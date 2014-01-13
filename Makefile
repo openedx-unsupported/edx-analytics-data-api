@@ -11,3 +11,20 @@ requirements:
 
 test-requirements: requirements
 	pip install -r requirements/test.txt
+
+test: test-requirements
+	rm -rf .coverage
+	python -m coverage run --rcfile=./.coveragerc `which nosetests`
+
+coverage: test
+	coverage html
+	coverage xml -o coverage.xml
+	diff-cover coverage.xml --html-report diff_cover.html
+
+	# Compute quality
+	diff-quality --violations=pep8 --html-report diff_quality_pep8.html
+	diff-quality --violations=pylint --html-report diff_quality_pylint.html
+
+	# Compute style violations
+	pep8 > pep8.report || echo "Not pep8 clean"
+	pylint -f parseable edx > pylint.report || echo "Not pylint clean"

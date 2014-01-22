@@ -1,0 +1,73 @@
+---
+
+- name: Configure luigi
+  hosts: "mr_{{ name }}_master"
+  gather_facts: False
+  sudo: True
+  roles:
+    - luigi
+
+- name: Run a task
+  hosts: "mr_{{ name }}_master"
+  gather_facts: False
+  sudo: False
+
+  vars:
+    - repo: git@github.com:edx/analytics-tasks.git
+    - branch: master
+    - working_dir: "/tmp/task-work-{{ uuid }}"
+    - working_repo_dir: "{{ working_dir }}/repo"
+    - working_venv_dir: "{{ working_dir }}/venv"
+    - task_arguments: ''
+    - git_server_hostname: github.com
+    - git_server_ip_address: 207.97.227.239
+    - git_server_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==''
+
+  tasks:
+    - name: known_hosts file exists
+      command: touch /home/{{ ansible_ssh_user }}/.ssh/known_hosts creates=/home/{{ ansible_ssh_user }}/.ssh/known_hosts
+
+    - name: git server in known_hosts file
+      lineinfile: >
+        dest=/home/{{ ansible_ssh_user }}/.ssh/known_hosts
+        regexp=^github.com
+        line="{{ git_server_hostname }},{{ git_server_ip_address }} {{ git_server_public_key }}"
+
+    - name: working directories created
+      file: path={{ item }} state=directory
+      with_items:
+        - "{{ working_dir }}"
+        - "{{ working_repo_dir }}"
+        - "{{ working_venv_dir }}"
+
+    - name: analytics tasks repository checked out
+      git: repo={{ repo }} dest={{ working_repo_dir }}
+
+    - name: branch fetched
+      command: git fetch origin {{ branch }} chdir={{ working_repo_dir }}
+
+    - name: branch checked out
+      command: git checkout FETCH_HEAD chdir={{ working_repo_dir }}
+
+    - name: bootstrap pip
+      command: sudo apt-get install -q -y python-pip
+      sudo: True
+
+    - name: virtualenv installed
+      pip: name=virtualenv version=1.10.1
+      sudo: True
+
+    - name: virtualenv created
+      command: >
+        virtualenv {{ working_venv_dir }}
+
+    - name: virtualenv initialized
+      shell: >
+        . {{ working_venv_dir }}/bin/activate && make install
+        chdir={{ working_repo_dir }}
+
+    - name: task run
+      shell: >
+        {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} chdir={{ working_repo_dir }}
+      async: 10000000000
+      poll: 0

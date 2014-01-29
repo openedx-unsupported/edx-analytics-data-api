@@ -1,5 +1,7 @@
 argparse==1.2.1
 boto==2.22.1
+numpy==1.8.0
+pandas==0.13.0
 pbr==0.5.23
 stevedore==0.13
 tornado==3.1.1

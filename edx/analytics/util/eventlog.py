@@ -8,26 +8,44 @@ import re
 
 PATTERN_JSON = re.compile(r'^.*?(\{.*\})\s*$')
 
+# borrowed from modulestore/parsers.py:
+ALLOWED_ID_CHARS = r'[a-zA-Z0-9_\-~.:]'
+PATTERN_COURSEID = re.compile(r'^' + ALLOWED_ID_CHARS + r'+$')
 
-def get_datetime_string(timestamp):
-    return timestamp.strftime('%Y-%m-%dT%H:%M:%S')
+def is_valid_course_id(course_id):
+    """
+    Determines if a course_id from an event log is possibly legitimate.
 
+    Applies two tests:
 
-def get_date_string(timestamp):
-    return timestamp.strftime('%Y-%m-%d')
+    * Course Id can be split into org/coursename/runname using '/' as delimiter.
+    * Components of id contain only "allowed" characters as defined in modulestore/parsers.py.
 
-
-def get_date_from_datetime(datetime_string):
-    return datetime_string.split('T')[0]
+    Note this will need to be updated as split-mongo changes are rolled out
+    that permit a broader set of id values.
+    """
+    components = course_id.split('/')
+    if len(components) != 3:
+        return False
+    return all(PATTERN_COURSEID.match(component) for component in components)
 
 
 def json_decode(line):
-    """Wrapper to decode JSON string in implementation-independent way."""
+    """Wrapper to decode JSON string in an implementation-independent way."""
     return cjson.decode(line)
 
 
 def parse_eventlog_item(line, nested=False):
-    """ Parse a tracking log input line as JSON to create a dict representation."""
+    """
+    Parse a tracking log input line as JSON to create a dict representation.
+
+    Arguments:
+    * line:  the eventlog text
+    * nested: boolean flag permitting this to be called recursively.
+
+    Apparently some eventlog entries are pure JSON, while others are
+    JSON that are prepended by a timestamp.
+    """
     try:
         parsed = json_decode(line)
     except:
@@ -48,11 +66,32 @@ def parse_eventlog_item(line, nested=False):
 
 
 def log_item(msg, item, level='ERROR'):
+    """Writes a message about an eventlog item."""
     sys.stderr.write("{level}: {msg}: {item}\n".format(msg=msg, item=item, level=level))
 
 
-def get_timestamp(item):
+# Time-related terminology:
+# * datetime: a datetime object.
+# * timestamp: a string, with date and time (to second), in ISO format.
+# * datestamp: a string with only date information, in ISO format.
 
+def get_timestamp(datetime):
+    """Returns a string with the datetime value of the provided datetime object."""
+    return datetime.strftime('%Y-%m-%dT%H:%M:%S')
+
+
+def get_datestamp(datetime):
+    """Returns a string with the date value of the provided datetime object."""
+    return datetime.strftime('%Y-%m-%d')
+
+
+def get_datestamp_from_timestamp(timestamp):
+    """Returns a string with the date value of the provided ISO datetime string."""
+    return timestamp.split('T')[0]
+
+
+def get_datetime(item):
+    """Returns a datetime object from an event item, if present."""
     try:
         timestamp = item['time']
         removed_ms = timestamp.split('.')[0]
@@ -62,6 +101,11 @@ def get_timestamp(item):
 
 
 def get_event_data(item):
+    """
+    Returns event data from an event log item as a dict object.
+
+    Returns None if not found.
+    """
     event_value = item.get('event')
 
     if event_value is None:
@@ -69,7 +113,7 @@ def get_event_data(item):
         return None
 
     if isinstance(event_value, basestring):
-        # If the value is a string, try to parse as JSON into a dict:.
+        # If the value is a string, try to parse as JSON into a dict.
         try:
             event_value = json_decode(event_value)
         except:

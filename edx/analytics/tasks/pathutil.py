@@ -72,7 +72,7 @@ class PathSetTask(luigi.Task):
 
     def __init__(self, *args, **kwargs):
         super(PathSetTask, self).__init__(*args, **kwargs)
-        self.s3 = boto.connect_s3()
+        self.s3 = None
 
     def requires(self):
         if self.src.startswith('s3'):
@@ -102,6 +102,10 @@ class PathSetTask(luigi.Task):
 
     def _generate_sources(self):
         bucket_name, root = get_s3_bucket_key_names(self.src)
+
+        # connect lazily, only if necessary:
+        if self.s3 is None:
+            self.s3 = boto.connect_s3()
 
         bucket = self.s3.get_bucket(bucket_name)
         keys = (s.key for s in bucket.list(root) if s.size > 0)

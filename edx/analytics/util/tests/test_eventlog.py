@@ -7,9 +7,28 @@ import unittest
 
 import edx.analytics.util.eventlog as eventlog
 
-class EventLogTest(unittest.TestCase):
+
+class CourseIdTest(unittest.TestCase):
     """
-    Tests to verify that event log parsing works correctly.
+    Verify that course_id filtering works correctly.
+    """
+
+    def test_normal_course_id(self):
+        course_id = "org/course_id/course_run"
+        self.assertTrue(eventlog.is_valid_course_id(course_id))
+
+    def test_course_id_without_components(self):
+        course_id = "org:course_id:course_run"
+        self.assertFalse(eventlog.is_valid_course_id(course_id))
+
+    def test_course_id_with_nonascii(self):
+        course_id = u"org/course\ufffd_id/course_run"
+        self.assertFalse(eventlog.is_valid_course_id(course_id))
+
+
+class ParseEventLogTest(unittest.TestCase):
+    """
+    Verify that event log parsing works correctly.
     """
 
     def test_parse_valid_eventlog_item(self):
@@ -34,3 +53,43 @@ class EventLogTest(unittest.TestCase):
         self.assertEquals(result['username'], u'b\ufffdb')
 
 
+class TimestampTest(unittest.TestCase):
+    """Verify timestamp-related functions."""
+
+    def test_datestamp_from_timestamp(self):
+        timestamp = "2013-12-17T15:38:32"
+        self.assertEquals(eventlog.timestamp_to_datestamp(timestamp), "2013-12-17")
+
+    def test_missing_datetime(self):
+        item = {"something else": "not an event"}
+        self.assertIsNone(eventlog.get_event_time(item))
+
+    def test_good_datetime(self):
+        item = {"time": "2013-12-17T15:38:32.805444+00:00"}
+        dt_value = eventlog.get_event_time(item)
+        self.assertEquals(eventlog.datetime_to_timestamp(dt_value), "2013-12-17T15:38:32")
+        self.assertEquals(eventlog.datetime_to_datestamp(dt_value), "2013-12-17")
+
+
+class GetEventDataTest(unittest.TestCase):
+    """Verify that get_event_data works as expected."""
+
+    def test_missing_event_data(self):
+        item = {"something else": "not an event"}
+        self.assertIsNone(eventlog.get_event_data(item))
+
+    def test_get_bad_string_event_data(self):
+        item = {"event": "a string but not JSON"}
+        self.assertIsNone(eventlog.get_event_data(item))
+
+    def test_get_json_string_event_data(self):
+        item = {"event": '{ "a string": "that is JSON"}'}
+        self.assertEquals(eventlog.get_event_data(item), {"a string": "that is JSON"})
+
+    def test_event_data_with_unknown_type(self):
+        item = {"event": ["a list", "of strings"]}
+        self.assertIsNone(eventlog.get_event_data(item))
+
+    def test_get_dict_event_data(self):
+        item = {"event": {"a dict": "that has strings"}}
+        self.assertEquals(eventlog.get_event_data(item), {"a dict": "that has strings"})

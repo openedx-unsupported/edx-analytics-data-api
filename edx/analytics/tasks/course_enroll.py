@@ -16,6 +16,7 @@ Example command lines:
         --dest s3://edx-analytics-scratch/output
 
 """
+import sys
 
 import luigi
 import luigi.hadoop
@@ -25,17 +26,314 @@ import luigi.hdfs
 import edx.analytics.util.eventlog as eventlog
 from edx.analytics.tasks.pathutil import get_target_for_url, PathSetTask
 
+import logging
+logger = logging.getLogger(__name__)
+
+
+################################
+# Task Map-Reduce definitions
+################################
+
+
+class CourseEnrollmentEventsPerDayMixin(object):
+    """Calculates daily change in enrollment for a user in a course, given raw event log input."""
+
+    def mapper(self, line):
+        """
+        Generates output values for explicit enrollment events.
+
+        Args:
+
+          line: text line from a tracking event log.
+
+        Yields:
+
+          (course_id, user_id), (timestamp, action_value)
+
+            where `timestamp` is in ISO format, with resolution to the millisecond
+            and `action_value` = 1 (enrolled) or -1 (unenrolled).
+
+        Example:
+            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
+        """
+        parsed_tuple_or_none = get_explicit_enrollment_output(line)
+        if parsed_tuple_or_none is not None:
+            yield parsed_tuple_or_none
+
+    def reducer(self, key, values):
+        """
+        Calculate status for each user on the end of each day where they changed their status.
+
+        Args:
+
+          key:  (course_id, user_id) tuple
+          value:  (timestamp, action_value) tuple
+
+        Yields:
+
+          (course_id, datestamp), enrollment_change
+
+            where `datestamp` is in ISO format, with resolution to the day
+            and `enrollment_change` is the change on that date for an individual user.
+            Produced values are -1 or 1.
+
+        No output is yielded if a user enrolls and then unenrolls (or unenrolls and
+        then enrolls) on a given day.  Only days with a change at the end of the day
+        when compared with the previous day are output.
+
+        Note that we don't bother to actually output the user_id,
+        since it's not needed downstream (though it might be sometimes useful
+        for debugging). 
+
+        Example:
+            (edX/DemoX/Demo_Course, 2013-09-10), 1
+            (edX/DemoX/Demo_Course, 2013-09-12), -1
+
+        """
+        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
+        course_id, user_id = key
+
+        # Sort input values (by timestamp) to easily detect the end of a day.
+        # Note that this assumes the timestamp values (strings) are in ISO
+        # representation, so that the tuples will be ordered in ascending time value.
+        sorted_values = sorted(values)
+
+        # Convert timestamps to dates, so we can group them by day.
+        func = eventlog.timestamp_to_datestamp
+        values = [(func(timestamp), value) for timestamp, value in sorted_values]
+
+        # Add a stop item to ensure we process the last entry.
+        values = values + [(None, None)]
+
+        # The enrollment state for each student: {1 : enrolled, -1: unenrolled}
+        # Assume students start in an unknown state, so that whatever happens on
+        # the first day will get output.
+        state, prev_state = 0, 0
+
+        prev_date = None
+        for (this_date, action) in values:
+            # Before we process a new date, report the state if it has
+            # changed from the previously reported, if any.
+            if this_date != prev_date and prev_date is not None:
+                if state != prev_state:
+                    # sys.stderr.write("outputting date and value: " + str(prev_date) + " " + str(state)  + '\n')
+                    prev_state = state
+                    yield (course_id, prev_date), state
+
+            # sys.stderr.write("accumulating date and value: " + str(this_date) + " " + str(action) + '\n')
+            # Consecutive changes of the same kind don't affect the state.
+            if action != state:
+                state = action
+            else:
+                sys.stderr.write("WARNING: duplicate enrollment event {action} "
+                    "for user_id {user_id} in course {course_id} on {date}".format(
+                    action=action, user_id=user_id, course_id=course_id, date=this_date))
+
+            # If this is the first entry, then we need to infer what
+            # the previous state was before the first entry arrives.
+            # For this, we take the opposite of the first entry.
+            if prev_date is None:
+                prev_state = -1 if action == 1 else 1
+
+            prev_date = this_date
+
+
+class CourseEnrollmentChangesPerDayMixin(object):
+    """Calculates daily changes in enrollment, given per-user net changes by date."""
+
+    def mapper(self, line):
+        """
+        Args:  tab-delimited values in a single text line
+
+        Yields:  (course_id, datestamp), enrollment_change
+
+        Example:
+            (edX/DemoX/Demo_Course, 2013-09-10), 1
+            (edX/DemoX/Demo_Course, 2013-09-12), -1
+
+        """
+        course_id, date, enrollment_change = line.split('\t')
+        yield (course_id, date), enrollment_change
+
+    def reducer(self, key, values):
+        """
+        Reducer: sums enrollments for a given course on a particular date.
+
+        Args:
+
+          (course_id, datestamp), enrollment_changes
+
+          Input `enrollment_changes` are the enrollment changes on a day due to a specific user.
+          Each user with a change has a separate input, either -1 (unenroll) or 1 (enroll).
+
+        Yields:
+
+          (course_id, datestamp), enrollment_change
+
+          Output `enrollment_change` is summed across all users, one output per course.
+
+        """
+        # sys.stderr.write("Found key in second reducer: " + str(key) + '\n')
+        count = sum(int(v) for v in values)
+        yield key, count
+
+
+##################################
+# Task requires/output definitions
+##################################
+
+class BaseCourseEnrollmentTask(luigi.hadoop.JobTask):
+    """
+    Base class for course enrollment calculations.
+
+    Parameters:
+
+      name: a unique identifier to distinguish one run from another.  It is used in
+          the construction of output filenames, so each run will have distinct outputs.
+      src:  a URL to the root location of input tracking log files.
+      dest:  a URL to the root location to write output file(s).
+      include:  a list of patterns to be used to match input files, relative to `src` URL.
+          The default value is ['*'].
+      run_locally: a boolean flag to indicate that the task should be run locally rather than
+          on a hadoop cluster.  This is used only to change the intepretation of S3 URLs in src and/or dest.
+    """
+    name = luigi.Parameter()
+    src = luigi.Parameter()
+    dest = luigi.Parameter()
+    include = luigi.Parameter(is_list=True, default=('*',))
+    run_locally = luigi.BooleanParameter()
+
+    def extra_modules(self):
+        # The following are needed for (almost) every course enrollment task.
+        # Boto is used for S3 access, cjson for parsing log files, and util
+        # is used for parsing events and date conversion.
+        import boto
+        import cjson
+        import edx.analytics.util
+        return [boto, edx.analytics.util, cjson]
+
+
+class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourseEnrollmentTask):
+    """Calculates daily change in enrollment for a user in a course, given raw event log input."""
+
+    def requires(self):
+        return PathSetTask(self.src, self.include, self.run_locally)
+
+    def output(self):
+        # generate a single output file
+        output_name = 'course_enrollment_events_per_day_{name}'.format(name=self.name)
+        return get_target_for_url(self.dest, output_name, self.run_locally)
+
+
+class CourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCourseEnrollmentTask):
+    """Calculates daily changes in enrollment, given per-user net changes by date."""
+
+    def requires(self):
+        return CourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
+
+    def output(self):
+        # generate a single output file
+        output_name = 'course_enrollment_changes_per_day_{name}'.format(name=self.name)
+        return get_target_for_url(self.dest, output_name, self.run_locally)
+
+
+class FirstCourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourseEnrollmentTask):
+    """Calculate number of "first" course enrollments per-user, per-course, per-day."""
+
+    def requires(self):
+        return PathSetTask(self.src, self.include, self.run_locally)
+
+    def output(self):
+        # generate a single output file
+        output_name = 'first_course_enrollment_events_per_day_{name}'.format(name=self.name)
+        return get_target_for_url(self.dest, output_name, self.run_locally)
+
+    def mapper(self, line):
+        """
+        Generates output values for explicit enrollment events.
+
+        Args:
+
+          line: text line from a tracking event log.
+
+        Yields:
+
+          (course_id, user_id), (timestamp, action_value)
+
+            where action_value = 1 (enrolled) or -1 (unenrolled)
+            and timestamp is in ISO format, with resolution to the millisecond.
+
+        Example:
+            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
+
+        """
+        parsed_tuple_or_none = get_explicit_enrollment_output(line)
+        if parsed_tuple_or_none is not None:
+            yield parsed_tuple_or_none
+
+    def reducer(self, key, values):
+        """
+        Calculate first time each user enrolls in a course.
+
+        Output key:   (course_id, date)
+        Output value:  1 on the first date the user enrolls.
+
+        Note that we don't bother to actually output the user_id,
+        since it's not needed downstream.
+
+        Example:
+            edX/DemoX/Demo_Course	2013-09-10	1
+
+        """
+        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
+        course_id, _user_id = key
+        sorted_values = sorted(values)
+        for (timestamp, change_value) in sorted_values:
+            # get the day's date from the event's timestamp:
+            this_date = eventlog.get_datestamp_from_timestamp(timestamp)
+            # if it's an enrollment, output it and we're done.
+            if change_value > 0:
+                yield (course_id, this_date), change_value
+                return
+
+
+class FirstCourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCourseEnrollmentTask):
+    """Calculate changes in "first" course enrollments per-course, per-day."""
+
+    def requires(self):
+        return FirstCourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
+
+    def output(self):
+        # generate a single output file
+        output_name = 'first_course_enrollment_changes_per_day_{name}'.format(name=self.name)
+        return get_target_for_url(self.dest, output_name, self.run_locally)
+
+
+################################
+# Helper methods
+
+################################
 
 def get_explicit_enrollment_output(line):
     """
     Generates output values for explicit enrollment events.
 
-    Output format:  (course_id, user_id), (timestamp, action_value)
+    Args:
 
-      where action_value = 1 (enrolled) or -1 (unenrolled)
-      and timestamp is in ISO format, with resolution to the second.
+      line: text line from a tracking event log.
 
-    Returns None if there is no valid enrollment event on the line.
+    Returns:
+
+      (course_id, user_id), (timestamp, action_value)
+
+        where action_value = 1 (enrolled) or -1 (unenrolled)
+        and timestamp is in ISO format, with resolution to the millisecond.
+
+      or None if there is no valid enrollment event on the line.
+
+    Example:
+            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
+
     """
     # Before parsing, check that the line contains something that
     # suggests it's an enrollment event.
@@ -66,22 +364,16 @@ def get_explicit_enrollment_output(line):
         return None
 
     # get the timestamp:
-    datetime = eventlog.get_datetime(item)
+    datetime = eventlog.get_event_time(item)
     if datetime is None:
         eventlog.log_item("encountered event with bad datetime", item)
         return None
-    timestamp = eventlog.get_timestamp(datetime)
+    timestamp = eventlog.datetime_to_timestamp(datetime)
 
-
-    # Enrollment parameters like course_id and user_id may be stored
-    # in the context and also in the data.  Pick the data.  For
-    # course_id, we expect the values to be the same.  However, for
-    # user_id, the values may not be the same.  This is because the
-    # context contains the name and id of the user making a particular
-    # request, but it is not necessarily the id of the user being
-    # enrolled.  For example, Studio provides authors with the ability
-    # to add staff to their courses, and these staff get enrolled in
-    # the course while the author is listed in the context.
+    # Use the `user_id` from the event `data` field, since the
+    # `user_id` in the `context` field is the user who made the
+    # request but not necessarily the one who got enrolled.  (The
+    # `course_id` should be the same in `context` as in `data`.)
 
     # Get the event data:
     event_data = eventlog.get_event_data(item)
@@ -96,10 +388,10 @@ def get_explicit_enrollment_output(line):
         return None
 
     # Get the user_id from the data:
-    if 'user_id' not in event_data:
+    user_id = event_data.get('user_id')
+    if user_id is None:
         eventlog.log_item("encountered explicit enrollment event with no user_id", item)
         return None
-    user_id = event_data['user_id']
 
     # For now, ignore the enrollment 'mode' (e.g. 'honor').
 
@@ -107,325 +399,12 @@ def get_explicit_enrollment_output(line):
 
 
 ################################
-# Task Map-Reduce definitions
-################################
-
-
-class BaseCourseEnrollmentEventsPerDay(luigi.hadoop.JobTask):
-    """Calculates daily change in enrollment for a user in a course, given raw event log input."""
-
-    def mapper(self, line):
-        """
-        Output format:  (course_id, username), (datetime, action_value)
-
-          where action_value = 1 (enrolled) or -1 (unenrolled)
-
-        Example:
-            edX/DemoX/Demo_Course	dummyuser	2013-09-10	1
-            edX/DemoX/Demo_Course	dummyuser	2013-09-10	1
-            edX/DemoX/Demo_Course	dummyuser	2013-09-10     -1
-
-        """
-        parsed_tuple = get_explicit_enrollment_output(line)
-        if parsed_tuple is not None:
-            # sys.stderr.write("Found tuple in mapper: " + str(parsed_tuple) + '\n')
-            yield parsed_tuple
-
-    def reducer(self, key, values):
-        """
-        Calculate status for each user on the end of each day where they changed their status.
-
-        Output key:   (course_id, date)
-        Output value:  net enrollment change on that date for an individual user.
-             Expected values are -1, 0 (no change), 1
-
-        Note that we don't bother to actually output the username,
-        since it's not needed downstream.
-
-        If the user were already enrolled (or attempted enrollment),
-        the net change from a subsequent enrollment is zero.  Same to
-        unenroll after an unenroll.  This is true whether they occur
-        on the same day or on widely disparate days.  For implicit
-        enrollment events, we don't know when they succeed, so we
-        assume they succeed the first time, and ignore subsequent
-        attempts.  Likewise for implicit enrollment events followed by
-        explicit enrollment events.
-
-        An unenroll following an enroll on the same day will also
-        result in zero change.
-
-        Example:
-            edX/DemoX/Demo_Course	2013-09-10	1
-            edX/DemoX/Demo_Course	2013-09-10     -1
-            edX/DemoX/Demo_Course	2013-09-10      0
-
-        """
-        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
-        course_id, username = key
-
-        # Sort input values (by timestamp) to easily detect the end of a day.
-        sorted_values = sorted(values)
-
-        # Convert timestamps to dates, so we can group them by day.
-        fn = eventlog.get_datestamp_from_timestamp
-        values = [(fn(timestamp), value) for timestamp, value in sorted_values]
-
-        # Add a stop item to ensure we process the last entry.
-        values = values + [(None, None)]
-
-        # The enrollment state for each student: {1 : enrolled, -1: unenrolled}
-        # Assume students start in an unknown state, so that whatever happens on
-        # the first day will get output.
-        state, prev_state = 0, 0
-
-        prev_date = None
-        import sys
-        for (this_date, action) in values:
-            # Before we process a new date, report the state if it has
-            # changed from the previously reported, if any.
-            if this_date != prev_date and prev_date is not None:
-                if state != prev_state:
-                    # sys.stderr.write("outputting date and value: " + str(prev_date) + " " + str(state)  + '\n')
-                    prev_state = state
-                    yield (course_id, prev_date), state
-
-            # sys.stderr.write("accumulating date and value: " + str(this_date) + " " + str(action) + '\n')
-            # Consecutive changes of the same kind don't affect the state.
-            if action != state:
-                state = action
-
-            # If this is the first entry, then we need to infer what
-            # the previous state was before the first entry arrives.
-            # For this, we take the opposite of the first entry.
-            if prev_date is None:
-                prev_state = -1 if action == 1 else 1
-
-            prev_date = this_date
-
-class BaseCourseEnrollmentChangesPerDay(luigi.hadoop.JobTask):
-    """Calculates daily changes in enrollment, given per-user net changes by date."""
-
-    def mapper(self, line):
-        """
-        Output key:   (course_id, date)
-        Output value:  net enrollment change on that date for an individual user.
-             Expected values are -1, 0 (no change), 1
-
-        Example:
-            edX/DemoX/Demo_Course	2013-09-10	1
-            edX/DemoX/Demo_Course	2013-09-10     -1
-            edX/DemoX/Demo_Course	2013-09-10      0
-
-        """
-        # yield line
-        inputs = line.split('\t')
-        if len(inputs) == 3:
-            yield (inputs[0], inputs[1]), inputs[2]
-
-    def reducer(self, key, values):
-        """
-        Reducer: sums enrollments for a given course on a particular date.
-
-        Inputs are enrollments changes on a day due to a specific user.
-        Outputs are enrollment changes on a day summed across all users.
-
-        Key:   (course_id, date)
-        Values:  individual enrollment changes, represented as -1 or 1.
-
-        Output key:  (course_id, date)
-        Output value:  sum(changes)
-        """
-        # sys.stderr.write("Found key in second reducer: " + str(key) + '\n')
-        count = 0
-        for value in values:
-            count += int(value)
-        yield key, count
-
-
-class BaseCourseEnrollmentTotalsPerDay(luigi.hadoop.JobTask):
-    """Calculates cumulative changes in enrollment, given net changes by date."""
-
-    def mapper(self, line):
-        """
-        Key:   course_id
-        Values:  (date, net enrollment change on that date)
-
-        Example:  
-            edX/DemoX/Demo_Course	2013-09-10	5
-            edX/DemoX/Demo_Course	2013-09-11     -3
-        """
-        # yield line
-        inputs = line.split('\t')
-        if len(inputs) == 3:
-            yield inputs[0], (inputs[1], inputs[2])
-
-    def reducer(self, key, values):
-        """
-        Reducer: sums enrollments for a given course through a particular date.
-
-        Key:   course_id
-        Values:   date, and enrollment changes per day
-
-        Output key:  course_id
-        Output value:  date, accum(changes)
-        """
-        # sys.stderr.write("Found key in third reducer: " + str(key) + '\n')
-        sorted_values = sorted(values)
-        accum_count = 0
-        for date, count in sorted_values:
-            accum_count += int(count)
-            yield key, date, accum_count
-
-
-##################################
-# Task requires/output definitions
-##################################
-
-class CourseEnrollmentEventsPerDay(BaseCourseEnrollmentEventsPerDay):
-
-    name = luigi.Parameter()
-    src = luigi.Parameter()
-    dest = luigi.Parameter()
-    include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
-
-    def requires(self):
-        return PathSetTask(self.src, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'course_enrollment_events_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def extra_modules(self):
-        import boto
-        import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
-
-
-class CourseEnrollmentChangesPerDay(BaseCourseEnrollmentChangesPerDay):
-
-    name = luigi.Parameter()
-    src = luigi.Parameter()
-    dest = luigi.Parameter()
-    include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
-
-    def requires(self):
-        return CourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'course_enrollment_changes_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def extra_modules(self):
-        import boto
-        import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
-
-
-class CourseEnrollmentTotalsPerDay(BaseCourseEnrollmentTotalsPerDay):
-
-    name = luigi.Parameter()
-    src = luigi.Parameter()
-    dest = luigi.Parameter()
-    include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
-
-    def requires(self):
-        return CourseEnrollmentChangesPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'course_enrollment_totals_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def extra_modules(self):
-        import boto
-        import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
-
-
-class FirstCourseEnrollmentEventsPerDay(BaseCourseEnrollmentEventsPerDay):
-
-    name = luigi.Parameter()
-    src = luigi.Parameter()
-    dest = luigi.Parameter()
-    include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
-
-    def requires(self):
-        return PathSetTask(self.src, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'first_course_enrollment_events_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def extra_modules(self):
-        import boto
-        import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
-
-    def reducer(self, key, values):
-        """
-        Calculate first time each user enrolls in a course.
-
-        Output key:   (course_id, date)
-        Output value:  1 on the first date the user enrolls.
-
-        Note that we don't bother to actually output the username,
-        since it's not needed downstream.
-
-        Example:
-            edX/DemoX/Demo_Course	2013-09-10	1
-
-        """
-        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
-        course_id, username = key
-        sorted_values = sorted(values)
-        for (timestamp, change_value) in sorted_values:
-            # get the day's date from the event's timestamp:
-            this_date = eventlog.get_datestamp_from_timestamp(timestamp)
-            # if it's an enrollment, output it and we're done.
-            if change_value > 0:
-                yield (course_id, this_date), change_value
-                return
-
-
-class FirstCourseEnrollmentChangesPerDay(BaseCourseEnrollmentChangesPerDay):
-
-    name = luigi.Parameter()
-    src = luigi.Parameter()
-    dest = luigi.Parameter()
-    include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
-
-    def requires(self):
-        return FirstCourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'first_course_enrollment_changes_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def extra_modules(self):
-        import boto
-        import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
-
-################################
 # Running tasks
 ################################
 
 
 def main():
+    """Mainline for command-line testing."""
     luigi.run()
 
 

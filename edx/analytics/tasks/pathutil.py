@@ -17,15 +17,7 @@ import luigi.s3
 import luigi.hdfs
 import luigi.format
 
-def get_s3_bucket_key_names(url):
-    """Extract bucket_name and root from S3 URL."""
-    parts = urlparse(url)
-    return (parts.netloc.strip('/'), parts.path.strip('/'))
-
-
-def join_as_s3_url(bucket, root, path):
-    """Construct a URL for accessing S3, given its components."""
-    return 's3://{bucket}/{root}/{path}'.format(bucket=bucket, root=root, path=path)
+from s3_util import join_as_s3_url, generate_s3_sources
 
 
 class LocalPathTask(luigi.ExternalTask):
@@ -39,7 +31,7 @@ class LocalPathTask(luigi.ExternalTask):
 
     def output(self):
         if self.path.endswith('.gz'):
-            yield luigi.LocalTarget(self.path, format=luigi.format.Gzip) 
+            yield luigi.LocalTarget(self.path, format=luigi.format.Gzip)
         else:
             yield luigi.LocalTarget(self.path)
 
@@ -68,15 +60,22 @@ class PathSetTask(luigi.Task):
     """
     src = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
+    # TODO: modify this to get default values from a configuration file,
+    # and use that to determine whether running in a cluster or locally.
+    # It will be decoupled from the use of S3PathTask/HDFSPathTask.
+    # Instead, these will be distinguished by different protocol names.
     run_locally = luigi.BooleanParameter()
 
     def __init__(self, *args, **kwargs):
         super(PathSetTask, self).__init__(*args, **kwargs)
-        self.s3 = None
+        self.s3_conn = None
 
     def requires(self):
         if self.src.startswith('s3'):
-            for bucket, root, path in self._generate_sources():
+            # connect lazily as needed:
+            if self.s3_conn is None:
+                self.s3_conn = boto.connect_s3()
+            for bucket, root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
                 source = join_as_s3_url(bucket, root, path)
                 if self.run_locally:
                     yield luigi.s3.S3PathTask(source)
@@ -99,27 +98,6 @@ class PathSetTask(luigi.Task):
 
     def output(self):
         return [task.output() for task in self.requires()]
-
-    def _generate_sources(self):
-        bucket_name, root = get_s3_bucket_key_names(self.src)
-
-        # connect lazily, only if necessary:
-        if self.s3 is None:
-            self.s3 = boto.connect_s3()
-
-        bucket = self.s3.get_bucket(bucket_name)
-        keys = (s.key for s in bucket.list(root) if s.size > 0)
-
-        # remove root
-        paths = (k.lstrip(root).strip('/') for k in keys)
-        paths = self._filter_matches(paths)
-
-        return ((bucket.name, root, path) for path in paths)
-
-    def _filter_matches(self, names):
-        patterns = self.include
-        fn = lambda n: any(fnmatch(n, p) for p in patterns)
-        return (n for n in names if fn(n))
 
 
 def get_target_for_url(dest, output_name, run_locally=False):

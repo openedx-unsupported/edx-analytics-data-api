@@ -1,23 +1,6 @@
 """
 Luigi tasks for extracting course enrollment statistics from tracking log files.
-
-Example command lines:
-
- (local)
-
-  python course_enroll.py --local-scheduler CourseEnrollmentTotalsPerDay
-        --name mytest --src input --include 'tracking*' --include '2012*'
-        --dest output7
-
- (local using s3)
-
-  python course_enroll.py --local-scheduler CourseEnrollmentTotalsPerDay
-        --name mytest --src s3://edx-analytics-test-data/data --include 'tracking*'
-        --dest s3://edx-analytics-scratch/output
-
 """
-import sys
-
 import luigi
 import luigi.hadoop
 import luigi.s3
@@ -29,6 +12,8 @@ from edx.analytics.tasks.pathutil import get_target_for_url, PathSetTask
 import logging
 logger = logging.getLogger(__name__)
 
+UNENROLLED = -1
+ENROLLED = 1
 
 ################################
 # Task Map-Reduce definitions
@@ -43,18 +28,16 @@ class CourseEnrollmentEventsPerDayMixin(object):
         Generates output values for explicit enrollment events.
 
         Args:
-
-          line: text line from a tracking event log.
+            line: text line from a tracking event log.
 
         Yields:
-
-          (course_id, user_id), (timestamp, action_value)
+            (course_id, user_id), (timestamp, action_value)
 
             where `timestamp` is in ISO format, with resolution to the millisecond
             and `action_value` = 1 (enrolled) or -1 (unenrolled).
 
         Example:
-            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
+            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05.123456, 1)
         """
         parsed_tuple_or_none = get_explicit_enrollment_output(line)
         if parsed_tuple_or_none is not None:
@@ -65,13 +48,11 @@ class CourseEnrollmentEventsPerDayMixin(object):
         Calculate status for each user on the end of each day where they changed their status.
 
         Args:
-
-          key:  (course_id, user_id) tuple
-          value:  (timestamp, action_value) tuple
+            key:  (course_id, user_id) tuple
+            values:  iterator of (timestamp, action_value) tuples
 
         Yields:
-
-          (course_id, datestamp), enrollment_change
+            (course_id, datestamp), enrollment_change
 
             where `datestamp` is in ISO format, with resolution to the day
             and `enrollment_change` is the change on that date for an individual user.
@@ -83,20 +64,29 @@ class CourseEnrollmentEventsPerDayMixin(object):
 
         Note that we don't bother to actually output the user_id,
         since it's not needed downstream (though it might be sometimes useful
-        for debugging). 
+        for debugging).
 
-        Example:
+        Also note that this can be greatly simplified if we have
+        confidence that there are no duplicate enrollment events. Then
+        we could just have the mapper generate output with the key as
+        (course_id, user_id, datestamp), with a value of just the
+        action.  Then the reducer just sums the actions for the date,
+        and yields those days with non-zero values.
+
+        Example output:
             (edX/DemoX/Demo_Course, 2013-09-10), 1
             (edX/DemoX/Demo_Course, 2013-09-12), -1
 
         """
-        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
+        logger.debug("Found key in reducer: %s", key)
         course_id, user_id = key
 
         # Sort input values (by timestamp) to easily detect the end of a day.
         # Note that this assumes the timestamp values (strings) are in ISO
         # representation, so that the tuples will be ordered in ascending time value.
         sorted_values = sorted(values)
+        if len(sorted_values) <= 0:
+            return
 
         # Convert timestamps to dates, so we can group them by day.
         func = eventlog.timestamp_to_datestamp
@@ -105,35 +95,28 @@ class CourseEnrollmentEventsPerDayMixin(object):
         # Add a stop item to ensure we process the last entry.
         values = values + [(None, None)]
 
-        # The enrollment state for each student: {1 : enrolled, -1: unenrolled}
-        # Assume students start in an unknown state, so that whatever happens on
-        # the first day will get output.
-        state, prev_state = 0, 0
+        # Remove the first action and use it to initialize the state machine.
+        first_date, first_enrollment_status = values.pop(0)
+        last_reported_enrollment_status = UNENROLLED if first_enrollment_status == ENROLLED else ENROLLED
+        enrollment_status = first_enrollment_status
+        prev_date = first_date
 
-        prev_date = None
-        for (this_date, action) in values:
+        for (this_date, new_enrollment_status) in values:
             # Before we process a new date, report the state if it has
             # changed from the previously reported, if any.
-            if this_date != prev_date and prev_date is not None:
-                if state != prev_state:
-                    # sys.stderr.write("outputting date and value: " + str(prev_date) + " " + str(state)  + '\n')
-                    prev_state = state
-                    yield (course_id, prev_date), state
+            if this_date != prev_date and enrollment_status != last_reported_enrollment_status:
+                logger.debug("outputting date and value: %s %s", prev_date, enrollment_status)
+                last_reported_enrollment_status = enrollment_status
+                yield (course_id, prev_date), enrollment_status
 
-            # sys.stderr.write("accumulating date and value: " + str(this_date) + " " + str(action) + '\n')
+            logger.debug("accumulating date and value: %s %s", this_date, new_enrollment_status)
             # Consecutive changes of the same kind don't affect the state.
-            if action != state:
-                state = action
+            if new_enrollment_status != enrollment_status:
+                enrollment_status = new_enrollment_status
             else:
-                sys.stderr.write("WARNING: duplicate enrollment event {action} "
+                logger.warning("WARNING: duplicate enrollment event {status} "
                     "for user_id {user_id} in course {course_id} on {date}".format(
-                    action=action, user_id=user_id, course_id=course_id, date=this_date))
-
-            # If this is the first entry, then we need to infer what
-            # the previous state was before the first entry arrives.
-            # For this, we take the opposite of the first entry.
-            if prev_date is None:
-                prev_state = -1 if action == 1 else 1
+                    status=new_enrollment_status, user_id=user_id, course_id=course_id, date=this_date))
 
             prev_date = this_date
 
@@ -160,20 +143,19 @@ class CourseEnrollmentChangesPerDayMixin(object):
         Reducer: sums enrollments for a given course on a particular date.
 
         Args:
+            key:  (course_id, datestamp) tuple
+            values:  iterator of enrollment_changes 
 
-          (course_id, datestamp), enrollment_changes
-
-          Input `enrollment_changes` are the enrollment changes on a day due to a specific user.
-          Each user with a change has a separate input, either -1 (unenroll) or 1 (enroll).
+            Input `enrollment_changes` are the enrollment changes on a day due to a specific user.
+            Each user with a change has a separate input, either -1 (unenroll) or 1 (enroll).
 
         Yields:
+            (course_id, datestamp), enrollment_change
 
-          (course_id, datestamp), enrollment_change
-
-          Output `enrollment_change` is summed across all users, one output per course.
+            Output `enrollment_change` is summed across all users, one output per course.
 
         """
-        # sys.stderr.write("Found key in second reducer: " + str(key) + '\n')
+        logger.debug("Found key in second reducer: %s", key)
         count = sum(int(v) for v in values)
         yield key, count
 
@@ -187,7 +169,6 @@ class BaseCourseEnrollmentTask(luigi.hadoop.JobTask):
     Base class for course enrollment calculations.
 
     Parameters:
-
       name: a unique identifier to distinguish one run from another.  It is used in
           the construction of output filenames, so each run will have distinct outputs.
       src:  a URL to the root location of input tracking log files.
@@ -220,7 +201,6 @@ class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourse
         return PathSetTask(self.src, self.include, self.run_locally)
 
     def output(self):
-        # generate a single output file
         output_name = 'course_enrollment_events_per_day_{name}'.format(name=self.name)
         return get_target_for_url(self.dest, output_name, self.run_locally)
 
@@ -232,86 +212,12 @@ class CourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCour
         return CourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
 
     def output(self):
-        # generate a single output file
         output_name = 'course_enrollment_changes_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-
-class FirstCourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourseEnrollmentTask):
-    """Calculate number of "first" course enrollments per-user, per-course, per-day."""
-
-    def requires(self):
-        return PathSetTask(self.src, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'first_course_enrollment_events_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
-
-    def mapper(self, line):
-        """
-        Generates output values for explicit enrollment events.
-
-        Args:
-
-          line: text line from a tracking event log.
-
-        Yields:
-
-          (course_id, user_id), (timestamp, action_value)
-
-            where action_value = 1 (enrolled) or -1 (unenrolled)
-            and timestamp is in ISO format, with resolution to the millisecond.
-
-        Example:
-            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
-
-        """
-        parsed_tuple_or_none = get_explicit_enrollment_output(line)
-        if parsed_tuple_or_none is not None:
-            yield parsed_tuple_or_none
-
-    def reducer(self, key, values):
-        """
-        Calculate first time each user enrolls in a course.
-
-        Output key:   (course_id, date)
-        Output value:  1 on the first date the user enrolls.
-
-        Note that we don't bother to actually output the user_id,
-        since it's not needed downstream.
-
-        Example:
-            edX/DemoX/Demo_Course	2013-09-10	1
-
-        """
-        # sys.stderr.write("Found key in reducer: " + str(key) + '\n')
-        course_id, _user_id = key
-        sorted_values = sorted(values)
-        for (timestamp, change_value) in sorted_values:
-            # get the day's date from the event's timestamp:
-            this_date = eventlog.get_datestamp_from_timestamp(timestamp)
-            # if it's an enrollment, output it and we're done.
-            if change_value > 0:
-                yield (course_id, this_date), change_value
-                return
-
-
-class FirstCourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCourseEnrollmentTask):
-    """Calculate changes in "first" course enrollments per-course, per-day."""
-
-    def requires(self):
-        return FirstCourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
-
-    def output(self):
-        # generate a single output file
-        output_name = 'first_course_enrollment_changes_per_day_{name}'.format(name=self.name)
         return get_target_for_url(self.dest, output_name, self.run_locally)
 
 
 ################################
 # Helper methods
-
 ################################
 
 def get_explicit_enrollment_output(line):
@@ -332,7 +238,7 @@ def get_explicit_enrollment_output(line):
       or None if there is no valid enrollment event on the line.
 
     Example:
-            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05, 1)
+            (edX/DemoX/Demo_Course, dummy_userid), (2013-09-10T00:01:05.123456, 1)
 
     """
     # Before parsing, check that the line contains something that
@@ -341,32 +247,32 @@ def get_explicit_enrollment_output(line):
         return None
 
     # try to parse the line into a dict:
-    item = eventlog.parse_eventlog_item(line)
-    if item is None:
+    event = eventlog.parse_json_event(line)
+    if event is None:
         # The line didn't parse.  For this specific purpose,
         # we can assume that all enrollment-related lines would parse,
         # and these non-parsing lines would get skipped anyway.
         return None
 
     # get event type, and check that it exists:
-    event_type = item.get('event_type')
+    event_type = event.get('event_type')
     if event_type is None:
-        eventlog.log_item("encountered event with no event_type", item)
+        logger.error("encountered event with no event_type: %s", event)
         return None
 
     # convert the type to a value:
     if event_type == 'edx.course.enrollment.activated':
-        action_value = 1
+        action_value = ENROLLED
     elif event_type == 'edx.course.enrollment.deactivated':
-        action_value = -1
+        action_value = UNENROLLED
     else:
         # not an enrollment event...
         return None
 
     # get the timestamp:
-    datetime = eventlog.get_event_time(item)
+    datetime = eventlog.get_event_time(event)
     if datetime is None:
-        eventlog.log_item("encountered event with bad datetime", item)
+        logger.error("encountered event with bad datetime: %s", event)
         return None
     timestamp = eventlog.datetime_to_timestamp(datetime)
 
@@ -376,7 +282,7 @@ def get_explicit_enrollment_output(line):
     # `course_id` should be the same in `context` as in `data`.)
 
     # Get the event data:
-    event_data = eventlog.get_event_data(item)
+    event_data = eventlog.get_event_data(event)
     if event_data is None:
         # Assume it's already logged (and with more specifics).
         return None
@@ -384,29 +290,15 @@ def get_explicit_enrollment_output(line):
     # Get the course_id from the data, and validate.
     course_id = event_data['course_id']
     if not eventlog.is_valid_course_id(course_id):
-        eventlog.log_item("encountered explicit enrollment event with bogus course_id", item)
+        logger.error("encountered explicit enrollment event with bogus course_id: %s", event)
         return None
 
     # Get the user_id from the data:
     user_id = event_data.get('user_id')
     if user_id is None:
-        eventlog.log_item("encountered explicit enrollment event with no user_id", item)
+        logger.error("encountered explicit enrollment event with no user_id: %s", event)
         return None
 
     # For now, ignore the enrollment 'mode' (e.g. 'honor').
 
     return (course_id, user_id), (timestamp, action_value)
-
-
-################################
-# Running tasks
-################################
-
-
-def main():
-    """Mainline for command-line testing."""
-    luigi.run()
-
-
-if __name__ == '__main__':
-    main()

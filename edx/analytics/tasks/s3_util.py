@@ -5,8 +5,6 @@ Utility methods for interacting with S3 via boto.
 from fnmatch import fnmatch
 from urlparse import urlparse
 
-import boto
-
 
 def get_s3_bucket_key_names(url):
     """Extract the bucket and key names from a S3 URL"""
@@ -18,12 +16,14 @@ def join_as_s3_url(bucket, root, path):
     """Combine bucket name, root path and relative path into a S3 URL"""
     return 's3://{0}/{1}/{2}'.format(bucket, root, path)
 
+
 def get_s3_key(s3_conn, url):
     """Returns an S3 key for use in further boto actions."""
     bucket_name, key_name = get_s3_bucket_key_names(url)
     bucket = s3_conn.get_bucket(bucket_name)
     key = bucket.get_key(key_name)
     return key
+
 
 def generate_s3_sources(s3_conn, source, patterns):
     """
@@ -61,8 +61,8 @@ def generate_s3_sources(s3_conn, source, patterns):
 
     return ((bucket.name, root, path) for path in paths)
 
+
 def _filter_matches(patterns, names):
     """Return only key names that match any of the include patterns."""
-    fn = lambda n: any(fnmatch(n, p) for p in patterns)
-    return (n for n in names if fn(n))
-
+    func = lambda n: any(fnmatch(n, p) for p in patterns)
+    return (n for n in names if func(n))

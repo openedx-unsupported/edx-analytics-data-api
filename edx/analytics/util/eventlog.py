@@ -1,10 +1,11 @@
 """Support for reading tracking event logs."""
 
-import sys
 import cjson
 import datetime
 import re
 
+import logging
+logger = logging.getLogger(__name__)
 
 PATTERN_JSON = re.compile(r'^.*?(\{.*\})\s*$')
 
@@ -32,13 +33,13 @@ def is_valid_course_id(course_id):
     return all(PATTERN_COURSEID.match(component) for component in components)
 
 
-def json_decode(line):
+def decode_json(line):
     """Wrapper to decode JSON string in an implementation-independent way."""
     # TODO: Verify correctness of cjson
     return cjson.decode(line)
 
 
-def parse_eventlog_item(line, nested=False):
+def parse_json_event(line, nested=False):
     """
     Parse a tracking log input line as JSON to create a dict representation.
 
@@ -50,12 +51,12 @@ def parse_eventlog_item(line, nested=False):
     JSON that are prepended by a timestamp.
     """
     try:
-        parsed = json_decode(line)
+        parsed = decode_json(line)
     except Exception:
         if not nested:
             json_match = PATTERN_JSON.match(line)
             if json_match:
-                return parse_eventlog_item(json_match.group(1), nested=True)
+                return parse_json_event(json_match.group(1), nested=True)
 
         # TODO: There are too many to be logged.  It might be useful
         # at some point to collect stats on the length of truncation
@@ -65,23 +66,24 @@ def parse_eventlog_item(line, nested=False):
         # Note that empirically some seem to be truncated in input
         # data at 10000 characters, 2043 for others...
         return None
+
+    # TODO: add basic validation here.
+
     return parsed
-
-
-def log_item(msg, item, level='ERROR'):
-    """Writes a message about an eventlog item."""
-    # TODO: replace this with real logging.
-    sys.stderr.write("{level}: {msg}: {item}\n".format(msg=msg, item=item, level=level))
 
 
 # Time-related terminology:
 # * datetime: a datetime object.
-# * timestamp: a string, with date and time (to second), in ISO format.
+# * timestamp: a string, with date and time (to millisecond), in ISO format.
 # * datestamp: a string with only date information, in ISO format.
 
 def datetime_to_timestamp(datetime_obj):
-    """Returns a string with the datetime value of the provided datetime object."""
-    return datetime_obj.strftime('%Y-%m-%dT%H:%M:%S')
+    """
+    Returns a string with the datetime value of the provided datetime object.
+
+    Note that if the datetime has zero microseconds, the microseconds will not be output.
+    """
+    return datetime_obj.isoformat()
 
 
 def datetime_to_datestamp(datetime_obj):
@@ -94,39 +96,42 @@ def timestamp_to_datestamp(timestamp):
     return timestamp.split('T')[0]
 
 
-def get_event_time(item):
-    """Returns a datetime object from an event item, if present."""
+def get_event_time(event):
+    """Returns a datetime object from an event object, if present."""
     try:
-        timestamp = item['time']
-        removed_ms = timestamp.split('.')[0]
-        return datetime.datetime.strptime(removed_ms, '%Y-%m-%dT%H:%M:%S')
+        # Get entry, and strip off time zone information.  Keep microseconds, if any.
+        raw_timestamp = event['time']
+        timestamp = raw_timestamp.split('+')[0]
+        if '.' not in timestamp:
+            timestamp = '{datetime}.000000'.format(datetime=timestamp)
+        return datetime.datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
     except Exception:
         return None
 
 
-def get_event_data(item):
+def get_event_data(event):
     """
-    Returns event data from an event log item as a dict object.
+    Returns event data from an event log entry as a dict object.
 
     Returns None if not found.
     """
-    event_value = item.get('event')
+    event_value = event.get('event')
 
     if event_value is None:
-        log_item("encountered event with missing event value", item)
+        logger.error("encountered event with missing event value: %s", event)
         return None
 
     if isinstance(event_value, basestring):
         # If the value is a string, try to parse as JSON into a dict.
         try:
-            event_value = json_decode(event_value)
+            event_value = decode_json(event_value)
         except Exception:
-            log_item("encountered event with unparsable event value", item)
+            logger.error("encountered event with unparsable event value: %s", event)
             return None
 
     if isinstance(event_value, dict):
         # It's fine, just return.
         return event_value
     else:
-        log_item("encountered event data with unrecognized type", item)
+        logger.error("encountered event data with unrecognized type: %s", event)
         return None

@@ -9,15 +9,13 @@ Supports outputs to HDFS, S3, and local FS.
 import os
 import boto
 import glob
-from urlparse import urlparse
-from fnmatch import fnmatch
 
 import luigi
 import luigi.s3
 import luigi.hdfs
 import luigi.format
 
-from s3_util import join_as_s3_url, generate_s3_sources
+from edx.analytics.tasks.s3_util import join_as_s3_url, generate_s3_sources
 
 
 class LocalPathTask(luigi.ExternalTask):

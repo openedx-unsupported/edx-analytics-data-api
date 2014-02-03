@@ -13,6 +13,7 @@ test-requirements: requirements
 	pip install -r requirements/test.txt
 
 test: test-requirements
+	# TODO: when we have better coverage, modify this to actually fail when coverage is too low.
 	rm -rf .coverage
 	python -m coverage run --rcfile=./.coveragerc `which nosetests`
 

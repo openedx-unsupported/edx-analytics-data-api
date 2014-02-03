@@ -4,7 +4,8 @@ import boto
 import luigi
 import luigi.s3
 
-from s3_util import join_as_s3_url, get_s3_bucket_key_names, generate_s3_sources, get_s3_key
+from edx.analytics.tasks.s3_util import join_as_s3_url, get_s3_bucket_key_names, generate_s3_sources, get_s3_key
+
 
 class S3Copy(luigi.Task):
     """
@@ -113,4 +114,3 @@ class S3Sync(luigi.Task):
     def output(self):
         for task in self.requires():
             yield task.output()
-

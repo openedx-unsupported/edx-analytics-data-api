@@ -19,7 +19,7 @@ def main():
     change_directory_to_ansible_script_home()
 
     extra_vars = convert_cli_arguments_to_ansible_extra_vars(arguments)
-    
+
     run_ansible_playbook(arguments.verbose, extra_vars)
 
 
@@ -43,7 +43,7 @@ def convert_cli_arguments_to_ansible_extra_vars(arguments):
 def run_ansible_playbook(verbose, extra_vars):
     ansible_playbook_path = os.path.join(sys.prefix, 'bin', 'ansible-playbook')
     command = [
-         ansible_playbook_path, '-i', 'ec2.py', 'task.yml', '-e', extra_vars
+        ansible_playbook_path, '-i', 'ec2.py', 'task.yml', '-e', extra_vars
     ]
     if verbose:
         command.append('-vvvv')

@@ -1,10 +1,10 @@
 import os.path
-from fnmatch import fnmatch
-from urlparse import urlparse
 
 import boto
 import luigi
 import luigi.s3
+
+from edx.analytics.tasks.s3_util import join_as_s3_url, get_s3_bucket_key_names, generate_s3_sources, get_s3_key
 
 
 class S3Copy(luigi.Task):
@@ -47,8 +47,8 @@ class S3Copy(luigi.Task):
         if not dst.exists():
             return False
 
-        src_key = self._get_s3_key(src.path)
-        dst_key = self._get_s3_key(dst.path)
+        src_key = get_s3_key(self.s3, src.path)
+        dst_key = get_s3_key(self.s3, dst.path)
 
         if dst_key.size != src_key.size:
             return False
@@ -63,18 +63,12 @@ class S3Copy(luigi.Task):
         src_url = self.input().path
         dst_url = self.output().path
 
-        src_key = self._get_s3_key(src_url)
+        src_key = get_s3_key(self.s3, src_url)
         dst_bucket_name, dst_key_name = get_s3_bucket_key_names(dst_url)
 
-        # The copy overwrittes the destination. The task checks if
+        # The copy overwrites the destination. The task checks if
         # that is necessary during the `complete()` call.
         src_key.copy(dst_bucket_name, dst_key_name)
-
-    def _get_s3_key(self, url):
-        bucket_name, key_name = get_s3_bucket_key_names(url)
-        bucket = self.s3.get_bucket(bucket_name)
-        key = bucket.get_key(key_name)
-        return key
 
 
 class S3Sync(luigi.Task):
@@ -112,7 +106,7 @@ class S3Sync(luigi.Task):
         return [boto]
 
     def requires(self):
-        for bucket, root, path in self._generate_sources():
+        for bucket, root, path in generate_s3_sources(self.s3, self.source, self.include):
             source = join_as_s3_url(bucket, root, path)
             destination = os.path.join(self.destination, path)
             yield S3Copy(source, destination)
@@ -120,35 +114,3 @@ class S3Sync(luigi.Task):
     def output(self):
         for task in self.requires():
             yield task.output()
-
-    def _generate_sources(self):
-        bucket_name, root = get_s3_bucket_key_names(self.source)
-
-        bucket = self.s3.get_bucket(bucket_name)
-        keys = (s.key for s in bucket.list(root) if s.size > 0)
-
-        # Make paths relative by removing root
-        paths = (k.lstrip(root).strip('/') for k in keys)
-
-        # Filter only paths that match the include patterns
-        paths = self._filter_matches(paths)
-
-        return ((bucket.name, root, path) for path in paths)
-
-    def _filter_matches(self, names):
-        patterns = self.include
-
-        # Return only key names that match any of the include patterns
-        fn = lambda n: any(fnmatch(n, p) for p in patterns)
-        return (n for n in names if fn(n))
-
-
-def get_s3_bucket_key_names(url):
-    """Extract the bucket and key names from a S3 URL"""
-    parts = urlparse(url)
-    return (parts.netloc.strip('/'), parts.path.strip('/'))
-
-
-def join_as_s3_url(bucket, root, path):
-    """Combine bucket name, root path and relative path into a S3 URL"""
-    return 's3://{0}/{1}/{2}'.format(bucket, root, path)

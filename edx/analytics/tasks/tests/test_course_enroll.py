@@ -66,6 +66,7 @@ class CourseEnrollEventMapTest(unittest.TestCase):
 
     def test_missing_event_type(self):
         event_dict = self._create_event_dict()
+        event_dict['old_event_type'] = event_dict['event_type']
         del event_dict['event_type']
         line = json.dumps(event_dict)
         self.assert_no_output_for(line)

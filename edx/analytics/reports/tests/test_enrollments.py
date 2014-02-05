@@ -34,7 +34,7 @@ class FakeTarget(object):
 
 class TestEnrollmentsByWeek(TestCase):
 
-    def run_task(self, source, date, weeks, offset=None):
+    def run_task(self, source, date, weeks, offset=None, statuses=None):
         """
         Run task with fake targets.
 
@@ -64,6 +64,10 @@ class TestEnrollmentsByWeek(TestCase):
         # Mock offsets only if specified.
         if offset:
             input_targets.update({'offsets': FakeTarget(reformat(offset))})
+
+        # Mock statuses only if specified.
+        if statuses:
+            input_targets.update({'statuses': FakeTarget(reformat(statuses))})
 
         task.input = MagicMock(return_value=input_targets)
 
@@ -110,7 +114,7 @@ class TestEnrollmentsByWeek(TestCase):
         """
         res = self.run_task(source, '2013-01-21', 4)
         weeks = set(['2012-12-31', '2013-01-07', '2013-01-14', '2013-01-21'])
-        self.assertEqual(weeks, set(str(w) for w in res.columns))
+        self.assertEqual(weeks | set(['org_id', 'status']), set(str(w) for w in res.columns))
 
         course_1 = res.loc['course_1']
         self.assertTrue(isnan(course_1['2012-12-31']))  # no data
@@ -200,3 +204,34 @@ class TestEnrollmentsByWeek(TestCase):
 
         destination = task.output()
         self.assertIsInstance(destination, luigi.File)
+
+    def test_statuses(self):
+        source = """
+        course_1 2013-03-01 1
+        course_2 2013-03-07 1
+        course_3 2013-03-15 1
+        """
+
+        statuses = """
+        course_2 new
+        course_3 past
+        """
+        res = self.run_task(source, '2013-03-28', 4, statuses=statuses)
+
+        self.assertTrue(isnan(res.loc['course_1']['status']))
+        self.assertEquals(res.loc['course_2']['status'], 'new')
+        self.assertEquals(res.loc['course_3']['status'], 'past')
+
+    def test_organization_mapping(self):
+        source = """
+        foo/course_1/run 2013-03-01 1
+        bar/course_2/run 2013-03-07 1
+        baz/course_3 2013-03-15 1
+        course_4 2013-03-16 1
+        """
+        res = self.run_task(source, '2013-03-28', 4)
+
+        self.assertEquals(res.loc['foo/course_1/run']['org_id'], 'foo')
+        self.assertEquals(res.loc['bar/course_2/run']['org_id'], 'bar')
+        self.assertTrue(isnan(res.loc['baz/course_3']['org_id']))
+        self.assertTrue(isnan(res.loc['course_4']['org_id']))

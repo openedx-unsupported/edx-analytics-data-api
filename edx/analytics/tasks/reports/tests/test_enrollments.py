@@ -10,8 +10,8 @@ from mock import MagicMock
 from numpy import isnan
 import pandas
 
-from edx.analytics.reports.enrollments import EnrollmentsByWeek
-from edx.analytics.reports.enrollments import ExternalURL
+from edx.analytics.tasks.reports.enrollments import EnrollmentsByWeek
+from edx.analytics.tasks.reports.enrollments import ExternalURL
 
 
 class FakeTarget(object):

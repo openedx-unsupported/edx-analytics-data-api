@@ -5,7 +5,7 @@ Tests for utilities that parse event logs.
 
 import unittest
 
-import edx.analytics.util.eventlog as eventlog
+import edx.analytics.tasks.util.eventlog as eventlog
 
 
 class CourseIdTest(unittest.TestCase):

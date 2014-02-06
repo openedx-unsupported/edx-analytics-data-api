@@ -6,7 +6,7 @@ import luigi.hadoop
 import luigi.s3
 import luigi.hdfs
 
-import edx.analytics.util.eventlog as eventlog
+import edx.analytics.tasks.util.eventlog as eventlog
 from edx.analytics.tasks.pathutil import get_target_for_url, PathSetTask
 
 import logging
@@ -190,8 +190,7 @@ class BaseCourseEnrollmentTask(luigi.hadoop.JobTask):
         # is used for parsing events and date conversion.
         import boto
         import cjson
-        import edx.analytics.util
-        return [boto, edx.analytics.util, cjson]
+        return [boto, cjson]
 
 
 class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourseEnrollmentTask):

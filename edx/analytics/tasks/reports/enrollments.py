@@ -9,6 +9,8 @@ import luigi.hdfs
 import numpy
 import pandas
 
+from edx.analytics.tasks.url import ExternalURL, get_target_from_url
+
 
 class EnrollmentsByWeek(luigi.Task):
     """Calculates cumulative enrollments per week per course.
@@ -248,24 +250,3 @@ class EnrollmentsByWeek(luigi.Task):
         '''
         split_course = course_id.split('/')
         return '-' if len(split_course) != 3 else split_course[0]
-
-
-class ExternalURL(luigi.ExternalTask):
-    """Simple Task that returns a target based on its URL"""
-    url = luigi.Parameter()
-
-    def output(self):
-        return get_target_from_url(self.url)
-
-
-def get_target_from_url(url):
-    """Returns a luigi target based on the url scheme"""
-    # TODO: Make external utility to resolve target by URL,
-    # including s3, s3n, etc.
-    if url.startswith('hdfs://') or url.startswith('s3://'):
-        if url.endswith('/'):
-            return luigi.hdfs.HdfsTarget(url, format=luigi.hdfs.PlainDir)
-        else:
-            return luigi.hdfs.HdfsTarget(url)
-    else:
-        return luigi.LocalTarget(url)

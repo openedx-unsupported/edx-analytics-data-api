@@ -2,12 +2,12 @@
 Luigi tasks for extracting course enrollment statistics from tracking log files.
 """
 import luigi
-import luigi.hadoop
 import luigi.s3
-import luigi.hdfs
 
 import edx.analytics.tasks.util.eventlog as eventlog
-from edx.analytics.tasks.pathutil import get_target_for_url, PathSetTask
+from edx.analytics.tasks.mapreduce import MapReduceJobTask
+from edx.analytics.tasks.pathutil import PathSetTask
+from edx.analytics.tasks.url import get_target_from_url, url_path_join
 
 import logging
 logger = logging.getLogger(__name__)
@@ -164,7 +164,7 @@ class CourseEnrollmentChangesPerDayMixin(object):
 # Task requires/output definitions
 ##################################
 
-class BaseCourseEnrollmentTask(luigi.hadoop.JobTask):
+class BaseCourseEnrollmentTask(MapReduceJobTask):
     """
     Base class for course enrollment calculations.
 
@@ -175,14 +175,11 @@ class BaseCourseEnrollmentTask(luigi.hadoop.JobTask):
       dest:  a URL to the root location to write output file(s).
       include:  a list of patterns to be used to match input files, relative to `src` URL.
           The default value is ['*'].
-      run_locally: a boolean flag to indicate that the task should be run locally rather than
-          on a hadoop cluster.  This is used only to change the intepretation of S3 URLs in src and/or dest.
     """
     name = luigi.Parameter()
     src = luigi.Parameter()
     dest = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
-    run_locally = luigi.BooleanParameter()
 
     def extra_modules(self):
         # The following are needed for (almost) every course enrollment task.
@@ -197,22 +194,22 @@ class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourse
     """Calculates daily change in enrollment for a user in a course, given raw event log input."""
 
     def requires(self):
-        return PathSetTask(self.src, self.include, self.run_locally)
+        return PathSetTask(self.src, self.include)
 
     def output(self):
         output_name = 'course_enrollment_events_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
+        return get_target_from_url(url_path_join(self.dest, output_name))
 
 
 class CourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCourseEnrollmentTask):
     """Calculates daily changes in enrollment, given per-user net changes by date."""
 
     def requires(self):
-        return CourseEnrollmentEventsPerDay(self.name, self.src, self.dest, self.include, self.run_locally)
+        return CourseEnrollmentEventsPerDay(self.mapreduce_engine, self.name, self.src, self.dest, self.include)
 
     def output(self):
         output_name = 'course_enrollment_changes_per_day_{name}'.format(name=self.name)
-        return get_target_for_url(self.dest, output_name, self.run_locally)
+        return get_target_from_url(url_path_join(self.dest, output_name))
 
 
 ################################

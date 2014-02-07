@@ -115,8 +115,8 @@ class CourseEnrollmentEventsPerDayMixin(object):
                 enrollment_status = new_enrollment_status
             else:
                 logger.warning("WARNING: duplicate enrollment event {status} "
-                    "for user_id {user_id} in course {course_id} on {date}".format(
-                    status=new_enrollment_status, user_id=user_id, course_id=course_id, date=this_date))
+                               "for user_id {user_id} in course {course_id} on {date}".format(
+                                   status=new_enrollment_status, user_id=user_id, course_id=course_id, date=this_date))
 
             prev_date = this_date
 
@@ -144,7 +144,7 @@ class CourseEnrollmentChangesPerDayMixin(object):
 
         Args:
             key:  (course_id, datestamp) tuple
-            values:  iterator of enrollment_changes 
+            values:  iterator of enrollment_changes
 
             Input `enrollment_changes` are the enrollment changes on a day due to a specific user.
             Each user with a change has a separate input, either -1 (unenroll) or 1 (enroll).

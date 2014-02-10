@@ -27,5 +27,5 @@ coverage: test
 	diff-quality --violations=pylint --html-report diff_quality_pylint.html
 
 	# Compute style violations
-	pep8 > pep8.report || echo "Not pep8 clean"
+	pep8 edx > pep8.report || echo "Not pep8 clean"
 	pylint -f parseable edx > pylint.report || echo "Not pylint clean"

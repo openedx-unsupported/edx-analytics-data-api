@@ -190,7 +190,7 @@ class EnrollmentsByWeek(luigi.Task):
 
         # List the dates of the last day of each week requested.
         start, weeks = self.date, self.weeks
-        days = [start - timedelta(i*7) for i in reversed(xrange(0, weeks))]
+        days = [start - timedelta(i * 7) for i in reversed(xrange(0, weeks))]
 
         # Sample the cumulative data on the requested days.
         # Result is NaN if there is no data available for that date.

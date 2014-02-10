@@ -40,7 +40,7 @@ coverage: test
 
 jenkins: .tox
 	virtualenv ./venv
-	./venv/bin/pip install tox
+	./venv/bin/pip install -U tox
 	./venv/bin/tox
 
 get_config = $(shell echo "$$ACCEPTANCE_TEST_CONFIG" | python -c 'import sys, json; print json.load(sys.stdin)[sys.argv[1]]' $(1))

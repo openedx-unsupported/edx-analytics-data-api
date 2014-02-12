@@ -5,3 +5,4 @@ pep8==1.4.5
 pylint==0.28
 diff-cover >= 0.2.1
 mock==1.0.1
+unittest2==0.5.1

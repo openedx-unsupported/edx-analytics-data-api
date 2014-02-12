@@ -1,4 +1,4 @@
-.PHONY:	requirements test test-requirements
+.PHONY:	requirements test test-requirements .tox
 
 install: requirements
 	python setup.py install
@@ -29,3 +29,8 @@ coverage: test
 	# Compute style violations
 	pep8 edx > pep8.report || echo "Not pep8 clean"
 	pylint -f parseable edx > pylint.report || echo "Not pylint clean"
+
+jenkins: .tox
+	virtualenv ./venv
+	./venv/bin/pip install tox
+	./venv/bin/tox

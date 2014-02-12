@@ -41,3 +41,4 @@ diff_*.html
 *.report
 report
 edx_analytics.log
+venv

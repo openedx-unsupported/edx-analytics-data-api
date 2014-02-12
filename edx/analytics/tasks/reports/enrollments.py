@@ -9,10 +9,117 @@ import luigi.hdfs
 import numpy
 import pandas
 
+from edx.analytics.tasks.util.tsv import read_tsv
 from edx.analytics.tasks.url import ExternalURL, get_target_from_url
 
 
-class EnrollmentsByWeek(luigi.Task):
+class CourseEnrollmentCountMixin(object):
+    """Provides methods useful for generating reports using course enrollment counts."""
+
+    def read_course_date_count_tsv(self, input_file):
+        """Read TSV file with hard-coded column names into a pandas DataFrame."""
+        names = ['course_id', 'date', 'count']
+
+        # Not assuming any encoding, course_id will be read as plain string
+        data = read_tsv(input_file, names)
+
+        data.date = pandas.to_datetime(data.date)
+        return data
+
+    def initialize_daily_count(self, course_date_count_data):
+        """
+        Reorganize a course-date-count data table to index by date.
+
+        Args:
+            Pandas dataframe with one row per course_id and
+            columns for the date and count of the offset.
+
+        Returns:
+            Pandas dataframe with one column per course_id, and
+            indexed rows for the date.  Counts are set to zero for
+            dates that are missing.
+
+        """
+        data = course_date_count_data.pivot(
+            index='date',
+            columns='course_id',
+            values='count',
+        )
+
+        # Complete the range of data to include all days between
+        # the dates of the first and last events.
+        date_range = pandas.date_range(min(data.index), max(data.index))
+        data = data.reindex(date_range)
+        data = data.fillna(0)
+
+        return data
+
+    def add_offsets_to_daily_count(self, count_by_day, offsets):
+        """
+        Add offsets to a dataframe in-place.
+
+        Args:
+            count_by_day: Pandas dataframe with one column per course_id, and
+                indexed rows for the date.
+            offsets: Pandas dataframe with one row per course_id and
+                columns for the date and count of the offset.
+
+        """
+        for _, (course_id, date, count) in offsets.iterrows():
+            if course_id in count_by_day.columns:
+                # The offsets are computed to beginning of that day. We
+                # add them to the counts by the end of that day to
+                # get the correct count for the day.
+                count_by_day.loc[date, course_id] += count
+
+                # Flag values before the offset day with NaN,
+                # since they are not "available".
+                not_available = count_by_day.index < date
+                count_by_day.loc[not_available, course_id] = numpy.NaN
+
+    def calculate_total_enrollment(self, count_by_day, offsets=None):
+        """
+        Accumulate enrollment changes per day to find total enrollment per day.
+
+        Args:
+            count_by_day: Pandas dataframe with one column per course_id, and
+                indexed rows for the date.  Counts are net changes in enrollment
+                during the day for each course.
+            offsets: Pandas dataframe with one row per course_id and
+                columns for the date and count of the offset.  The offset
+                for a course is used to provide total enrollment counts
+                at a point in time right before the timeframe covered by count_by_day.
+
+        """
+        if offsets is not None:
+            self.add_offsets_to_daily_count(count_by_day, offsets)
+        # Calculate the cumulative sum per day of the input.
+        # Entries with NaN stay NaN.
+        # At this stage only the data prior to the offset should contain NaN.
+        cumulative_sum = count_by_day.cumsum()
+        return cumulative_sum
+
+    def select_weekly_values(self, daily_values, start, weeks):
+        """
+        Sample daily values on a weekly basis.
+
+        Args:
+            daily_values: Pandas dataframe with one column per course_id, and
+                indexed rows for the date.
+            start: last day to request.
+            weeks: number of weeks to sample (including the last day)
+        """
+        # List the dates of the last day of each week requested.
+        days = [start - timedelta(i * 7) for i in reversed(xrange(0, weeks))]
+
+        # Sample the cumulative data on the requested days.
+        # Result is NaN if there is no data available for that date.
+        results = daily_values.loc[days]
+
+        return results
+
+
+class EnrollmentsByWeek(luigi.Task, CourseEnrollmentCountMixin):
     """Calculates cumulative enrollments per week per course.
 
     Parameters:
@@ -51,19 +158,24 @@ class EnrollmentsByWeek(luigi.Task):
         return get_target_from_url(self.destination)
 
     def run(self):
-        # Load the data into a pandas dataframe
-        count_by_day = self.read_source()
-
+        # Load the data into pandas dataframes
+        daily_enrollment_changes = self.read_source()
         offsets = self.read_offsets()
-        if offsets is not None:
-            self.include_offsets(count_by_day, offsets)
 
-        cumulative_by_week = self.accumulate(count_by_day)
+        daily_enrollment_totals = self.calculate_total_enrollment(daily_enrollment_changes, offsets)
+
+        # Sample the cumulative data on the requested days.
+        # Result is NaN if there is no data available for that date.
+        weekly_enrollment_totals = self.select_weekly_values(
+            daily_enrollment_totals,
+            self.date,
+            self.weeks
+        )
 
         statuses = self.read_statuses()
 
         with self.output().open('w') as output_file:
-            self.save_output(cumulative_by_week, statuses, output_file)
+            self.save_output(weekly_enrollment_totals, statuses, output_file)
 
     def read_source(self):
         """
@@ -75,19 +187,8 @@ class EnrollmentsByWeek(luigi.Task):
 
         """
         with self.input()['source'].open('r') as input_file:
-            data = self.read_date_count_tsv(input_file)
-
-            # Reorganize the data. One column per course_id, with
-            # shared date index.
-            data = data.pivot(index='date',
-                              columns='course_id',
-                              values='count')
-
-            # Complete the range of data to include all days between
-            # the dates of the first and last events.
-            date_range = pandas.date_range(min(data.index), max(data.index))
-            data = data.reindex(date_range)
-            data = data.fillna(0)
+            course_date_count_data = self.read_course_date_count_tsv(input_file)
+            data = self.initialize_daily_count(course_date_count_data)
 
         return data
 
@@ -102,24 +203,12 @@ class EnrollmentsByWeek(luigi.Task):
             Returns None if no offset was specified.
 
         """
-
         data = None
 
         if self.input().get('offsets'):
             with self.input()['offsets'].open('r') as offset_file:
-                data = self.read_date_count_tsv(offset_file)
+                data = self.read_course_date_count_tsv(offset_file)
 
-        return data
-
-    def read_date_count_tsv(self, input_file):
-        """Read hadoop formatted tsv file into a pandas DataFrame."""
-
-        names = ['course_id', 'date', 'count']
-
-        # Not assuming any encoding, course_id will be read as plain string
-        data = self.read_tsv(input_file, names)
-
-        data.date = pandas.to_datetime(data.date)
         return data
 
     def read_statuses(self):
@@ -139,66 +228,10 @@ class EnrollmentsByWeek(luigi.Task):
 
         if self.input().get('statuses'):
             with self.input()['statuses'].open('r') as status_file:
-                data = self.read_tsv(status_file, names)
+                data = read_tsv(status_file, names)
                 data = data.set_index('course_id')
 
         return data
-
-    def read_tsv(self, input_file, names):
-        """
-        Reads a tab-separated file into a DataFrame.
-
-        Args:
-            input_file (str): Path to the input file.
-            names (list): The names of the columns in the input file.
-        Returns:
-            A pandas DataFrame read from the file contents of the file.
-        """
-        return pandas.read_csv(
-            input_file,
-            names=names,
-            quoting=csv.QUOTE_NONE,
-            encoding=None,
-            delimiter='\t'
-        )
-
-    def include_offsets(self, count_by_day, offsets):
-        """
-        Add offsets to a dataframe inplace.
-
-        Args:
-            count_by_day: Dataframe with format from `read_source`
-            offsets: Dataframe with format from `read_offsets`.
-
-        """
-
-        for n, (course_id, date, count) in offsets.iterrows():
-            if course_id in count_by_day.columns:
-                # The offsets are computed to begining of that day. We
-                # add them to the counts by the end of that day to
-                # get the correct count for the day.
-                count_by_day.loc[date, course_id] += count
-
-                # Flag values before the offset day with NaN,
-                # since they are not "available".
-                not_available = count_by_day.index < date
-                count_by_day.loc[not_available, course_id] = numpy.NaN
-
-    def accumulate(self, count_by_day):
-        # Calculate the cumulative sum per day of the input.
-        # Entries with NaN stay NaN.
-        # At this stage only the data prior to the offset should contain NaN.
-        cumulative_sum = count_by_day.cumsum()
-
-        # List the dates of the last day of each week requested.
-        start, weeks = self.date, self.weeks
-        days = [start - timedelta(i * 7) for i in reversed(xrange(0, weeks))]
-
-        # Sample the cumulative data on the requested days.
-        # Result is NaN if there is no data available for that date.
-        results = cumulative_sum.loc[days]
-
-        return results
 
     def save_output(self, results, statuses, output_file):
         results = results.transpose()

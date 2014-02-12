@@ -2,13 +2,13 @@
 Tests for tasks that collect enrollment events.
 
 """
-import unittest
 import json
 
 from edx.analytics.tasks.course_enroll import (
     CourseEnrollmentEventsPerDayMixin,
     CourseEnrollmentChangesPerDayMixin,
 )
+from edx.analytics.tasks.tests import unittest
 
 
 class CourseEnrollEventMapTest(unittest.TestCase):
@@ -39,7 +39,7 @@ class CourseEnrollEventMapTest(unittest.TestCase):
                 "org_id": org_id,
                 "user_id": self.user_id,
             },
-            "time": "{}+00:00".format(self.timestamp),
+            "time": "{0}+00:00".format(self.timestamp),
             "ip": "127.0.0.1",
             "event": {
                 "course_id": self.course_id,

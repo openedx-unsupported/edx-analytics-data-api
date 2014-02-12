@@ -2,7 +2,6 @@ from contextlib import contextmanager
 import datetime
 import textwrap
 from StringIO import StringIO
-from unittest import TestCase
 
 import luigi
 import luigi.hdfs
@@ -10,6 +9,7 @@ from mock import MagicMock
 from numpy import isnan
 import pandas
 
+from edx.analytics.tasks.tests import unittest
 from edx.analytics.tasks.reports.enrollments import EnrollmentsByWeek
 from edx.analytics.tasks.reports.enrollments import ExternalURL
 
@@ -32,7 +32,7 @@ class FakeTarget(object):
         self.buffer.seek(0)
 
 
-class TestEnrollmentsByWeek(TestCase):
+class TestEnrollmentsByWeek(unittest.TestCase):
 
     def run_task(self, source, date, weeks, offset=None, statuses=None):
         """

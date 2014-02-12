@@ -1,11 +1,9 @@
 """
 Tests for utilities that parse event logs.
-
 """
 
-import unittest
-
 import edx.analytics.tasks.util.eventlog as eventlog
+from edx.analytics.tasks.tests import unittest
 
 
 class CourseIdTest(unittest.TestCase):

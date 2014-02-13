@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import datetime
 import textwrap
 from StringIO import StringIO
@@ -10,26 +9,9 @@ from numpy import isnan
 import pandas
 
 from edx.analytics.tasks.tests import unittest
+from edx.analytics.tasks.tests.target import FakeTarget
 from edx.analytics.tasks.reports.enrollments import EnrollmentsByWeek
 from edx.analytics.tasks.reports.enrollments import ExternalURL
-
-
-class FakeTarget(object):
-    """
-    Fake luigi like target that saves data in memory, using a
-    StringIO buffer.
-    """
-    def __init__(self, value=''):
-        self.buffer = StringIO(value)
-        # Rewind the buffer head so the value can be read
-        self.buffer.seek(0)
-
-    @contextmanager
-    def open(self, *args, **kwargs):
-        yield self.buffer
-
-        # Rewind the head for easy reading
-        self.buffer.seek(0)
 
 
 class TestEnrollmentsByWeek(unittest.TestCase):

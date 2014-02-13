@@ -6,6 +6,10 @@ install: requirements
 develop: requirements
 	python setup.py develop
 
+system-requirements:
+	sudo apt-get update -q
+	sudo apt-get install -y -q libmysqlclient-dev
+
 requirements:
 	pip install -r requirements/default.txt
 

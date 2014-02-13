@@ -10,13 +10,13 @@ from mock import MagicMock
 from numpy import isnan
 import pandas
 
-from edx.analytics.tasks.reports.total_enrollments import TotalUsersAndEnrollmentsByWeek, TOTAL_ENROLLMENT_ROWNAME
+from edx.analytics.tasks.reports.total_enrollments import WeeklyAllUsersAndEnrollments, TOTAL_ENROLLMENT_ROWNAME
 from edx.analytics.tasks.tests import unittest
 from edx.analytics.tasks.tests.target import FakeTarget
 
 
-class TestTotalUsersAndEnrollmentsByWeek(unittest.TestCase):
-    """Tests for TotalUsersAndEnrollmentsByWeek class."""
+class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
+    """Tests for WeeklyAllUsersAndEnrollments class."""
 
     def run_task(self, source, date, weeks, offset=None, history=None):
         """
@@ -29,7 +29,7 @@ class TestTotalUsersAndEnrollmentsByWeek(unittest.TestCase):
         parsed_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
         # Make offsets None if it was not specified.
-        task = TotalUsersAndEnrollmentsByWeek(
+        task = WeeklyAllUsersAndEnrollments(
             source='fake_source',
             offsets='fake_offsets' if offset else None,
             history='fake_history' if history else None,
@@ -161,10 +161,10 @@ class TestTotalUsersAndEnrollmentsByWeek(unittest.TestCase):
     def test_task_urls(self):
         date = datetime.date(2013, 01, 20)
 
-        task = TotalUsersAndEnrollmentsByWeek(source='s3://bucket/path/',
-                                              offsets='s3://bucket/file.txt',
-                                              destination='file://path/file.txt',
-                                              date=date)
+        task = WeeklyAllUsersAndEnrollments(source='s3://bucket/path/',
+                                            offsets='s3://bucket/file.txt',
+                                            destination='file://path/file.txt',
+                                            date=date)
 
         requires = task.requires()
 

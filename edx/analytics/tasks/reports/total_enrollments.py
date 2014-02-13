@@ -8,6 +8,7 @@ import luigi.hdfs
 import numpy
 import pandas
 
+from edx.analytics.tasks.util.tsv import read_tsv
 from edx.analytics.tasks.url import ExternalURL, get_target_from_url
 from edx.analytics.tasks.reports.enrollments import CourseEnrollmentCountMixin
 
@@ -16,7 +17,87 @@ ROWNAME_HEADER = 'name'
 TOTAL_ENROLLMENT_ROWNAME = 'Total Enrollment'
 
 
-class TotalUsersAndEnrollmentsByWeek(luigi.Task, CourseEnrollmentCountMixin):
+class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
+
+    def read_date_count_tsv(self, input_file):
+        """
+        Read TSV containing dates and corresponding counts into a pandas Series.
+
+        NANs are not filled in here, as more than one filling strategy is
+        used with such files.
+        """
+        names = ['date', 'count']
+
+        data = read_tsv(input_file, names)
+        data.date = pandas.to_datetime(data.date)
+        data = data.set_index('date')
+
+        date_range = pandas.date_range(min(data.index), max(data.index))
+        data = data.reindex(date_range)
+
+        # return as a Series
+        return data['count']
+
+    def read_incremental_count_tsv(self, input_file):
+        """
+        Read TSV containing dates and corresponding counts into a pandas Series.
+
+        Interstitial incremental counts are filled as zeroes.
+        """
+        return self.read_date_count_tsv(input_file).fillna(0)
+
+    def read_total_count_tsv(self, input_file):
+        # TODO: this is a placeholder for reading in historical counts,
+        # such as total enrollment numbers.  It will
+        # need to interpolate the interstitial NANs.
+        data = self.read_date_count_tsv(input_file)
+        return data
+
+    def filter_duplicate_courses(self, daily_enrollment_totals):
+        # TODO: implement this for real.  (This is just a placeholder.)
+        # At this point we should remove data for courses that are
+        # represented by other courses, because the students have been
+        # moved to the new course.  Perhaps this should actually
+        # perform a merge of the two courses, since we would want the
+        # history of one before the move date, and the history of the
+        # second after that date.
+
+        # Note that this is not the same filtering that would be applied
+        # to the EnrollmentsByWeek report.
+        pass
+
+    def save_output(self, results, output_file):
+        """
+        Write output to CSV file.
+
+        Args:
+            results:  a pandas DataFrame object containing series data
+                per row to be output.
+
+        """
+        # transpose the dataframe so that weeks are columns, and output:
+        results = results.transpose()
+
+        # List of fieldnames for the report
+        fieldnames = [ROWNAME_HEADER] + list(results.columns)
+
+        writer = csv.DictWriter(output_file, fieldnames)
+        writer.writerow(dict((k, k) for k in fieldnames))  # Write header
+
+        def format_counts(counts_dict):
+            for k, v in counts_dict.iteritems():
+                yield k, '-' if numpy.isnan(v) else int(v)
+
+        for series_name, series in results.iterrows():
+            values = {
+                ROWNAME_HEADER: series_name,
+            }
+            by_week_values = format_counts(series.to_dict())
+            values.update(by_week_values)
+            writer.writerow(values)
+
+
+class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
     """
     Calculates total users and enrollments across all (known) courses per week.
 
@@ -168,46 +249,3 @@ class TotalUsersAndEnrollmentsByWeek(luigi.Task, CourseEnrollmentCountMixin):
         # For gaps in history, values should be extrapolated.
         # Also may to need to reindex, since new dates are being added.
         pass
-
-    def filter_duplicate_courses(self, daily_enrollment_totals):
-        # TODO: implement this for real.  (This is just a placeholder.)
-        # At this point we should remove data for courses that are
-        # represented by other courses, because the students have been
-        # moved to the new course.  Perhaps this should actually
-        # perform a merge of the two courses, since we would want the
-        # history of one before the move date, and the history of the
-        # second after that date.
-
-        # Note that this is not the same filtering that would be applied
-        # to the EnrollmentsByWeek report.
-        pass
-
-    def save_output(self, results, output_file):
-        """
-        Write output to CSV file.
-
-        Args:
-            results:  a pandas DataFrame object containing series data
-                per row to be output.
-
-        """
-        # transpose the dataframe so that weeks are columns, and output:
-        results = results.transpose()
-
-        # List of fieldnames for the report
-        fieldnames = [ROWNAME_HEADER] + list(results.columns)
-
-        writer = csv.DictWriter(output_file, fieldnames)
-        writer.writerow(dict((k, k) for k in fieldnames))  # Write header
-
-        def format_counts(counts_dict):
-            for k, v in counts_dict.iteritems():
-                yield k, '-' if numpy.isnan(v) else int(v)
-
-        for series_name, series in results.iterrows():
-            values = {
-                ROWNAME_HEADER: series_name,
-            }
-            by_week_values = format_counts(series.to_dict())
-            values.update(by_week_values)
-            writer.writerow(values)

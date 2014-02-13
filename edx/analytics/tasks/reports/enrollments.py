@@ -23,7 +23,7 @@ class CourseEnrollmentCountMixin(object):
         # Not assuming any encoding, course_id will be read as plain string
         data = read_tsv(input_file, names)
 
-        data.date = pandas.to_datetime(data.date)
+        data.date = pandas.to_datetime(data.date)  # pylint: disable=maybe-no-member
         return data
 
     def initialize_daily_count(self, course_date_count_data):
@@ -75,7 +75,7 @@ class CourseEnrollmentCountMixin(object):
                 # Flag values before the offset day with NaN,
                 # since they are not "available".
                 not_available = count_by_day.index < date
-                count_by_day.loc[not_available, course_id] = numpy.NaN
+                count_by_day.loc[not_available, course_id] = numpy.NaN  # pylint: disable=maybe-no-member
 
     def calculate_total_enrollment(self, count_by_day, offsets=None):
         """
@@ -174,7 +174,7 @@ class EnrollmentsByWeek(luigi.Task, CourseEnrollmentCountMixin):
 
         statuses = self.read_statuses()
 
-        with self.output().open('w') as output_file:
+        with self.output().open('w') as output_file:  # pylint: disable=maybe-no-member
             self.save_output(weekly_enrollment_totals, statuses, output_file)
 
     def read_source(self):

@@ -68,10 +68,6 @@ class UrlPathJoinTestCase(unittest.TestCase):
     def test_extra_separators(self):
         self.assertEquals(url.url_path_join('s3://foo/bar', '///baz'), 's3://foo///baz')
 
-    @unittest.skip("Failing in Python 2.6 due to differences in urlparse")
-    def test_query_string(self):
-        self.assertEquals(url.url_path_join('s3://foo/bar?x=y', 'baz'), 's3://foo/bar/baz?x=y')
-
     def test_multiple_elements(self):
         self.assertEquals(url.url_path_join('s3://foo', 'bar', 'baz'), 's3://foo/bar/baz')
         self.assertEquals(url.url_path_join('s3://foo', 'bar/bing', 'baz'), 's3://foo/bar/bing/baz')

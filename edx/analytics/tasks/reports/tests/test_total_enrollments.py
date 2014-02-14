@@ -4,7 +4,6 @@ from contextlib import contextmanager
 import datetime
 import textwrap
 from StringIO import StringIO
-from unittest import TestCase
 
 import luigi
 import luigi.hdfs
@@ -13,7 +12,7 @@ from numpy import isnan
 import pandas
 
 from edx.analytics.tasks.reports.total_enrollments import TotalUsersAndEnrollmentsByWeek, TOTAL_ENROLLMENT_ROWNAME
-
+from edx.analytics.tasks.tests import unittest
 
 class FakeTarget(object):
     """
@@ -33,7 +32,7 @@ class FakeTarget(object):
         self.buffer.seek(0)
 
 
-class TestTotalUsersAndEnrollmentsByWeek(TestCase):
+class TestTotalUsersAndEnrollmentsByWeek(unittest.TestCase):
     """Tests for TotalUsersAndEnrollmentsByWeek class."""
 
     def run_task(self, source, date, weeks, offset=None, history=None):

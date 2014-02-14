@@ -22,6 +22,7 @@
     - git_server_hostname: github.com
     - git_server_ip_address: 207.97.227.239
     - git_server_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+    - wait_for_task: False
 
   tasks:
     - name: known_hosts file exists
@@ -66,8 +67,22 @@
         . {{ working_venv_dir }}/bin/activate && make install
         chdir={{ working_repo_dir }}
 
-    - name: task run
+    # Unfortunately, we cannot make the poll value a variable because of this open issue:
+    # https://github.com/ansible/ansible/issues/255
+    # As a workaround, we define two versions of this play, then choose
+    # which one to run based on the boolean `wait_for_task`
+    # By default, `wait_for_task` is False, so we can "fire and forget" long-running tasks.
+    # In the integration tests, we will wait for tasks to complete before verifying results.
+    - name: task run (fire and forget)
       shell: >
         {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} chdir={{ working_repo_dir }}
       async: 10000000000
       poll: 0
+      when: not wait_for_task
+
+    - name: task run (wait for completion)
+      shell: >
+        {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} chdir={{ working_repo_dir }}
+      async: 10000000000
+      poll: 10
+      when: wait_for_task

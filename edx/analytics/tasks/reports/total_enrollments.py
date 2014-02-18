@@ -1,24 +1,29 @@
 """Total Enrollment related reports"""
 
 import csv
-from datetime import timedelta
+
+from datetime import timedelta, date
 
 import luigi
 import luigi.hdfs
+
+from luigi.date_interval import Custom
 
 import numpy
 import pandas
 
 from edx.analytics.tasks.util.tsv import read_tsv
-from edx.analytics.tasks.url import ExternalURL, get_target_from_url
+from edx.analytics.tasks.url import ExternalURL, get_target_from_url, url_path_join
+from edx.analytics.tasks.user_registrations import UserRegistrationsPerDay
 from edx.analytics.tasks.reports.enrollments import CourseEnrollmentCountMixin
 
 
-ROWNAME_HEADER = 'name'
-TOTAL_ENROLLMENT_ROWNAME = 'Total Enrollment'
+MINIMUM_DATE = date(1900, 1, 1)
 
 
 class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
+
+    ROWNAME_HEADER = 'name'
 
     def read_date_count_tsv(self, input_file):
         """
@@ -89,7 +94,7 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         results = results.transpose()
 
         # List of fieldnames for the report
-        fieldnames = [ROWNAME_HEADER] + list(results.columns)
+        fieldnames = [self.ROWNAME_HEADER] + list(results.columns)
 
         writer = csv.DictWriter(output_file, fieldnames)
         writer.writerow(dict((k, k) for k in fieldnames))  # Write header
@@ -101,7 +106,7 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
 
         for series_name, series in results.iterrows():
             values = {
-                ROWNAME_HEADER: series_name,
+                self.ROWNAME_HEADER: series_name,
             }
             by_week_values = format_counts(series.to_dict())
             values.update(by_week_values)
@@ -113,10 +118,10 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
     Calculates total users and enrollments across all (known) courses per week.
 
     Parameters:
-        source: Location of daily enrollments per date. The format is a
+        enrollments: Location of daily enrollments per date. The format is a
             TSV file, with fields course_id, date and count.
-        destination: Location of the resulting report. The output format is an
-            excel-compatible CSV file.
+        destination: Directory to store the resulting report and intermediate
+            results. The output format is an excel-compatible CSV file.
         history:  Location of historical values for total course enrollment.
             The format is a TSV file, with fields "date" and "enrollments".
         offsets: Location of seed values for each course. The format is a
@@ -133,18 +138,47 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         enrollments at the end of each week.
 
     """
-    # TODO: add the first (total users) row later, when we have access to total
-    # user counts (e.g. queried from and reconstructed from a production database).
 
-    source = luigi.Parameter()
+    enrollments = luigi.Parameter()
     destination = luigi.Parameter()
     offsets = luigi.Parameter(default=None)
     history = luigi.Parameter(default=None)
     date = luigi.DateParameter()
     weeks = luigi.IntParameter(default=52)
+    credentials = luigi.Parameter()
+
+    ROW_LABELS = {
+        'header': 'name',
+        'enrollments': 'Total Enrollment',
+        'registrations': 'Total Registrations',
+    }
+
+    @property
+    def start_date(self):
+        """
+        Returns:
+            The first date to include in the result.
+        """
+        return self.date - timedelta(self.weeks * 7)
 
     def requires(self):
-        results = {'source': ExternalURL(self.source)}
+        # The end date is not included in the result, so we have to add a day
+        # to the provided date in order to ensure user registration data is
+        # gathered for that date.
+        end_date = self.date + timedelta(1)
+
+        # In order to compute the cumulative sum of user registrations we need
+        # all changes in registrations up to (and including) the provided date.
+        registrations = UserRegistrationsPerDay(
+            credentials=self.credentials,
+            destination=self.destination,
+            date_interval=Custom(MINIMUM_DATE, end_date)
+        )
+
+        results = {
+            'enrollments': ExternalURL(self.enrollments),
+            'registrations': registrations
+        }
         if self.offsets:
             results.update({'offsets': ExternalURL(self.offsets)})
         if self.history:
@@ -153,11 +187,16 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         return results
 
     def output(self):
-        return get_target_from_url(self.destination)
+        return get_target_from_url(
+            url_path_join(
+                self.destination,
+                'total_users_and_enrollments_{0}-{1}.csv'.format(self.start_date, self.date)
+            )
+        )
 
     def run(self):
         # Load the explicit enrollment data into a pandas dataframe.
-        daily_enrollment_changes = self.read_source()
+        daily_enrollment_changes = self.read_enrollments()
 
         # Add enrollment offsets to allow totals to be calculated
         # for explicit enrollments.
@@ -177,13 +216,20 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         if overall_enrollment_history is not None:
             daily_overall_enrollment = self.prepend_history(daily_overall_enrollment, overall_enrollment_history)
 
-        # TODO: get user counts, as another series.
+        daily_overall_enrollment.name = self.ROW_LABELS['enrollments']
 
-        # TODO: Combine the two series into a single DataFrame, indexed by date.
-        # For now, put the single series into a data frame, so that
-        # it can be sampled and output in a consistent way.
-        daily_overall_enrollment.name = TOTAL_ENROLLMENT_ROWNAME
-        total_counts_by_day = pandas.DataFrame(daily_overall_enrollment)
+        daily_user_registration_totals = self.read_user_registrations()
+
+        # Because the registration data index is the requested date range
+        # use it as the canonical index and left join in the enrollment
+        # counts.
+        total_counts_by_day = pandas.merge(
+            daily_user_registration_totals,
+            pandas.DataFrame(daily_overall_enrollment),
+            how='left',
+            left_index=True,
+            right_index=True
+        )
 
         # Select values from DataFrame to display per-week.
         total_counts_by_week = self.select_weekly_values(
@@ -195,16 +241,16 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         with self.output().open('w') as output_file:
             self.save_output(total_counts_by_week, output_file)
 
-    def read_source(self):
+    def read_enrollments(self):
         """
-        Read source into a pandas DataFrame.
+        Read enrollments into a pandas DataFrame.
 
         Returns:
             Pandas dataframe with one column per course_id. Indexed
-            for the time interval available in the source data.
+            for the time interval available in the enrollments data.
 
         """
-        with self.input()['source'].open('r') as input_file:
+        with self.input()['enrollments'].open('r') as input_file:
             course_date_count_data = self.read_course_date_count_tsv(input_file)
             data = self.initialize_daily_count(course_date_count_data)
         return data
@@ -243,6 +289,31 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
                 data = self.read_total_count_tsv(history_file)
 
         return data
+
+    def read_user_registrations(self):
+        """
+        Read history of user registrations.
+
+        Returns:
+            Pandas DataFrame indexed by date with a single column
+            representing the number of users who have accounts at
+            the end of that day.
+        """
+        with self.input()['registrations'].open('r') as registrations_file:
+            # The column name here will be converted in to a row name later when
+            # the data is transposed.
+            registration_changes = read_tsv(registrations_file, ['date', self.ROW_LABELS['registrations']])
+            registration_changes.date = pandas.to_datetime(registration_changes.date)
+            registration_changes.set_index(['date'], inplace=True)
+
+            cumulative_registrations = registration_changes.cumsum()
+
+            # Restrict the index to only the date range requested
+            date_range = pandas.date_range(self.start_date, self.date)
+            # Forward fill gaps because those dates have no change in registrations
+            cumulative_registrations = cumulative_registrations.reindex(date_range, method='ffill')
+
+        return cumulative_registrations
 
     def prepend_history(self, count_by_day, history):
         """

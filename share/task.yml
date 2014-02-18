@@ -50,6 +50,9 @@
     - name: branch checked out
       command: git checkout FETCH_HEAD chdir={{ working_repo_dir }}
 
+    - name: ensure system packages are installed
+      command: make system-requirements chdir={{ working_repo_dir }}
+
     - name: bootstrap pip
       command: sudo apt-get install -q -y python-pip
       sudo: True

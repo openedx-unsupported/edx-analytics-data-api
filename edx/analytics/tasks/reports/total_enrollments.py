@@ -1,6 +1,7 @@
 """Total Enrollment related reports"""
 
 import csv
+from datetime import timedelta
 
 import luigi
 import luigi.hdfs
@@ -29,8 +30,8 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         names = ['date', 'count']
 
         data = read_tsv(input_file, names)
-        data.date = pandas.to_datetime(data.date)
-        data = data.set_index('date')
+        data.date = pandas.to_datetime(data.date)  # pylint: disable=maybe-no-member
+        data = data.set_index('date')  # pylint: disable=maybe-no-member
 
         date_range = pandas.date_range(min(data.index), max(data.index))
         data = data.reindex(date_range)
@@ -40,18 +41,27 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
 
     def read_incremental_count_tsv(self, input_file):
         """
-        Read TSV containing dates and corresponding counts into a pandas Series.
+        Read TSV containing dates and incremental counts.
 
-        Interstitial incremental counts are filled as zeroes.
+        Args:
+            input_file:  TSV file with dates and incremental counts.
+
+        Returns:
+            pandas Series containing daily counts.  Counts for missing days are set to zero.
         """
         return self.read_date_count_tsv(input_file).fillna(0)
 
     def read_total_count_tsv(self, input_file):
-        # TODO: this is a placeholder for reading in historical counts,
-        # such as total enrollment numbers.  It will
-        # need to interpolate the interstitial NANs.
-        data = self.read_date_count_tsv(input_file)
-        return data
+        """
+        Read TSV containing dates and total counts.
+
+        Args:
+            input_file:  TSV file with dates and total counts.
+
+        Returns:
+            pandas Series containing daily counts.  Counts for missing days are interpolated.
+        """
+        return self.read_date_count_tsv(input_file).interpolate(method='time')
 
     def filter_duplicate_courses(self, daily_enrollment_totals):
         # TODO: implement this for real.  (This is just a placeholder.)
@@ -85,6 +95,7 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         writer.writerow(dict((k, k) for k in fieldnames))  # Write header
 
         def format_counts(counts_dict):
+            """Replace NaN with dashes."""
             for k, v in counts_dict.iteritems():
                 yield k, '-' if numpy.isnan(v) else int(v)
 
@@ -160,18 +171,18 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         # Sum per-course counts to create a single series
         # of total enrollment counts per day.
         daily_overall_enrollment = daily_enrollment_totals.sum(axis=1)
-        daily_overall_enrollment.name = TOTAL_ENROLLMENT_ROWNAME
 
         # Prepend total enrollment history.
         overall_enrollment_history = self.read_history()
         if overall_enrollment_history is not None:
-            self.prepend_history(daily_overall_enrollment, overall_enrollment_history)
+            daily_overall_enrollment = self.prepend_history(daily_overall_enrollment, overall_enrollment_history)
 
         # TODO: get user counts, as another series.
 
         # TODO: Combine the two series into a single DataFrame, indexed by date.
         # For now, put the single series into a data frame, so that
         # it can be sampled and output in a consistent way.
+        daily_overall_enrollment.name = TOTAL_ENROLLMENT_ROWNAME
         total_counts_by_day = pandas.DataFrame(daily_overall_enrollment)
 
         # Select values from DataFrame to display per-week.
@@ -181,7 +192,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
             self.weeks,
         )
 
-        with self.output().open('w') as output_file:
+        with self.output().open('w') as output_file:  # pylint: disable=maybe-no-member
             self.save_output(total_counts_by_week, output_file)
 
     def read_source(self):
@@ -211,7 +222,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         """
         data = None
         if self.input().get('offsets'):
-            with self.input()['offsets'].open('r') as offset_file:
+            with self.input()['offsets'].open('r') as offset_file:  # pylint: disable=maybe-no-member
                 data = self.read_course_date_count_tsv(offset_file)
 
         return data
@@ -226,12 +237,11 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
 
             Returns None if no history was specified.
         """
-        # TODO: implement this for real.  (This is just a placeholder.)
         data = None
         if self.input().get('history'):
-            with self.input()['history'].open('r') as history_file:
-                # TODO:  read input file and convert to a Series.
-                pass
+            with self.input()['history'].open('r') as history_file:  # pylint: disable=maybe-no-member
+                data = self.read_total_count_tsv(history_file)
+
         return data
 
     def prepend_history(self, count_by_day, history):
@@ -243,9 +253,10 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
             history: pandas Series, also of counts indexed by date.
 
         """
-        # TODO: implement this for real.  (This is just a placeholder.)
-        # Check that entry doesn't already exist in count_by_day
-        # before adding value from history.
-        # For gaps in history, values should be extrapolated.
-        # Also may to need to reindex, since new dates are being added.
-        pass
+        # Get history dates that are not in the regular count data so there is no overlap.
+        last_day_of_history = count_by_day.index[0] - timedelta(1)
+        truncated_history = history[:last_day_of_history]
+
+        result = count_by_day.append(truncated_history, verify_integrity=True)
+
+        return result

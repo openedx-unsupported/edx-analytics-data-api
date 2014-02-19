@@ -41,8 +41,21 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         # Mock the input and output targets
 
         def reformat(string):
-            # Reformat string to make it like a hadoop tsv
+            """Reformat string to make it like a TSV."""
             return textwrap.dedent(string).strip().replace(' ', '\t')
+
+        if source is None:
+            source = """
+                course_1 2013-03-01 1
+                course_1 2013-03-30 2
+                course_2 2013-03-07 1
+                course_2 2013-03-08 1
+                course_2 2013-03-10 1
+                course_2 2013-03-13 1
+                course_3 2013-03-15 1
+                course_3 2013-03-18 1
+                course_3 2013-03-19 1
+                """
 
         input_targets = {
             'source': FakeTarget(reformat(source)),
@@ -98,8 +111,8 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         """
         res = self.run_task(source, '2013-01-21', 4)
         weeks = set(['2012-12-31', '2013-01-07', '2013-01-14', '2013-01-21'])
-        self.assertEqual(weeks, set(str(w) for w in res.columns))
-        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]
+        self.assertEqual(weeks, set(str(w) for w in res.columns))  # pylint: disable=maybe-no-member
+        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]  # pylint: disable=maybe-no-member
         self.assertTrue(isnan(total_enrollment['2012-12-31']))  # no data
         self.assertEqual(total_enrollment['2013-01-07'], 10)
         self.assertEqual(total_enrollment['2013-01-14'], 20)
@@ -118,29 +131,60 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         course_2 2013-02-15 -2
         """
         res = self.run_task(source, '2013-02-18', 2)
-        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]
+        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]  # pylint: disable=maybe-no-member
         self.assertEqual(total_enrollment['2013-02-11'], 13)
         self.assertEqual(total_enrollment['2013-02-18'], 24)
 
     def test_offsets(self):
-        source = """
-        course_1 2013-03-01 1
-        course_1 2013-03-30 2
-        course_2 2013-03-07 1
-        course_2 2013-03-08 1
-        course_2 2013-03-10 1
-        course_2 2013-03-13 1
-        course_3 2013-03-15 1
-        course_3 2013-03-18 1
-        course_3 2013-03-19 1
-        """
-
         offset = """
         course_2 2013-03-07 8
         course_3 2013-03-15 6
         """
-        res = self.run_task(source, '2013-03-28', 4, offset=offset)
-        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]
+        res = self.run_task(None, '2013-03-28', 6, offset=offset)
+        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]  # pylint: disable=maybe-no-member
+        self.assertTrue(isnan(total_enrollment['2013-02-21']))  # no data
+        self.assertTrue(isnan(total_enrollment['2013-02-28']))  # no data
+        self.assertEqual(total_enrollment['2013-03-07'], 10)
+        self.assertEqual(total_enrollment['2013-03-14'], 13)
+        self.assertEqual(total_enrollment['2013-03-21'], 22)
+        self.assertEqual(total_enrollment['2013-03-28'], 22)
+
+    def test_non_overlapping_history(self):
+        offset = """
+        course_2 2013-03-07 8
+        course_3 2013-03-15 6
+        """
+        # Choose history so that it ends right before
+        # source data begins (on 3/1).
+        history = """
+        2013-02-21 4
+        2013-02-28 10
+        """
+        res = self.run_task(None, '2013-03-28', 6, offset=offset, history=history)
+        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]  # pylint: disable=maybe-no-member
+        self.assertEqual(total_enrollment['2013-02-21'], 4)
+        self.assertEqual(total_enrollment['2013-02-28'], 10)
+        self.assertEqual(total_enrollment['2013-03-07'], 10)
+        self.assertEqual(total_enrollment['2013-03-14'], 13)
+        self.assertEqual(total_enrollment['2013-03-21'], 22)
+        self.assertEqual(total_enrollment['2013-03-28'], 22)
+
+    def test_overlapping_history(self):
+        offset = """
+        course_2 2013-03-07 8
+        course_3 2013-03-15 6
+        """
+        # Choose history so that it overlaps
+        # with when source data begins (on 3/1).
+        history = """
+        2013-02-18 4
+        2013-03-21 22
+        """
+        res = self.run_task(None, '2013-03-28', 6, offset=offset, history=history)
+        total_enrollment = res.loc[TOTAL_ENROLLMENT_ROWNAME]  # pylint: disable=maybe-no-member
+        print total_enrollment
+        self.assertEqual(total_enrollment['2013-02-21'], 5)
+        self.assertEqual(total_enrollment['2013-02-28'], 9)
         self.assertEqual(total_enrollment['2013-03-07'], 10)
         self.assertEqual(total_enrollment['2013-03-14'], 13)
         self.assertEqual(total_enrollment['2013-03-21'], 22)
@@ -156,7 +200,7 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
 
         res = self.run_task(source.encode('utf-8'), '2013-04-02', 1)
 
-        self.assertEqual(res.loc[TOTAL_ENROLLMENT_ROWNAME]['2013-04-02'], 2)
+        self.assertEqual(res.loc[TOTAL_ENROLLMENT_ROWNAME]['2013-04-02'], 2)  # pylint: disable=maybe-no-member
 
     def test_task_urls(self):
         date = datetime.date(2013, 01, 20)
@@ -164,6 +208,7 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         task = WeeklyAllUsersAndEnrollments(source='s3://bucket/path/',
                                             offsets='s3://bucket/file.txt',
                                             destination='file://path/file.txt',
+                                            history='file://path/history/file.gz',
                                             date=date)
 
         requires = task.requires()
@@ -175,6 +220,10 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         offsets = requires['offsets'].output()
         self.assertIsInstance(offsets, luigi.hdfs.HdfsTarget)
         self.assertEqual(offsets.format, luigi.hdfs.Plain)
+
+        offsets = requires['history'].output()
+        self.assertIsInstance(offsets, luigi.File)
+        self.assertEqual(offsets.format, luigi.format.Gzip)
 
         destination = task.output()
         self.assertIsInstance(destination, luigi.File)

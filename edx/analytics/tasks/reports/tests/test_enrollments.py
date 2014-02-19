@@ -1,3 +1,5 @@
+"""Tests for Enrollments-by-week report."""
+
 import datetime
 import textwrap
 from StringIO import StringIO
@@ -5,16 +7,16 @@ from StringIO import StringIO
 import luigi
 import luigi.hdfs
 from mock import MagicMock
-from numpy import isnan
+from numpy import isnan  # pylint: disable=no-name-in-module
 import pandas
 
 from edx.analytics.tasks.tests import unittest
 from edx.analytics.tasks.tests.target import FakeTarget
 from edx.analytics.tasks.reports.enrollments import EnrollmentsByWeek
-from edx.analytics.tasks.reports.enrollments import ExternalURL
 
 
 class TestEnrollmentsByWeek(unittest.TestCase):
+    """Tests for EnrollmentsByWeek report task."""
 
     def run_task(self, source, date, weeks, offset=None, statuses=None):
         """
@@ -36,7 +38,7 @@ class TestEnrollmentsByWeek(unittest.TestCase):
         # Mock the input and output targets
 
         def reformat(string):
-            # Reformat string to make it like a hadoop tsv
+            """Reformat string to make it like a TSV."""
             return textwrap.dedent(string).strip().replace(' ', '\t')
 
         input_targets = {
@@ -96,7 +98,8 @@ class TestEnrollmentsByWeek(unittest.TestCase):
         """
         res = self.run_task(source, '2013-01-21', 4)
         weeks = set(['2012-12-31', '2013-01-07', '2013-01-14', '2013-01-21'])
-        self.assertEqual(weeks | set(['org_id', 'status']), set(str(w) for w in res.columns))
+        self.assertEqual(weeks | set(['org_id', 'status']),
+                         set(str(w) for w in res.columns))
 
         course_1 = res.loc['course_1']
         self.assertTrue(isnan(course_1['2012-12-31']))  # no data
@@ -142,6 +145,7 @@ class TestEnrollmentsByWeek(unittest.TestCase):
         offset = """
         course_2 2013-03-07 8
         course_3 2013-03-15 6
+        course_4 2013-03-12 150000
         """
         res = self.run_task(source, '2013-03-28', 4, offset=offset)
 
@@ -153,6 +157,11 @@ class TestEnrollmentsByWeek(unittest.TestCase):
         self.assertTrue(isnan(course_3['2013-03-07']))  # no data
         self.assertTrue(isnan(course_3['2013-03-14']))  # no data
         self.assertEqual(course_3['2013-03-21'], 9)
+
+        course_4 = res.loc['course_4']
+        self.assertTrue(isnan(course_4['2013-03-07']))  # no data
+        self.assertEqual(course_4['2013-03-14'], 150000)
+        self.assertEqual(course_4['2013-03-21'], 150000)
 
     def test_unicode(self):
         course_id = u'course_\u2603'

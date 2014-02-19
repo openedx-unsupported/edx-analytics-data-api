@@ -71,11 +71,17 @@ class CourseEnrollmentCountMixin(object):
                 # add them to the counts by the end of that day to
                 # get the correct count for the day.
                 count_by_day.loc[date, course_id] += count
+            else:
+                # We have an offset for the course, but no current
+                # counts.  Create an course entry, set the offset, and set
+                # all subsequent counts to zero.
+                count_by_day.loc[date, course_id] = count
+                count_by_day.loc[count_by_day.index > date, course_id] = 0
 
-                # Flag values before the offset day with NaN,
-                # since they are not "available".
-                not_available = count_by_day.index < date
-                count_by_day.loc[not_available, course_id] = numpy.NaN
+            # Flag values before the offset day with NaN,
+            # since they are not "available".
+            not_available = count_by_day.index < date
+            count_by_day.loc[not_available, course_id] = numpy.NaN
 
     def calculate_total_enrollment(self, count_by_day, offsets=None):
         """

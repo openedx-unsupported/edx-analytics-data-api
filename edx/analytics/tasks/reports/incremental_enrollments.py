@@ -97,7 +97,7 @@ class WeeklyIncrementalUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountM
             weekly_registration_changes, weekly_overall_enrollment
         )
 
-        with self.output().open('w') as output_file:  # pylint: disable=maybe-no-member
+        with self.output().open('w') as output_file:
             self.save_output(weekly_report, output_file)
 
     def read_enrollments(self):

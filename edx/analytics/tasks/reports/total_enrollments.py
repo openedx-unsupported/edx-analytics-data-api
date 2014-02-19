@@ -30,8 +30,8 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         names = ['date', 'count']
 
         data = read_tsv(input_file, names)
-        data.date = pandas.to_datetime(data.date)  # pylint: disable=maybe-no-member
-        data = data.set_index('date')  # pylint: disable=maybe-no-member
+        data.date = pandas.to_datetime(data.date)
+        data = data.set_index('date')
 
         date_range = pandas.date_range(min(data.index), max(data.index))
         data = data.reindex(date_range)
@@ -192,7 +192,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
             self.weeks,
         )
 
-        with self.output().open('w') as output_file:  # pylint: disable=maybe-no-member
+        with self.output().open('w') as output_file:
             self.save_output(total_counts_by_week, output_file)
 
     def read_source(self):
@@ -222,7 +222,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         """
         data = None
         if self.input().get('offsets'):
-            with self.input()['offsets'].open('r') as offset_file:  # pylint: disable=maybe-no-member
+            with self.input()['offsets'].open('r') as offset_file:
                 data = self.read_course_date_count_tsv(offset_file)
 
         return data
@@ -239,7 +239,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         """
         data = None
         if self.input().get('history'):
-            with self.input()['history'].open('r') as history_file:  # pylint: disable=maybe-no-member
+            with self.input()['history'].open('r') as history_file:
                 data = self.read_total_count_tsv(history_file)
 
         return data

@@ -14,7 +14,6 @@ from edx.analytics.tasks.reports.incremental_enrollments import WeeklyIncrementa
 
 class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
     """Tests for WeeklyIncrementalUsersAndEnrollments class."""
-    # pylint: disable=maybe-no-member
 
     @staticmethod
     def row_label(row_name):

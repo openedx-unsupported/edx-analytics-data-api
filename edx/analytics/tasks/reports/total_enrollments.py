@@ -68,18 +68,38 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         """
         return self.read_date_count_tsv(input_file).interpolate(method='time')
 
-    def filter_duplicate_courses(self, daily_enrollment_totals):
-        # TODO: implement this for real.  (This is just a placeholder.)
-        # At this point we should remove data for courses that are
-        # represented by other courses, because the students have been
-        # moved to the new course.  Perhaps this should actually
-        # perform a merge of the two courses, since we would want the
-        # history of one before the move date, and the history of the
-        # second after that date.
+    def read_course_blacklist(self):
+        """
+        Reads a set of course_ids from the blacklist input file if one was
+        specified, otherwise returns an empty set.
 
-        # Note that this is not the same filtering that would be applied
-        # to the EnrollmentsByWeek report.
-        pass
+        Expected input file format is a single course ID per line.
+
+        Returns:
+            A set of course_ids that should not be included in aggregates.
+        """
+        if self.input().get('blacklist'):
+            with self.input()['blacklist'].open('r') as blacklist_file:
+                data = read_tsv(blacklist_file, ['course_id'])
+            return set(data['course_id'])
+        else:
+            return set()
+
+    def filter_out_courses(self, course_data, course_blacklist):
+        """
+        Removes data for courses that should be excluded from aggregates.
+
+        Args:
+            course_data (pandas.DataFrame): A DataFrame containing a single
+                column for each course.
+            course_blacklist (iterable): A collection of course IDs to
+                remove from the data table.
+
+        Returns:
+            None, the `course_data` is modified in place.
+        """
+        # Drop from axis 1 because we are dropping columns, not rows.
+        course_data.drop(course_blacklist, axis=1, inplace=True)
 
     def save_output(self, results, output_file):
         """
@@ -146,6 +166,7 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
     date = luigi.DateParameter()
     weeks = luigi.IntParameter(default=52)
     credentials = luigi.Parameter()
+    blacklist = luigi.Parameter(default=None)
 
     ROW_LABELS = {
         'header': 'name',
@@ -183,6 +204,8 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
             results.update({'offsets': ExternalURL(self.offsets)})
         if self.history:
             results.update({'history': ExternalURL(self.history)})
+        if self.blacklist:
+            results.update({'blacklist': ExternalURL(self.blacklist)})
 
         return results
 
@@ -203,9 +226,8 @@ class WeeklyAllUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountMixin):
         offsets = self.read_offsets()
         daily_enrollment_totals = self.calculate_total_enrollment(daily_enrollment_changes, offsets)
 
-        # Remove (or merge or whatever) data for courses that
-        # would otherwise result in duplicate counts.
-        self.filter_duplicate_courses(daily_enrollment_totals)
+        course_blacklist = self.read_course_blacklist()
+        self.filter_out_courses(daily_enrollment_totals, course_blacklist)
 
         # Sum per-course counts to create a single series
         # of total enrollment counts per day.

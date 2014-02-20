@@ -20,7 +20,7 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
         """Returns label value for reference row, given its internal row name."""
         return WeeklyIncrementalUsersAndEnrollments.ROW_LABELS[row_name]
 
-    def run_task(self, registrations, enrollments, date, weeks):
+    def run_task(self, registrations, enrollments, date, weeks, blacklist=None):
         """
         Run task with fake targets.
 
@@ -35,7 +35,8 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
             enrollments='fake_enrollments',
             destination='fake_destination',
             date=parsed_date,
-            weeks=weeks
+            weeks=weeks,
+            blacklist=blacklist
         )
 
         # Default missing inputs
@@ -59,6 +60,10 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
             'enrollments': FakeTarget(reformat(enrollments)),
             'registrations': FakeTarget(reformat(registrations)),
         }
+
+        # Mock blacklist only if specified.
+        if blacklist:
+            input_targets.update({'blacklist': FakeTarget(reformat(blacklist))})
 
         task.input = MagicMock(return_value=input_targets)
 
@@ -253,3 +258,19 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
         res = self.run_task(None, enrollments.encode('utf-8'), '2013-04-02', 2)
 
         self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-04-02'], 5)
+
+    def test_blacklist(self):
+        enrollments = """
+        course_1 2013-01-02 1
+        course_2 2013-01-02 2
+        course_3 2013-01-02 4
+        course_2 2013-01-09 1
+        course_3 2013-01-15 2
+        """
+        blacklist = """
+        course_1
+        course_2
+        """
+        res = self.run_task(None, enrollments, '2013-01-15', 2, blacklist=blacklist)
+        self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-01-08'], 4)
+        self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-01-15'], 2)

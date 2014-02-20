@@ -43,6 +43,7 @@ class WeeklyIncrementalUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountM
     destination = luigi.Parameter()
     date = luigi.DateParameter()
     weeks = luigi.IntParameter(default=10)
+    blacklist = luigi.Parameter(default=None)
 
     ROW_LABELS = {
         'header': 'name',
@@ -57,6 +58,8 @@ class WeeklyIncrementalUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountM
             'enrollments': ExternalURL(self.enrollments),
             'registrations': ExternalURL(self.registrations),
         }
+        if self.blacklist:
+            results.update({'blacklist': ExternalURL(self.blacklist)})
         return results
 
     def output(self):
@@ -70,9 +73,8 @@ class WeeklyIncrementalUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountM
         # Load the explicit enrollment data into a pandas dataframe.
         daily_enrollment_changes = self.read_enrollments()
 
-        # Remove (or merge or whatever) data for courses that
-        # would otherwise result in duplicate counts.
-        self.filter_duplicate_courses(daily_enrollment_changes)
+        course_blacklist = self.read_course_blacklist()
+        self.filter_out_courses(daily_enrollment_changes, course_blacklist)
 
         # Sum per-course counts to create a single series
         # of total enrollment counts per day.

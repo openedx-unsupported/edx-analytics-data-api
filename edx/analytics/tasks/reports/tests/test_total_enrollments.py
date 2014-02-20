@@ -23,7 +23,7 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         self.enrollment_label = WeeklyAllUsersAndEnrollments.ROW_LABELS['enrollments']
         self.registrations_label = WeeklyAllUsersAndEnrollments.ROW_LABELS['registrations']
 
-    def run_task(self, registrations, enrollments, date, weeks, offset=None, history=None):
+    def run_task(self, registrations, enrollments, date, weeks, offset=None, history=None, blacklist=None):
         """
         Run task with fake targets.
 
@@ -41,7 +41,8 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
             destination='fake_destination',
             date=parsed_date,
             weeks=weeks,
-            credentials=None
+            credentials=None,
+            blacklist=blacklist
         )
 
         # Mock the input and output targets
@@ -75,6 +76,10 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         # Mock history only if specified.
         if history:
             input_targets.update({'history': FakeTarget(reformat(history))})
+
+        # Mock blacklist only if specified.
+        if blacklist:
+            input_targets.update({'blacklist': FakeTarget(reformat(blacklist))})
 
         task.input = MagicMock(return_value=input_targets)
 
@@ -215,6 +220,22 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         self.assertEqual(total_enrollment['2013-03-14'], 13)
         self.assertEqual(total_enrollment['2013-03-21'], 22)
         self.assertEqual(total_enrollment['2013-03-28'], 22)
+
+    def test_blacklist(self):
+        enrollments = """
+        course_1 2013-01-02 1
+        course_2 2013-01-02 2
+        course_3 2013-01-02 4
+        course_2 2013-01-09 1
+        course_3 2013-01-15 2
+        """
+        blacklist = """
+        course_1
+        course_2
+        """
+        res = self.run_task('', enrollments, '2013-01-15', 2, blacklist=blacklist)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-08'], 4)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-15'], 6)
 
     def test_unicode(self):
         course_id = u'course_\u2603'

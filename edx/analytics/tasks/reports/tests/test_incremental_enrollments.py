@@ -10,6 +10,7 @@ import pandas
 from edx.analytics.tasks.tests import unittest
 from edx.analytics.tasks.tests.target import FakeTarget
 from edx.analytics.tasks.reports.incremental_enrollments import WeeklyIncrementalUsersAndEnrollments
+from edx.analytics.tasks.reports.incremental_enrollments import DailyRegistrationsEnrollmentsAndCourses
 
 
 class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
@@ -274,3 +275,138 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
         res = self.run_task(None, enrollments, '2013-01-15', 2, blacklist=blacklist)
         self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-01-08'], 4)
         self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-01-15'], 2)
+
+
+
+
+class TestDailyRegistrationsEnrollmentsAndCourses(unittest.TestCase):
+    """Tests for DailyRegistrationsEnrollmentsAndCourses class."""
+
+    def setUp(self):
+        self.enrollment_label = DailyRegistrationsEnrollmentsAndCourses.ROW_LABELS['enrollments']
+        self.registrations_label = DailyRegistrationsEnrollmentsAndCourses.ROW_LABELS['registrations']
+
+    def run_task(self, registrations, enrollments, date, days, blacklist=None):
+        """
+        Run task with fake targets.
+
+        Returns:
+            the task output as a pandas dataframe.
+        """
+
+        parsed_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+
+        # Make offsets None if it was not specified.
+        task = DailyRegistrationsEnrollmentsAndCourses(
+            registrations='fake_registrations',
+            enrollments='fake_enrollments',
+            destination='fake_destination',
+            date=parsed_date,
+            days=days,
+            blacklist=blacklist
+        )
+
+        # Default missing inputs
+        if registrations is None:
+            registrations = """
+                2013-01-01 10
+                2013-01-10 20
+                """
+
+        if enrollments is None:
+            enrollments = """
+                course_1 2013-01-06 10
+                course_1 2013-01-14 10
+                """
+
+        # Mock the input and output targets
+
+        def reformat(string):
+            # Reformat string to make it like a hadoop tsv
+            return textwrap.dedent(string).strip().replace(' ', '\t')
+
+        input_targets = {
+            'enrollments': FakeTarget(reformat(enrollments)),
+            'registrations': FakeTarget(reformat(registrations)),
+        }
+
+        # Mock blacklist only if specified.
+        if blacklist:
+            input_targets.update({'blacklist': FakeTarget(reformat(blacklist))})
+
+        task.input = MagicMock(return_value=input_targets)
+
+        output_target = FakeTarget()
+        task.output = MagicMock(return_value=output_target)
+
+        # Run the task and parse the output into a pandas dataframe
+
+        task.run()
+
+        data = output_target.buffer.read()
+        result = pandas.read_csv(StringIO(data),
+                                 na_values=['-'],
+                                 index_col='name')
+
+        return result
+
+    def test_incremental_registration(self):
+        registrations = """
+        2013-02-15 -2
+        2013-02-16 6
+        2013-02-18 6
+        """
+
+        res = self.run_task(registrations, None, '2013-02-19', 6)
+        days = set(['2013-02-14', '2013-02-15', '2013-02-16', '2013-02-17', '2013-02-18', '2013-02-19'])
+        self.assertEqual(days, set(str(col) for col in res.columns))
+
+        inc_registration = res.loc[self.registrations_label]
+        self.assertTrue(isnan(inc_registration['2013-02-14']))
+        self.assertEqual(inc_registration['2013-02-15'], -2)
+        self.assertEqual(inc_registration['2013-02-16'], 6)
+        self.assertEqual(inc_registration['2013-02-17'], 0)
+        self.assertEqual(inc_registration['2013-02-18'], 6)
+        self.assertTrue(isnan(inc_registration['2013-02-19']))
+
+    def test_incremental_enrollment(self):
+        enrollments = """
+        course_1 2013-02-01 4
+        course_1 2013-02-18 6
+        course_2 2013-02-17 3
+        course_2 2013-02-18 -2
+        """
+        res = self.run_task(None, enrollments, '2013-02-19', 4)
+        days = set(['2013-02-16', '2013-02-17', '2013-02-18', '2013-02-19'])
+        self.assertEqual(days, set(str(d) for d in res.columns))
+
+        inc_enrollment = res.loc[self.enrollment_label]
+        self.assertEqual(inc_enrollment['2013-02-16'], 0)
+        self.assertEqual(inc_enrollment['2013-02-17'], 3)
+        self.assertEqual(inc_enrollment['2013-02-18'], 4)
+        self.assertTrue(isnan(inc_enrollment['2013-02-19']))
+
+    def test_output_row_order(self):
+        res = self.run_task(None, None, '2013-02-18', 2)
+        expected_rows = [
+            self.registrations_label,
+            self.enrollment_label,
+        ]
+        self.assertEqual(res.index.tolist(), expected_rows)
+
+    def test_blacklist(self):
+        enrollments = """
+        course_1 2013-01-02 1
+        course_2 2013-01-02 2
+        course_3 2013-01-02 4
+        course_2 2013-01-09 1
+        course_3 2013-01-15 2
+        """
+        blacklist = """
+        course_1
+        course_2
+        """
+        res = self.run_task(None, enrollments, '2013-01-15', 20, blacklist=blacklist)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-02'], 4)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-10'], 0)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-15'], 2)

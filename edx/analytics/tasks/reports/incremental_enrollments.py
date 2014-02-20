@@ -174,3 +174,126 @@ class WeeklyIncrementalUsersAndEnrollments(luigi.Task, AllCourseEnrollmentCountM
             ]
         )
         return weekly_report
+
+
+class DailyRegistrationsEnrollmentsAndCourses(luigi.Task,
+                                              AllCourseEnrollmentCountMixin):
+    """
+    Calculates users registration and total enrollments across courses.
+
+    Parameters:
+        registrations: Location of daily registrations per date. The format is a
+            TSV file, with fields date and count.
+        enrollments: Location of daily enrollments per date. The format is a
+            TSV file, with fields course_id, date and count.
+        destination: Location of the resulting report. The output format is an
+            excel-compatible CSV file.
+        date: End date of the last week requested.
+        days: Number of days from the end date to request.
+
+    Output:
+        Excel-compatible CSV file with a header row.
+        Columns are the days requested.
+        First row is number of user registrations.
+        Second row is the number of total course enrollments.
+        Third row is the number of live courses.
+
+    """
+
+    ROW_LABELS = {
+        'header': 'name',
+        'registrations': 'Daily New Users',
+        'enrollments': 'Daily Course Enrollment Changes',
+        'courses': 'Total Live Courses',
+    }
+
+    registrations = luigi.Parameter()
+    enrollments = luigi.Parameter()
+    destination = luigi.Parameter()
+    date = luigi.DateParameter()
+    days = luigi.IntParameter(default=28)
+    blacklist = luigi.Parameter(default=None)
+
+    @property
+    def date_range(self):
+        """The date range according to the task parameters"""
+        end = self.date
+        start = end - timedelta(self.days)
+        date_range = pandas.date_range(start, end, closed='right')
+        return date_range.date
+
+    def requires(self):
+        results = {
+            'enrollments': ExternalURL(self.enrollments),
+            'registrations': ExternalURL(self.registrations),
+        }
+        if self.blacklist:
+            results.update({'blacklist': ExternalURL(self.blacklist)})
+        return results
+
+    def output(self):
+        return get_target_from_url(self.destination)
+
+    def run(self):
+        daily_registrations = self.read_registrations()
+        daily_enrollments = self.read_enrollments()
+
+        report = self.assemble_report(
+            daily_registrations,
+            daily_enrollments,
+        )
+
+        with self.output().open('w') as output_file:
+            self.save_output(report, output_file)
+
+    def read_registrations(self):
+        """
+        Read history of user registrations.
+
+        Returns:
+            Pandas DataFrame indexed by date with a single column
+            representing the number of users who have accounts at
+            the end of that day.
+        """
+        with self.input()['registrations'].open('r') as input_file:
+            daily_registration_changes = self.read_incremental_count_tsv(input_file)
+        return daily_registration_changes.reindex(self.date_range)
+
+    def read_enrollments(self):
+        """
+        Read enrollments into a pandas DataFrame.
+
+        Returns:
+            Pandas dataframe with one column per course_id. Indexed
+            for the time interval available in the enrollments data.
+
+        """
+        with self.input()['enrollments'].open('r') as input_file:
+            course_date_count_data = self.read_course_date_count_tsv(input_file)
+            enrollments = self.initialize_daily_count(course_date_count_data)
+
+        course_blacklist = self.read_course_blacklist()
+        self.filter_out_courses(enrollments, course_blacklist)
+
+        # Sum counts for all courses
+        result = enrollments.sum(axis=1)
+
+        return result.reindex(self.date_range)
+
+    def assemble_report(self, registrations, enrollments):
+        """
+        Create a dataframe that represents the final report.
+
+        Args:
+            registration:  Pandas series, with date as index.
+            enrollments:  Pandas series, with date as index.
+
+        Returns:
+            A Pandas dataframe, with date as index and two columns.
+        """
+
+        report = pandas.DataFrame.from_items([
+            (self.ROW_LABELS['registrations'],  registrations),
+            (self.ROW_LABELS['enrollments'], enrollments),
+        ])
+        return report

@@ -1,7 +1,6 @@
 """Total Enrollment related reports"""
 
 import csv
-
 from datetime import timedelta, date
 
 import luigi
@@ -38,10 +37,11 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         data.date = pandas.to_datetime(data.date)
         data = data.set_index('date')
 
+        # Ensure a continuos date range
         date_range = pandas.date_range(min(data.index), max(data.index))
         data = data.reindex(date_range)
 
-        # return as a Series
+        # Return as a Series
         return data['count']
 
     def read_incremental_count_tsv(self, input_file):

@@ -297,6 +297,7 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         self.assertEqual(registrations.format, luigi.hdfs.Plain)
 
         destination = task.output()
+
         self.assertEqual(destination.path, 's3://path/total_users_and_enrollments_2012-01-22-2013-01-20.csv')
         self.assertIsInstance(offsets, luigi.hdfs.HdfsTarget)
         self.assertEqual(offsets.format, luigi.hdfs.Plain)

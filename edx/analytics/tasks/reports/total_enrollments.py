@@ -98,8 +98,13 @@ class AllCourseEnrollmentCountMixin(CourseEnrollmentCountMixin):
         Returns:
             None, the `course_data` is modified in place.
         """
-        # Drop from axis 1 because we are dropping columns, not rows.
-        course_data.drop(course_blacklist, axis=1, inplace=True)
+        for course_id in course_blacklist:
+            try:
+                # Drop from axis 1 because we are dropping columns, not rows.
+                course_data.drop(course_id, axis=1, inplace=True)
+            except ValueError:
+                # There is no column for this course.
+                pass
 
     def save_output(self, results, output_file):
         """

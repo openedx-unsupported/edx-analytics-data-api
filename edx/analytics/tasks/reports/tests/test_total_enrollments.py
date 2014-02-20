@@ -237,6 +237,23 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
         self.assertEqual(res.loc[self.enrollment_label]['2013-01-08'], 4)
         self.assertEqual(res.loc[self.enrollment_label]['2013-01-15'], 6)
 
+    def test_blacklist_course_not_in_enrollments(self):
+        enrollments = """
+        course_1 2013-01-02 1
+        course_2 2013-01-02 2
+        course_3 2013-01-02 4
+        course_2 2013-01-09 1
+        course_3 2013-01-15 2
+        """
+        blacklist = """
+        course_4
+        course_1
+        course_2
+        """
+        res = self.run_task('', enrollments, '2013-01-15', 2, blacklist=blacklist)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-08'], 4)
+        self.assertEqual(res.loc[self.enrollment_label]['2013-01-15'], 6)
+
     def test_unicode(self):
         course_id = u'course_\u2603'
 

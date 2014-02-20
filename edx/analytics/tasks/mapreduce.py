@@ -5,8 +5,6 @@ from __future__ import absolute_import
 
 import luigi.hadoop
 
-from stevedore import ExtensionManager
-
 
 class MapReduceJobTask(luigi.hadoop.JobTask):
     """
@@ -19,6 +17,10 @@ class MapReduceJobTask(luigi.hadoop.JobTask):
     )
 
     def job_runner(self):
+        # Lazily import this since this module will be loaded on hadoop worker nodes however stevedore will not be
+        # available in that environment.
+        from stevedore import ExtensionManager
+
         extension_manager = ExtensionManager('mapreduce.engine')
         try:
             engine_class = extension_manager[self.mapreduce_engine].plugin

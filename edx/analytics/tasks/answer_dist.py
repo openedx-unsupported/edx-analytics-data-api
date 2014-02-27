@@ -2,13 +2,16 @@
 Luigi tasks for extracting problem answer distribution statistics from
 tracking log files.
 """
+import hashlib
 import json
+import csv
 
 import luigi
+import luigi.hdfs
 import luigi.s3
 
 import edx.analytics.tasks.util.eventlog as eventlog
-from edx.analytics.tasks.mapreduce import MapReduceJobTask
+from edx.analytics.tasks.mapreduce import MapReduceJobTask, MultiOutputMapReduceJobTask
 from edx.analytics.tasks.pathutil import PathSetTask
 from edx.analytics.tasks.url import ExternalURL
 from edx.analytics.tasks.url import get_target_from_url, url_path_join
@@ -564,6 +567,83 @@ class AnswerDistributionPerCourse(AnswerDistributionPerCourseMixin, BaseAnswerDi
                 self.load_answer_metadata(answer_metadata_file)
 
         super(AnswerDistributionPerCourse, self).run()
+
+
+class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
+    """
+    Groups answer distributions by course, producing a different file for each.
+
+    All parameters are passed through to :py:class:`AnswerDistributionPerCourse`.
+    """
+
+    src = luigi.Parameter()
+    dest = luigi.Parameter()
+    include = luigi.Parameter(is_list=True, default=('*',))
+    name = luigi.Parameter(default='periodic')
+    answer_metadata = luigi.Parameter(default=None)
+
+    def requires(self):
+        return AnswerDistributionPerCourse(
+            mapreduce_engine=self.mapreduce_engine,
+            src=self.src,
+            dest=self.dest,
+            include=self.include,
+            name=self.name,
+            answer_metadata=self.answer_metadata
+        )
+
+    def mapper(self, line):
+        """
+        Groups inputs by course_id, writes all records with the same course_id to the same output file.
+
+        Each input line is expected to consist of tab separated columns. The first column is expected to be the
+        course_id and is used to group the entries. The course_id is stripped from the output and the remaining columns
+        are written to the appropriate output file in the same format they were read in (tab separated).
+        """
+        split_line = line.split('\t')
+        # Ensure that the first column is interpreted as the grouping key by the hadoop streaming API.  Note that since
+        # Configuration values can change this behavior, the remaining tab separated columns are encoded in a python
+        # structure before returning to hadoop.  They are decoded in the reducer.
+        course_id, content = split_line[0], split_line[1:]
+        yield course_id, tuple(content)
+
+    def output_path_for_key(self, course_id):
+        """
+        Match the course folder hierarchy that is expected by the instructor dashboard.
+
+        The instructor dashboard expects the file to be stored in a folder named sha1(course_id).  All files in that
+        directory will be displayed on the instructor dashboard for that course.
+        """
+        hashed_course_id = hashlib.sha1(course_id).hexdigest()
+        filename_safe_course_id = course_id.replace('/', '_')
+        filename = '{course_id}_answer_distribution.csv'.format(course_id=filename_safe_course_id)
+        return url_path_join(self.dest, hashed_course_id, filename)
+
+    def multi_output_reducer(self, course_id, values, output_file):
+        """
+        Each entry should be written to the output file in csv format.
+
+        This output is visible to instructors, so use an excel friendly format (csv).
+        """
+        field_names = AnswerDistributionPerCourse.get_column_order()
+        writer = csv.DictWriter(output_file, field_names)
+        writer.writerow(dict(
+            (k, k) for k in field_names
+        ))
+        for content_tuple in values:
+            # Restore tabs that were removed in the map task.  Tabs are special characters to hadoop, so they were
+            # removed to prevent interpretation of them.  Restore them here.
+            tab_separated_content = '\t'.join(content_tuple)
+
+            encoded_dict = dict()
+            for key, value in json.loads(tab_separated_content).iteritems():
+                encoded_dict[key] = unicode(value).encode('utf8')
+            writer.writerow(encoded_dict)
+
+    def extra_modules(self):
+        import cjson
+        import boto
+        return [cjson, boto]
 
 
 ################################

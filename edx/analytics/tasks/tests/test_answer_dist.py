@@ -4,10 +4,14 @@ Tests for tasks that calculate answer distributions.
 """
 import json
 import StringIO
+import hashlib
+
+from mock import Mock, call
 
 from edx.analytics.tasks.answer_dist import (
     LastProblemCheckEventMixin,
     AnswerDistributionPerCourseMixin,
+    AnswerDistributionOneFilePerCourseTask,
 )
 from edx.analytics.tasks.tests import unittest
 
@@ -635,3 +639,55 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         )
         expected_output["Problem Display Name"] = self.problem_display_name
         self._check_output([input_data], (expected_output,))
+
+
+class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
+
+    def setUp(self):
+        self.task = AnswerDistributionOneFilePerCourseTask(
+            mapreduce_engine='local',
+            src=None,
+            dest=None,
+            name=None,
+            include=None,
+        )
+
+    def test_map_single_value(self):
+        key, value = next(self.task.mapper('foo\tbar'))
+        self.assertEquals(key, 'foo')
+        self.assertEquals(value, ('bar',))
+
+    def test_map_multiple_values(self):
+        key, value = next(self.task.mapper('foo\tbar\tbaz'))
+        self.assertEquals(key, 'foo')
+        self.assertEquals(value, ('bar', 'baz'))
+
+    def test_reduce_multiple_values(self):
+        field_names = AnswerDistributionPerCourseMixin.get_column_order()
+        column_values = [(k, unicode(k) + u'\u2603') for k in field_names]
+        column_values[3] = (column_values[3][0], 10)
+        sample_input = json.dumps(dict(column_values))
+        mock_output_file = Mock()
+
+        self.task.multi_output_reducer('foo', iter([(sample_input,), (sample_input,)]), mock_output_file)
+
+        expected_header_string = ','.join(field_names) + '\r\n'
+        self.assertEquals(mock_output_file.write.mock_calls[0], call(expected_header_string))
+
+        expected_row_string = ','.join(unicode(v[1]).encode('utf8') for v in column_values) + '\r\n'
+        self.assertEquals(mock_output_file.write.mock_calls[1], call(expected_row_string))
+        self.assertEquals(mock_output_file.write.mock_calls[2], call(expected_row_string))
+
+    def test_output_path_for_key(self):
+        course_id = 'foo/bar/baz'
+        hashed_course_id = hashlib.sha1(course_id).hexdigest()
+        task = AnswerDistributionOneFilePerCourseTask(
+            mapreduce_engine='local',
+            src=None,
+            dest='/tmp',
+            name='name',
+            include=None,
+        )
+        output_path = task.output_path_for_key(course_id)
+        self.assertEquals(output_path,
+            '/tmp/{0}/foo_bar_baz_answer_distribution.csv'.format(hashed_course_id))

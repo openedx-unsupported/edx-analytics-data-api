@@ -18,6 +18,8 @@ import luigi.format
 import luigi.hdfs
 import luigi.s3
 
+from luigi.target import Target
+
 
 class ExternalURL(luigi.ExternalTask):
     """Simple Task that returns a target based on its URL"""
@@ -25,6 +27,15 @@ class ExternalURL(luigi.ExternalTask):
 
     def output(self):
         return get_target_from_url(self.url)
+
+
+class IgnoredTarget(Target):
+
+    def exists(self):
+        return False
+
+    def open(self, mode='r'):
+        return open('/dev/null', mode)
 
 
 DEFAULT_TARGET_CLASS = luigi.LocalTarget

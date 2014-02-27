@@ -5,7 +5,7 @@ import datetime
 import re
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 PATTERN_JSON = re.compile(r'^.*?(\{.*\})\s*$')
 
@@ -72,6 +72,53 @@ def parse_json_event(line, nested=False):
     return parsed
 
 
+def parse_json_server_event(line, requested_event_type):
+    """
+    Parse a tracking log input line as JSON to create a dict representation.
+
+    Arguments:
+        line:  the eventlog text
+        requested_event_type: string representing the requested event_type
+
+    Returns:
+        tracking event log entry as a dict, if line corresponds to a server
+            event with the requested event_type.
+
+    Returns None if an error is encountered or if it doesn't match.
+    """
+    # Before parsing, check that the line contains something that
+    # suggests it's a problem_check event.
+    if requested_event_type not in line:
+        return None
+
+    # Parse the line into a dict.
+    event = parse_json_event(line)
+    if event is None:
+        # The line didn't parse.  We know that some significant number
+        # of server lines do not parse because of line length issues,
+        # so log these here.
+        log.error("encountered event line that did not parse: %s", line)
+        return None
+
+    # We are only interested in server events, not browser events.
+    event_source = event.get('event_source')
+    if event_source is None:
+        log.error("encountered event with no event_source: %s", event)
+        return None
+    if event_source != 'server':
+        return None
+
+    # We only want the explicit event, not the implicit form.
+    event_type = event.get('event_type')
+    if event_type is None:
+        log.error("encountered event with no event_type: %s", event)
+        return None
+    if event_type != requested_event_type:
+        return None
+
+    return event
+
+
 # Time-related terminology:
 # * datetime: a datetime object.
 # * timestamp: a string, with date and time (to millisecond), in ISO format.
@@ -118,7 +165,7 @@ def get_event_data(event):
     event_value = event.get('event')
 
     if event_value is None:
-        logger.error("encountered event with missing event value: %s", event)
+        log.error("encountered event with missing event value: %s", event)
         return None
 
     if isinstance(event_value, basestring):
@@ -126,12 +173,59 @@ def get_event_data(event):
         try:
             event_value = decode_json(event_value)
         except Exception:
-            logger.error("encountered event with unparsable event value: %s", event)
+            log.error("encountered event with unparsable event value: %s", event)
             return None
 
     if isinstance(event_value, dict):
         # It's fine, just return.
         return event_value
     else:
-        logger.error("encountered event data with unrecognized type: %s", event)
+        log.error("encountered event data with unrecognized type: %s", event)
         return None
+
+
+def get_augmented_event_data(event, fields_to_augment):
+    """
+    Returns event data from an event log entry, and adds additional fields.
+
+    Args:
+        event: event log entry as a dict object
+        fields_to_augment: list of field names to use as keys.
+
+    Returns:
+        dict containing event data, with keys listed in `fields_to_augment`
+            pulled from event dict and place in the returned dict.
+
+    Returns None if not found.
+    """
+    # Get the event data.
+    event_data = get_event_data(event)
+    if event_data is None:
+        # Assume it's already logged (and with more specifics).
+        return None
+
+    if 'timestamp' in fields_to_augment:
+        # Get the timestamp as an object.
+        datetime_obj = get_event_time(event)
+        if datetime_obj is None:
+            log.error("encountered event with bad datetime: %s", event)
+            return None
+        timestamp = datetime_to_timestamp(datetime_obj)
+        event_data['timestamp'] = timestamp
+
+    if 'context' in fields_to_augment:
+        # Get the event context.
+        context = event.get('context')
+        if context is None:
+            # Too common -- do not log here.
+            return None
+        event_data['context'] = context
+
+    if 'username' in fields_to_augment:
+        username = event.get('username')
+        if username is None:
+            log.error("encountered event with unexpected missing username: %s", event)
+            return None
+        event_data['username'] = username
+
+    return event_data

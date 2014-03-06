@@ -293,7 +293,7 @@ class DailyRegistrationsEnrollmentsAndCourses(luigi.Task,
         """
 
         report = pandas.DataFrame.from_items([
-            (self.ROW_LABELS['registrations'],  registrations),
+            (self.ROW_LABELS['registrations'], registrations),
             (self.ROW_LABELS['enrollments'], enrollments),
         ])
         return report

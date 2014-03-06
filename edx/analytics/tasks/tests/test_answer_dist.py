@@ -21,6 +21,7 @@ class LastProblemCheckEventBaseTest(unittest.TestCase):
         self.org_id = self.course_id.split('/')[0]
         self.problem_id = "i4x://MITx/7.00x/2013_Spring/problem/PSet1:PS1_Q1"
         self.answer_id = "i4x-MITx-7_00x-problem-PSet1_PS1_Q1_2_1"
+        self.second_answer_id = "i4x-MITx-7_00x-problem-PSet1_PS1_Q1_3_1"
         self.username = 'test_user'
         self.user_id = 24
         self.timestamp = "2013-12-17T15:38:32.805444"
@@ -31,6 +32,7 @@ class LastProblemCheckEventBaseTest(unittest.TestCase):
         return json.dumps(self._create_event_dict(**kwargs))
 
     def _create_event_data_dict(self, **kwargs):
+        """Returns event data dict with test values."""
         event_data = {
             "problem_id": self.problem_id,
             "seed": 1,
@@ -63,12 +65,13 @@ class LastProblemCheckEventBaseTest(unittest.TestCase):
 
     @staticmethod
     def _update_with_kwargs(data_dict, **kwargs):
-        # Update from kwargs only if it modifies a top-level value.
+        """Updates a dict from kwargs only if it modifies a top-level value."""
         for key, value in kwargs.iteritems():
             if key in data_dict:
                 data_dict[key] = value
 
     def _create_event_context(self, **kwargs):
+        """Returns context dict with test values."""
         context = {
             "course_id": self.course_id,
             "org_id": self.org_id,
@@ -78,6 +81,7 @@ class LastProblemCheckEventBaseTest(unittest.TestCase):
         return context
 
     def _create_problem_data_dict(self, **kwargs):
+        """Returns problem_data with test values."""
         problem_data = self._create_event_data_dict(**kwargs)
         problem_data['timestamp'] = self.timestamp
         problem_data['username'] = self.username
@@ -196,30 +200,30 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
         return tuple(self.task.reducer(self.key, values))
 
     def _check_output(self, inputs, expected):
-        """Compare generated with expected output."""
+        """
+        Compare generated with expected output.
+        Args:
+            inputs: array of values to pass to reducer
+                for hard-coded key.
+            expected:  dict of expected answer data, with
+                answer_id as key.
+
+        """
         reducer_output = self._get_reducer_output(inputs)
         self.assertEquals(len(reducer_output), len(expected))
-        for i, reducer_value in enumerate(reducer_output):
-            expected_value = expected[i]
-            self.assertEquals(len(reducer_value), 2)
-            self.assertEquals(reducer_value[0], expected_value[0])
-            self.assertEquals(len(reducer_value[1]), 2)
-            self.assertEquals(reducer_value[1][0], self.timestamp)
-            # apparently the output of json.dumps() is not consistent enough
-            # to compare, due to ordering issues.  So compare the dicts
-            # rather than the JSON strings.
-            actual_info = reducer_value[1][1]
-            actual_data = json.loads(actual_info)
-            expected_data = expected_value[1][1]
-            self.assertEquals(actual_data, expected_data)
+        for key, value in reducer_output:
+            course_id, answer_id = key
+            timestamp, answer_data = value
+            self.assertEquals(course_id, self.course_id)
+            self.assertEquals(timestamp, self.timestamp)
+            self.assertTrue(answer_id in expected)
+            self.assertEquals(json.loads(answer_data), expected.get(answer_id))
 
     def test_no_events(self):
         self._check_output([], tuple())
 
-    def test_one_answer_event(self):
-        problem_data = self._create_problem_data_dict()
-        input_data = (self.timestamp, json.dumps(problem_data))
-
+    def _get_answer_data(self, **kwargs):
+        """Returns expected answer data."""
         answer_data = {
             "answer_value_id": "3",
             "problem_display_name": None,
@@ -227,10 +231,14 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
             "correct": "incorrect",
             "problem_id": self.problem_id,
         }
-        expected_key = (self.course_id, self.answer_id)
-        expected_value = (self.timestamp, answer_data)
+        answer_data.update(**kwargs)
+        return answer_data
 
-        self._check_output([input_data], [(expected_key, expected_value)])
+    def test_one_answer_event(self):
+        problem_data = self._create_problem_data_dict()
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data()
+        self._check_output([input_data], {self.answer_id: answer_data})
 
     def test_one_submission_event(self):
         problem_data = self._create_problem_data_dict()
@@ -245,27 +253,127 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
             },
         }
         input_data = (self.timestamp, json.dumps(problem_data))
-        answer_data = {
-            u"answer": u"3",
-            u"problem_display_name": None,
-            u"variant": 629,
-            u"correct": False,
-            u"problem_id": unicode(self.problem_id),
-            u"input_type": u"formulaequationinput",
-            u"question": u"Enter the number of fingers on a human hand",
-            u"response_type": u"numericalresponse",
+        answer_data = self._get_answer_data(
+            answer="3",
+            variant=629,
+            correct=False,
+            input_type="formulaequationinput",
+            question="Enter the number of fingers on a human hand",
+            response_type="numericalresponse",
+        )
+        del answer_data['answer_value_id']
+        self._check_output([input_data], {self.answer_id: answer_data})
+
+    def test_one_submission_with_value_id(self):
+        problem_data = self._create_problem_data_dict()
+        problem_data['submission'] = {
+            self.answer_id: {
+                "input_type": "formulaequationinput",
+                "question": "Enter the number of fingers on a human hand",
+                "response_type": "choiceresponse",
+                "answer": "3",
+                "answer_value_id": "choice_3",
+                "variant": 629,
+                "correct": False
+            },
         }
-        expected_key = (self.course_id, self.answer_id)
-        expected_value = (self.timestamp, answer_data)
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data(
+            answer="3",
+            answer_value_id="choice_3",
+            variant=629,
+            correct=False,
+            input_type="formulaequationinput",
+            question="Enter the number of fingers on a human hand",
+            response_type="choiceresponse",
+        )
+        self._check_output([input_data], {self.answer_id: answer_data})
 
-        self._check_output([input_data], [(expected_key, expected_value)])
+    def _add_second_answer(self, problem_data, answer_id=None):
+        """Adds a second answer to an existing problem."""
+        if answer_id is None:
+            answer_id = self.second_answer_id
+        problem_data['answers'][answer_id] = "4"
+        problem_data['correct_map'][answer_id] = {
+            "correctness": "incorrect",
+        }
+        if 'submission' in problem_data:
+            problem_data['submission'][answer_id] = {
+                "input_type": "formulaequationinput",
+                "question": "Enter the number of fingers on the other hand",
+                "response_type": "numericalresponse",
+                "answer": "4",
+                "variant": 629,
+                "correct": False,
+            }
 
-        # TODO: test adding problem_display_name to context.
-        # TODO: test with multiple answers from the same problem.
-        # TODO: add hidden Ids
-        # TODO: add submissions with answer_value_ids.
-        # TODO: test multiple answers from the same user (w/different times).
-        #     (and different orders).
+    def test_two_answer_event(self):
+        problem_data = self._create_problem_data_dict()
+        self._add_second_answer(problem_data)
+        input_data = (self.timestamp, json.dumps(problem_data))
+
+        answer_data = self._get_answer_data()
+        answer_data_2 = self._get_answer_data(answer_value_id="4")
+        self._check_output([input_data], {
+            self.answer_id: answer_data, self.second_answer_id: answer_data_2
+        })
+
+    def test_two_answer_submission_event(self):
+        problem_data = self._create_problem_data_dict()
+        problem_data['submission'] = {
+            self.answer_id: {
+                "input_type": "formulaequationinput",
+                "question": "Enter the number of fingers on a human hand",
+                "response_type": "numericalresponse",
+                "answer": "3",
+                "variant": 1,
+                "correct": False
+            },
+        }
+        self._add_second_answer(problem_data)
+        input_data = (self.timestamp, json.dumps(problem_data))
+
+        answer_data = self._get_answer_data(
+            answer="3",
+            variant=1,
+            correct=False,
+            input_type="formulaequationinput",
+            question="Enter the number of fingers on a human hand",
+            response_type="numericalresponse",
+        )
+        del answer_data['answer_value_id']
+        answer_data_2 = self._get_answer_data(
+            answer="4",
+            variant=629,
+            correct=False,
+            input_type="formulaequationinput",
+            question="Enter the number of fingers on the other hand",
+            response_type="numericalresponse",
+        )
+        del answer_data_2['answer_value_id']
+
+        self._check_output([input_data], {
+            self.answer_id: answer_data, self.second_answer_id: answer_data_2
+        })
+
+    def test_hidden_answer_event(self):
+        for hidden_suffix in ['_dynamath', '_comment']:
+            problem_data = self._create_problem_data_dict()
+            hidden_answer_id = "{answer_id}{suffix}".format(
+                answer_id=self.answer_id, suffix=hidden_suffix
+            )
+            self._add_second_answer(problem_data, answer_id=hidden_answer_id)
+            input_data = (self.timestamp, json.dumps(problem_data))
+
+            answer_data = self._get_answer_data()
+            self._check_output([input_data], {self.answer_id: answer_data})
+
+    def test_problem_display_name(self):
+        problem_data = self._create_problem_data_dict()
+        problem_data['context']['module'] = {'display_name': "Display Name"}
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data(problem_display_name="Display Name")
+        self._check_output([input_data], {self.answer_id: answer_data})
 
 
 class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
@@ -299,6 +407,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         self.assertEquals(reducer_outputs, expected_outputs)
 
     def _get_answer_data(self, **kwargs):
+        """Returns answer data for input with submission information."""
         answer_data = {
             "answer": "3",
             "problem_display_name": None,
@@ -313,6 +422,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         return answer_data
 
     def _get_non_submission_answer_data(self, **kwargs):
+        """Returns answer data for input without submission information."""
         answer_data = {
             "answer_value_id": "3",
             "problem_display_name": None,
@@ -366,20 +476,18 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer='First Choice',
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
-            ValueID='choice_1',
-            AnswerValue='First Choice'
-        )
+        expected_output = self._get_expected_output(answer_data, ValueID='choice_1', AnswerValue='First Choice')
         self._check_output([input_data], (expected_output,))
 
     def test_multiple_choice_answer(self):
         answer_data = self._get_answer_data(
-            answer_value_id=['choice_1','choice_2','choice_4'],
-            answer=['First Choice','Second Choice','Fourth Choice'],
+            answer_value_id=['choice_1', 'choice_2', 'choice_4'],
+            answer=['First Choice', 'Second Choice', 'Fourth Choice'],
             response_type="multiplechoiceresponse",
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             ValueID='[choice_1|choice_2|choice_4]',
             AnswerValue='[First Choice|Second Choice|Fourth Choice]'
         )
@@ -439,8 +547,8 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
 
     def _load_metadata(self, **kwargs):
         """Defines some metadata for test answer."""
-        metadata_dict = { 
-            self.answer_id: { 
+        metadata_dict = {
+            self.answer_id: {
                 "question": "Pick One or Two",
                 "response_type": "multiplechoiceresponse",
                 "input_type": "my_input_type",
@@ -459,7 +567,8 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_value_id='choice_1',
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             ValueID='choice_1',
             AnswerValue='First Choice',
             Question="Pick One or Two",
@@ -472,10 +581,11 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_value_id_map={"choice_1": "First Choice", "choice_2": "Second Choice"}
         )
         answer_data = self._get_non_submission_answer_data(
-            answer_value_id=['choice_1','choice_2']
+            answer_value_id=['choice_1', 'choice_2']
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             ValueID='[choice_1|choice_2]',
             AnswerValue='[First Choice|Second Choice]',
             Question="Pick One or Two",
@@ -487,10 +597,11 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def test_non_submission_nonmapped_multichoice_with_metadata(self):
         self._load_metadata()
         answer_data = self._get_non_submission_answer_data(
-            answer_value_id=['choice_1','choice_2']
+            answer_value_id=['choice_1', 'choice_2']
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             ValueID='[choice_1|choice_2]',
             AnswerValue='',
             Question="Pick One or Two",
@@ -504,7 +615,8 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_value_id='choice_1'
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             ValueID='choice_1',
             AnswerValue='',
             Question="Pick One or Two",
@@ -516,7 +628,8 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         self._load_metadata(response_type="optionresponse")
         answer_data = self._get_non_submission_answer_data()
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data,
+        expected_output = self._get_expected_output(
+            answer_data,
             AnswerValue='3',
             Question="Pick One or Two",
         )

@@ -277,8 +277,6 @@ class TestWeeklyIncrementalUsersAndEnrollments(unittest.TestCase):
         self.assertEqual(res.loc[self.row_label('enrollment_change')]['2013-01-15'], 2)
 
 
-
-
 class TestDailyRegistrationsEnrollmentsAndCourses(unittest.TestCase):
     """Tests for DailyRegistrationsEnrollmentsAndCourses class."""
 

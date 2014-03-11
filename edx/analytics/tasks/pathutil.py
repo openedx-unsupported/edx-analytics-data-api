@@ -6,7 +6,6 @@ Supports outputs to HDFS, S3, and local FS.
 
 """
 
-import os
 import boto
 import glob
 
@@ -15,7 +14,7 @@ import luigi.s3
 import luigi.hdfs
 import luigi.format
 
-from edx.analytics.tasks.s3_util import join_as_s3_url, generate_s3_sources
+from edx.analytics.tasks.s3_util import generate_s3_sources
 from edx.analytics.tasks.url import ExternalURL, url_path_join
 
 
@@ -40,7 +39,7 @@ class PathSetTask(luigi.Task):
             # connect lazily as needed:
             if self.s3_conn is None:
                 self.s3_conn = boto.connect_s3()
-            for bucket, root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
+            for _bucket, root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
                 source = url_path_join(self.src, root, path)
                 yield ExternalURL(source)
         else:

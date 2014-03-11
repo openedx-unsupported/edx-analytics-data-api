@@ -18,8 +18,6 @@ import luigi.format
 import luigi.hdfs
 import luigi.s3
 
-from luigi.target import Target
-
 
 class ExternalURL(luigi.ExternalTask):
     """Simple Task that returns a target based on its URL"""
@@ -29,7 +27,10 @@ class ExternalURL(luigi.ExternalTask):
         return get_target_from_url(self.url)
 
 
-class IgnoredTarget(Target):
+class IgnoredTarget(luigi.hdfs.HdfsTarget):
+    """Dummy target for use in Hadoop jobs that produce no explicit output file."""
+    def __init__(self):
+        super(IgnoredTarget, self).__init__(is_tmp=True)
 
     def exists(self):
         return False
@@ -60,6 +61,7 @@ def get_target_from_url(url):
         if url.endswith('.gz'):
             kwargs['format'] = luigi.format.Gzip
 
+    url = url.rstrip('/')
     return target_class(url, **kwargs)
 
 

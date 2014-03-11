@@ -372,11 +372,25 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
             answer_data = self._get_answer_data()
             self._check_output([input_data], {self.answer_id: answer_data})
 
+    def test_bogus_choice_event(self):
+        # In real data, values appeared in student_answers that were
+        # not in the correct_map.  This was causing a failure.
+        problem_data = self._create_problem_data_dict()
+        del problem_data['answers'][self.answer_id]
+        for bogus_value in ['choice_1', 'choice_2', 'choice_3']:
+            bogus_answer_id = "{answer_id}_{suffix}".format(
+                answer_id=self.answer_id, suffix=bogus_value
+            )
+            problem_data['answers'][bogus_answer_id] = bogus_value
+            input_data = (self.timestamp, json.dumps(problem_data))
+            # The problem should be skipped.
+            self._check_output([input_data], {})
+
     def test_problem_display_name(self):
         problem_data = self._create_problem_data_dict()
-        problem_data['context']['module'] = {'display_name': "Display Name"}
+        problem_data['context']['module'] = {'display_name': u"Displ\u0101y Name"}
         input_data = (self.timestamp, json.dumps(problem_data))
-        answer_data = self._get_answer_data(problem_display_name="Display Name")
+        answer_data = self._get_answer_data(problem_display_name=u"Displ\u0101y Name")
         self._check_output([input_data], {self.answer_id: answer_data})
 
 
@@ -413,13 +427,13 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def _get_answer_data(self, **kwargs):
         """Returns answer data for input with submission information."""
         answer_data = {
-            "answer": "3",
+            "answer": u"\u00b2",
             "problem_display_name": None,
             "variant": None,
             "correct": False,
             "problem_id": self.problem_id,
             "input_type": "formulaequationinput",
-            "question": "Enter the number of fingers on a human hand",
+            "question": u"Enter the number(\u00ba) of fingers on a human hand",
             "response_type": "numericalresponse",
         }
         answer_data.update(**kwargs)
@@ -428,7 +442,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def _get_non_submission_answer_data(self, **kwargs):
         """Returns answer data for input without submission information."""
         answer_data = {
-            "answer_value_id": "3",
+            "answer_value_id": u'\u00b2',
             "problem_display_name": None,
             "variant": None,
             "correct": False,
@@ -486,14 +500,14 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def test_multiple_choice_answer(self):
         answer_data = self._get_answer_data(
             answer_value_id=['choice_1', 'choice_2', 'choice_4'],
-            answer=['First Choice', 'Second Choice', 'Fourth Choice'],
+            answer=[u'First Ch\u014dice', u'Second Ch\u014dice', u'Fourth Ch\u014dice'],
             response_type="multiplechoiceresponse",
         )
         input_data = (self.timestamp, json.dumps(answer_data))
         expected_output = self._get_expected_output(
             answer_data,
             ValueID='[choice_1|choice_2|choice_4]',
-            AnswerValue='[First Choice|Second Choice|Fourth Choice]'
+            AnswerValue=u'[First Ch\u014dice|Second Ch\u014dice|Fourth Ch\u014dice]'
         )
         self._check_output([input_data], (expected_output,))
 
@@ -553,7 +567,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         """Defines some metadata for test answer."""
         metadata_dict = {
             self.answer_id: {
-                "question": "Pick One or Two",
+                "question": u"Pick One or \u00b2",
                 "response_type": "multiplechoiceresponse",
                 "input_type": "my_input_type",
                 "problem_display_name": self.problem_display_name,
@@ -565,7 +579,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
 
     def test_non_submission_choice_with_metadata(self):
         self._load_metadata(
-            answer_value_id_map={"choice_1": "First Choice", "choice_2": "Second Choice"}
+            answer_value_id_map={"choice_1": u"First Ch\u014dice", "choice_2": u"Second Ch\u014dice"}
         )
         answer_data = self._get_non_submission_answer_data(
             answer_value_id='choice_1',
@@ -574,8 +588,8 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         expected_output = self._get_expected_output(
             answer_data,
             ValueID='choice_1',
-            AnswerValue='First Choice',
-            Question="Pick One or Two",
+            AnswerValue=u'First Ch\u014dice',
+            Question=u"Pick One or \u00b2",
         )
         expected_output["Problem Display Name"] = self.problem_display_name
         self._check_output([input_data], (expected_output,))
@@ -592,7 +606,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_data,
             ValueID='[choice_1|choice_2]',
             AnswerValue='[First Choice|Second Choice]',
-            Question="Pick One or Two",
+            Question=u"Pick One or \u00b2",
         )
         expected_output["Problem Display Name"] = self.problem_display_name
 
@@ -608,7 +622,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_data,
             ValueID='[choice_1|choice_2]',
             AnswerValue='',
-            Question="Pick One or Two",
+            Question=u"Pick One or \u00b2",
         )
         expected_output["Problem Display Name"] = self.problem_display_name
         self._check_output([input_data], (expected_output,))
@@ -623,7 +637,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_data,
             ValueID='choice_1',
             AnswerValue='',
-            Question="Pick One or Two",
+            Question=u"Pick One or \u00b2",
         )
         expected_output["Problem Display Name"] = self.problem_display_name
         self._check_output([input_data], (expected_output,))
@@ -634,14 +648,15 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         input_data = (self.timestamp, json.dumps(answer_data))
         expected_output = self._get_expected_output(
             answer_data,
-            AnswerValue='3',
-            Question="Pick One or Two",
+            AnswerValue=u'\u00b2',
+            Question=u"Pick One or \u00b2",
         )
         expected_output["Problem Display Name"] = self.problem_display_name
         self._check_output([input_data], (expected_output,))
 
 
 class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
+    """Tests for AnswerDistributionOneFilePerCourseTask class."""
 
     def setUp(self):
         self.task = AnswerDistributionOneFilePerCourseTask(
@@ -650,6 +665,7 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
             dest=None,
             name=None,
             include=None,
+            output_root=None,
         )
 
     def test_map_single_value(self):
@@ -684,10 +700,11 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
         task = AnswerDistributionOneFilePerCourseTask(
             mapreduce_engine='local',
             src=None,
-            dest='/tmp',
+            dest=None,
             name='name',
             include=None,
+            output_root='/tmp',
         )
         output_path = task.output_path_for_key(course_id)
-        self.assertEquals(output_path,
-            '/tmp/{0}/foo_bar_baz_answer_distribution.csv'.format(hashed_course_id))
+        expected_output_path = '/tmp/{0}/foo_bar_baz_answer_distribution.csv'.format(hashed_course_id)
+        self.assertEquals(output_path, expected_output_path)

@@ -61,11 +61,11 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
         # Luigi requires the reducer to return an iterable
         return iter(tuple())
 
-    def multi_output_reducer(self, key, values, output_file):
+    def multi_output_reducer(self, _key, _values, _output_file):
         """Returns an iterable of strings that are written out to the appropriate output file for this key."""
         return iter(tuple())
 
-    def output_path_for_key(self, key):
+    def output_path_for_key(self, _key):
         """
         Returns a URL that is unique to the given key.
 

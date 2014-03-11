@@ -1,3 +1,4 @@
+"""Tests for URL-related functionality."""
 import luigi
 import luigi.format
 import luigi.hdfs
@@ -8,6 +9,7 @@ from edx.analytics.tasks.tests import unittest
 
 
 class TargetFromUrlTestCase(unittest.TestCase):
+    """Tests for get_target_from_url()."""
 
     def test_hdfs_scheme(self):
         for test_url in ['s3://foo/bar', 'hdfs://foo/bar', 's3n://foo/bar']:
@@ -32,7 +34,7 @@ class TargetFromUrlTestCase(unittest.TestCase):
         test_url = 's3://foo/bar/'
         target = url.get_target_from_url(test_url)
         self.assertIsInstance(target, luigi.hdfs.HdfsTarget)
-        self.assertEquals(target.path, test_url)
+        self.assertEquals(target.path, test_url[:-1])
         self.assertEquals(target.format, luigi.hdfs.PlainDir)
 
     def test_gzip_local_file(self):
@@ -44,6 +46,7 @@ class TargetFromUrlTestCase(unittest.TestCase):
 
 
 class UrlPathJoinTestCase(unittest.TestCase):
+    """Tests for url_path_join()."""
 
     def test_relative(self):
         self.assertEquals(url.url_path_join('s3://foo/bar', 'baz'), 's3://foo/bar/baz')
@@ -64,9 +67,6 @@ class UrlPathJoinTestCase(unittest.TestCase):
     def test_extra_separators(self):
         self.assertEquals(url.url_path_join('s3://foo/bar', '///baz'), 's3://foo///baz')
         self.assertEquals(url.url_path_join('s3://foo/bar', 'baz//bar'), 's3://foo/bar/baz//bar')
-
-    def test_extra_separators(self):
-        self.assertEquals(url.url_path_join('s3://foo/bar', '///baz'), 's3://foo///baz')
 
     def test_multiple_elements(self):
         self.assertEquals(url.url_path_join('s3://foo', 'bar', 'baz'), 's3://foo/bar/baz')

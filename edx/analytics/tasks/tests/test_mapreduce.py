@@ -1,3 +1,5 @@
+"""Tests for classes defined in mapreduce.py."""
+
 from __future__ import absolute_import
 
 from mock import patch, call
@@ -7,6 +9,7 @@ from edx.analytics.tasks.tests import unittest
 
 
 class MultiOutputMapReduceJobTaskTest(unittest.TestCase):
+    """Tests for MultiOutputMapReduceJobTask."""
 
     def setUp(self):
         self.task = TestJobTask(
@@ -21,13 +24,14 @@ class MultiOutputMapReduceJobTaskTest(unittest.TestCase):
         self.assert_values_written_to_file('foo', ['bar', 'baz'])
 
     def assert_values_written_to_file(self, key, values):
+        """Confirm that values passed to reducer appear in output file."""
         self.assertItemsEqual(self.task.reducer(key, values), [])
 
         self.mock_get_target.assert_called_once_with('/any/path/' + key)
 
         mock_target = self.mock_get_target.return_value
         mock_file = mock_target.open.return_value.__enter__.return_value
-        mock_file.write.assert_has_calls([ call(v + '\n') for v in values ])
+        mock_file.write.assert_has_calls([call(v + '\n') for v in values])
 
         self.mock_get_target.reset_mock()
 
@@ -37,6 +41,7 @@ class MultiOutputMapReduceJobTaskTest(unittest.TestCase):
 
 
 class TestJobTask(MultiOutputMapReduceJobTask):
+    """Dummy task to use for testing."""
 
     def output_path_for_key(self, key):
         return '/any/path/' + key

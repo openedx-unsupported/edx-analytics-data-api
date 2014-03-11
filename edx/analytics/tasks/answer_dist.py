@@ -161,6 +161,19 @@ class LastProblemCheckEventMixin(object):
             for answer_id in answers:
                 if not self.is_hidden_answer(answer_id):
                     answer_value = answers[answer_id]
+
+                    # Argh. It seems that sometimes we're encountering
+                    # bogus answer_id values.  In particular, one that
+                    # is including the possible choice values, instead
+                    # of any actual values selected by the student.
+                    # For now, let's just dump an error and skip it,
+                    # so that it becomes the equivalent of a hidden
+                    # answer.  Eventually we would probably want to treat
+                    # it explicitly as a hidden answer.
+                    if answer_id not in correct_map:
+                        log.error("Unexpected answer_id %s not in correct_map: %s", answer_id, event)
+                        continue
+
                     correct_entry = correct_map[answer_id]
 
                     # We do not know the values for 'input_type',
@@ -459,7 +472,7 @@ class AnswerDistributionPerCourseMixin(object):
         # answer_value may be a list of multiple values, so we need to
         # convert it to a string that can be used as an index (i.e. to
         # increment a previous occurrence).
-        return '{value}_{variant}'.format(value=self.stringify(answer_value), variant=variant)
+        return u'{value}_{variant}'.format(value=self.stringify(answer_value), variant=variant)
 
     @staticmethod
     def stringify(answer_value):
@@ -484,7 +497,7 @@ class AnswerDistributionPerCourseMixin(object):
         if isinstance(answer_value, basestring):
             return answer_value
         elif isinstance(answer_value, list):
-            return '[{list_val}]'.format(list_val='|'.join(answer_value))
+            return u'[{list_val}]'.format(list_val=u'|'.join(answer_value))
         else:
             # unexpected type:
             log.error("Unexpected type for an answer_value: %s", answer_value)
@@ -526,7 +539,7 @@ class LastProblemCheckEvent(LastProblemCheckEventMixin, BaseAnswerDistributionTa
         return PathSetTask(self.src, self.include)
 
     def output(self):
-        output_name = 'last_problem_check_events_{name}'.format(name=self.name)
+        output_name = u'last_problem_check_events_{name}/'.format(name=self.name)
         return get_target_from_url(url_path_join(self.dest, output_name))
 
 
@@ -557,7 +570,7 @@ class AnswerDistributionPerCourse(AnswerDistributionPerCourseMixin, BaseAnswerDi
         return self.requires()['events']
 
     def output(self):
-        output_name = 'answer_distribution_per_course_{name}'.format(name=self.name)
+        output_name = u'answer_distribution_per_course_{name}/'.format(name=self.name)
         return get_target_from_url(url_path_join(self.dest, output_name))
 
     def run(self):
@@ -573,13 +586,19 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
     """
     Groups answer distributions by course, producing a different file for each.
 
-    All parameters are passed through to :py:class:`AnswerDistributionPerCourse`.
+    Most parameters are passed through to :py:class:`AnswerDistributionPerCourse`.
+    One additional parameter is defined:
+
+        output_root: location where the one-file-per-course outputs
+            are written.  This is distinct from `dest`, which is where
+            intermediate output is written.
     """
 
     src = luigi.Parameter()
     dest = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
     name = luigi.Parameter(default='periodic')
+    output_root = luigi.Parameter()
     answer_metadata = luigi.Parameter(default=None)
 
     def requires(self):
@@ -616,10 +635,10 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
         """
         hashed_course_id = hashlib.sha1(course_id).hexdigest()
         filename_safe_course_id = course_id.replace('/', '_')
-        filename = '{course_id}_answer_distribution.csv'.format(course_id=filename_safe_course_id)
-        return url_path_join(self.dest, hashed_course_id, filename)
+        filename = u'{course_id}_answer_distribution.csv'.format(course_id=filename_safe_course_id)
+        return url_path_join(self.output_root, hashed_course_id, filename)
 
-    def multi_output_reducer(self, course_id, values, output_file):
+    def multi_output_reducer(self, _course_id, values, output_file):
         """
         Each entry should be written to the output file in csv format.
 

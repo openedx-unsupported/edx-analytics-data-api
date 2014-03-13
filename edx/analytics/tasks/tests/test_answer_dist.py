@@ -39,7 +39,6 @@ class LastProblemCheckEventBaseTest(unittest.TestCase):
         """Returns event data dict with test values."""
         event_data = {
             "problem_id": self.problem_id,
-            "seed": 1,
             "attempts": 2,
             "answers": {self.answer_id: "3"},
             "correct_map": {
@@ -223,20 +222,75 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
             self.assertTrue(answer_id in expected)
             self.assertEquals(json.loads(answer_data), expected.get(answer_id))
 
-    def test_no_events(self):
-        self._check_output([], tuple())
+    def _add_second_answer(self, problem_data, answer_id=None):
+        """Adds a second answer to an existing problem check event."""
+        if answer_id is None:
+            answer_id = self.second_answer_id
+        problem_data['answers'][answer_id] = "4"
+        problem_data['correct_map'][answer_id] = {
+            "correctness": "incorrect",
+        }
 
     def _get_answer_data(self, **kwargs):
-        """Returns expected answer data."""
+        """Returns expected answer data returned by the reducer."""
         answer_data = {
             "answer_value_id": "3",
             "problem_display_name": None,
             "variant": 1,
-            "correct": "incorrect",
+            "correct": False,
             "problem_id": self.problem_id,
         }
         answer_data.update(**kwargs)
         return answer_data
+
+    def _create_submission_problem_data_dict(self, **kwargs):
+        """Returns problem event data with test values for 'submission'."""
+        problem_data = self._create_problem_data_dict(**kwargs)
+        problem_data_submission = {
+            self.answer_id: {
+                "input_type": "formulaequationinput",
+                "question": "Enter the number of fingers on a human hand",
+                "response_type": "numericalresponse",
+                "answer": "3",
+                "variant": "",
+                "correct": False
+            },
+        }
+        self._update_with_kwargs(problem_data_submission, **kwargs)
+        if 'answer_value_id' in kwargs:
+            problem_data_submission[self.answer_id]['answer_value_id'] = kwargs['answer_value_id']
+        problem_data['submission'] = problem_data_submission
+        return problem_data
+
+    def _get_answer_data_from_submission(self, problem_data, **kwargs):
+        """Returns expected answer data returned by the reducer, given the event's data."""
+        print problem_data
+        answer_data = {}
+        problem_data_submission = problem_data['submission']
+        print problem_data_submission
+        for answer_id in problem_data_submission:
+            problem_data_sub = problem_data_submission[answer_id]
+            print problem_data_sub
+            answer_id_data = {
+                "answer": problem_data_sub['answer'],
+                "problem_display_name": None,
+                "variant": problem_data_sub['variant'],
+                "correct": problem_data_sub['correct'],
+                "input_type": problem_data_sub['input_type'],
+                "response_type": problem_data_sub['response_type'],
+                "question": problem_data_sub['question'],
+                "problem_id": self.problem_id,
+            }
+            if 'answer_value_id' in problem_data_sub:
+                answer_id_data['answer_value_id'] = problem_data_sub['answer_value_id']
+
+            self._update_with_kwargs(answer_id_data, **kwargs)
+            answer_data[answer_id] = answer_id_data
+
+        return answer_data
+
+    def test_no_events(self):
+        self._check_output([], tuple())
 
     def test_one_answer_event(self):
         problem_data = self._create_problem_data_dict()
@@ -244,72 +298,31 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
         answer_data = self._get_answer_data()
         self._check_output([input_data], {self.answer_id: answer_data})
 
-    def test_one_submission_event(self):
-        problem_data = self._create_problem_data_dict()
-        problem_data['submission'] = {
-            self.answer_id: {
-                "input_type": "formulaequationinput",
-                "question": "Enter the number of fingers on a human hand",
-                "response_type": "numericalresponse",
-                "answer": "3",
-                "variant": 629,
-                "correct": False
-            },
-        }
-        input_data = (self.timestamp, json.dumps(problem_data))
-        answer_data = self._get_answer_data(
-            answer="3",
-            variant=629,
-            correct=False,
-            input_type="formulaequationinput",
-            question="Enter the number of fingers on a human hand",
-            response_type="numericalresponse",
+    def test_one_correct_answer_event(self):
+        problem_data = self._create_problem_data_dict(
+            correct_map={self.answer_id: {"correctness": "correct"}}
         )
-        del answer_data['answer_value_id']
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data(correct=True)
+        self._check_output([input_data], {self.answer_id: answer_data})
+
+    def test_one_submission_event(self):
+        problem_data = self._create_submission_problem_data_dict()
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data_from_submission(problem_data)[self.answer_id]
         self._check_output([input_data], {self.answer_id: answer_data})
 
     def test_one_submission_with_value_id(self):
-        problem_data = self._create_problem_data_dict()
-        problem_data['submission'] = {
-            self.answer_id: {
-                "input_type": "formulaequationinput",
-                "question": "Enter the number of fingers on a human hand",
-                "response_type": "choiceresponse",
-                "answer": "3",
-                "answer_value_id": "choice_3",
-                "variant": 629,
-                "correct": False
-            },
-        }
+        problem_data = self._create_submission_problem_data_dict(answer=3, answer_value_id='choice_3')
         input_data = (self.timestamp, json.dumps(problem_data))
-        answer_data = self._get_answer_data(
-            answer="3",
-            answer_value_id="choice_3",
-            variant=629,
-            correct=False,
-            input_type="formulaequationinput",
-            question="Enter the number of fingers on a human hand",
-            response_type="choiceresponse",
-        )
+        answer_data = self._get_answer_data_from_submission(problem_data)[self.answer_id]
         self._check_output([input_data], {self.answer_id: answer_data})
 
-    def _add_second_answer(self, problem_data, answer_id=None):
-        """Adds a second answer to an existing problem."""
-        if answer_id is None:
-            answer_id = self.second_answer_id
-        problem_data['answers'][answer_id] = "4"
-        problem_data['correct_map'][answer_id] = {
-            "correctness": "incorrect",
-        }
-        if 'submission' in problem_data:
-            problem_data['submission'][answer_id] = {
-                "input_type": "formulaequationinput",
-                "question": "Enter the number of fingers on the other hand",
-                "response_type": "numericalresponse",
-                "answer": "4",
-                "variant": 629,
-                "correct": False,
-            }
+    def test_one_submission_with_variant(self):
+        problem_data = self._create_submission_problem_data_dict(variant=629)
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data_from_submission(problem_data)[self.answer_id]
+        self._check_output([input_data], {self.answer_id: answer_data})
 
     def test_two_answer_event(self):
         problem_data = self._create_problem_data_dict()
@@ -323,42 +336,18 @@ class LastProblemCheckEventReduceTest(LastProblemCheckEventBaseTest):
         })
 
     def test_two_answer_submission_event(self):
-        problem_data = self._create_problem_data_dict()
-        problem_data['submission'] = {
-            self.answer_id: {
-                "input_type": "formulaequationinput",
-                "question": "Enter the number of fingers on a human hand",
-                "response_type": "numericalresponse",
-                "answer": "3",
-                "variant": 1,
-                "correct": False
-            },
-        }
-        self._add_second_answer(problem_data)
-        input_data = (self.timestamp, json.dumps(problem_data))
-
-        answer_data = self._get_answer_data(
-            answer="3",
-            variant=1,
-            correct=False,
-            input_type="formulaequationinput",
-            question="Enter the number of fingers on a human hand",
-            response_type="numericalresponse",
-        )
-        del answer_data['answer_value_id']
-        answer_data_2 = self._get_answer_data(
-            answer="4",
+        problem_data = self._create_submission_problem_data_dict()
+        problem_data_2 = self._create_submission_problem_data_dict(
+            answer='4',
             variant=629,
-            correct=False,
-            input_type="formulaequationinput",
-            question="Enter the number of fingers on the other hand",
-            response_type="numericalresponse",
+            question="Enter the number of fingers on the other hand"
         )
-        del answer_data_2['answer_value_id']
+        for key in ['answers', 'correct_map', 'submission']:
+            problem_data[key][self.second_answer_id] = problem_data_2[key][self.answer_id]
 
-        self._check_output([input_data], {
-            self.answer_id: answer_data, self.second_answer_id: answer_data_2
-        })
+        input_data = (self.timestamp, json.dumps(problem_data))
+        answer_data = self._get_answer_data_from_submission(problem_data)
+        self._check_output([input_data], answer_data)
 
     def test_hidden_answer_event(self):
         for hidden_suffix in ['_dynamath', '_comment']:
@@ -419,17 +408,17 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         for course_id, _output in reducer_output:
             self.assertEquals(course_id, self.course_id)
         # We don't know what order the outputs will be dumped for a given
-        # set of inputs, so we have to compare sets.
+        # set of input dicts, so we have to compare sets of items.
         reducer_outputs = set([frozenset(json.loads(output).items()) for _, output in reducer_output])
         expected_outputs = set([frozenset(output.items()) for output in expected])
         self.assertEquals(reducer_outputs, expected_outputs)
 
     def _get_answer_data(self, **kwargs):
-        """Returns answer data for input with submission information."""
+        """Returns answer data with submission information for input to reducer."""
         answer_data = {
             "answer": u"\u00b2",
             "problem_display_name": None,
-            "variant": None,
+            "variant": "",
             "correct": False,
             "problem_id": self.problem_id,
             "input_type": "formulaequationinput",
@@ -440,11 +429,11 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         return answer_data
 
     def _get_non_submission_answer_data(self, **kwargs):
-        """Returns answer data for input without submission information."""
+        """Returns answer data without submission information for input to reducer ."""
         answer_data = {
             "answer_value_id": u'\u00b2',
             "problem_display_name": None,
-            "variant": None,
+            "variant": "1",
             "correct": False,
             "problem_id": self.problem_id,
         }
@@ -452,7 +441,7 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         return answer_data
 
     def _get_expected_output(self, answer_data, **kwargs):
-        """Get an output based on the input."""
+        """Get an expected reducer output based on the input."""
         expected_output = {
             "Problem Display Name": answer_data.get('problem_display_name'),
             "Count": 1,
@@ -540,6 +529,14 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def test_two_answer_event_same_old_and_new(self):
         answer_data_1 = self._get_non_submission_answer_data()
         answer_data_2 = self._get_answer_data()
+        input_data_1 = (self.earlier_timestamp, json.dumps(answer_data_1))
+        input_data_2 = (self.timestamp, json.dumps(answer_data_2))
+        expected_output = self._get_expected_output(answer_data_2, Count=2)
+        self._check_output([input_data_1, input_data_2], (expected_output,))
+
+    def test_same_old_and_new_with_variant(self):
+        answer_data_1 = self._get_non_submission_answer_data(variant=123)
+        answer_data_2 = self._get_answer_data(variant=123)
         input_data_1 = (self.earlier_timestamp, json.dumps(answer_data_1))
         input_data_2 = (self.timestamp, json.dumps(answer_data_2))
         expected_output = self._get_expected_output(answer_data_2, Count=2)

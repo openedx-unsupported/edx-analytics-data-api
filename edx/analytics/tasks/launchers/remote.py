@@ -28,6 +28,7 @@ def main():
 
     sys.exit(return_code)
 
+
 def run_task_playbook(arguments, uid):
     """
     Execute the ansible playbook that triggers and monitors the remote task execution.
@@ -38,6 +39,7 @@ def run_task_playbook(arguments, uid):
     """
     extra_vars = convert_args_to_extra_vars(arguments, uid)
     return run_ansible(('task.yml', '-e', extra_vars), arguments.verbose, executable='ansible-playbook')
+
 
 def convert_args_to_extra_vars(arguments, uid):
     """
@@ -59,6 +61,7 @@ def convert_args_to_extra_vars(arguments, uid):
     if arguments.wait:
         extra_vars['wait_for_task'] = True
     return ' '.join(["{}='{}'".format(k, extra_vars[k]) for k in extra_vars])
+
 
 def run_ansible(args, verbose, executable='ansible'):
     """
@@ -94,6 +97,7 @@ def run_ansible(args, verbose, executable='ansible'):
         proc.wait()
 
     return proc.returncode
+
 
 def download_logs(arguments, uid):
     """

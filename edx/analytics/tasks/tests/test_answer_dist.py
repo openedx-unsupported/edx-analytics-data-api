@@ -443,13 +443,13 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
     def _get_expected_output(self, answer_data, **kwargs):
         """Get an expected reducer output based on the input."""
         expected_output = {
-            "Problem Display Name": answer_data.get('problem_display_name'),
+            "Problem Display Name": answer_data.get('problem_display_name') or "",
             "Count": 1,
             "PartID": self.answer_id,
-            "Question": answer_data.get('question'),
-            "AnswerValue": answer_data.get('answer'),
+            "Question": answer_data.get('question') or "",
+            "AnswerValue": answer_data.get('answer') or answer_data.get('answer_value_id') or "",
             "ValueID": "",
-            "Variant": answer_data.get('variant'),
+            "Variant": answer_data.get('variant') or "",
             "Correct Answer": "1" if answer_data['correct'] else '0',
             "ModuleID": self.problem_id,
         }
@@ -549,6 +549,23 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         input_data_2 = (self.timestamp, json.dumps(answer_data_2))
         expected_output_1 = self._get_expected_output(answer_data_1)
         expected_output_2 = self._get_expected_output(answer_data_2)
+        self._check_output([input_data_1, input_data_2], (expected_output_1, expected_output_2))
+
+    def test_two_answer_event_different_old_and_new(self):
+        answer_data_1 = self._get_non_submission_answer_data(answer_value_id="first")
+        answer_data_2 = self._get_answer_data(problem_display_name=self.problem_display_name)
+        input_data_1 = (self.earlier_timestamp, json.dumps(answer_data_1))
+        input_data_2 = (self.timestamp, json.dumps(answer_data_2))
+        expected_output_2 = self._get_expected_output(answer_data_2)
+        # An older non-submission-based event should inherit some
+        # information from a newer submission-based event.
+        # In particular, the Variant, the Question, and Problem Display Name.
+        expected_output_1 = self._get_expected_output(
+            answer_data_1,
+            Variant="",
+            Question=expected_output_2['Question'],
+        )
+        expected_output_1['Problem Display Name'] = expected_output_2['Problem Display Name']
         self._check_output([input_data_1, input_data_2], (expected_output_1, expected_output_2))
 
     def test_two_answer_event_different_variant(self):

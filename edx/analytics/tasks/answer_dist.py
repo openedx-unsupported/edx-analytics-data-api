@@ -175,7 +175,7 @@ class LastProblemCheckEventMixin(object):
                     if answer_id not in correct_map:
                         log.error("Unexpected answer_id %s not in correct_map: %s", answer_id, event)
                         continue
-                    correctness = correct_map[answer_id].get('correctness') in ['correct']
+                    correctness = correct_map[answer_id].get('correctness') == 'correct'
 
                     variant = event.get('state', {}).get('seed')
 
@@ -275,7 +275,8 @@ class AnswerDistributionPerCourseMixin(object):
         problem_id = most_recent_answer.get('problem_id')
         problem_display_name = most_recent_answer.get('problem_display_name')
         most_recent_question = most_recent_answer.get('question', '')
-        answer_uses_code = ('answer_value_id' in most_recent_answer)
+        answer_uses_value_id = ('answer_value_id' in most_recent_answer)
+        answer_uses_variant = (most_recent_answer.get('variant', '') != '')
         answer_dist = {}
         for _timestamp, value_string in reversed(values):
             answer = json.loads(value_string)
@@ -291,7 +292,7 @@ class AnswerDistributionPerCourseMixin(object):
             # We only want this from the most recent answer that has
             # this value.
             if answer_grouping_key not in answer_dist:
-                if answer_uses_code:
+                if answer_uses_value_id:
                     # The most recent overall answer indicates that
                     # the code should be returned as such.  If this
                     # particular answer did not have 'submission'
@@ -317,19 +318,21 @@ class AnswerDistributionPerCourseMixin(object):
                 # If there is no variant, then the question should be
                 # the same, and we want to go with the most recently
                 # defined value.
-                if answer.get('variant'):
+                if answer_uses_variant:
                     question = answer.get('question', '')
+                    variant = answer.get('variant') or ''
                 else:
                     question = most_recent_question
+                    variant = ''
 
                 # Key values here should match those used in get_column_order().
                 answer_dist[answer_grouping_key] = {
                     'ModuleID': problem_id,
                     'PartID': answer_id,
-                    'ValueID': value_id,
-                    'AnswerValue': answer_value,
-                    'Variant': answer.get('variant'),
-                    'Problem Display Name': problem_display_name,
+                    'ValueID': value_id or '',
+                    'AnswerValue': answer_value or '',
+                    'Variant': variant,
+                    'Problem Display Name': problem_display_name or '',
                     'Question': question,
                     'Correct Answer': '1' if answer.get('correct') else '0',
                     'Count': 0,

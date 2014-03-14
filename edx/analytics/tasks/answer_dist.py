@@ -168,13 +168,16 @@ class LastProblemCheckEventMixin(object):
                     # of any actual values selected by the student.
                     # For now, let's just dump an error and skip it,
                     # so that it becomes the equivalent of a hidden
-                    # answer.  Eventually we would probably want to treat
-                    # it explicitly as a hidden answer.
+                    # answer.
+
+                    # TODO: Eventually treat it explicitly as a hidden
+                    # answer.
                     if answer_id not in correct_map:
                         log.error("Unexpected answer_id %s not in correct_map: %s", answer_id, event)
                         continue
+                    correctness = correct_map[answer_id].get('correctness') in ['correct']
 
-                    correct_entry = correct_map[answer_id]
+                    variant = event.get('state', {}).get('seed')
 
                     # We do not know the values for 'input_type',
                     # 'response_type', or 'question'.  We also don't know if
@@ -185,8 +188,8 @@ class LastProblemCheckEventMixin(object):
                     # an 'answer' and only sometimes have an 'answer_value_id'.
                     submission = {
                         'answer_value_id': answer_value,
-                        'correct': correct_entry.get('correctness'),
-                        'variant': event.get('seed'),
+                        'correct': correctness,
+                        'variant': variant,
                     }
                     append_submission(answer_id, submission)
 
@@ -457,7 +460,14 @@ class AnswerDistributionPerCourseMixin(object):
 
     def get_answer_grouping_key(self, answer):
         """Return value to use for uniquely identify an answer value in the distribution."""
-        variant = answer.get('variant', 'NO_VARIANT')
+        # For variants, we want to treat missing variants with the
+        # same value as used for events that lack 'submission'
+        # information, so that they will be grouped together.  That
+        # value is a seed value of '1'.  We want to map both missing
+        # values and zero-length values to this default value.
+        variant = answer.get('variant', '')
+        if variant == '':
+            variant = '1'
         # Events that lack 'submission' information will have a value
         # for 'answer_value_id' and none for 'answer'.  Events with
         # 'submission' information will have the reverse situation

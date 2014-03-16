@@ -694,19 +694,27 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
 
     def test_reduce_multiple_values(self):
         field_names = AnswerDistributionPerCourseMixin.get_column_order()
-        column_values = [(k, unicode(k) + u'\u2603') for k in field_names]
-        column_values[3] = (column_values[3][0], 10)
-        sample_input = json.dumps(dict(column_values))
+
+        # To test sorting, the first sample is made to sort after the
+        # second sample.
+        column_values_2 = [(k, unicode(k) + u'\u2603') for k in field_names]
+        column_values_2[3] = (column_values_2[3][0], 10)
+        column_values_1 = list(column_values_2)
+        column_values_1[4] = (column_values_1[4][0], u'ZZZZZZZZZZZ')
+        sample_input_1 = json.dumps(dict(column_values_1))
+        sample_input_2 = json.dumps(dict(column_values_2))
         mock_output_file = Mock()
 
-        self.task.multi_output_reducer('foo', iter([(sample_input,), (sample_input,)]), mock_output_file)
+        self.task.multi_output_reducer('foo', iter([(sample_input_1,), (sample_input_2,)]), mock_output_file)
 
         expected_header_string = ','.join(field_names) + '\r\n'
         self.assertEquals(mock_output_file.write.mock_calls[0], call(expected_header_string))
 
-        expected_row_string = ','.join(unicode(v[1]).encode('utf8') for v in column_values) + '\r\n'
-        self.assertEquals(mock_output_file.write.mock_calls[1], call(expected_row_string))
-        self.assertEquals(mock_output_file.write.mock_calls[2], call(expected_row_string))
+        # Confirm that the second sample appears before the first.
+        expected_row_1 = ','.join(unicode(v[1]).encode('utf8') for v in column_values_2) + '\r\n'
+        self.assertEquals(mock_output_file.write.mock_calls[1], call(expected_row_1))
+        expected_row_2 = ','.join(unicode(v[1]).encode('utf8') for v in column_values_1) + '\r\n'
+        self.assertEquals(mock_output_file.write.mock_calls[2], call(expected_row_2))
 
     def test_output_path_for_key(self):
         course_id = 'foo/bar/baz'

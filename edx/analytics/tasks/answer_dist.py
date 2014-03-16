@@ -5,6 +5,7 @@ tracking log files.
 import hashlib
 import json
 import csv
+from operator import itemgetter
 
 import luigi
 import luigi.hdfs
@@ -355,13 +356,13 @@ class AnswerDistributionPerCourseMixin(object):
         return [
             'ModuleID',
             'PartID',
+            'Correct Answer',
+            'Count',
             'ValueID',
             'AnswerValue',
             'Variant',
             'Problem Display Name',
             'Question',
-            'Correct Answer',
-            'Count',
         ]
 
     def load_answer_metadata(self, answer_metadata_file):
@@ -662,13 +663,22 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
         writer.writerow(dict(
             (k, k) for k in field_names
         ))
-        for content_tuple in values:
-            # Restore tabs that were removed in the map task.  Tabs are special characters to hadoop, so they were
-            # removed to prevent interpretation of them.  Restore them here.
-            tab_separated_content = '\t'.join(content_tuple)
 
+        # Collect in memory the list of dicts to be output.
+        row_data = []
+        for content_tuple in values:
+            # Restore tabs that were removed in the map task.  Tabs
+            # are special characters to hadoop, so they were removed
+            # to prevent interpretation of them.  Restore them here.
+            tab_separated_content = '\t'.join(content_tuple)
+            row_data.append(json.loads(tab_separated_content))
+
+        # Sort the list of dicts by their field names before encoding.
+        row_data = sorted(row_data, key=itemgetter(*field_names))
+
+        for row_dict in row_data:
             encoded_dict = dict()
-            for key, value in json.loads(tab_separated_content).iteritems():
+            for key, value in row_dict.iteritems():
                 encoded_dict[key] = unicode(value).encode('utf8')
             writer.writerow(encoded_dict)
 

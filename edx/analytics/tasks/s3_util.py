@@ -5,6 +5,9 @@ Utility methods for interacting with S3 via boto.
 from fnmatch import fnmatch
 from urlparse import urlparse
 
+from boto.s3.key import Key
+from luigi.s3 import S3Client
+
 
 def get_s3_bucket_key_names(url):
     """Extract the bucket and key names from a S3 URL"""
@@ -66,3 +69,28 @@ def _filter_matches(patterns, names):
     """Return only key names that match any of the include patterns."""
     func = lambda n: any(fnmatch(n, p) for p in patterns)
     return (n for n in names if func(n))
+
+
+class RestrictedPermissionsS3Client(S3Client):
+    """
+    S3 client that requires minimal permissions to write objects to a bucket.
+
+    It should only require PutObject and PutObjectAcl permissions in order to write to the target bucket.
+    """
+    # TODO: Make this behavior configurable and submit this change upstream.
+
+    def put(self, local_path, destination_s3_path):
+        """Put an object stored locally to an S3 path."""
+        (bucket, key) = self._path_to_bucket_and_key(destination_s3_path)
+
+        # Boto will list all of the keys in the bucket if it is passed "validate=True" this requires an additional
+        # permission.  We want to minimize the set of required permissions so we get a reference to the bucket without
+        # validating that it exists.
+        s3_bucket = self.s3.get_bucket(bucket, validate=False)
+
+        # By default, AWS does not apply an ACL to keys that are put into a bucket from another account. Having no ACL
+        # at all effectively renders the object useless since it cannot be read or anything. The only workaround we
+        # found was to explicitly set the ACL policy when putting the object.
+        s3_key = Key(s3_bucket)
+        s3_key.key = key
+        s3_key.set_contents_from_filename(local_path, policy='bucket-owner-full-control')

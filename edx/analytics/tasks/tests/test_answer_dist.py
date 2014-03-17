@@ -477,14 +477,50 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         expected_output = self._get_expected_output(answer_data)
         self._check_output([input_data], (expected_output,))
 
-    def test_choice_answer(self):
+    def check_choice_answer(self, answer, expected):
+        """Run a choice answer with a provided value, and compare with expected."""
         answer_data = self._get_answer_data(
             answer_value_id='choice_1',
-            answer='First Choice',
+            answer=answer,
         )
         input_data = (self.timestamp, json.dumps(answer_data))
-        expected_output = self._get_expected_output(answer_data, ValueID='choice_1', AnswerValue='First Choice')
+        expected_output = self._get_expected_output(answer_data, ValueID='choice_1', AnswerValue=expected)
         self._check_output([input_data], (expected_output,))
+
+    def test_choice_answer(self):
+        self.check_choice_answer('First Choice', 'First Choice')
+
+    def test_choice_answer_with_whitespace(self):
+        self.check_choice_answer('First Choice\t', 'First Choice')
+
+    def test_choice_answer_with_empty_string(self):
+        self.check_choice_answer('', '')
+
+    def test_choice_answer_with_empty_markup(self):
+        self.check_choice_answer('<text><span>First Choice</span></text>', 'First Choice')
+
+    def test_choice_answer_with_non_element_markup(self):
+        # This tests a branch of the get_text_from_element logic,
+        # where there is no tag on an element.
+        self.check_choice_answer(
+            '<text><span>First<!-- embedded comment --> Choice</span></text>',
+            'First Choice'
+        )
+
+    def test_choice_answer_with_html_markup(self):
+        self.check_choice_answer('<p>First<br>Choice', 'First Choice')
+
+    def test_choice_answer_with_embedded_whitespace(self):
+        self.check_choice_answer('First  \t\n    Choice  ', 'First Choice')
+
+    def test_choice_answer_with_bad_html_markup(self):
+        self.check_choice_answer('<p First <br>Choice', 'Choice')
+
+    def test_choice_answer_with_bad2_html_markup(self):
+        self.check_choice_answer('First br>Choice', 'First br>Choice')
+
+    def test_choice_answer_with_cdata_html_markup(self):
+        self.check_choice_answer('First <![CDATA[This is to be ignored.]]>  Choice', 'First Choice')
 
     def test_multiple_choice_answer(self):
         answer_data = self._get_answer_data(
@@ -497,6 +533,24 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
             answer_data,
             ValueID='[choice_1|choice_2|choice_4]',
             AnswerValue=u'[First Ch\u014dice|Second Ch\u014dice|Fourth Ch\u014dice]'
+        )
+        self._check_output([input_data], (expected_output,))
+
+    def test_multiple_choice_answer_with_markup(self):
+        answer_data = self._get_answer_data(
+            answer_value_id=['choice_1', 'choice_2', 'choice_4'],
+            answer=[
+                u'<text>First Ch\u014dice</text>',
+                u'Second <sup>Ch\u014dice</sup>',
+                u'Fourth <table><tbody><tr><td>Ch\u014dice</td></tr></tbody></table> goes here.'
+            ],
+            response_type="multiplechoiceresponse",
+        )
+        input_data = (self.timestamp, json.dumps(answer_data))
+        expected_output = self._get_expected_output(
+            answer_data,
+            ValueID='[choice_1|choice_2|choice_4]',
+            AnswerValue=u'[First Ch\u014dice|Second Ch\u014dice|Fourth Ch\u014dice goes here.]'
         )
         self._check_output([input_data], (expected_output,))
 
@@ -550,6 +604,14 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         expected_output_1 = self._get_expected_output(answer_data_1)
         expected_output_2 = self._get_expected_output(answer_data_2)
         self._check_output([input_data_1, input_data_2], (expected_output_1, expected_output_2))
+
+    def test_two_answer_event_different_answer_by_whitespace(self):
+        answer_data_1 = self._get_answer_data(answer="\t\n\nfirst   ")
+        answer_data_2 = self._get_answer_data(answer="first")
+        input_data_1 = (self.earlier_timestamp, json.dumps(answer_data_1))
+        input_data_2 = (self.timestamp, json.dumps(answer_data_2))
+        expected_output = self._get_expected_output(answer_data_2, Count=2)
+        self._check_output([input_data_1, input_data_2], (expected_output,))
 
     def test_two_answer_event_different_old_and_new(self):
         answer_data_1 = self._get_non_submission_answer_data(answer_value_id="first")
@@ -685,12 +747,7 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
     def test_map_single_value(self):
         key, value = next(self.task.mapper('foo\tbar'))
         self.assertEquals(key, 'foo')
-        self.assertEquals(value, ('bar',))
-
-    def test_map_multiple_values(self):
-        key, value = next(self.task.mapper('foo\tbar\tbaz'))
-        self.assertEquals(key, 'foo')
-        self.assertEquals(value, ('bar', 'baz'))
+        self.assertEquals(value, 'bar')
 
     def test_reduce_multiple_values(self):
         field_names = AnswerDistributionPerCourseMixin.get_column_order()
@@ -705,7 +762,7 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
         sample_input_2 = json.dumps(dict(column_values_2))
         mock_output_file = Mock()
 
-        self.task.multi_output_reducer('foo', iter([(sample_input_1,), (sample_input_2,)]), mock_output_file)
+        self.task.multi_output_reducer('foo', iter([sample_input_1, sample_input_2]), mock_output_file)
 
         expected_header_string = ','.join(field_names) + '\r\n'
         self.assertEquals(mock_output_file.write.mock_calls[0], call(expected_header_string))

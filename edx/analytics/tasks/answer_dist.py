@@ -2,9 +2,10 @@
 Luigi tasks for extracting problem answer distribution statistics from
 tracking log files.
 """
-import hashlib
-import json
 import csv
+import hashlib
+import html5lib
+import json
 from operator import itemgetter
 
 import luigi
@@ -310,8 +311,13 @@ class AnswerDistributionPerCourseMixin(object):
                     answer_value = answer.get('answer', answer.get('answer_value_id'))
 
                 # These values may be lists, so convert to output format.
+                # And if we have a value_id, the corresponding answer_value
+                # may contain HTML markup, that should be stripped.
+                # But don't strip markup otherwise, as it may be part of
+                # the answer.
                 value_id = self.stringify(value_id)
-                answer_value = self.stringify(answer_value)
+                answer_value_contains_html = (value_id is not None and value_id != '')
+                answer_value = self.stringify(answer_value, contains_html=answer_value_contains_html)
 
                 # If there is a variant, then the question might not be
                 # the same for all variants presented to students.  So
@@ -489,7 +495,7 @@ class AnswerDistributionPerCourseMixin(object):
         return u'{value}_{variant}'.format(value=self.stringify(answer_value), variant=variant)
 
     @staticmethod
-    def stringify(answer_value):
+    def stringify(answer_value, contains_html=False):
         """
         Convert answer value to a canonical string representation.
 
@@ -498,24 +504,63 @@ class AnswerDistributionPerCourseMixin(object):
         (e.g. "[choice_1|choice_3|choice_4]").
 
         If answer_value is a string, just returns as-is.
+
+        If contains_html is True, the answer_string is parsed as XML,
+        and the text value of the answer_value is returned.
+
         """
         # If it's a list, convert to a string.  Note that it's not
         # enough to call str() or unicode(), as this will appear as
         # "[u'choice_5']".
+        def normalize(value):
+            """Pull out HTML tags if requested."""
+            return get_text_from_html(value) if contains_html else value.strip()
 
-        # TODO: also need to strip out XML tags here, that may be
-        # appearing for the answer text displayed for choices.  But
-        # what happens if the answer is not a choice, but is a text
-        # string, and that string happens to have XML-like markup in
-        # it?
         if isinstance(answer_value, basestring):
-            return answer_value
+            return normalize(answer_value)
         elif isinstance(answer_value, list):
-            return u'[{list_val}]'.format(list_val=u'|'.join(answer_value))
+            list_val = u'|'.join(normalize(value) for value in answer_value)
+            return u'[{list_val}]'.format(list_val=list_val)
         else:
             # unexpected type:
             log.error("Unexpected type for an answer_value: %s", answer_value)
             return unicode(answer_value)
+
+
+def get_text_from_html(markup):
+    """
+    Convert html markup to plain text.
+
+    Includes stripping excess whitespace, and assuring whitespace
+    exists between elements (e.g. table elements).
+    """
+    try:
+        root = html5lib.parse(markup)
+        text_list = []
+        for val in get_text_from_element(root):
+            text_list.extend(val.split())
+        text = u' '.join(text_list)
+    except Exception as exception:  # pylint: disable=broad-except
+        # TODO: find out what exceptions might actually occur here, if any.
+        # This may be unnecessarily paranoid, given html5lib's fallback behavior.
+        log.error("Unparseable answer value markup: '%s' return exception %s", markup, exception)
+        text = markup.strip()
+
+    return text
+
+
+def get_text_from_element(node):
+    """Traverse ElementTree node recursively to return text values."""
+    tag = node.tag
+    if not isinstance(tag, basestring) and tag is not None:
+        return
+    if node.text:
+        yield node.text
+    for child in node:
+        for text in get_text_from_element(child):
+            yield text
+        if child.tail:
+            yield child.tail
 
 
 ##################################
@@ -543,7 +588,8 @@ class BaseAnswerDistributionTask(MapReduceJobTask):
         # Boto is used for S3 access and cjson for parsing log files.
         import boto
         import cjson
-        return [boto, cjson]
+        import six
+        return [boto, cjson, html5lib, six]
 
 
 class LastProblemCheckEvent(LastProblemCheckEventMixin, BaseAnswerDistributionTask):
@@ -629,16 +675,15 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
         """
         Groups inputs by course_id, writes all records with the same course_id to the same output file.
 
-        Each input line is expected to consist of tab separated columns. The first column is expected to be the
-        course_id and is used to group the entries. The course_id is stripped from the output and the remaining columns
-        are written to the appropriate output file in the same format they were read in (tab separated).
+        Each input line is expected to consist of two tab separated columns. The first column is expected to be the
+        course_id and is used to group the entries. The course_id is stripped from the output and the remaining column
+        is written to the appropriate output file in the same format it was read in (i.e. as an encoded JSON string).
         """
-        split_line = line.split('\t')
         # Ensure that the first column is interpreted as the grouping key by the hadoop streaming API.  Note that since
         # Configuration values can change this behavior, the remaining tab separated columns are encoded in a python
         # structure before returning to hadoop.  They are decoded in the reducer.
-        course_id, content = split_line[0], split_line[1:]
-        yield course_id, tuple(content)
+        course_id, content = line.split('\t')
+        yield course_id, content
 
     def output_path_for_key(self, course_id):
         """
@@ -664,16 +709,9 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
             (k, k) for k in field_names
         ))
 
-        # Collect in memory the list of dicts to be output.
-        row_data = []
-        for content_tuple in values:
-            # Restore tabs that were removed in the map task.  Tabs
-            # are special characters to hadoop, so they were removed
-            # to prevent interpretation of them.  Restore them here.
-            tab_separated_content = '\t'.join(content_tuple)
-            row_data.append(json.loads(tab_separated_content))
-
-        # Sort the list of dicts by their field names before encoding.
+        # Collect in memory the list of dicts to be output.  Then sort
+        # the list of dicts by their field names before encoding.
+        row_data = [json.loads(content) for content in values]
         row_data = sorted(row_data, key=itemgetter(*field_names))
 
         for row_dict in row_data:
@@ -685,7 +723,8 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
     def extra_modules(self):
         import cjson
         import boto
-        return [cjson, boto]
+        import six
+        return [boto, cjson, html5lib, six]
 
 
 ################################

@@ -8,5 +8,6 @@ tornado==3.1.1
 ansible==1.4.4
 python-cjson==1.0.5
 oursql==0.9.3.1
+html5lib==1.0b3
 
 -e git+https://github.com/spotify/luigi.git@a33756c781b9bf7e51384f0eb19d6a25050ef136#egg=luigi

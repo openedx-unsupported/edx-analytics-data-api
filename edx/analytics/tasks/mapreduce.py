@@ -6,6 +6,7 @@ from __future__ import absolute_import
 import luigi
 import luigi.hdfs
 import luigi.hadoop
+from luigi import configuration
 
 from edx.analytics.tasks.url import get_target_from_url, IgnoredTarget
 
@@ -19,6 +20,12 @@ class MapReduceJobTask(luigi.hadoop.JobTask):
     mapreduce_engine = luigi.Parameter(
         default_from_config={'section': 'map-reduce', 'name': 'engine'}
     )
+    input_format = luigi.Parameter(default=None)
+    lib_jar = luigi.Parameter(is_list=True, default=[])
+
+    # Override the parent class definition of this parameter. This typically wants to scale with the cluster size so the
+    # user should be able to tweak it depending on their particular configuration.
+    n_reduce_tasks = luigi.Parameter(default=25)
 
     def job_runner(self):
         # Lazily import this since this module will be loaded on hadoop worker nodes however stevedore will not be
@@ -31,7 +38,31 @@ class MapReduceJobTask(luigi.hadoop.JobTask):
         except KeyError:
             raise KeyError('A map reduce engine must be specified in order to run MapReduceJobTasks')
 
-        return engine_class()
+        if issubclass(engine_class, MapReduceJobRunner):
+            return engine_class(libjars_in_hdfs=self.lib_jar, input_format=self.input_format)
+        else:
+            return engine_class()
+
+
+class MapReduceJobRunner(luigi.hadoop.HadoopJobRunner):
+    """
+    Support more customization of the streaming command.
+
+    Args:
+        libjars_in_hdfs (list): An optional list of library jars that the hadoop job can make use of.
+        input_format (str): An optional full class name of a hadoop input format to use.
+    """
+
+    def __init__(self, libjars_in_hdfs=None, input_format=None):
+        libjars_in_hdfs = libjars_in_hdfs or []
+        config = configuration.get_config()
+        streaming_jar = config.get('hadoop', 'streaming-jar')
+
+        super(MapReduceJobRunner, self).__init__(
+            streaming_jar,
+            input_format=input_format,
+            libjars_in_hdfs=libjars_in_hdfs
+        )
 
 
 class MultiOutputMapReduceJobTask(MapReduceJobTask):

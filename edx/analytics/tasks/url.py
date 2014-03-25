@@ -18,7 +18,7 @@ import luigi.format
 import luigi.hdfs
 import luigi.s3
 
-from edx.analytics.tasks.s3_util import RestrictedPermissionsS3Client
+from edx.analytics.tasks.s3_util import RestrictedPermissionsS3Client, S3HdfsTarget
 
 
 class ExternalURL(luigi.ExternalTask):
@@ -44,8 +44,8 @@ class IgnoredTarget(luigi.hdfs.HdfsTarget):
 DEFAULT_TARGET_CLASS = luigi.LocalTarget
 URL_SCHEME_TO_TARGET_CLASS = {
     'hdfs': luigi.hdfs.HdfsTarget,
-    's3': luigi.hdfs.HdfsTarget,
-    's3n': luigi.hdfs.HdfsTarget,
+    's3': S3HdfsTarget,
+    's3n': S3HdfsTarget,
     'file': luigi.LocalTarget,
     's3+https': luigi.s3.S3Target,
 }

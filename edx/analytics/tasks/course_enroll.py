@@ -175,11 +175,15 @@ class BaseCourseEnrollmentTask(MapReduceJobTask):
       dest:  a URL to the root location to write output file(s).
       include:  a list of patterns to be used to match input files, relative to `src` URL.
           The default value is ['*'].
+      manifest: a URL to a file location that can store the complete set of input files.
     """
     name = luigi.Parameter()
     src = luigi.Parameter()
     dest = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
+    # A manifest file is required by hadoop if there are too many input paths. It hits an operating system limit on the
+    # number of arguments passed to the mapper process on the task nodes.
+    manifest = luigi.Parameter(default=None)
 
     def extra_modules(self):
         # The following are needed for (almost) every course enrollment task.
@@ -194,7 +198,7 @@ class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourse
     """Calculates daily change in enrollment for a user in a course, given raw event log input."""
 
     def requires(self):
-        return PathSetTask(self.src, self.include)
+        return PathSetTask(self.src, self.include, self.manifest)
 
     def output(self):
         output_name = 'course_enrollment_events_per_day_{name}'.format(name=self.name)
@@ -204,8 +208,20 @@ class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourse
 class CourseEnrollmentChangesPerDay(CourseEnrollmentChangesPerDayMixin, BaseCourseEnrollmentTask):
     """Calculates daily changes in enrollment, given per-user net changes by date."""
 
+    base_input_format = luigi.Parameter(default=None)
+
     def requires(self):
-        return CourseEnrollmentEventsPerDay(self.mapreduce_engine, self.name, self.src, self.dest, self.include)
+        return CourseEnrollmentEventsPerDay(
+            mapreduce_engine=self.mapreduce_engine,
+            input_format=self.base_input_format,
+            lib_jar=self.lib_jar,
+            n_reduce_tasks=self.n_reduce_tasks,
+            name=self.name,
+            src=self.src,
+            dest=self.dest,
+            include=self.include,
+            manifest=self.manifest
+        )
 
     def output(self):
         output_name = 'course_enrollment_changes_per_day_{name}'.format(name=self.name)

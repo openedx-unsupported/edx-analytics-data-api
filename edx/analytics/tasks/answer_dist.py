@@ -578,11 +578,15 @@ class BaseAnswerDistributionTask(MapReduceJobTask):
         dest:  a URL to the root location to write output file(s).
         include:  a list of patterns to be used to match input files, relative to `src` URL.
             The default value is ['*'].
+        manifest: a URL to a file location that can store the complete set of input files.
     """
     name = luigi.Parameter()
     src = luigi.Parameter()
     dest = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
+    # A manifest file is required by hadoop if there are too many input paths. It hits an operating system limit on the
+    # number of arguments passed to the mapper process on the task nodes.
+    manifest = luigi.Parameter(default=None)
 
     def extra_modules(self):
         # Boto is used for S3 access and cjson for parsing log files.
@@ -596,7 +600,7 @@ class LastProblemCheckEvent(LastProblemCheckEventMixin, BaseAnswerDistributionTa
     """Identifies last problem_check event for a user on a problem in a course, given raw event log input."""
 
     def requires(self):
-        return PathSetTask(self.src, self.include)
+        return PathSetTask(self.src, self.include, self.manifest)
 
     def output(self):
         output_name = u'last_problem_check_events_{name}/'.format(name=self.name)
@@ -611,13 +615,26 @@ class AnswerDistributionPerCourse(AnswerDistributionPerCourseMixin, BaseAnswerDi
     Additional Parameters:
         answer_metadata:  optional file to provide information about particular answers.
             Includes problem_display_name, input_type, response_type, and question.
+        base_input_format:  The input format to use on the first map reduce job in the chain. This job takes in the most
+            input and may need a custom input format.
     """
 
     answer_metadata = luigi.Parameter(default=None)
+    base_input_format = luigi.Parameter(default=None)
 
     def requires(self):
         results = {
-            'events': LastProblemCheckEvent(self.mapreduce_engine, self.name, self.src, self.dest, self.include),
+            'events': LastProblemCheckEvent(
+                mapreduce_engine=self.mapreduce_engine,
+                input_format=self.base_input_format,
+                lib_jar=self.lib_jar,
+                n_reduce_tasks=self.n_reduce_tasks,
+                name=self.name,
+                src=self.src,
+                dest=self.dest,
+                include=self.include,
+                manifest=self.manifest,
+            ),
         }
 
         if self.answer_metadata:
@@ -660,15 +677,21 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
     name = luigi.Parameter(default='periodic')
     output_root = luigi.Parameter()
     answer_metadata = luigi.Parameter(default=None)
+    manifest = luigi.Parameter(default=None)
+    base_input_format = luigi.Parameter(default=None)
 
     def requires(self):
         return AnswerDistributionPerCourse(
             mapreduce_engine=self.mapreduce_engine,
+            lib_jar=self.lib_jar,
+            base_input_format=self.base_input_format,
+            n_reduce_tasks=self.n_reduce_tasks,
             src=self.src,
             dest=self.dest,
             include=self.include,
             name=self.name,
-            answer_metadata=self.answer_metadata
+            answer_metadata=self.answer_metadata,
+            manifest=self.manifest,
         )
 
     def mapper(self, line):

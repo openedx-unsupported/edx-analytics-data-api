@@ -10,7 +10,8 @@ import uuid
 def main():
     """Parse arguments and run the remote task."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--job-flow-id', help='EMR job flow to run the task')
+    parser.add_argument('--job-flow-id', help='EMR job flow to run the task', default=None)
+    parser.add_argument('--job-flow-name', help='EMR job flow to run the task', default=None)
     parser.add_argument('--branch', help='git branch to checkout before running the task', default='release')
     parser.add_argument('--repo', help='git repository to clone')
     parser.add_argument('--remote-name', help='an identifier for this remote task')
@@ -51,7 +52,7 @@ def convert_args_to_extra_vars(arguments, uid):
         uid (str): A unique identifier for this task execution.
     """
     extra_vars = {
-        'name': arguments.job_flow_id,
+        'name': arguments.job_flow_id or arguments.job_flow_name,
         'branch': arguments.branch,
         'task_arguments': ' '.join(arguments.launch_task_arguments) + ' >/tmp/{0}.out 2>/tmp/{0}.err'.format(uid),
         'uuid': uid,

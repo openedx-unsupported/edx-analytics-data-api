@@ -374,7 +374,7 @@ class Ec2Inventory(object):
             if k == 'ansible:groups':
                 for group in v.split(','):
                     self.push(self.inventory, group, dest)
-            elif k == 'aws:elasticmapreduce:job-flow-id':
+            elif k == 'aws:elasticmapreduce:job-flow-id' or k == 'ansible:emr:name':
                 role = instance.tags.get('aws:elasticmapreduce:instance-group-role')
                 if role:
                     self.push(self.inventory, 'mr_{name}_{role}'.format(name=v, role=role.lower()), dest)

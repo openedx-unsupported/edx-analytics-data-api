@@ -6,7 +6,7 @@ from fnmatch import fnmatch
 from urlparse import urlparse
 
 from boto.s3.key import Key
-from luigi.s3 import S3Client, AtomicS3File, ReadableS3File, FileNotFoundException
+from luigi.s3 import S3Client, AtomicS3File
 
 import luigi.hdfs
 
@@ -101,8 +101,9 @@ class RestrictedPermissionsS3Client(S3Client):
 class S3HdfsTarget(luigi.hdfs.HdfsTarget):
     """HDFS target that supports writing and reading files directly in S3."""
 
-    # Luigi does not support HDFS targets that point to complete URLs like "s3://foo/bar" it only supports HDFS paths
-    # that look like standard file paths "/foo/bar".  Once this bug is fixed this class is no longer necessary.
+    # Luigi does not support writing to HDFS targets that point to complete URLs like "s3://foo/bar" it only supports
+    # HDFS paths that look like standard file paths "/foo/bar".  Once this bug is fixed this class is no longer
+    # necessary.
 
     # TODO: Fix the upstream bug in luigi that prevents writing to HDFS files that are specified by complete URLs
 
@@ -114,13 +115,8 @@ class S3HdfsTarget(luigi.hdfs.HdfsTarget):
         if mode not in ('r', 'w'):
             raise ValueError("Unsupported open mode '{mode}'".format(mode=mode))
 
-        safe_path = self.path.replace('s3n://', 's3://')
-
         if mode == 'r':
-            s3_key = self.s3_client.get_key(safe_path)
-            if s3_key:
-                return ReadableS3File(s3_key)
-            else:
-                raise FileNotFoundException("Could not find file at %s" % safe_path)
+            return super(S3HdfsTarget, self).open(mode=mode)
         else:
+            safe_path = self.path.replace('s3n://', 's3://')
             return AtomicS3File(safe_path, self.s3_client)

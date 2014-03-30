@@ -639,6 +639,26 @@ class AnswerDistributionPerCourseReduceTest(unittest.TestCase):
         expected_output_2 = self._get_expected_output(answer_data_2)
         self._check_output([input_data_1, input_data_2], (expected_output_1, expected_output_2))
 
+    def test_problem_type_changed_to_multi_choice(self):
+        answer_data_1 = self._get_answer_data(
+            answer=u'First Ch\u014dice',
+            response_type='optionresponse',
+        )
+        answer_data_2 = self._get_answer_data(
+            answer_value_id=['choice_1', 'choice_2', 'choice_4'],
+            answer=[u'First Ch\u014dice', u'Second Ch\u014dice', u'Fourth Ch\u014dice'],
+            response_type="multiplechoiceresponse",
+        )
+        input_data_1 = (self.earlier_timestamp, json.dumps(answer_data_1))
+        input_data_2 = (self.timestamp, json.dumps(answer_data_2))
+        expected_output_1 = self._get_expected_output(answer_data_1)
+        expected_output_2 = self._get_expected_output(
+            answer_data_2,
+            ValueID='[choice_1|choice_2|choice_4]',
+            AnswerValue=u'[First Ch\u014dice|Second Ch\u014dice|Fourth Ch\u014dice]'
+        )
+        self._check_output([input_data_1, input_data_2], (expected_output_1, expected_output_2))
+
     def _load_metadata(self, **kwargs):
         """Defines some metadata for test answer."""
         metadata_dict = {

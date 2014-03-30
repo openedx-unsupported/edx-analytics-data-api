@@ -299,8 +299,11 @@ class AnswerDistributionPerCourseMixin(object):
                     # the code should be returned as such.  If this
                     # particular answer did not have 'submission'
                     # information, it may not have an answer_value, so
-                    # we flag it.
-                    value_id = answer['answer_value_id']
+                    # we flag it. The problem type may have changed as
+                    # well, so previous answers to this problem may not
+                    # actually have an answer_value_id even though the
+                    # most recent one does.
+                    value_id = answer.get('answer_value_id', '')
                     answer_value = answer.get('answer', UNKNOWN_ANSWER_VALUE)
                 else:
                     # There should be no value_id returned.  If the

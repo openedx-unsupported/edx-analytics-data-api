@@ -69,7 +69,6 @@ class PathSetTask(luigi.Task):
         else:
             return self.generate_file_list()
 
-
     def complete(self):
         # An optimization: just declare that the task is always
         # complete, by definition, because it is whatever files were

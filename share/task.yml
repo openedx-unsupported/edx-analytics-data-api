@@ -10,12 +10,14 @@
 - name: Run a task
   hosts: "mr_{{ name }}_master"
   gather_facts: False
-  sudo: False
 
   vars:
     - repo: git@github.com:edx/analytics-tasks.git
     - branch: master
-    - working_dir: "/tmp/task-work-{{ uuid }}"
+    - root_data_dir: /var/lib/analytics-tasks
+    - root_log_dir: /var/log/analytics-tasks
+    - working_dir: "{{ root_data_dir }}/{{ uuid }}"
+    - log_dir: "{{ root_log_dir }}/{{ uuid}}"
     - working_repo_dir: "{{ working_dir }}/repo"
     - working_venv_dir: "{{ working_dir }}/venv"
     - task_arguments: ''
@@ -34,12 +36,26 @@
         regexp=^github.com
         line="{{ git_server_hostname }},{{ git_server_ip_address }} {{ git_server_public_key }}"
 
+    - name: root directories created
+      file: path={{ item }} state=directory owner=root group=root
+      sudo: True
+      with_items:
+        - "{{ root_data_dir }}"
+        - "{{ root_log_dir }}"
+
     - name: working directories created
-      file: path={{ item }} state=directory
+      file: path={{ item }} state=directory owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }}
+      sudo: True
       with_items:
         - "{{ working_dir }}"
         - "{{ working_repo_dir }}"
         - "{{ working_venv_dir }}"
+
+    - name: log directory created
+      file: path={{ item }} state=directory mode=777 owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }}
+      sudo: True
+      with_items:
+        - "{{ log_dir }}"
 
     - name: analytics tasks repository checked out
       git: repo={{ repo }} dest={{ working_repo_dir }}
@@ -52,9 +68,10 @@
 
     - name: ensure system packages are installed
       command: make system-requirements chdir={{ working_repo_dir }}
+      sudo: True
 
     - name: bootstrap pip
-      command: sudo apt-get install -q -y python-pip
+      command: apt-get install -q -y python-pip
       sudo: True
 
     - name: virtualenv installed
@@ -70,6 +87,9 @@
         . {{ working_venv_dir }}/bin/activate && make install
         chdir={{ working_repo_dir }}
 
+    - name: logging configured
+      template: src=logging.cfg.j2 dest={{ working_repo_dir }}/logging.cfg
+
     # Unfortunately, we cannot make the poll value a variable because of this open issue:
     # https://github.com/ansible/ansible/issues/255
     # As a workaround, we define two versions of this play, then choose
@@ -78,14 +98,18 @@
     # In the integration tests, we will wait for tasks to complete before verifying results.
     - name: task run (fire and forget)
       shell: >
-        {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} chdir={{ working_repo_dir }}
+        . /home/hadoop/.bashrc && {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} >{{ log_dir }}/stdout 2>{{ log_dir }}/stderr chdir={{ working_repo_dir }}
       async: 10000000000
       poll: 0
+      sudo: True
+      sudo_user: hadoop
       when: not wait_for_task
 
     - name: task run (wait for completion)
       shell: >
-        {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} chdir={{ working_repo_dir }}
+        . /home/hadoop/.bashrc && {{ working_venv_dir }}/bin/launch-task {{ task_arguments }} >{{ log_dir }}/stdout 2>{{ log_dir }}/stderr chdir={{ working_repo_dir }}
       async: 10000000000
       poll: 10
+      sudo: True
+      sudo_user: hadoop
       when: wait_for_task

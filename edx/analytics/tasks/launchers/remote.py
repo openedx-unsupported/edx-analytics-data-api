@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--wait', action='store_true', help='wait for the task to complete')
     parser.add_argument('--verbose', action='store_true', help='display very verbose output')
     parser.add_argument('--log-path', help='download luigi output streams after completing the task', default=None)
+    parser.add_argument('--user', help='remote user name to connect as', default=None)
     arguments, extra_args = parser.parse_known_args()
     arguments.launch_task_arguments = extra_args
 
@@ -39,7 +40,10 @@ def run_task_playbook(arguments, uid):
         uid (str): A unique identifier for this task execution.
     """
     extra_vars = convert_args_to_extra_vars(arguments, uid)
-    return run_ansible(('task.yml', '-e', extra_vars), arguments.verbose, executable='ansible-playbook')
+    args = ['task.yml', '-e', extra_vars]
+    if arguments.user:
+        args.extend(['-u', arguments.user])
+    return run_ansible(tuple(args), arguments.verbose, executable='ansible-playbook')
 
 
 def convert_args_to_extra_vars(arguments, uid):
@@ -54,7 +58,7 @@ def convert_args_to_extra_vars(arguments, uid):
     extra_vars = {
         'name': arguments.job_flow_id or arguments.job_flow_name,
         'branch': arguments.branch,
-        'task_arguments': ' '.join(arguments.launch_task_arguments) + ' >/tmp/{0}.out 2>/tmp/{0}.err'.format(uid),
+        'task_arguments': ' '.join(arguments.launch_task_arguments),
         'uuid': uid,
     }
     if arguments.repo:
@@ -109,15 +113,19 @@ def download_logs(arguments, uid):
         uid (str): A unique identifier for this task execution.
     """
     for extension in ['out', 'err']:
+        args = [
+            'mr_{job_flow}_master'.format(job_flow=arguments.job_flow_id),
+            '-m', 'fetch',
+            '-a', 'src=/tmp/{uid}.{ext} dest={dest} flat=yes'.format(
+                uid=uid,
+                ext=extension,
+                dest=arguments.log_path
+            )
+        ]
+        if arguments.user:
+            args.extend(['-u', arguments.user])
+
         run_ansible(
-            (
-                'mr_{job_flow}_master'.format(job_flow=arguments.job_flow_id),
-                '-m', 'fetch',
-                '-a', 'src=/tmp/{uid}.{ext} dest={dest} flat=yes'.format(
-                    uid=uid,
-                    ext=extension,
-                    dest=arguments.log_path
-                )
-            ),
+            tuple(args),
             arguments.verbose
         )

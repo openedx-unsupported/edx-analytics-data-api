@@ -25,8 +25,6 @@ def main():
     uid = arguments.remote_name or str(uuid.uuid4())
 
     return_code = run_task_playbook(arguments, uid)
-    if arguments.log_path:
-        download_logs(arguments, uid)
 
     sys.exit(return_code)
 
@@ -65,6 +63,8 @@ def convert_args_to_extra_vars(arguments, uid):
         extra_vars['repo'] = arguments.repo
     if arguments.wait:
         extra_vars['wait_for_task'] = True
+    if arguments.log_path:
+        extra_vars['local_log_dir'] = arguments.log_path
     return ' '.join(["{}='{}'".format(k, extra_vars[k]) for k in extra_vars])
 
 
@@ -102,30 +102,3 @@ def run_ansible(args, verbose, executable='ansible'):
         proc.wait()
 
     return proc.returncode
-
-
-def download_logs(arguments, uid):
-    """
-    Connect to the remote machine and download the logs produced by luigi.
-
-    Args:
-        arguments (argparse.Namespace): The arguments that were passed in on the command line.
-        uid (str): A unique identifier for this task execution.
-    """
-    for extension in ['out', 'err']:
-        args = [
-            'mr_{job_flow}_master'.format(job_flow=arguments.job_flow_id),
-            '-m', 'fetch',
-            '-a', 'src=/tmp/{uid}.{ext} dest={dest} flat=yes'.format(
-                uid=uid,
-                ext=extension,
-                dest=arguments.log_path
-            )
-        ]
-        if arguments.user:
-            args.extend(['-u', arguments.user])
-
-        run_ansible(
-            tuple(args),
-            arguments.verbose
-        )

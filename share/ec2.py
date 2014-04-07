@@ -331,6 +331,7 @@ class Ec2Inventory(object):
         for dest_variable in [self.destination_variable, self.backup_destination_variable]:
             if hasattr(instance, dest_variable):
                 dest = getattr(instance, dest_variable)
+                break
 
         if not dest:
             # Skip instances we cannot address (e.g. private VPC subnet)

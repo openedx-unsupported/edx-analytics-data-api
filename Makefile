@@ -19,7 +19,11 @@ test-requirements: requirements
 test: test-requirements
 	# TODO: when we have better coverage, modify this to actually fail when coverage is too low.
 	rm -rf .coverage
-	python -m coverage run --rcfile=./.coveragerc `which nosetests`
+	python -m coverage run --rcfile=./.coveragerc `which nosetests` -A 'not acceptance'
+
+test-acceptance: test-requirements
+	rm -rf .coverage
+	python -m coverage run --rcfile=./.coveragerc `which nosetests` --nocapture -A acceptance
 
 coverage: test
 	coverage html
@@ -38,3 +42,26 @@ jenkins: .tox
 	virtualenv ./venv
 	./venv/bin/pip install tox
 	./venv/bin/tox
+
+get_config = $(shell echo "$$ACCEPTANCE_TEST_CONFIG" | python -c 'import sys, json; print json.load(sys.stdin)[sys.argv[1]]' $(1))
+VENV_ROOT = $(shell echo "$$WORKSPACE/build/venvs")
+META_BIN = $(VENV_ROOT)/meta/bin
+EXPORTER_BIN = $(VENV_ROOT)/analytics-exporter/bin
+export EXPORTER=$(EXPORTER_BIN)/exporter
+TASKS_BIN = $(VENV_ROOT)/analytics-tasks/bin
+export REMOTE_TASK=$(TASKS_BIN)/remote-task
+
+jenkins-acceptance:
+	mkdir -p $(VENV_ROOT)
+
+	virtualenv $(VENV_ROOT)/analytics-tasks
+	virtualenv $(VENV_ROOT)/analytics-exporter
+	virtualenv $(VENV_ROOT)/meta
+
+	$(META_BIN)/pip install awscli
+	$(META_BIN)/aws s3 rm --recursive $(call get_config,tasks_output_url)$(call get_config,identifier) || true
+
+	$(EXPORTER_BIN)/pip install -r $$WORKSPACE/analytics-exporter/requirements.txt
+	$(EXPORTER_BIN)/pip install -e $$WORKSPACE/analytics-exporter/
+
+	. $(TASKS_BIN)/activate && $(MAKE) test-acceptance

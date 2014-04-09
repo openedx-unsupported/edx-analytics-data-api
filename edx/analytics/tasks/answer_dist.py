@@ -592,11 +592,8 @@ class BaseAnswerDistributionTask(MapReduceJobTask):
     manifest = luigi.Parameter(default=None)
 
     def extra_modules(self):
-        # Boto is used for S3 access and cjson for parsing log files.
-        import boto
-        import cjson
         import six
-        return [boto, cjson, html5lib, six]
+        return [html5lib, six]
 
 
 class LastProblemCheckEvent(LastProblemCheckEventMixin, BaseAnswerDistributionTask):
@@ -747,10 +744,8 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
             writer.writerow(encoded_dict)
 
     def extra_modules(self):
-        import cjson
-        import boto
         import six
-        return [boto, cjson, html5lib, six]
+        return [html5lib, six]
 
 
 ################################

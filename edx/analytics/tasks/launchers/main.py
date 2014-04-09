@@ -25,6 +25,8 @@ import logging
 
 import boto
 import argparse
+import filechunkio
+import cjson
 
 import luigi
 import luigi.configuration
@@ -51,8 +53,11 @@ def main():
         log.warning('Default configuration file not found: %s', DEFAULT_CONFIGURATION_FILE)
 
     # Tell luigi what dependencies to pass to the Hadoop nodes
-    # - argparse is not included by default in python 2.6
-    luigi.hadoop.attach(argparse)
+    # - argparse is not included by default in python 2.6, but is required by luigi.
+    # - boto is used for all direct interactions with s3.
+    # - cjson is used for all parsing event logs.
+    # - filechunkio is used for multipart uploads of large files to s3.
+    luigi.hadoop.attach(argparse, boto, cjson, filechunkio)
 
     # TODO: setup logging for tasks or configured logging mechanism
 

@@ -27,9 +27,6 @@ class S3Copy(luigi.Task):
         super(S3Copy, self).__init__(*args, **kwargs)
         self.s3 = boto.connect_s3()
 
-    def extra_modules(self):
-        return [boto]
-
     def requires(self):
         return luigi.s3.S3PathTask(self.source)
 
@@ -101,9 +98,6 @@ class S3Sync(luigi.Task):
     def __init__(self, *args, **kwargs):
         super(S3Sync, self).__init__(*args, **kwargs)
         self.s3 = boto.connect_s3()
-
-    def extra_modules(self):
-        return [boto]
 
     def requires(self):
         for bucket, root, path in generate_s3_sources(self.s3, self.source, self.include):

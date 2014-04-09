@@ -185,14 +185,6 @@ class BaseCourseEnrollmentTask(MapReduceJobTask):
     # number of arguments passed to the mapper process on the task nodes.
     manifest = luigi.Parameter(default=None)
 
-    def extra_modules(self):
-        # The following are needed for (almost) every course enrollment task.
-        # Boto is used for S3 access, cjson for parsing log files, and util
-        # is used for parsing events and date conversion.
-        import boto
-        import cjson
-        return [boto, cjson]
-
 
 class CourseEnrollmentEventsPerDay(CourseEnrollmentEventsPerDayMixin, BaseCourseEnrollmentTask):
     """Calculates daily change in enrollment for a user in a course, given raw event log input."""

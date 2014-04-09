@@ -43,7 +43,7 @@ class PathSetTask(luigi.Task):
             if self.s3_conn is None:
                 self.s3_conn = boto.connect_s3()
             for _bucket, root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
-                source = url_path_join(self.src, root, path)
+                source = url_path_join(self.src, path)
                 yield ExternalURL(source)
         else:
             filelist = []

@@ -18,7 +18,7 @@ import luigi.format
 import luigi.hdfs
 import luigi.s3
 
-from edx.analytics.tasks.s3_util import RestrictedPermissionsS3Client, S3HdfsTarget
+from edx.analytics.tasks.s3_util import ScalableS3Client, S3HdfsTarget
 
 
 class ExternalURL(luigi.ExternalTask):
@@ -63,7 +63,7 @@ def get_target_from_url(url):
         if url.endswith('.gz'):
             kwargs['format'] = luigi.format.Gzip
     if issubclass(target_class, luigi.s3.S3Target):
-        kwargs['client'] = RestrictedPermissionsS3Client()
+        kwargs['client'] = ScalableS3Client()
 
     url = url.rstrip('/')
     return target_class(url, **kwargs)

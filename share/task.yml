@@ -26,6 +26,11 @@
     - git_server_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
     - wait_for_task: False
     - local_log_dir: build/logs
+    - install_env:
+        # EMR runs a modified version of Debian 6 (squeeze)
+        WHEEL_URL: http://edx-wheelhouse.s3-website-us-east-1.amazonaws.com/Debian/squeeze
+        # EMR ships with python 2.6 (unfortunately)
+        WHEEL_PYVER: 2.6
 
   tasks:
     - name: known_hosts file exists
@@ -87,6 +92,7 @@
       shell: >
         . {{ working_venv_dir }}/bin/activate && make install
         chdir={{ working_repo_dir }}
+      environment: install_env
 
     - name: logging configured
       template: src=logging.cfg.j2 dest={{ working_repo_dir }}/logging.cfg
@@ -121,3 +127,4 @@
         - stdout
         - stderr
         - edx_analytics.log
+      when: wait_for_task

@@ -7,6 +7,9 @@ import sys
 import uuid
 
 
+STATIC_FILES_PATH = os.path.join(sys.prefix, 'share', 'edx.analytics.tasks')
+
+
 def main():
     """Parse arguments and run the remote task."""
     parser = argparse.ArgumentParser()
@@ -24,6 +27,7 @@ def main():
 
     uid = arguments.remote_name or str(uuid.uuid4())
 
+    refresh_ansible_inventory_cache()
     return_code = run_task_playbook(arguments, uid)
 
     sys.exit(return_code)
@@ -68,6 +72,26 @@ def convert_args_to_extra_vars(arguments, uid):
     return ' '.join(["{}='{}'".format(k, extra_vars[k]) for k in extra_vars])
 
 
+def refresh_ansible_inventory_cache():
+    """
+    Ensure the EC2 inventory cache is cleared before running ansible.
+
+    Otherwise new resources will not be present in the inventory which will cause ansible to fail to connect to them.
+
+    """
+    executable_path = os.path.join(STATIC_FILES_PATH, 'ec2.py')
+    with open('/dev/null', 'r+') as devnull:
+        proc = Popen(
+            [executable_path, '--refresh-cache'],
+            stdin=devnull,
+            cwd=STATIC_FILES_PATH
+        )
+        proc.wait()
+
+    if proc.returncode != 0:
+        raise RuntimeError('Unable to refresh ansible inventory cache.')
+
+
 def run_ansible(args, verbose, executable='ansible'):
     """
     Execute ansible passing in the provided arguments.
@@ -97,7 +121,7 @@ def run_ansible(args, verbose, executable='ansible'):
             command,
             stdin=devnull,
             env=env,
-            cwd=os.path.join(sys.prefix, 'share', 'edx.analytics.tasks')
+            cwd=STATIC_FILES_PATH
         )
         proc.wait()
 

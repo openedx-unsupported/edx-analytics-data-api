@@ -8,7 +8,11 @@ import luigi.hdfs
 import luigi.hadoop
 from luigi import configuration
 
-from edx.analytics.tasks.url import get_target_from_url, IgnoredTarget
+from edx.analytics.tasks.url import get_target_from_url, url_path_join
+
+
+# Name of marker file to appear in output directory of MultiOutputMapReduceJobTask to indicate success.
+MARKER_FILENAME = 'job_success'
 
 
 class MapReduceJobTask(luigi.hadoop.JobTask):
@@ -73,11 +77,16 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
     reduce tasks must not write to the same file.  Since all values for a given mapper output key are guaranteed to be
     processed by the same reduce task, we only allow a single file to be output per key for safety.  In the future, the
     reducer output key could be used to determine the output file name, however,
+
+    Parameters:
+        output_root: a URL location where the split files will be stored.
+        delete_output_root: if True, recursively deletes the output_root at task creation.
     """
+    output_root = luigi.Parameter()
+    delete_output_root = luigi.BooleanParameter(default=False)
 
     def output(self):
-        # Unfortunately, Luigi requires an output.
-        return IgnoredTarget()
+        return get_target_from_url(url_path_join(self.output_root, MARKER_FILENAME))
 
     def reducer(self, key, values):
         """
@@ -104,3 +113,15 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
         from this function.
         """
         return None
+
+    def __init__(self, *args, **kwargs):
+        super(MultiOutputMapReduceJobTask, self).__init__(*args, **kwargs)
+        if self.delete_output_root:
+            # If requested, make sure that the output directory is empty.  This gets rid
+            # of any generated data files from a previous run (that might not get
+            # regenerated in this run).  It also makes sure that the marker file
+            # (i.e. the output target) will be removed, so that external functionality
+            # will know that the generation of data files is not complete.
+            output_dir_target = get_target_from_url(self.output_root)
+            if output_dir_target.exists():
+                output_dir_target.remove()

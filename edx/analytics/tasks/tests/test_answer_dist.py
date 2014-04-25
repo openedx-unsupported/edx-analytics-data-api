@@ -5,6 +5,9 @@ Tests for tasks that calculate answer distributions.
 import json
 import StringIO
 import hashlib
+import os
+import tempfile
+import shutil
 
 from mock import Mock, call
 
@@ -807,3 +810,62 @@ class AnswerDistributionOneFilePerCourseTaskTest(unittest.TestCase):
         output_path = task.output_path_for_key(course_id)
         expected_output_path = '/tmp/{0}/foo_bar_baz_answer_distribution.csv'.format(hashed_course_id)
         self.assertEquals(output_path, expected_output_path)
+
+
+class AnswerDistributionOneFilePerCourseTaskOutputRootTest(unittest.TestCase):
+    """Tests for output_root behavior of AnswerDistributionOneFilePerCourseTask."""
+
+    def setUp(self):
+        # Define a real output directory, so it can
+        # be removed if existing.
+        def cleanup(dirname):
+            """Remove the temp directory only if it exists."""
+            if os.path.exists(dirname):
+                shutil.rmtree(dirname)
+
+        self.output_root = tempfile.mkdtemp()
+        self.addCleanup(cleanup, self.output_root)
+
+    def test_no_delete_output_root(self):
+        # Not using the delete_output_root option will
+        # not delete the output_root.
+        self.assertTrue(os.path.exists(self.output_root))
+        AnswerDistributionOneFilePerCourseTask(
+            mapreduce_engine='local',
+            src=None,
+            dest=None,
+            name='name',
+            include=None,
+            output_root=self.output_root,
+        )
+        self.assertTrue(os.path.exists(self.output_root))
+
+    def test_delete_output_root(self):
+        # We create a task in order to get the output path.
+        task = AnswerDistributionOneFilePerCourseTask(
+            mapreduce_engine='local',
+            src=None,
+            dest=None,
+            name='name',
+            include=None,
+            output_root=self.output_root,
+        )
+        # Write to the output path will not mark this task
+        # as complete.
+        output_marker = task.output().path
+        open(output_marker, 'a').close()
+        self.assertFalse(task.complete())
+
+        # But it's still possible to use the delete option
+        # to get rid of the output_root directory.
+        task = AnswerDistributionOneFilePerCourseTask(
+            mapreduce_engine='local',
+            src=None,
+            dest=None,
+            name='name',
+            include=None,
+            output_root=self.output_root,
+            delete_output_root="true",
+        )
+        self.assertFalse(task.complete())
+        self.assertFalse(os.path.exists(self.output_root))

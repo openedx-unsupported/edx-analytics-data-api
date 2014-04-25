@@ -15,7 +15,7 @@ import luigi.s3
 import edx.analytics.tasks.util.eventlog as eventlog
 from edx.analytics.tasks.mapreduce import MapReduceJobTask, MultiOutputMapReduceJobTask
 from edx.analytics.tasks.pathutil import PathSetTask
-from edx.analytics.tasks.url import ExternalURL
+from edx.analytics.tasks.url import ExternalURL, IgnoredTarget
 from edx.analytics.tasks.url import get_target_from_url, url_path_join
 
 import logging
@@ -679,6 +679,12 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
     answer_metadata = luigi.Parameter(default=None)
     manifest = luigi.Parameter(default=None)
     base_input_format = luigi.Parameter(default=None)
+
+    def output(self):
+        # Because this task writes to a shared directory, we don't
+        # want to include a marker for job success.  Use a special
+        # target that always triggers new runs and never writes out.
+        return IgnoredTarget()
 
     def requires(self):
         return AnswerDistributionPerCourse(

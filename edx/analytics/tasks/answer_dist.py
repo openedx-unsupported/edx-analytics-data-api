@@ -664,18 +664,18 @@ class AnswerDistributionOneFilePerCourseTask(MultiOutputMapReduceJobTask):
     Groups answer distributions by course, producing a different file for each.
 
     Most parameters are passed through to :py:class:`AnswerDistributionPerCourse`.
-    One additional parameter is defined:
+    Additional parameters are defined by :py:class:`MultiOutputMapReduceJobTask`.:
 
         output_root: location where the one-file-per-course outputs
             are written.  This is distinct from `dest`, which is where
             intermediate output is written.
+        delete_output_root: if True, recursively deletes the output_root at task creation.
     """
 
     src = luigi.Parameter()
     dest = luigi.Parameter()
     include = luigi.Parameter(is_list=True, default=('*',))
     name = luigi.Parameter(default='periodic')
-    output_root = luigi.Parameter()
     answer_metadata = luigi.Parameter(default=None)
     manifest = luigi.Parameter(default=None)
     base_input_format = luigi.Parameter(default=None)

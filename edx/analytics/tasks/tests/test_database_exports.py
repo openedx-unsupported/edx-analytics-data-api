@@ -1,13 +1,11 @@
 """
 Tests for database export tasks
 """
+from mock import Mock
 
 from edx.analytics.tasks.database_exports import StudentModulePerCourseTask
 from edx.analytics.tasks.database_exports import STUDENT_MODULE_FIELDS
-
 from edx.analytics.tasks.tests import unittest
-
-from mock import Mock
 
 
 STATE_MYSQLDUMP = '\'{\\"answer\\": {\\"code\\": \\"print(\\\'hello world\\\')\\\\r\\\\n\\\\t\\", \\"score\\": 1.0}} ' \
@@ -81,11 +79,11 @@ class StudentModulePerCourseTestCase(unittest.TestCase):
         expected = 'test://output/Sample-Course-ID-courseware_studentmodule-test-analytics.sql'
         self.assertEqual(filename, expected)
 
-    def test_empty_output_path(self):
+    def test_empty_output_suffix(self):
         task = StudentModulePerCourseTask(
             mapreduce_engine='local',
             dump_root='test://dump_root',
-            output_root='test://output'
+            output_root='test://output/',
         )
 
         course_id = 'Sample/Course/ID'

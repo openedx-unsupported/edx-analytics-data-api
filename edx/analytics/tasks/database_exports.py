@@ -25,7 +25,6 @@ log = logging.getLogger(__name__)
 FIELD_SIZE_LIMIT = 4 * 1024 * 1024  # 4 MB
 csv.field_size_limit(FIELD_SIZE_LIMIT)
 
-
 # Helpers for the courseware student module table.
 
 STUDENT_MODULE_FIELDS = [
@@ -52,11 +51,9 @@ class StudentModulePerCourseTask(MultiOutputMapReduceJobTask):
 
     Parameters:
         dump_root: a URL location of the database dump.
-        output_root: a URL location where the split files will be stored.
         output_suffix: added to the filenames for identification.
     """
     dump_root = luigi.Parameter()
-    output_root = luigi.Parameter()
     output_suffix = luigi.Parameter(default=None)
 
     def requires(self):
@@ -113,6 +110,7 @@ class StudentModulePerCourseAfterImportWorkflow(StudentModulePerCourseTask):
         dump_root: a URL location of the database dump.
         output_root: a URL location where the split files will be stored.
         output_suffix: added to the filenames for identification.
+        delete_output_root: if True, recursively deletes the output_root at task creation.
         credentials: Path to the external access credentials file.
         num_mappers: The number of map tasks to ask Sqoop to use.
         where:  A 'where' clause to be passed to Sqoop.

@@ -114,11 +114,13 @@ class StudentModulePerCourseAfterImportWorkflow(StudentModulePerCourseTask):
         credentials: Path to the external access credentials file.
         num_mappers: The number of map tasks to ask Sqoop to use.
         where:  A 'where' clause to be passed to Sqoop.
+        verbose: Sqoop prints more information while working.
 
     """
     credentials = luigi.Parameter()  # TODO: move to config
     num_mappers = luigi.Parameter(default=None)  # TODO: move to config
     where = luigi.Parameter(default=None)
+    verbose = luigi.BooleanParameter(default=False)
 
     def requires(self):
         return SqoopImportFromMysql(
@@ -126,5 +128,6 @@ class StudentModulePerCourseAfterImportWorkflow(StudentModulePerCourseTask):
             destination=self.dump_root,
             table_name='courseware_studentmodule',
             num_mappers=self.num_mappers,
-            where=self.where
+            where=self.where,
+            verbose=self.verbose
         )

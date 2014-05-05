@@ -37,6 +37,7 @@ class SqoopImportTask(luigi.hadoop.BaseHadoopJobTask):
         where:  A 'where' clause to be passed to Sqoop.  Note that
             no spaces should be embedded and special characters should
             be escaped.  For example:  --where "id\<50".
+        verbose: Print more information while working.
 
     Example Credentials File::
 
@@ -54,6 +55,7 @@ class SqoopImportTask(luigi.hadoop.BaseHadoopJobTask):
     table_name = luigi.Parameter()
     num_mappers = luigi.Parameter(default=None)
     where = luigi.Parameter(default=None)
+    verbose = luigi.BooleanParameter(default=False)
 
     def requires(self):
         return {
@@ -80,6 +82,9 @@ class SqoopImportTask(luigi.hadoop.BaseHadoopJobTask):
         cred = self._get_credentials()
         url = self.connection_url(cred)
         generic_args = ['--connect', url, '--username', cred['username']]
+
+        if self.verbose:
+            generic_args.append('--verbose')
 
         # write password to temp file object, and pass name of file to Sqoop:
         with password_target.open('w') as password_file:

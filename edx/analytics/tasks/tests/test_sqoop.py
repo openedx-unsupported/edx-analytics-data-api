@@ -26,7 +26,7 @@ class SqoopImportFromMysqlTestCase(unittest.TestCase):
         self.mock_run = patcher2.start()
         self.addCleanup(patcher2.stop)
 
-    def run_task(self, credentials=None, num_mappers=None, where=None):
+    def run_task(self, credentials=None, num_mappers=None, where=None, verbose=False):
         """
         Emulate execution of a generic MysqlTask.
         """
@@ -45,7 +45,8 @@ class SqoopImportFromMysqlTestCase(unittest.TestCase):
             destination="/fake/destination",
             table_name="example_table",
             num_mappers=num_mappers,
-            where=where
+            where=where,
+            verbose=verbose
         )
 
         fake_input = {
@@ -91,6 +92,10 @@ class SqoopImportFromMysqlTestCase(unittest.TestCase):
         ]
         self.assertEquals(arglist, expected_arglist)
         self.assertTrue(self.mock_hdfstarget().remove.called)
+
+    def test_verbose_arguments(self):
+        arglist = self.run_task(verbose=True)
+        self.assertIn('--verbose', arglist)
 
     def test_connect_with_where_args(self):
         arglist = self.run_task(where='id < 50')

@@ -8,7 +8,7 @@ uninstall:
 	python setup.py clean
 
 install: requirements uninstall
-	python setup.py install
+	python setup.py install --force
 
 develop: requirements
 	python setup.py develop
@@ -70,4 +70,4 @@ jenkins-acceptance:
 	$(EXPORTER_BIN)/$(PIP_INSTALL) -r $$WORKSPACE/analytics-exporter/requirements.txt
 	$(EXPORTER_BIN)/$(PIP_INSTALL) -e $$WORKSPACE/analytics-exporter/
 
-	. $(TASKS_BIN)/activate && $(MAKE) test-acceptance
+	. $(TASKS_BIN)/activate && $(MAKE) install test-acceptance

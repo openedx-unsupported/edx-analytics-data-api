@@ -52,10 +52,6 @@ class ExportAcceptanceTest(unittest.TestCase):
         self.task_output_root = url_path_join(
             self.config.get('tasks_output_url'), self.config.get('identifier'))
 
-        # Although this string is semi-arbitrary, in practice we will likely use day of month since it will ensure our
-        # intermediate data storage doesn't grow without bound while still allowing us to debug old jobs (up to a month
-        # old).
-        self.external_prefix = datetime.datetime.utcnow().strftime('%d')
         self.output_prefix = 'automation/{ident}/'.format(ident=self.config.get('identifier'))
 
         self.exported_filename = '{safe_course_id}-{table}-{suffix}-analytics.sql'.format(
@@ -96,6 +92,8 @@ class ExportAcceptanceTest(unittest.TestCase):
         assert('credentials_file_url' in self.config)
         # The name of an existing job flow to run the test on
         assert('job_flow_name' in self.config)
+        # The git URL of the repository to checkout analytics-tasks from.
+        assert('tasks_repo' in self.config)
         # The branch of the analytics-tasks repository to test. Note this can differ from the branch that is currently
         # checked out and running this code.
         assert('tasks_branch' in self.config)
@@ -109,7 +107,6 @@ class ExportAcceptanceTest(unittest.TestCase):
         self.ensure_database_exists()
         self.load_data_from_file()
         self.run_export_task()
-        self.download_task_output()
         self.run_legacy_exporter()
         self.validate_exporter_output()
 
@@ -175,6 +172,7 @@ class ExportAcceptanceTest(unittest.TestCase):
             os.getenv('REMOTE_TASK'),
             '--job-flow-name', self.config.get('job_flow_name'),
             '--branch', self.config.get('tasks_branch'),
+            '--repo', self.config.get('tasks_repo'),
             '--remote-name', self.config.get('identifier'),
             '--wait',
             '--log-path', self.config.get('tasks_log_path'),
@@ -183,7 +181,7 @@ class ExportAcceptanceTest(unittest.TestCase):
             '--local-scheduler',
             '--credentials', self.config.get('credentials_file_url'),
             '--dump-root', url_path_join(self.task_output_root, 'intermediate'),
-            '--output-root', self.task_output_root,
+            '--output-root', url_path_join(self.task_output_root, self.ENVIRONMENT),
             '--output-suffix', self.ENVIRONMENT,
             '--num-mappers', str(self.NUM_MAPPERS),
             '--n-reduce-tasks', str(self.NUM_REDUCERS),
@@ -194,29 +192,6 @@ class ExportAcceptanceTest(unittest.TestCase):
         """Execute a subprocess and log the command before running it."""
         log.info('Running subprocess {0}'.format(command))
         subprocess.check_call(command)
-
-    def download_task_output(self):
-        """
-        Preconditions: A single text file for the test course courseware_studentmodule data stored in S3.
-        External Effect: Downloads the file from S3 and stores it in the external files path. The legacy exporter
-            can pull externally generated files from that path when it is assembling the complete data package.
-
-        Downloads s3://<tasks_output_url>/edX-E929-2014_T1-courseware_studentmodule-acceptance-analytics.sql
-            and stores it in <temporary_dir>/external/<day of month>/edX-E929-2014_T1-courseware_studentmodule-acceptance-analytics.sql.
-
-        """
-        parsed_url = urlparse.urlparse(self.task_output_root)
-        bucket = self.s3_conn.get_bucket(parsed_url.netloc)
-        key = bucket.lookup(os.path.join(parsed_url.path, self.exported_filename))
-        if key is None:
-            self.fail(
-                'Expected output from StudentModulePerCourseAfterImportWorkflow not found. Url = {0}'.format(
-                    url_path_join(self.task_output_root, self.exported_filename)
-                )
-            )
-        local_dir = os.path.join(self.external_files_dir, self.external_prefix)
-        os.makedirs(local_dir)
-        key.get_contents_to_filename(os.path.join(local_dir, self.exported_filename))
 
     def run_legacy_exporter(self):
         """
@@ -242,7 +217,7 @@ class ExportAcceptanceTest(unittest.TestCase):
             '--work-dir', self.working_dir,
             '--bucket', self.config.get('exporter_output_bucket'),
             '--course-id', self.COURSE_ID,
-            '--external-prefix', self.external_prefix,
+            '--external-prefix', self.task_output_root,
             '--output-prefix', self.output_prefix,
             config_file_path,
             '--env', self.ENVIRONMENT,

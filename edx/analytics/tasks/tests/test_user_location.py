@@ -277,6 +277,10 @@ class UsersPerCountryReportTestCase(unittest.TestCase):
         self.assertEquals(
             output_lines[2], UsersPerCountryReport.create_csv_entry(float(34) / 77, 34, "Country_1", "Code_1")
         )
+        # Also confirm the formatting:
+        for line in output_lines[1:2]:
+            self.assertTrue(line.startswith('0.'))
+
 
 
 class UsersPerCountryReportWorkflowTestCase(BaseUserLocationEventTestCase):

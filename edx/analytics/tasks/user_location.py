@@ -250,12 +250,12 @@ class UsersPerCountryReport(luigi.Task):
     def create_header(cls, date):
         """Generate a header for CSV output."""
         fields = ['percent', 'count', 'country', 'code', 'date={date}'.format(date=date)]
-        return '\t'.join(fields)
+        return ','.join(fields)
 
     @classmethod
     def create_csv_entry(cls, percent, count, country, code):
         """Generate a single entry in CSV format."""
-        return "{percent:.2%}\t{count}\t{country}\t{code}".format(
+        return '{percent:.4f},{count},"{country}",{code}'.format(
             percent=percent, count=count, country=country, code=code
         )
 
@@ -297,15 +297,14 @@ class UsersPerCountryReportWorkflow(UsersPerCountryReport):
         src:  a URL to the root location of input tracking log files.
         include:  a list of patterns to be used to match input files, relative to `src` URL.
             The default value is ['*'].
-        dest:  a URL to the root location to write output file(s).
         manifest: a URL to a file location that can store the complete set of input files.
         end_date: events before or on this date are kept, and after this date are filtered out.
         geolocation_data: a URL to the location of country-level geolocation data.
 
-    Additional optional parameters are passed through to :py:class:`UsersPerCountryReport`:
+    Additional optional parameters are passed through to :py:class:`MapReduceJobTask`:
 
         mapreduce_engine:  'hadoop' (the default) or 'local'.
-        input_format: override the input_format for Hadoop job to use. For example, when
+        base_input_format: override the input_format for Hadoop job to use. For example, when
             running with manifest file above, specify "oddjob.ManifestTextInputFormat" for input_format.
         lib_jar:  points to jar defining input_format, if any.
         n_reduce_tasks: number of reducer tasks to use in upstream tasks.

@@ -282,7 +282,6 @@ class UsersPerCountryReportTestCase(unittest.TestCase):
             self.assertTrue(line.startswith('0.'))
 
 
-
 class UsersPerCountryReportWorkflowTestCase(BaseUserLocationEventTestCase):
     """Tests of UsersPerCountryReportWorkflow."""
 

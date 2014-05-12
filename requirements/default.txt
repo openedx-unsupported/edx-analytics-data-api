@@ -9,6 +9,8 @@ pandas==0.13.0
 pbr==0.5.23
 pygeoip==0.3.1
 python-cjson==1.0.5
+python-gnupg==0.3.6
+pyyaml==3.10
 stevedore==0.14.1
 tornado==3.1.1
 git+https://github.com/spotify/luigi.git@a33756c781b9bf7e51384f0eb19d6a25050ef136#egg=luigi

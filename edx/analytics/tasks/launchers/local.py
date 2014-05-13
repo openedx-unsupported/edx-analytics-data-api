@@ -63,3 +63,7 @@ def main():
 
     # Launch Luigi using the default builder
     luigi.run()
+
+
+if __name__ == '__main__':
+    main()

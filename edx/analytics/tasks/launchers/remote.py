@@ -126,3 +126,7 @@ def run_ansible(args, verbose, executable='ansible'):
         proc.wait()
 
     return proc.returncode
+
+
+if __name__ == '__main__':
+    main()

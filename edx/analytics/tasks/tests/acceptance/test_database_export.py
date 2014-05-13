@@ -13,41 +13,34 @@ import tempfile
 import textwrap
 import shutil
 import subprocess
-import urlparse
 
-import boto
 import oursql
 
 from edx.analytics.tasks.url import get_target_from_url
 from edx.analytics.tasks.url import url_path_join
-from edx.analytics.tasks.tests import unittest
+from edx.analytics.tasks.tests.acceptance import AcceptanceTestCase
 
 
 log = logging.getLogger(__name__)
 
 
-class ExportAcceptanceTest(unittest.TestCase):
+class ExportAcceptanceTest(AcceptanceTestCase):
     """Validate the research data export pipeline for a single course and organization."""
 
     acceptance = 1
 
     ENVIRONMENT = 'acceptance'
     TABLE = 'courseware_studentmodule'
-    NUM_MAPPERS = 4
-    NUM_REDUCERS = 2
     COURSE_ID = 'edX/E929/2014_T1'
 
     def setUp(self):
+        super(ExportAcceptanceTest, self).setUp()
+
         # These variables will be set later
         self.temporary_dir = None
-        self.data_dir = None
         self.external_files_dir = None
         self.working_dir = None
         self.credentials = None
-
-        self.s3_conn = boto.connect_s3()
-
-        self.config = json.loads(os.getenv('ACCEPTANCE_TEST_CONFIG'))
 
         self.task_output_root = url_path_join(
             self.config.get('tasks_output_url'), self.config.get('identifier'))
@@ -75,7 +68,6 @@ class ExportAcceptanceTest(unittest.TestCase):
         self.temporary_dir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.temporary_dir)
 
-        self.data_dir = os.path.join(os.path.dirname(__file__), 'fixtures')
         self.external_files_dir = os.path.join(self.temporary_dir, 'external')
         self.working_dir = os.path.join(self.temporary_dir, 'work')
 
@@ -156,6 +148,7 @@ class ExportAcceptanceTest(unittest.TestCase):
                             continue
 
                         cursor.execute(line)
+
 
     def run_export_task(self):
         """

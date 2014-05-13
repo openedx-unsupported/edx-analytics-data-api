@@ -88,6 +88,10 @@
       command: >
         virtualenv {{ working_venv_dir }}
 
+    - name: update pip
+      command: >
+        {{ working_venv_dir }}/bin/pip install -U pip
+
     - name: virtualenv initialized
       shell: >
         . {{ working_venv_dir }}/bin/activate && make install

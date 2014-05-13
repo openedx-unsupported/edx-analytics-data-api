@@ -3,6 +3,7 @@ argparse==1.2.1
 boto==2.22.1
 filechunkio==1.5
 html5lib==1.0b3
+luigi==1.0.16
 numpy==1.8.0
 oursql==0.9.3.1
 pandas==0.13.0
@@ -13,4 +14,3 @@ python-gnupg==0.3.6
 pyyaml==3.10
 stevedore==0.14.1
 tornado==3.1.1
-git+https://github.com/spotify/luigi.git@a33756c781b9bf7e51384f0eb19d6a25050ef136#egg=luigi

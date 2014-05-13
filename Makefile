@@ -18,10 +18,10 @@ system-requirements:
 	sudo apt-get install -y -q libmysqlclient-dev
 
 requirements:
-	$(PIP_INSTALL) -r requirements/default.txt
+	$(PIP_INSTALL) -U -r requirements/default.txt
 
 test-requirements: requirements
-	$(PIP_INSTALL) -r requirements/test.txt
+	$(PIP_INSTALL) -U -r requirements/test.txt
 
 test: test-requirements
 	# TODO: when we have better coverage, modify this to actually fail when coverage is too low.
@@ -29,7 +29,7 @@ test: test-requirements
 	python -m coverage run --rcfile=./.coveragerc -m nose -A 'not acceptance'
 
 test-acceptance: test-requirements
-	python -m coverage run --rcfile=./.coveragerc -m nose --nocapture -A acceptance
+	python -m coverage run --rcfile=./.coveragerc -m nose --nocapture -A acceptance $(ONLY_TESTS)
 
 coverage: test
 	python -m coverage html
@@ -67,7 +67,7 @@ jenkins-acceptance:
 	$(META_BIN)/pip install awscli
 	$(META_BIN)/aws s3 rm --recursive $(call get_config,tasks_output_url)$(call get_config,identifier) || true
 
-	$(EXPORTER_BIN)/$(PIP_INSTALL) -r $$WORKSPACE/analytics-exporter/requirements.txt
+	$(EXPORTER_BIN)/$(PIP_INSTALL) -U -r $$WORKSPACE/analytics-exporter/requirements.txt
 	$(EXPORTER_BIN)/$(PIP_INSTALL) -e $$WORKSPACE/analytics-exporter/
 
 	. $(TASKS_BIN)/activate && $(MAKE) install test-acceptance

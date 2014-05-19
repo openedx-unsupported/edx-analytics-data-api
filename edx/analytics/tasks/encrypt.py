@@ -17,8 +17,15 @@ log = logging.getLogger(__name__)
 
 
 @contextmanager
-def make_encrypted_file(output_file, key_file_targets, recipients):
-    """Creates a file object to be written to, whose contents will afterwards be encrypted."""
+def make_encrypted_file(output_file, key_file_targets, recipients=None):
+    """
+    Creates a file object to be written to, whose contents will afterwards be encrypted.
+
+    Parameters:
+        output_file:  a file object, opened for writing.
+        key_file_targets: a list of luigi.Target objects defining the gpg public key files to be loaded.
+        recipients:  an optional list of recipients to be loaded.  If not specified, uses all loaded keys.
+    """
     with make_temp_directory(prefix="encrypt") as temp_dir:
         # Use temp directory to hold gpg keys.
         gpg = gnupg.GPG(gnupghome=temp_dir)
@@ -31,6 +38,8 @@ def make_encrypted_file(output_file, key_file_targets, recipients):
 
         # Encryption produces a second file in the same temp directory.
         temp_encrypted_filepath = "{filepath}.gpg".format(filepath=temp_input_filepath)
+        if recipients is None:
+            recipients = [key['keyid'] for key in gpg.list_keys()]
         with open(temp_input_filepath, 'r') as temp_input_file:
             _encrypt_file(gpg, temp_input_file, temp_encrypted_filepath, recipients)
         _copy_file_to_open_file(temp_encrypted_filepath, output_file)
@@ -109,7 +118,7 @@ class FakeEventExportWithEncryptionTask(MultiOutputMapReduceJobTask):
         org_id, _server_id = key
         recipients = self._get_recipients(org_id)
         key_file_targets = [get_target_from_url(url_path_join(self.gpg_key_dir, recipient)) for recipient in recipients]
-        with make_encrypted_file(output_file, key_file_targets, recipients) as encrypted_output_file:
+        with make_encrypted_file(output_file, key_file_targets) as encrypted_output_file:
             for value in values:
                 encrypted_output_file.write(value)
                 encrypted_output_file.write('\n')

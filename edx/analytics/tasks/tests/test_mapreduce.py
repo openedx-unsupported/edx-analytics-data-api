@@ -7,8 +7,81 @@ import os
 import tempfile
 import shutil
 
-from edx.analytics.tasks.mapreduce import MultiOutputMapReduceJobTask
+import luigi
+import luigi.hdfs
+
+from edx.analytics.tasks.mapreduce import MultiOutputMapReduceJobTask, MapReduceJobTask
 from edx.analytics.tasks.tests import unittest
+
+
+class MapReduceJobTaskTest(unittest.TestCase):
+    """Tests for MapReduceJobTask"""
+
+    def test_job_with_special_input_targets(self):
+        lib_jar_path = ['hdfs:///tmp/something.jar']
+        input_format = 'com.example.SpecialInputFormat'
+
+        required_job = TaskWithSpecialOutputs(lib_jar_path=lib_jar_path, input_format=input_format)
+        job = DynamicRequirementsJob()
+        job.requirements = [required_job]
+
+        runner = job.job_runner()
+
+        self.assertItemsEqual(runner.libjars_in_hdfs, lib_jar_path)
+        self.assertEquals(runner.input_format, input_format)
+
+    def test_job_with_different_input_formats(self):
+        job = DynamicRequirementsJob()
+        job.requirements = [
+            TaskWithSpecialOutputs(input_format='foo'),
+            TaskWithSpecialOutputs(input_format='bar')
+        ]
+
+        with self.assertRaises(RuntimeError):
+            job.job_runner()
+
+    def test_multiple_lib_jars(self):
+        job = DynamicRequirementsJob()
+        job.requirements = [
+            TaskWithSpecialOutputs(lib_jar_path=['foo', 'bar']),
+            TaskWithSpecialOutputs(lib_jar_path=['baz'])
+        ]
+
+        runner = job.job_runner()
+
+        self.assertItemsEqual(runner.libjars_in_hdfs, ['foo', 'bar', 'baz'])
+
+    def test_missing_input_format(self):
+        job = DynamicRequirementsJob()
+        job.requirements = [
+            TaskWithSpecialOutputs(lib_jar_path=['foo'], input_format='com.example.Foo'),
+            TaskWithSpecialOutputs(lib_jar_path=['baz'])
+        ]
+
+        runner = job.job_runner()
+
+        self.assertItemsEqual(runner.libjars_in_hdfs, ['foo', 'baz'])
+        self.assertEquals(runner.input_format, 'com.example.Foo')
+
+
+class TaskWithSpecialOutputs(luigi.ExternalTask):
+    """A task with a single output that requires the use of a configurable library jar and input format."""
+
+    lib_jar_path = luigi.Parameter(default=[], is_list=True)
+    input_format = luigi.Parameter(default=None)
+
+    def output(self):
+        target = luigi.hdfs.HdfsTarget('/tmp/foo')
+        target.lib_jar = self.lib_jar_path
+        target.input_format = self.input_format
+        return target
+
+
+class DynamicRequirementsJob(MapReduceJobTask):
+    """A task with configurable requirements."""
+
+    def requires(self):
+        return self.requirements
 
 
 class MultiOutputMapReduceJobTaskTest(unittest.TestCase):
@@ -58,6 +131,10 @@ class MultiOutputMapReduceJobTaskOutputRootTest(unittest.TestCase):
         self.output_root = tempfile.mkdtemp()
         self.addCleanup(cleanup, self.output_root)
 
+        patcher = patch('edx.analytics.tasks.mapreduce.luigi.configuration.get_config')
+        self.mock_get_config = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_no_delete_output_root(self):
         self.assertTrue(os.path.exists(self.output_root))
         TestJobTask(
@@ -67,6 +144,10 @@ class MultiOutputMapReduceJobTaskOutputRootTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.output_root))
 
     def test_delete_output_root(self):
+        temporary_file_path = tempfile.mkdtemp()
+        self.mock_get_config.return_value.get.return_value = temporary_file_path
+        self.addCleanup(shutil.rmtree, temporary_file_path)
+
         # We create a task in order to get the output path.
         task = TestJobTask(
             mapreduce_engine='local',

@@ -841,22 +841,7 @@ class AnswerDistributionOneFilePerCourseTaskOutputRootTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.output_root))
 
     def test_delete_output_root(self):
-        # We create a task in order to get the output path.
-        task = AnswerDistributionOneFilePerCourseTask(
-            mapreduce_engine='local',
-            src=None,
-            dest=None,
-            name='name',
-            include=None,
-            output_root=self.output_root,
-        )
-        # Write to the output path will not mark this task
-        # as complete.
-        output_marker = task.output().path
-        open(output_marker, 'a').close()
-        self.assertFalse(task.complete())
-
-        # But it's still possible to use the delete option
+        # It's still possible to use the delete option
         # to get rid of the output_root directory.
         task = AnswerDistributionOneFilePerCourseTask(
             mapreduce_engine='local',

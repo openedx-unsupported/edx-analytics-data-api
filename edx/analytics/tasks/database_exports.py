@@ -13,7 +13,7 @@ from edx.analytics.tasks.mapreduce import MultiOutputMapReduceJobTask
 from edx.analytics.tasks.pathutil import PathSetTask
 from edx.analytics.tasks.sqoop import SqoopImportFromMysql
 from edx.analytics.tasks.util import csv_util
-from edx.analytics.tasks.url import url_path_join
+from edx.analytics.tasks.url import url_path_join, get_target_from_url
 
 
 log = logging.getLogger(__name__)
@@ -44,6 +44,10 @@ STUDENT_MODULE_FIELDS = [
 StudentModuleRecord = namedtuple('StudentModuleRecord', STUDENT_MODULE_FIELDS)
 
 
+# Name of marker file to appear in output directory of MultiOutputMapReduceJobTask to indicate success.
+MARKER_FILENAME = 'job_success'
+
+
 class StudentModulePerCourseTask(MultiOutputMapReduceJobTask):
     """
     Separates a raw SQL dump of a courseware_studentmodule table into
@@ -58,6 +62,9 @@ class StudentModulePerCourseTask(MultiOutputMapReduceJobTask):
 
     def requires(self):
         return PathSetTask(self.dump_root)
+
+    def output(self):
+        return get_target_from_url(url_path_join(self.output_root, MARKER_FILENAME))
 
     def mapper(self, line):
         """

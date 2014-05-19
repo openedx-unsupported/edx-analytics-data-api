@@ -288,7 +288,6 @@ class TestWeeklyAllUsersAndEnrollments(unittest.TestCase):
 
         history = requires['history'].output()
         self.assertIsInstance(history, luigi.File)
-        self.assertEqual(history.format, luigi.format.Gzip)
 
         registrations = requires['registrations'].output()
         self.assertIsInstance(requires['registrations'], UserRegistrationsPerDay)

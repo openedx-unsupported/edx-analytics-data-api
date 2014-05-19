@@ -21,16 +21,22 @@
     - working_repo_dir: "{{ working_dir }}/repo"
     - working_venv_dir: "{{ working_dir }}/venv"
     - task_arguments: ''
-    - git_server_hostname: github.com
-    - git_server_ip_address: 207.97.227.239
-    - git_server_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+    - git_servers:
+      # TODO: edx specific, move elsewhere
+      - hostname: github.com
+        public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+      - hostname: review.edx.org
+        public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDP6AOufe+CnkwwQs+zZtsDgiWnJykJ0TLoOICqQvimLRynsADmCuJpfMs4QvlYQQwWwSxBiO5wKhL0RmnPDV2ela+AHUD+SR7yPXCc1oSIAnm9k6IE1s0aFNKDdUv2nxnD8AiCQ6pGihSwth4bHgzdsTtpOPx+fgaAwuGdFCDMKQ=='
     - wait_for_task: False
     - local_log_dir: build/logs
     - install_env:
+        # TODO: edx specific, move elsewhere
         # EMR runs a modified version of Debian 6 (squeeze)
         WHEEL_URL: http://edx-wheelhouse.s3-website-us-east-1.amazonaws.com/Debian/squeeze
         # EMR ships with python 2.6 (unfortunately)
         WHEEL_PYVER: 2.6
+
+    # - override_config: path/to/config.cfg (optionally adds a luigi config override)
 
   tasks:
     - name: known_hosts file exists
@@ -39,8 +45,9 @@
     - name: git server in known_hosts file
       lineinfile: >
         dest=/home/{{ ansible_ssh_user }}/.ssh/known_hosts
-        regexp=^github.com
-        line="{{ git_server_hostname }},{{ git_server_ip_address }} {{ git_server_public_key }}"
+        regexp=^{{item.hostname}}
+        line="{{ item.hostname }} {{ item.public_key }}"
+      with_items: git_servers
 
     - name: root directories created
       file: path={{ item }} state=directory owner=root group=root
@@ -100,6 +107,13 @@
 
     - name: logging configured
       template: src=logging.cfg.j2 dest={{ working_repo_dir }}/logging.cfg
+
+    - name: configuration override removed
+      file: path={{ working_repo_dir }}/override.cfg state=absent
+
+    - name: configuration override installed
+      copy: src={{ override_config }} dest={{ working_repo_dir }}/override.cfg mode=644
+      when: override_config is defined
 
     # Unfortunately, we cannot make the poll value a variable because of this open issue:
     # https://github.com/ansible/ansible/issues/255

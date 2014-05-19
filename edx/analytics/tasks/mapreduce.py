@@ -3,16 +3,23 @@ Support executing map reduce tasks.
 """
 from __future__ import absolute_import
 
+import gzip
+from hashlib import md5
+import os
+import StringIO
+
 import luigi
+import luigi.configuration
 import luigi.hdfs
 import luigi.hadoop
+import luigi.task
 from luigi import configuration
 
 from edx.analytics.tasks.url import get_target_from_url, url_path_join
+from edx.analytics.tasks.util.manifest import convert_tasks_to_manifest_if_necessary
 
 
-# Name of marker file to appear in output directory of MultiOutputMapReduceJobTask to indicate success.
-MARKER_FILENAME = 'job_success'
+DEFAULT_MARKER_ROOT = 'hdfs:///tmp/marker'
 
 
 class MapReduceJobTask(luigi.hadoop.JobTask):
@@ -22,14 +29,16 @@ class MapReduceJobTask(luigi.hadoop.JobTask):
     """
 
     mapreduce_engine = luigi.Parameter(
-        default_from_config={'section': 'map-reduce', 'name': 'engine'}
+        default_from_config={'section': 'map-reduce', 'name': 'engine'},
+        significant=False
     )
-    input_format = luigi.Parameter(default=None)
-    lib_jar = luigi.Parameter(is_list=True, default=[])
+    # TODO: remove these parameters
+    input_format = luigi.Parameter(default=None, significant=False)
+    lib_jar = luigi.Parameter(is_list=True, default=[], significant=False)
 
     # Override the parent class definition of this parameter. This typically wants to scale with the cluster size so the
     # user should be able to tweak it depending on their particular configuration.
-    n_reduce_tasks = luigi.Parameter(default=25)
+    n_reduce_tasks = luigi.Parameter(default=25, significant=False)
 
     def job_runner(self):
         # Lazily import this since this module will be loaded on hadoop worker nodes however stevedore will not be
@@ -43,9 +52,38 @@ class MapReduceJobTask(luigi.hadoop.JobTask):
             raise KeyError('A map reduce engine must be specified in order to run MapReduceJobTasks')
 
         if issubclass(engine_class, MapReduceJobRunner):
-            return engine_class(libjars_in_hdfs=self.lib_jar, input_format=self.input_format)
+            engine_kwargs = self._get_engine_parameters_from_targets()
+            return engine_class(**engine_kwargs)
         else:
             return engine_class()
+
+    def _get_engine_parameters_from_targets(self):
+        """
+        Determine the set of job parameters that should be used to process the input.
+
+        Some types of input may not be simple files that Hadoop can process natively out of the box, they might require
+        special handling by custom input formats. Allow dynamic loading of input formats and the jars that contain them
+        by setting attributes on the input target.
+        """
+        lib_jar = list(self.lib_jar)
+        input_format = self.input_format
+
+        for input_target in luigi.task.flatten(self.input_hadoop()):
+            if hasattr(input_target, 'lib_jar'):
+                lib_jar.extend(input_target.lib_jar)
+            if hasattr(input_target, 'input_format') and input_target.input_format is not None:
+                if input_format is not None and input_target.input_format != input_format:
+                    raise RuntimeError('Multiple distinct input formats specified on input targets.')
+
+                input_format = input_target.input_format
+
+        return {
+            'libjars_in_hdfs': lib_jar,
+            'input_format': input_format,
+        }
+
+    def requires_hadoop(self):
+        return convert_tasks_to_manifest_if_necessary(self.requires())
 
 
 class MapReduceJobRunner(luigi.hadoop.HadoopJobRunner):
@@ -60,13 +98,88 @@ class MapReduceJobRunner(luigi.hadoop.HadoopJobRunner):
     def __init__(self, libjars_in_hdfs=None, input_format=None):
         libjars_in_hdfs = libjars_in_hdfs or []
         config = configuration.get_config()
-        streaming_jar = config.get('hadoop', 'streaming-jar')
+        streaming_jar = config.get('hadoop', 'streaming-jar', '/tmp/hadoop-streaming.jar')
+
+        if config.has_section('job-conf'):
+            job_confs = dict(config.items('job-conf'))
+        else:
+            job_confs = {}
 
         super(MapReduceJobRunner, self).__init__(
             streaming_jar,
             input_format=input_format,
-            libjars_in_hdfs=libjars_in_hdfs
+            libjars_in_hdfs=libjars_in_hdfs,
+            jobconfs=job_confs,
         )
+
+class EmulatedMapReduceJobRunner(luigi.hadoop.JobRunner):
+    """
+    Execute map reduce tasks in process on the machine that is running luigi.
+
+    This is a modified version of luigi.hadoop.LocalJobRunner. The key differences are:
+
+    * It gracefully handles .gz input files, decompressing them and streaming them directly to the mapper. This mirrors
+      the behavior of hadoop's default file input format. Note this only works for files that support `tell()` and
+      `seek()` since those methods are used by the gzip decompression library.
+    * It detects ".manifest" files and assumes that they are in fact just a file that contains paths to the real files
+      that should be processed by the task. It makes use of this information to "do the right thing". This mirrors the
+      behavior of a manifest input format in hadoop.
+    * It sets the "map_input_file" environment variable when running the mapper just like the hadoop streaming library.
+
+    Other than that it should behave identically to LocalJobRunner.
+
+    """
+
+    def group(self, input):
+        output = StringIO.StringIO()
+        lines = []
+        for i, line in enumerate(input):
+            parts = line.rstrip('\n').split('\t')
+            blob = md5(str(i)).hexdigest()  # pseudo-random blob to make sure the input isn't sorted
+            lines.append((parts[:-1], blob, line))
+        for k, _, line in sorted(lines):
+            output.write(line)
+        output.seek(0)
+        return output
+
+    def run_job(self, job):
+        job.init_hadoop()
+        job.init_mapper()
+        map_output = StringIO.StringIO()
+        input_targets = luigi.task.flatten(job.input_hadoop())
+        for input_target in input_targets:
+            with input_target.open('r') as input_file:
+
+                # S3 files not yet supported since they don't support tell() and seek()
+                if input_target.path.endswith('.gz'):
+                    input_file = gzip.GzipFile(fileobj=input_file)
+                elif input_target.path.endswith('.manifest'):
+                    for url in input_file:
+                        input_targets.append(get_target_from_url(url.strip()))
+                    continue
+
+                os.environ['map_input_file'] = input_target.path
+                try:
+                    outputs = job._map_input((line[:-1] for line in input_file))
+                    job.internal_writer(outputs, map_output)
+                finally:
+                    del os.environ['map_input_file']
+
+        map_output.seek(0)
+
+        reduce_input = self.group(map_output)
+        try:
+            reduce_output = job.output().open('w')
+        except Exception:
+            reduce_output = StringIO.StringIO()
+
+        try:
+            job._run_reducer(reduce_input, reduce_output)
+        finally:
+            try:
+                reduce_output.close()
+            except Exception:
+                pass
 
 
 class MultiOutputMapReduceJobTask(MapReduceJobTask):
@@ -83,10 +196,12 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
         delete_output_root: if True, recursively deletes the output_root at task creation.
     """
     output_root = luigi.Parameter()
-    delete_output_root = luigi.BooleanParameter(default=False)
+    delete_output_root = luigi.BooleanParameter(default=False, significant=False)
 
     def output(self):
-        return get_target_from_url(url_path_join(self.output_root, MARKER_FILENAME))
+        marker_base_url = luigi.configuration.get_config().get('map-reduce', 'marker', DEFAULT_MARKER_ROOT)
+        marker_url = url_path_join(marker_base_url, str(hash(self)))
+        return get_target_from_url(marker_url)
 
     def reducer(self, key, values):
         """
@@ -123,5 +238,6 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
             # (i.e. the output target) will be removed, so that external functionality
             # will know that the generation of data files is not complete.
             output_dir_target = get_target_from_url(self.output_root)
-            if output_dir_target.exists():
-                output_dir_target.remove()
+            for target in [self.output(), output_dir_target]:
+                if target.exists():
+                    target.remove()

@@ -42,3 +42,6 @@ diff_*.html
 report
 edx_analytics.log
 venv
+
+# Override config files
+override.cfg

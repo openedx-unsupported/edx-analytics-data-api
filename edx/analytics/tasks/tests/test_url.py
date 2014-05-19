@@ -11,11 +11,16 @@ from edx.analytics.tasks.tests import unittest
 class TargetFromUrlTestCase(unittest.TestCase):
     """Tests for get_target_from_url()."""
 
-    def test_hdfs_scheme(self):
-        for test_url in ['s3://foo/bar', 'hdfs://foo/bar', 's3n://foo/bar']:
+    def test_s3_scheme(self):
+        for test_url in ['s3://foo/bar', 's3n://foo/bar']:
             target = url.get_target_from_url(test_url)
             self.assertIsInstance(target, luigi.hdfs.HdfsTarget)
             self.assertEquals(target.path, test_url)
+
+    def test_hdfs_scheme(self):
+        target = url.get_target_from_url('hdfs:///foo/bar')
+        self.assertIsInstance(target, luigi.hdfs.HdfsTarget)
+        self.assertEquals(target.path, '/foo/bar')
 
     def test_file_scheme(self):
         path = '/foo/bar'
@@ -36,13 +41,6 @@ class TargetFromUrlTestCase(unittest.TestCase):
         self.assertIsInstance(target, luigi.hdfs.HdfsTarget)
         self.assertEquals(target.path, test_url[:-1])
         self.assertEquals(target.format, luigi.hdfs.PlainDir)
-
-    def test_gzip_local_file(self):
-        test_url = '/foo/bar.gz'
-        target = url.get_target_from_url(test_url)
-        self.assertIsInstance(target, luigi.LocalTarget)
-        self.assertEquals(target.path, test_url)
-        self.assertEquals(target.format, luigi.format.Gzip)
 
 
 class UrlPathJoinTestCase(unittest.TestCase):

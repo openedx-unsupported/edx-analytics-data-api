@@ -36,21 +36,20 @@ from stevedore.extension import ExtensionManager
 
 log = logging.getLogger(__name__)
 
-DEFAULT_CONFIGURATION_FILE = 'default.cfg'
+OVERRIDE_CONFIGURATION_FILE = 'override.cfg'
 
 
 def main():
+    # In order to see errors during extension loading, you can uncomment the next line.
+    # logging.basicConfig(level=logging.DEBUG)
+
     # Load tasks configured using entry_points
     # TODO: launch tasks by their entry_point name
     ExtensionManager('edx.analytics.tasks')
 
-    # Include default configuration file with task defaults
-    # TODO: add a config argument to specify the location of the file
     configuration = luigi.configuration.get_config()
-    configuration.add_config_path(DEFAULT_CONFIGURATION_FILE)
-
-    if not os.path.isfile(DEFAULT_CONFIGURATION_FILE):
-        log.warning('Default configuration file not found: %s', DEFAULT_CONFIGURATION_FILE)
+    if os.path.exists(OVERRIDE_CONFIGURATION_FILE):
+        configuration.add_config_path(OVERRIDE_CONFIGURATION_FILE)
 
     # Tell luigi what dependencies to pass to the Hadoop nodes
     # - argparse is not included by default in python 2.6, but is required by luigi.

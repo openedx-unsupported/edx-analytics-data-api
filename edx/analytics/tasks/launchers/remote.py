@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--verbose', action='store_true', help='display very verbose output')
     parser.add_argument('--log-path', help='download luigi output streams after completing the task', default=None)
     parser.add_argument('--user', help='remote user name to connect as', default=None)
+    parser.add_argument('--override-config', help='config file to use to run the job', default=None)
     arguments, extra_args = parser.parse_known_args()
     arguments.launch_task_arguments = extra_args
 
@@ -69,6 +70,8 @@ def convert_args_to_extra_vars(arguments, uid):
         extra_vars['wait_for_task'] = True
     if arguments.log_path:
         extra_vars['local_log_dir'] = arguments.log_path
+    if arguments.override_config:
+        extra_vars['override_config'] = arguments.override_config
     return ' '.join(["{}='{}'".format(k, extra_vars[k]) for k in extra_vars])
 
 

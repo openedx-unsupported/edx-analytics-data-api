@@ -14,6 +14,7 @@ import os
 import urlparse
 
 import luigi
+import luigi.configuration
 import luigi.format
 import luigi.hdfs
 import luigi.s3
@@ -27,6 +28,13 @@ class ExternalURL(luigi.ExternalTask):
 
     def output(self):
         return get_target_from_url(self.url)
+
+
+class UncheckedExternalURL(ExternalURL):
+    """A ExternalURL task that does not verify if the source file exists, which can be expensive for S3 URLs."""
+
+    def complete(self):
+        return True
 
 
 class IgnoredTarget(luigi.hdfs.HdfsTarget):
@@ -58,10 +66,10 @@ def get_target_from_url(url):
     kwargs = {}
     if issubclass(target_class, luigi.hdfs.HdfsTarget) and url.endswith('/'):
         kwargs['format'] = luigi.hdfs.PlainDir
-    if issubclass(target_class, luigi.LocalTarget):
+    if issubclass(target_class, luigi.LocalTarget) or parsed_url.scheme == 'hdfs':
+        # LocalTarget and HdfsTarget both expect paths without any scheme, netloc etc, just bare paths. So strip
+        # everything else off the url and pass that in to the target.
         url = parsed_url.path
-        if url.endswith('.gz'):
-            kwargs['format'] = luigi.format.Gzip
     if issubclass(target_class, luigi.s3.S3Target):
         kwargs['client'] = ScalableS3Client()
 

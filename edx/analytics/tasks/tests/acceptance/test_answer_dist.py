@@ -62,11 +62,11 @@ class AnswerDistributionAcceptanceTest(AcceptanceTestCase):
             '--user', self.config.get('connection_user'),
             'AnswerDistributionOneFilePerCourseTask',
             '--local-scheduler',
-            '--src',  self.test_src,
+            '--src', self.test_src,
             '--dest', url_path_join(self.test_root, 'dst'),
             '--name', 'test',
             '--output-root', self.test_out,
-            '--include',  '"*"',
+            '--include', '"*"',
             '--manifest', url_path_join(self.test_root, 'manifest.txt'),
             '--base-input-format', self.INPUT_FORMAT,
             '--lib-jar', self.oddjob_jar,
@@ -90,4 +90,4 @@ class AnswerDistributionAcceptanceTest(AcceptanceTestCase):
 
                 # Check that at least one of the count columns is non zero
                 get_count = lambda line: int(line.split(',')[3])
-                self.assertTrue(any(get_count(l) > 0 for l in lines ))
+                self.assertTrue(any(get_count(l) > 0 for l in lines))

@@ -1,12 +1,5 @@
 """Tests for S3--related utility functionality."""
 from mock import MagicMock
-from mock import patch
-from mock import sentinel
-
-import luigi
-import luigi.format
-import luigi.hdfs
-import luigi.s3
 
 from edx.analytics.tasks import s3_util
 from edx.analytics.tasks.tests import unittest
@@ -16,12 +9,14 @@ class GenerateS3SourcesTestCase(unittest.TestCase):
     """Tests for generate_s3_sources()."""
 
     def _make_key(self, keyname, size):
+        """Makes a dummy key object, providing the necessary accessors."""
         s3_key = MagicMock()
         s3_key.key = keyname
         s3_key.size = size
         return s3_key
 
     def _make_s3_generator(self, bucket_name, root, path_info, patterns):
+        """Generates a list of matching S3 sources using a mock S3 connection."""
         s3_conn = MagicMock()
         s3_bucket = MagicMock()
         s3_conn.get_bucket = MagicMock(return_value=s3_bucket)
@@ -31,7 +26,7 @@ class GenerateS3SourcesTestCase(unittest.TestCase):
         print [(k.key, k.size) for k in target_list]
 
         s3_bucket.name = bucket_name
-        source = "s3://{bucket}/{root}/".format(bucket=bucket_name, root=root)
+        source = "s3://{bucket}/{root}".format(bucket=bucket_name, root=root)
         generator = s3_util.generate_s3_sources(s3_conn, source, patterns)
         output = list(generator)
         return output
@@ -73,6 +68,21 @@ class GenerateS3SourcesTestCase(unittest.TestCase):
         self.assertEquals(len(output), 1)
         self.assertEquals(output, [(bucket_name, root, "subdir1/path1")])
 
+    def test_generate_with_trailing_slash(self):
+        bucket_name = "bucket_name"
+        root = "root1/root2/"
+        path_info = {
+            "subdir1/path1": 1000,
+            "path2": 2000,
+        }
+        patterns = ['*']
+        output = self._make_s3_generator(bucket_name, root, path_info, patterns)
+        self.assertEquals(len(output), 2)
+        self.assertEquals(set(output), set([
+            (bucket_name, root.rstrip('/'), "subdir1/path1"),
+            (bucket_name, root.rstrip('/'), "path2")
+        ]))
+
 
 class ScalableS3ClientTestCase(unittest.TestCase):
     """Tests for ScalableS3Client class."""
@@ -81,6 +91,7 @@ class ScalableS3ClientTestCase(unittest.TestCase):
         self.client = s3_util.ScalableS3Client()
 
     def _assert_get_chunk_specs(self, source_size_bytes, expected_num_chunks, expected_chunk_size):
+        """Asserts that _get_chunk_specs returns the expected values."""
         number_of_chunks, bytes_per_chunk = self.client._get_chunk_specs(source_size_bytes)
         self.assertEquals(number_of_chunks, expected_num_chunks)
         self.assertEquals(bytes_per_chunk, expected_chunk_size)

@@ -150,7 +150,6 @@ class ExportAcceptanceTest(AcceptanceTestCase):
 
                         cursor.execute(line)
 
-
     def run_export_task(self):
         """
         Preconditions: Populated courseware_studentmodule table in the MySQL database.

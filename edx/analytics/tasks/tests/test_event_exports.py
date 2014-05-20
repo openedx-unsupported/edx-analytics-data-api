@@ -3,7 +3,6 @@ Tests for event export tasks
 """
 
 import datetime
-from textwrap import dedent
 from cStringIO import StringIO
 
 from luigi.date_interval import Year

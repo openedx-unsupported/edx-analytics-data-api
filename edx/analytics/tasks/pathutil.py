@@ -8,7 +8,7 @@ Supports outputs to HDFS, S3, and local FS.
 
 import boto
 import datetime
-import glob
+import fnmatch
 import logging
 import os
 import re
@@ -47,21 +47,22 @@ class PathSetTask(luigi.Task):
         self.s3_conn = None
 
     def generate_file_list(self):
-        """Yield each individual path given a source folder and a set of glob expressions."""
+        """Yield each individual path given a source folder and a set of file-matching expressions."""
         if self.src.startswith('s3'):
             # connect lazily as needed:
             if self.s3_conn is None:
                 self.s3_conn = boto.connect_s3()
-            for _bucket, root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
+            for _bucket, _root, path in generate_s3_sources(self.s3_conn, self.src, self.include):
                 source = url_path_join(self.src, path)
                 yield ExternalURL(source)
         else:
-            filelist = []
-            for include_val in self.include:
-                glob_pattern = "{src}/{include}".format(src=self.src, include=include_val)
-                filelist.extend(glob.glob(glob_pattern))
-            for filepath in filelist:
-                yield ExternalURL(filepath)
+            # Apply the include patterns to the relative path below the src directory.
+            for dirpath, _dirnames, files in os.walk(self.src):
+                for filename in files:
+                    filepath = os.path.join(dirpath, filename)
+                    relpath = os.path.relpath(filepath, self.src)
+                    if any(fnmatch.fnmatch(relpath, include_val) for include_val in self.include):
+                        yield ExternalURL(filepath)
 
     def manifest_file_list(self):
         """Write each individual path to a manifest file and yield the path to that file."""

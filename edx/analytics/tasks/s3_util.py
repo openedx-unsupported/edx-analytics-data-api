@@ -77,13 +77,17 @@ def generate_s3_sources(s3_conn, source, patterns):
 
     bucket = s3_conn.get_bucket(bucket_name)
 
+    # Make sure that the listing is done on a "folder" boundary,
+    # since list() just looks for matching prefixes.
+    root_with_slash = root + '/' if root[-1] != '/' else root
+
     # Skip keys that have zero size.  This allows directories
     # to be skipped, but also skips legitimate files that are
     # also zero-length.
-    keys = (s.key for s in bucket.list(root) if s.size > 0)
+    keys = (s.key for s in bucket.list(root_with_slash) if s.size > 0)
 
     # Make paths relative by removing root
-    paths = (k[len(root):].lstrip('/') for k in keys)
+    paths = (k[len(root_with_slash):].lstrip('/') for k in keys)
 
     # Filter only paths that match the include patterns
     paths = _filter_matches(patterns, paths)

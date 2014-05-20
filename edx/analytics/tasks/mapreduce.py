@@ -9,7 +9,6 @@ import os
 import StringIO
 
 import luigi
-import luigi.configuration
 import luigi.hdfs
 import luigi.hadoop
 import luigi.task
@@ -112,6 +111,7 @@ class MapReduceJobRunner(luigi.hadoop.HadoopJobRunner):
             jobconfs=job_confs,
         )
 
+
 class EmulatedMapReduceJobRunner(luigi.hadoop.JobRunner):
     """
     Execute map reduce tasks in process on the machine that is running luigi.
@@ -189,7 +189,7 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
     The mapper output tuple key is used to determine the name of the file that reducer results are written to. Different
     reduce tasks must not write to the same file.  Since all values for a given mapper output key are guaranteed to be
     processed by the same reduce task, we only allow a single file to be output per key for safety.  In the future, the
-    reducer output key could be used to determine the output file name, however,
+    reducer output key could be used to determine the output file name, however.
 
     Parameters:
         output_root: a URL location where the split files will be stored.
@@ -199,7 +199,7 @@ class MultiOutputMapReduceJobTask(MapReduceJobTask):
     delete_output_root = luigi.BooleanParameter(default=False, significant=False)
 
     def output(self):
-        marker_base_url = luigi.configuration.get_config().get('map-reduce', 'marker', DEFAULT_MARKER_ROOT)
+        marker_base_url = configuration.get_config().get('map-reduce', 'marker', DEFAULT_MARKER_ROOT)
         marker_url = url_path_join(marker_base_url, str(hash(self)))
         return get_target_from_url(marker_url)
 

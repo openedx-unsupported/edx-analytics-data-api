@@ -174,6 +174,6 @@ class TestJobTask(MultiOutputMapReduceJobTask):
     def output_path_for_key(self, key):
         return os.path.join(self.output_root, key)
 
-    def multi_output_reducer(self, key, values, output_file):
+    def multi_output_reducer(self, _key, values, output_file):
         for value in values:
             output_file.write(value + '\n')

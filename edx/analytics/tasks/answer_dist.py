@@ -399,7 +399,7 @@ class AnswerDistributionPerCourseMixin(object):
         made.
 
         """
-        self.answer_metadata_dict = json.load(answer_metadata_file)  # pylint: disable=attribute-defined-outside-init
+        self.answer_metadata_dict = json.load(answer_metadata_file)
 
     def add_metadata_to_answer(self, answer_id, answer):
         """

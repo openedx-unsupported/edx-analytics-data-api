@@ -15,7 +15,8 @@ develop: requirements
 
 system-requirements:
 	sudo apt-get update -q
-	sudo apt-get install -y -q libmysqlclient-dev
+	# This is not great, we can't use these libraries on slave nodes using this method.
+	sudo apt-get install -y -q libmysqlclient-dev libatlas3gf-base
 
 requirements:
 	$(PIP_INSTALL) -U -r requirements/default.txt

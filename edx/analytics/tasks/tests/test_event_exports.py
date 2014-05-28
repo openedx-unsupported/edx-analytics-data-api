@@ -7,7 +7,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from luigi.date_interval import Year
-from mock import MagicMock, patch
+from mock import MagicMock, patch, call
 import yaml
 
 from edx.analytics.tasks.event_exports import EventExportTask
@@ -37,10 +37,10 @@ class EventExportTestCase(unittest.TestCase):
         },
         'organizations': {
             'FooX': {
-                'recipient': 'automation@example.com'
+                'recipient': 'automation@foox.com'
             },
             'BarX': {
-                'recipient': 'automation@example.com',
+                'recipient': 'automation@barx.com',
                 'other_names': [
                     'BazX',
                     'bar'
@@ -58,16 +58,18 @@ class EventExportTestCase(unittest.TestCase):
             source='test://input/',
             environment=['edge', 'prod'],
             interval=Year.parse('2014'),
+            gpg_key_dir='test://config/gpg-keys/',
+            gpg_master_key='skeleton.key@example.com'
         )
 
         self.task.input_local = MagicMock(return_value=FakeTarget(self.CONFIGURATION))
 
     def test_org_whitelist_capture(self):
-        self.task.init_mapper()
+        self.task.init_local()
         self.assertItemsEqual(self.task.org_id_whitelist, ['FooX', 'BarX', 'BazX', 'bar'])
 
     def test_server_whitelist_capture(self):
-        self.task.init_mapper()
+        self.task.init_local()
         self.assertItemsEqual(self.task.server_name_whitelist, [self.SERVER_NAME_1, self.SERVER_NAME_2])
 
     def test_mapper(self):
@@ -111,7 +113,7 @@ class EventExportTestCase(unittest.TestCase):
 
         input_events = expected_output + excluded_events
 
-        self.task.init_mapper()
+        self.task.init_local()
 
         results = []
         for key, event_string in input_events:
@@ -207,17 +209,18 @@ class EventExportTestCase(unittest.TestCase):
 
     def test_output_path_for_key(self):
         path = self.task.output_path_for_key((datetime.date(2015, 1, 1), 'OrgX', 'prod-app-001'))
-        self.assertEquals('test://output/OrgX/prod-app-001/2015-01-01_OrgX.log', path)
+        self.assertEquals('test://output/OrgX/prod-app-001/2015-01-01_OrgX.log.gpg', path)
 
     def test_output_path_for_key_casing(self):
         path = self.task.output_path_for_key((datetime.date(2015, 1, 1), 'orgX', 'prod-app-001'))
-        self.assertEquals('test://output/orgX/prod-app-001/2015-01-01_orgX.log', path)
+        self.assertEquals('test://output/orgX/prod-app-001/2015-01-01_orgX.log.gpg', path)
 
-    def test_multi_output_reducer(self):
-        output = StringIO()
-        self.task.multi_output_reducer(None, ['a\t', 'b', 'c'], output)
-        output.seek(0)
-        self.assertEquals('a\nb\nc\n', output.read())
+    @patch('edx.analytics.tasks.event_exports.make_encrypted_file')
+    def test_multi_output_reducer(self, mock_make_encrypted_file):
+        self.task.multi_output_reducer((None, 'FooX', None), ['a\t', 'b', 'c'], None)
+
+        mock_encrypted_file = mock_make_encrypted_file.return_value.__enter__.return_value
+        self.assertEquals(mock_encrypted_file.write.mock_calls, [call(s) for s in ['a', '\n', 'b', '\n', 'c', '\n']])
 
     def test_local_requirements(self):
         self.assertEquals(self.task.requires_local().url, 'test://config/default.yaml')
@@ -239,7 +242,7 @@ class EventExportTestCase(unittest.TestCase):
             # Some coverage missing here, but it's probably good enough for now
 
     def test_unrecognized_environment(self):
-        self.task.init_mapper()
+        self.task.init_local()
 
         for server in ['prod-app-001', 'prod-app-002']:
             expected_output = [((self.EXAMPLE_DATE, 'FooX', server), self.EXAMPLE_EVENT)]
@@ -248,11 +251,11 @@ class EventExportTestCase(unittest.TestCase):
         self.assertItemsEqual(self.run_mapper_for_server_file('foobar', self.EXAMPLE_EVENT), [])
 
     def test_odd_file_paths(self):
-        self.task.init_mapper()
+        self.task.init_local()
 
         for path in ['something.gz', 'test://input/something.gz']:
             self.assertItemsEqual(self.run_mapper_for_file_path(path, self.EXAMPLE_EVENT), [])
 
     def test_missing_environment_variable(self):
-        self.task.init_mapper()
+        self.task.init_local()
         self.assertItemsEqual([output for output in self.task.mapper(self.EXAMPLE_EVENT) if output is not None], [])

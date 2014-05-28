@@ -3,13 +3,14 @@
 import logging
 import os
 
+import gnupg
 import luigi
-import luigi.configuration
 import yaml
 
+from edx.analytics.tasks.encrypt import make_encrypted_file
 from edx.analytics.tasks.mapreduce import MultiOutputMapReduceJobTask
 from edx.analytics.tasks.pathutil import EventLogSelectionTask
-from edx.analytics.tasks.url import url_path_join, ExternalURL
+from edx.analytics.tasks.url import url_path_join, ExternalURL, get_target_from_url
 from edx.analytics.tasks.util import eventlog
 
 
@@ -45,6 +46,13 @@ class EventExportTask(MultiOutputMapReduceJobTask):
     interval = luigi.DateIntervalParameter()
     pattern = luigi.Parameter(default=None)
 
+    gpg_key_dir = luigi.Parameter(
+        default_from_config={'section': 'event-export', 'name': 'gpg_key_dir'}
+    )
+    gpg_master_key = luigi.Parameter(
+        default_from_config={'section': 'event-export', 'name': 'gpg_master_key'}
+    )
+
     def requires(self):
         tasks = []
         for env in self.environment:
@@ -61,16 +69,25 @@ class EventExportTask(MultiOutputMapReduceJobTask):
     def requires_local(self):
         return ExternalURL(url=self.config)
 
-    def init_mapper(self):
+    def extra_modules(self):
+        return [gnupg, yaml]
+
+    def init_local(self):
         with self.input_local().open() as config_input:
             config_data = yaml.load(config_input)
             self.organizations = config_data['organizations']
 
-        self.org_id_whitelist = set(self.organizations.keys())
-        for _org_id, org_config in self.organizations.iteritems():
+        # Map org_ids to recipient names, taking in to account org_id aliases. For example, if an org_id Foo is also
+        # known as FooX then two entries will appear in this dictionary ('Foo', 'recipient@foo.org') and
+        # ('FooX', 'recipient@foo.org'). Note that both aliases map to the same recipient.
+        self.recipient_for_org_id = {}
+        for org_id, org_config in self.organizations.iteritems():
+            recipient = org_config['recipient']
+            self.recipient_for_org_id[org_id] = recipient
             for alias in org_config.get('other_names', []):
-                self.org_id_whitelist.add(alias)
+                self.recipient_for_org_id[alias] = recipient
 
+        self.org_id_whitelist = self.recipient_for_org_id.keys()
         log.debug('Using org_id whitelist ["%s"]', '", "'.join(self.org_id_whitelist))
 
         self.server_name_whitelist = set()
@@ -101,18 +118,23 @@ class EventExportTask(MultiOutputMapReduceJobTask):
         if date_string < self.lower_bound_date_string or date_string >= self.upper_bound_date_string:
             return
 
-        server_id = self.get_server_id()
-
         org_id = self.get_org_id(event)
         if org_id not in self.org_id_whitelist:
-            log.debug('Unrecognized organization: server_id=%s org_id=%s', server_id or '', org_id or '')
+            log.debug('Unrecognized organization: org_id=%s', org_id or '')
             return
 
+        server_id = self.get_server_id()
         if server_id not in self.server_name_whitelist:
-            log.debug('Unrecognized server: server_id=%s org_id=%s', server_id or '', org_id or '')
+            log.debug('Unrecognized server: server_id=%s', server_id or '')
             return
 
-        yield (date_string, org_id, server_id), line
+        key = (date_string, org_id, server_id)
+        # Enforce a standard encoding for the parts of the key. Without this a part of the key might appear differently
+        # in the key string when it is coerced to a string by luigi. For example, if the same org_id appears in two
+        # different records, one as a str() type and the other a unicode() then without this change they would appear as
+        # u'FooX' and 'FooX' in the final key string. Although python doesn't care about this difference, hadoop does,
+        # and will bucket the values separately. Which is not what we want.
+        yield tuple([value.encode('utf8') for value in key]), line.strip()
 
     def get_server_id(self):
         """
@@ -190,13 +212,24 @@ class EventExportTask(MultiOutputMapReduceJobTask):
             self.output_root,
             org_id,
             server_id,
-            '{date}_{org}.log'.format(
+            '{date}_{org}.log.gpg'.format(
                 date=date,
                 org=org_id,
             )
         )
 
-    def multi_output_reducer(self, _key, values, output_file):
-        for value in values:
-            output_file.write(value.strip())
-            output_file.write('\n')
+    def multi_output_reducer(self, key, values, output_file):
+        _date_string, org_id, _server_id = key
+        recipients = self._get_recipients(org_id)
+        key_file_targets = [get_target_from_url(url_path_join(self.gpg_key_dir, recipient)) for recipient in recipients]
+        with make_encrypted_file(output_file, key_file_targets) as encrypted_output_file:
+            for value in values:
+                encrypted_output_file.write(value.strip())
+                encrypted_output_file.write('\n')
+
+    def _get_recipients(self, org_id):
+        """Get the correct recipients for the specified organization."""
+        recipients = [self.recipient_for_org_id[org_id]]
+        if self.gpg_master_key is not None:
+            recipients.append(self.gpg_master_key)
+        return recipients

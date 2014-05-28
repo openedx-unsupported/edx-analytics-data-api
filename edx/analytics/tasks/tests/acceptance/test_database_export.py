@@ -14,6 +14,7 @@ import textwrap
 import shutil
 import subprocess
 
+import gnupg
 import oursql
 
 from edx.analytics.tasks.url import get_target_from_url
@@ -287,22 +288,13 @@ class ExportAcceptanceTest(AcceptanceTestCase):
         os.makedirs(gpg_dir)
         os.chmod(gpg_dir, 0700)
 
-        import_key_command = [
-            'gpg',
-            '--homedir', gpg_dir,
-            '--armor',
-            '--import', 'gpg-keys/insecure_secret.key'
-        ]
-        self.call_subprocess(import_key_command)
+        gpg = gnupg.GPG(gnupghome=gpg_dir)
+        with open(os.path.join('gpg-keys', 'insecure_secret.key'), 'r') as key_file:
+            gpg.import_keys(key_file.read())
 
         exported_file_path = os.path.join(validation_dir, self.exported_filename)
-        decrypt_file_command = [
-            'gpg',
-            '--homedir', gpg_dir,
-            '--output', exported_file_path,
-            '--decrypt', os.path.join(validation_dir, export_id, self.exported_filename + '.gpg'),
-        ]
-        self.call_subprocess(decrypt_file_command)
+        with open(os.path.join(validation_dir, export_id, self.exported_filename + '.gpg'), 'r') as encrypted_file:
+            gpg.decrypt_file(encrypted_file, output=exported_file_path)
 
         sorted_filename = exported_file_path + '.sorted'
         self.call_subprocess(['sort', '-o', sorted_filename, exported_file_path])

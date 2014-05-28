@@ -29,6 +29,7 @@ def make_encrypted_file(output_file, key_file_targets, recipients=None):
     with make_temp_directory(prefix="encrypt") as temp_dir:
         # Use temp directory to hold gpg keys.
         gpg = gnupg.GPG(gnupghome=temp_dir)
+        gpg.encoding = 'utf-8'
         _import_key_files(gpg, key_file_targets)
 
         # Create a temp file to contain the unencrypted output, in the same temp directory.
@@ -77,61 +78,3 @@ def _copy_file_to_open_file(filepath, output_file):
                 output_file.write(transfer_buffer)
             else:
                 break
-
-
-class FakeEventExportWithEncryptionTask(MultiOutputMapReduceJobTask):
-    """Example class to demonstrate use of encryption of files for export from multi-output."""
-    source = luigi.Parameter()
-    config = luigi.Parameter()
-    # TODO: these parameters could be moved into the config file.
-    gpg_key_dir = luigi.Parameter()
-    gpg_master_key = luigi.Parameter(default=None)
-
-    def init_reducer(self):
-        self._get_organization_info()
-
-    def requires(self):
-        return {
-            'source': ExternalURL(self.source),
-            'config': ExternalURL(self.config),
-        }
-
-    def requires_local(self):
-        return self.requires()['config']
-
-    def requires_hadoop(self):
-        return self.requires()['source']
-
-    def mapper(self, line):
-        org_id = "edx"
-        server_id = "prod-edxapp-011"
-        yield (org_id, server_id), line
-
-    def extra_modules(self):
-        return [gnupg, yaml]
-
-    def output_path_for_key(self, key):
-        org_id, server_id = key
-        return url_path_join(self.output_root, org_id, server_id, 'tracking.log.gpg')
-
-    def multi_output_reducer(self, key, values, output_file):
-        org_id, _server_id = key
-        recipients = self._get_recipients(org_id)
-        key_file_targets = [get_target_from_url(url_path_join(self.gpg_key_dir, recipient)) for recipient in recipients]
-        with make_encrypted_file(output_file, key_file_targets) as encrypted_output_file:
-            for value in values:
-                encrypted_output_file.write(value)
-                encrypted_output_file.write('\n')
-
-    def _get_organization_info(self):
-        """Get the organization configuration from the configuration yaml file."""
-        with self.input()['config'].open() as config_input:
-            config_data = yaml.load(config_input)
-        self.organizations = config_data['organizations']  # pylint: disable=attribute-defined-outside-init
-
-    def _get_recipients(self, org_id):
-        """Get the correct recipients for the specified organization."""
-        recipients = [self.organizations[org_id]['recipient']]
-        if self.gpg_master_key is not None:
-            recipients.append(self.gpg_master_key)
-        return recipients

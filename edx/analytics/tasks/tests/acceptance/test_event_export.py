@@ -8,6 +8,7 @@ import logging
 import tempfile
 import textwrap
 import time
+import shutil
 
 from luigi.s3 import S3Client, S3Target
 
@@ -57,7 +58,10 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
 
         self.test_src = url_path_join(self.test_root, 'src')
         self.test_out = url_path_join(self.test_root, 'out')
-        self.test_config = url_path_join(self.test_root, 'config', 'default.yaml')
+        self.test_config_root = url_path_join(self.test_root, 'config')
+
+        self.test_config = url_path_join(self.test_config_root, 'default.yaml')
+        self.test_gpg_key_dir = url_path_join(self.test_config_root, 'gpg-keys')
 
         self.input_paths = {
             'prod': url_path_join(self.test_src, self.PROD_SERVER_NAME, 'tracking.log-20140515.gz'),
@@ -66,6 +70,7 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
 
         self.upload_data()
         self.write_config()
+        self.upload_public_keys()
 
     def upload_data(self):
         src = os.path.join(self.data_dir, 'input', self.INPUT_FILE)
@@ -74,8 +79,7 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
             gzip_file = gzip.open(temp_file.name, 'wb')
             try:
                 with open(src, 'r') as input_file:
-                    for line in input_file:
-                        gzip_file.write(line)
+                    shutil.copyfileobj(input_file, gzip_file)
             finally:
                 gzip_file.close()
 
@@ -100,9 +104,9 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
                           - {server_2}
                     organizations:
                       edX:
-                        recipient: automation@example.com
+                        recipient: daemon@edx.org
                       AcceptanceX:
-                        recipient: automation@example.com
+                        recipient: daemon+2@edx.org
                     """
                     .format(
                         server_1=self.PROD_SERVER_NAME,
@@ -110,6 +114,15 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
                     )
                 )
             )
+
+    def upload_public_keys(self):
+        gpg_key_dir = os.path.join('gpg-keys')
+        for key_filename in os.listdir(gpg_key_dir):
+            full_local_path = os.path.join(gpg_key_dir, key_filename)
+            remote_url = url_path_join(self.test_gpg_key_dir, key_filename)
+
+            if not key_filename.endswith('.key'):
+                self.s3_client.put(full_local_path, remote_url)
 
     def test_event_log_exports_using_manifest(self):
         with tempfile.NamedTemporaryFile() as temp_config_file:
@@ -152,6 +165,8 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
                 '--environment', 'prod',
                 '--environment', 'edge',
                 '--interval', '2014-05',
+                '--gpg-key-dir', self.test_gpg_key_dir,
+                '--gpg-master-key', 'daemon+master@edx.org',
                 '--n-reduce-tasks', str(self.NUM_REDUCERS),
             ]
         )
@@ -159,35 +174,46 @@ class EventExportAcceptanceTest(AcceptanceTestCase):
         self.call_subprocess(command)
 
     def validate_output(self):
-        # TODO: a lot of duplication here
-        comparisons = [
-            ('2014-05-15_edX.log', url_path_join(self.test_out, 'edX', self.PROD_SERVER_NAME, '2014-05-15_edX.log')),
-            ('2014-05-16_edX.log', url_path_join(self.test_out, 'edX', self.PROD_SERVER_NAME, '2014-05-16_edX.log')),
-            ('2014-05-15_edX.log', url_path_join(self.test_out, 'edX', self.EDGE_SERVER_NAME, '2014-05-15_edX.log')),
-            ('2014-05-16_edX.log', url_path_join(self.test_out, 'edX', self.EDGE_SERVER_NAME, '2014-05-16_edX.log')),
-            ('2014-05-15_AcceptanceX.log', url_path_join(self.test_out, 'AcceptanceX', self.EDGE_SERVER_NAME, '2014-05-15_AcceptanceX.log')),
-            ('2014-05-15_AcceptanceX.log', url_path_join(self.test_out, 'AcceptanceX', self.PROD_SERVER_NAME, '2014-05-15_AcceptanceX.log')),
-        ]
+        for server_id in [self.PROD_SERVER_NAME, self.EDGE_SERVER_NAME]:
+            for use_master_key in [False, True]:
+                self.validate_output_file('2014-05-15', 'edX', server_id, use_master_key)
+                self.validate_output_file('2014-05-16', 'edX', server_id, use_master_key)
+                self.validate_output_file('2014-05-15', 'AcceptanceX', server_id, use_master_key)
 
-        for local_file_name, remote_url in comparisons:
-            with open(os.path.join(self.data_dir, 'output', local_file_name), 'r') as local_file:
-                remote_target = S3Target(remote_url)
+    def validate_output_file(self, day, org_id, server_id, use_master_key=False):
+        if use_master_key:
+            key_filename = 'insecure_master_secret.key'
+        else:
+            if org_id == 'edX':
+                key_filename = 'insecure_secret.key'
+            else:
+                key_filename = 'insecure_secret_2.key'
 
-                # Files won't appear in S3 instantaneously, wait for the files to appear.
-                # TODO: exponential backoff
-                found = False
-                for _i in range(30):
-                    if remote_target.exists():
-                        found = True
-                        break
-                    else:
-                        time.sleep(2)
+        self.temporary_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.temporary_dir)
 
-                if not found:
-                    self.fail('Unable to find expected output file {0}'.format(remote_url))
+        self.downloaded_outputs = os.path.join(self.temporary_dir, 'output')
+        os.makedirs(self.downloaded_outputs)
 
-                with remote_target.open('r') as remote_file:
-                    local_contents = local_file.read()
-                    remote_contents = remote_file.read()
+        local_file_name = '{day}_{org_id}.log'.format(day=day, org_id=org_id)
+        remote_url = url_path_join(self.test_out, org_id, server_id, local_file_name + '.gpg')
 
-                    self.assertEquals(local_contents, remote_contents)
+        # Files won't appear in S3 instantaneously, wait for the files to appear.
+        # TODO: exponential backoff
+        for _i in range(30):
+            key = self.s3_client.get_key(remote_url)
+            if key is not None:
+                break
+            else:
+                time.sleep(2)
+
+        if key is None:
+            self.fail('Unable to find expected output file {0}'.format(remote_url))
+
+        downloaded_output_path = os.path.join(self.downloaded_outputs, remote_url.split('/')[-1])
+        key.get_contents_to_filename(downloaded_output_path)
+
+        decrypted_file_name = downloaded_output_path[:-len('.gpg')]
+        self.decrypt_file(downloaded_output_path, decrypted_file_name, key_filename)
+
+        self.call_subprocess(['diff', decrypted_file_name, os.path.join(self.data_dir, 'output', local_file_name)])

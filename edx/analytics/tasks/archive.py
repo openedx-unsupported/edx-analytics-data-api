@@ -105,7 +105,8 @@ class ArchiveExportTask(MultiOutputMapReduceJobTask):
         self.mapper_done = True
 
     def extra_modules(self):
-        return [yaml]
+        import gnupg
+        return [gnupg, yaml]
 
     def output_path_for_key(self, key):
         primary_org_id = key

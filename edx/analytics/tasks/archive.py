@@ -97,7 +97,7 @@ class ArchiveExportTask(MultiOutputMapReduceJobTask):
         task = PathSetTask(src=org_source, include=['*.log*'])
         for target in task.output():
             target_url = target.path
-            relative_url = target_url[len(org_source):].lstrip('/')
+            relative_url = target_url[len(self.eventlog_output_root):].lstrip('/')
             yield (target_url, relative_url)
 
     def mapper(self, _line):

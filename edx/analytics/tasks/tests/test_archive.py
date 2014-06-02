@@ -84,11 +84,12 @@ class ArchiveExportTaskTestCase(unittest.TestCase):
         """
         Extract parameters from log file name.
 
-        Expects name of form "prod-edge-edxapp-001/2014-05-09_HSchoolX.log".
+        Expects name of form "HSchoolX/prod-edge-edxapp-001/2014-05-09_HSchoolX.log".
         """
-        server, name = logfile_name.split('/')
+        org_dir, server, name = logfile_name.split('/')
         date, org = name.split('_')
         org = org[:-4]
+        self.assertEquals(org_dir, org)
         return org, server, date
 
     def _check_tar_file_contents(self, tarfile_path):

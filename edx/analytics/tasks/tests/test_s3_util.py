@@ -31,6 +31,14 @@ class GenerateS3SourcesTestCase(unittest.TestCase):
         output = list(generator)
         return output
 
+    def _run_without_filtering(self, bucket_name, root, path_info):
+        """Runs generator and checks output."""
+        patterns = ['*']
+        output = self._make_s3_generator(bucket_name, root, path_info, patterns)
+        self.assertEquals(len(output), len(path_info))
+        expected = [(bucket_name, root, key) for key in path_info]
+        self.assertEquals(set(output), set(expected))
+
     def test_normal_generate(self):
         bucket_name = "bucket_name"
         root = "root1/root2"
@@ -38,11 +46,16 @@ class GenerateS3SourcesTestCase(unittest.TestCase):
             "subdir1/path1": 1000,
             "path2": 2000,
         }
-        patterns = ['*']
-        output = self._make_s3_generator(bucket_name, root, path_info, patterns)
-        self.assertEquals(len(output), 2)
-        self.assertEquals(set(output),
-                          set([(bucket_name, root, "subdir1/path1"), (bucket_name, root, "path2")]))
+        self._run_without_filtering(bucket_name, root, path_info)
+
+    def test_generate_with_empty_root(self):
+        bucket_name = "bucket_name"
+        root = ""
+        path_info = {
+            "subdir1/path1": 1000,
+            "path2": 2000,
+        }
+        self._run_without_filtering(bucket_name, root, path_info)
 
     def test_generate_with_pattern_filtering(self):
         bucket_name = "bucket_name"

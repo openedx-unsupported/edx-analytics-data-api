@@ -79,7 +79,7 @@ def generate_s3_sources(s3_conn, source, patterns):
 
     # Make sure that the listing is done on a "folder" boundary,
     # since list() just looks for matching prefixes.
-    root_with_slash = root + '/' if root[-1] != '/' else root
+    root_with_slash = root if len(root) == 0 or root.endswith('/') else root + '/'
 
     # Skip keys that have zero size.  This allows directories
     # to be skipped, but also skips legitimate files that are

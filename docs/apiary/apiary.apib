@@ -1,0 +1,266 @@
+FORMAT: 1A
+HOST: http://www.analytics.edx.org
+
+# edX Analytics API
+The edX Analytics API provides access to analytical insights related to an Open edX installation.
+
+# Data Types
+
+## Timestamp
+
+All timestamps are expected to be ISO 8601 formatted: `YYYY-mm-ddTHH:MM:SS.fffZ`. All references to time are UTC. Local timezones are not supported.
+
+# Conventions
+
+## Versioning
+
+All URLs are prefixed with a version number. This versioning scheme adheres to the [semantic versioning standard](http://semver.org/spec/v2.0.0.html). However, in order to provide stable URLs, partial version numbers can be used to address resources. For example "v1" will address the latest stable version of the major version "1". Version "v1.1" will address version 1.1.X where X is the highest patch number. All suffixes that specify beta, alpha and rc versions must be explicitly provided.
+
+**Note:** All version numbers less than 1.0.0 are initial development versions and subject to change arbitrarily without notice.
+
+A worked example follows. An API has published the following versions:
+
+- v0.1.0
+- v1.0.0
+- v1.1.0
+- v1.1.1
+- v1.2.0
+- v1.3.0-rc.0
+- v2.0.0
+- v2.1.0
+- v2.1.1
+
+Given this version history, the following URLs resolve to the specified version numbers:
+
+| URL Prefix | Version Used | Notes |
+|------------|--------------|-------|
+| /v1/       | v1.2.0       | The latest version of the v1 major revision is used. The "v1.3.0-rc.0" version is ignored because of the "-rc.0" suffix. |
+| /v1.1/     | v1.1.1       | The latest version of the v1.1 minor revision is used. |
+| /v1.1.0/   | v1.1.0       | A specific patch version. |
+| /v2/       | v2.1.1       | The latest version of the v2 major revision. |
+| /v1.3.0-rc.0/ | v1.3.0-rc.0 | A pre-release version. |
+
+Examples of changes and their impacts on the API version:
+
+- A resource is moved to a different URL: major version increment because this change may break existing clients.
+- A new resource is added: minor version increment because this will not break existing clients.
+- A field is added to a resource structure: patch version increment because this will not break existing clients and is a minor change to a single resource.
+- The timestamp format is changed: major version increment because this will break all clients who parse the timestamps.
+- The internal URL routing is changed, improving performance without any impacts on the public API: no version change because the exposed public API did not change in any way.
+
+## Authentication
+
+All requests are expected to be made over an SSL connection and include an `Authentication` header that includes a token that can be used to authenticate the request. The format is:
+
+        Authentication: Token 987ab987987c87d97e9877ff012
+
+# Group Operations
+
+## Status [/api/v0/status]
+
+A very quick check to see if the application server is alive and processing requests. Returns no data, a simple 200 OK result code is sufficient to indicate that the server is alive.
+
+This endpoint is public and does not require an authentication token to access it.
+
+### Get Status [GET]
+
++ Response 200
+
+## Health [/api/v0/health]
+
+A more comprehensive check to see if the system is fully operational.
+
+This endpoint is public and does not require an authentication token to access it.
+
+The returned structure contains the following fields:
+
+- overall_status: Can be either "OK" or "UNAVAILABLE".
+- detailed_status: More detailed information about the status of the system.
+    - database_connections: Status of each database connection. There will be one entry per database connection configured in the Django settings. The key of each entry in this dictionary will be the name of the connection and the value will be either "OK" or "UNAVAILABLE".
+
+### Check System Health [GET]
+
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                "overall_status": "UNAVAILABLE",
+                "detailed_status": {
+                    "database_connections": {
+                        "default": "OK",
+                        "reporting": "UNAVAILABLE"
+                    }
+                }
+            }
+
+## Authenticated [/api/v0/authenticated]
+
+Validates provided credentials. Returns no data, a simple 200 OK result code is sufficient to indicate that the credentials are valid.
+
+### Check Authentication [GET]
+
++ Request
+
+    + Headers
+            
+            Authentication: Token 987ab987987c87d97e9877ff012
+
++ Response 200
+
+# Group Course
+
+## User Activity [/api/v0/courses/{course_id}/user_activity{?from_date,to_date,group_by}]
+
+Counts of unique users who performed various actions of interest. A unique user is defined as a user who performed at least one action within a time interval specified by the `group_by` parameter. This time interval used for grouping results is referred to as the `unit` and can either be a week or a day.
+
+Each data point has the following fields:
+
+- from_date (timestamp): All data from this timestamp up to the `to_date` was considered when computing this data point.
+- to_date (timestamp): All data from `from_date` up to this timestamp was considered when computing this data point. Note that data produced at exactly this time is **not** included.
+- visited (integer): The number of unique users who visited the course.
+- started_video (integer): The number of unique users who started watching any video in the course.
+- answered_question (integer): The number of unique users who answered any capa based question in the course.
+- posted_forum (integer): The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.
+
++ Parameters
+    + course_id (string) ... ID of the course.
+
+        Currently accepts url encoded slash separated course key values. In the future will also accept other course identifying strings.
+
+    + from_date (optional, timestamp) ... A time within the first unit to include in the results.
+
+        Defaults to midnight on the first day of the most recent complete unit at the UTC time the server processes the request.
+
+    + to_date (optional, timestamp) ... A time within the unit after the last unit to include in the results.
+    
+        Defaults to midnight on the day after the last day of the most recent complete unit at the UTC time the server processes the request.
+
+    + group_by = `week` (optional, string) ... Specifies the granularity of groups returned.
+
+        Users that appear multiple times in this interval will be counted only once.
+
+        + Values
+            + `week`
+            + `day`
+
+### User Activity over Time [GET]
+
++ Request
+
+    + Headers
+            
+            Authentication: Token 987ab987987c87d97e9877ff012
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "count": 1,
+                "next": null,
+                "previous": null,
+                "results": [
+                    {
+                        "from_date": "2014-05-17T00:00:00.000Z",
+                        "to_date": "2014-05-24T00:00:00.000Z",
+                        "course_id": "edX/Demo_Course/2013_T1",
+                        "visited": 1047,
+                        "started_video": 931,
+                        "answered_question": 452,
+                        "posted_forum": 318
+                    }
+                ]
+            }
+
+# Group Problem
+Data regarding student activity on a particular problem in a course.
+
+## Answer Distribution [/api/v0/problems/{usage_id}/answer_distribution/{attempt}]
+A representation of the answer distribution associated with a problem used in a course.
+
+The representation has the following fields:
+
+- metadata:
+        - id: usage_id of the problem
+        - attempt: "first" or "last".  The attempt for which the answer distribution is computed.
+- distribution:  a JSON object whose top-level keys are the ids of all the *responses* in the problem and whose top-level values
+are JSON objects representing the answer distribution for that *response*.
+
++ Parameters
+  + usage_id (String) ... ID of the problem as used in a course.
+  + attempt (String) ... The attempt for which the answer distribution is computed.  Valid strings are "last" and "first".
+
++ Model (application/json)
+
+    JSON representation of problem answer distribution
+
+    + Body
+    
+            {
+                "metadata": {
+                    "id": "usageid0",
+                    "attempt": "last"
+                },
+                "distribution": {
+                    "response_0": {
+                        "choice_0": {'correct': true, 'count': 15},
+                        "choice_1": {'correct': false, 'count': 52},
+                        "choice_2": {'correct': false, 'count': 27},
+                        "choice_3": {'correct': false, 'count': 81}
+                    },
+                    "response_1": {
+                        "": {'correct': false, 'count': 53},
+                        "choice_0": {'correct': false, 'count': 21},
+                        "choice_1": {'correct': true, 'count': 32},
+                        "choice_0,choice_1": {'correct': false, 'count': 25}
+                    },
+                }
+            }
+
+### Problem Answer Distribution [GET]
+
++ Request
+
+    + Headers
+            
+            Authentication: Token 987ab987987c87d97e9877ff012
+
++ Response 200
+    
+    [Answer Distribution][]
+
+## Attempts Distribution [/api/v0/problems/{usage_id}/attempts_distribution]
+The distribution of the number of attempts on a problem, as used in a course.
+
+The representation has, as keys, strings of integers ascending from 0.
+The values associated with each key *k* are the number of students who made
+exactly *k* attempts on the problem.
+
++ Parameters
+  + usage_id (string) ... ID of the problem as used in a course.
+
++ Model (application/json)
+
+  + Body
+
+            {
+                "0": 235,
+                "1": 2923,
+                "2": 1098,
+                "3": 185
+            }
+
+### Problem Attempts Distribution [GET]
+
++ Request
+
+    + Headers
+            
+            Authentication: Token 987ab987987c87d97e9877ff012
+  
++ Response 200
+
+    [Attempts Distribution][]
+
+

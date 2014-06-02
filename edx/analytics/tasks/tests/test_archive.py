@@ -106,7 +106,7 @@ class ArchiveExportTaskTestCase(unittest.TestCase):
             self.assertEquals(actual, self._create_file_contents(org, server, log_date))
         tar_file.close()
 
-    def _run_task(self, config_filepath):
+    def _run_task(self, config_filepath, **kwargs):
         """Define and run ArchiveExportTask locally in Luigi."""
         # Define and run the task.
         task = ArchiveExportTask(
@@ -115,6 +115,7 @@ class ArchiveExportTaskTestCase(unittest.TestCase):
             eventlog_output_root=self.src_path,
             output_root=self.output_root_path,
             temp_dir=self.archive_temp_path,
+            **kwargs
         )
         worker = luigi.worker.Worker()
         worker.add(task)
@@ -160,3 +161,21 @@ class ArchiveExportTaskTestCase(unittest.TestCase):
         tar_file = tarfile.open(tarfile_path)
         self.assertEquals(len(tar_file.getmembers()), len(SERVERS) * len(DATES))
         tar_file.close()
+
+    def test_limited_orgs(self):
+        self._create_input_data(self.src_path)
+        config_filepath = self._create_config_file()
+
+        self._run_task(config_filepath, org_id=['edX'])
+
+        # Confirm that the job succeeded.
+        output_files = os.listdir(self.output_root_path)
+
+        self.assertEquals(len(output_files), 1)
+        output_file = output_files[0]
+
+        self.assertEquals(output_file.split('-')[3], 'edX')
+
+        # Confirm that the output files were correctly tarred.
+        tarfile_path = os.path.join(self.output_root_path, output_file)
+        self._check_tar_file_contents(tarfile_path)

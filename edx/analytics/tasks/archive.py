@@ -29,6 +29,8 @@ class ArchiveExportTask(MultiOutputMapReduceJobTask):
         config: url path to configuration file that defines organizations and their aliases.
         output_root: url path to location where output archives get written.
         temp_dir: optional path to local file directory to use to create archives.
+        org_id: A list of organizations to process data for. If provided, only these organizations will be processed.
+            Otherwise, all valid organizations will be processed.
 
     """
     eventlog_output_root = luigi.Parameter(
@@ -41,6 +43,7 @@ class ArchiveExportTask(MultiOutputMapReduceJobTask):
         default_from_config={'section': 'archive-event-export', 'name': 'output_root'}
     )
     temp_dir = luigi.Parameter(default=None)
+    org_id = luigi.Parameter(is_list=True, default=[])
 
     # Force this job to flush each counter increment instead of
     # batching them. The tasks does not output data directly through
@@ -91,6 +94,11 @@ class ArchiveExportTask(MultiOutputMapReduceJobTask):
 
         Yields tuple of absolute and relative paths (relative to org subdirectory in source).
         """
+
+        # If org_ids are specified, restrict the processed files to that set.
+        if len(self.org_id) > 0 and org_name not in self.org_id:
+            return
+
         org_source = url_path_join(self.eventlog_output_root, org_name)
 
         # Only include paths that include ".log" so that directory names are not included.
@@ -236,6 +244,7 @@ class ArchivedEventExportWorkflow(ArchiveExportTask):
             environment=self.environment,
             interval=self.interval,
             pattern=self.pattern,
+            org_id=self.org_id,
             mapreduce_engine=self.mapreduce_engine,
             n_reduce_tasks=self.n_reduce_tasks,
             delete_output_root=self.delete_output_root,

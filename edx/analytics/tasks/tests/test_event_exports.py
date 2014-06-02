@@ -50,7 +50,10 @@ class EventExportTestCase(unittest.TestCase):
     CONFIGURATION = yaml.dump(CONFIG_DICT)
 
     def setUp(self):
-        self.task = EventExportTask(
+        self.task = self._create_export_task()
+
+    def _create_export_task(self, **kwargs):
+        task = EventExportTask(
             mapreduce_engine='local',
             output_root='test://output/',
             config='test://config/default.yaml',
@@ -58,14 +61,21 @@ class EventExportTestCase(unittest.TestCase):
             environment=['edge', 'prod'],
             interval=Year.parse('2014'),
             gpg_key_dir='test://config/gpg-keys/',
-            gpg_master_key='skeleton.key@example.com'
+            gpg_master_key='skeleton.key@example.com',
+            **kwargs
         )
 
-        self.task.input_local = MagicMock(return_value=FakeTarget(self.CONFIGURATION))
+        task.input_local = MagicMock(return_value=FakeTarget(self.CONFIGURATION))
+        return task
 
     def test_org_whitelist_capture(self):
         self.task.init_local()
         self.assertItemsEqual(self.task.org_id_whitelist, ['FooX', 'BarX', 'BazX', 'bar'])
+
+    def test_limited_orgs(self):
+        task = self._create_export_task(org_id=['FooX', 'bar'])
+        task.init_local()
+        self.assertItemsEqual(task.org_id_whitelist, ['FooX', 'bar'])
 
     def test_server_whitelist_capture(self):
         self.task.init_local()

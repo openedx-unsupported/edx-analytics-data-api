@@ -31,6 +31,8 @@ class EventExportTask(MultiOutputMapReduceJobTask):
         pattern: A regex with a named capture group for the date that approximates the date that the events within were
             emitted. Note that the search interval is expanded, so events don't have to be in exactly the right file
             in order for them to be processed.
+        org_id: A list of organizations to process data for. If provided, only these organizations will be processed.
+            Otherwise, all valid organizations will be processed.
     """
 
     output_root = luigi.Parameter(
@@ -45,6 +47,7 @@ class EventExportTask(MultiOutputMapReduceJobTask):
     environment = luigi.Parameter(is_list=True, default=['prod', 'edge'])
     interval = luigi.DateIntervalParameter()
     pattern = luigi.Parameter(default=None)
+    org_id = luigi.Parameter(is_list=True, default=[])
 
     gpg_key_dir = luigi.Parameter(
         default_from_config={'section': 'event-export', 'name': 'gpg_key_dir'}
@@ -87,7 +90,12 @@ class EventExportTask(MultiOutputMapReduceJobTask):
             for alias in org_config.get('other_names', []):
                 self.recipient_for_org_id[alias] = recipient
 
-        self.org_id_whitelist = self.recipient_for_org_id.keys()
+        self.org_id_whitelist = set(self.recipient_for_org_id.keys())
+
+        # If org_ids are specified, restrict the processed files to that set.
+        if len(self.org_id) > 0:
+            self.org_id_whitelist.intersection_update(self.org_id)
+
         log.debug('Using org_id whitelist ["%s"]', '", "'.join(self.org_id_whitelist))
 
         self.server_name_whitelist = set()

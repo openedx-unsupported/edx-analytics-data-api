@@ -1,0 +1,4 @@
+export SECRET_KEY=test
+export DATABASE_NAME=test
+export DATABASE_USER=test
+export DATABASE_PASSWORD=test

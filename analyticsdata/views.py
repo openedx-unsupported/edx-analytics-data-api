@@ -1,3 +1,5 @@
+
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -6,6 +8,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
+
+from analyticsdata.models import CourseActivityLastWeek
 
 
 @api_view(['GET'])
@@ -90,3 +94,48 @@ def _handle_error(status_code):
     renderer = JSONRenderer()
     content_type = '{media}; charset={charset}'.format(media=renderer.media_type, charset=renderer.charset)
     return HttpResponse(renderer.render(info), content_type=content_type, status=status_code)
+
+
+class CourseActivityLastWeekView(generics.RetrieveAPIView):
+    """
+    Counts of users who performed various actions at least once in the past week. The default is all users who performed *any* action in the course.
+
+    The representation has the following fields:
+
+    - course_id: The ID of the course whose activity is described.
+    - interval_start: All data from this timestamp up to the `interval_end` was considered when computing this data point.
+    - interval_end: All data from `interval_start` up to this timestamp was considered when computing this data point. Note that data produced at exactly this time is **not** included.
+    - label: The type of activity requested. Possible values are:
+        - active: The number of unique users who visited the course.
+        - started_video: The number of unique users who started watching any video in the course.
+        - answered_question: The number of unique users who answered any loncapa based question in the course.
+        - posted_forum: The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.
+    - count: The number of users who performed the activity indicated by the `label`.
+
+    + Parameters
+        + course_id (string) ... ID of the course.
+
+            This string should uniquely identify the course.
+
+        + label = `Active` (optional, string) ... The type of activity.
+
+            + Values
+                + `Active`
+                + `Started_Video`
+                + `Answered_Question`
+                + `Posted_Forum`
+
+    """
+    model = CourseActivityLastWeek
+
+    # TODO: restrict fields, exclude the id
+
+    def get_object(self):
+        # TODO: will this return a 404 if this course doesn't exist?
+        course_id = self.kwargs.get('course_id')
+        # TODO: will this return a 404 if this label isn't found?
+        # TODO: casing is odd for these values. Maybe change this in the pipeline?
+        label = self.request.QUERY_PARAMS.get('label', 'Active')
+
+        # TODO: what happens if data isn't generated for > 1 week?
+        return self.model.objects.all().filter(course_id=course_id, label=label).latest('interval_end')

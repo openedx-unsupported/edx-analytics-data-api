@@ -1,3 +1,5 @@
+
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -6,6 +8,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
+
+from analyticsdata.models import CourseActivityLastWeek
 
 
 @api_view(['GET'])
@@ -90,3 +94,14 @@ def _handle_error(status_code):
     renderer = JSONRenderer()
     content_type = '{media}; charset={charset}'.format(media=renderer.media_type, charset=renderer.charset)
     return HttpResponse(renderer.render(info), content_type=content_type, status=status_code)
+
+
+class CourseActivityLastWeekView(generics.RetrieveAPIView):
+    model = CourseActivityLastWeek
+
+    def get_object(self):
+        course_id = self.kwargs.get('course_id')
+        label = self.kwargs.get('label')
+        if not label:
+            label = 'Active'
+        return self.model.objects.all().filter(course_id=course_id, label=label).latest('interval_end')

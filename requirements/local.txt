@@ -3,4 +3,3 @@
 -r test.txt
 django-debug-toolbar==0.9.4
 Sphinx==1.2b1
-requests==2.3.0 # nose requires this since it loads the client during test discovery

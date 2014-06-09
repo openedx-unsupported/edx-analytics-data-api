@@ -2,6 +2,7 @@
 ROOT = $(shell echo "$$PWD")
 COVERAGE = $(ROOT)/build/coverage
 PACKAGES = analyticsdata analyticsdataclient
+DATABASES = default analytics
 
 validate: test.requirements test quality
 
@@ -45,3 +46,7 @@ quality:
 
 	# Ignore module level docstrings and all test files
 	pep257 --ignore=D100 --match='(?!test).*py' $(PACKAGES)
+
+syncdb:
+	$(foreach db_name,$(DATABASES),./manage.py syncdb --database=$(db_name);)
+	$(foreach db_name,$(DATABASES),./manage.py migrate --database=$(db_name);)

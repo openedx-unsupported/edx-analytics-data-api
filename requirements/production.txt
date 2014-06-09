@@ -3,4 +3,4 @@
 -r base.txt
 
 gunicorn==0.17.4
-MySQL-python==1.2.4
+MySQL-python==1.2.5

@@ -9,3 +9,4 @@ mock==1.0.1
 pep257==0.3.2
 httpretty==0.8.0
 requests==2.3.0
+pytz==2012h

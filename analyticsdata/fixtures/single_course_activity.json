@@ -1,0 +1,46 @@
+[
+    {
+        "pk": 40, 
+        "model": "analyticsdata.courseactivitybyweek", 
+        "fields": {
+            "course_id": "edX/DemoX/Demo_Course", 
+            "interval_start": "2014-05-24T00:00:00Z", 
+            "label": "POSTED_FORUM", 
+            "count": 100, 
+            "interval_end": "2014-06-01T00:00:00Z"
+        }
+    }, 
+    {
+        "pk": 106, 
+        "model": "analyticsdata.courseactivitybyweek", 
+        "fields": {
+            "course_id": "edX/DemoX/Demo_Course", 
+            "interval_start": "2014-05-24T00:00:00Z", 
+            "label": "ATTEMPTED_PROBLEM", 
+            "count": 200, 
+            "interval_end": "2014-06-01T00:00:00Z"
+        }
+    }, 
+    {
+        "pk": 201, 
+        "model": "analyticsdata.courseactivitybyweek", 
+        "fields": {
+            "course_id": "edX/DemoX/Demo_Course", 
+            "interval_start": "2014-05-24T00:00:00Z", 
+            "label": "ACTIVE", 
+            "count": 300, 
+            "interval_end": "2014-06-01T00:00:00Z"
+        }
+    }, 
+    {
+        "pk": 725, 
+        "model": "analyticsdata.courseactivitybyweek", 
+        "fields": {
+            "course_id": "edX/DemoX/Demo_Course", 
+            "interval_start": "2014-05-24T00:00:00Z", 
+            "label": "PLAYED_VIDEO", 
+            "count": 400, 
+            "interval_end": "2014-06-01T00:00:00Z"
+        }
+    }
+]

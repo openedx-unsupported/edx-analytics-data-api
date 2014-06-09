@@ -7,6 +7,9 @@ urlpatterns = patterns(
     url(r'^status$', views.status),
     url(r'^authenticated$', views.authenticated),
     url(r'^health$', views.health),
+
+    # Course Activity
+    url(r'^courses/(?P<course_id>.+)/recent_activity$', views.CourseActivityMostRecentWeekView.as_view())
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -75,39 +75,34 @@ Validates provided credentials. Returns no data, a simple 200 OK status code is 
 
 # Group Course
 
-## User Activity [/api/v0/courses/{course_id}/user_activity{?from_date,to_date,group_by}]
+## Activity [/api/v0/courses/{course_id}/activity_last_week{?label}]
 
-Counts of unique users who performed various actions of interest. A unique user is defined as a user who performed at least one action within a time interval specified by the `group_by` parameter. This time interval used for grouping results is referred to as the `unit` and can either be a week or a day.
+Counts of users who performed various actions at least once in the past week. The default is all users who performed *any* action in the course.
 
-Each data point has the following fields:
+The representation has the following fields:
 
-- from_date (timestamp): All data from this timestamp up to the `to_date` was considered when computing this data point.
-- to_date (timestamp): All data from `from_date` up to this timestamp was considered when computing this data point. Note that data produced at exactly this time is **not** included.
-- visited (integer): The number of unique users who visited the course.
-- started_video (integer): The number of unique users who started watching any video in the course.
-- answered_question (integer): The number of unique users who answered any capa based question in the course.
-- posted_forum (integer): The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.
+- course_id: The ID of the course whose activity is described.
+- interval_start: All data from this timestamp up to the `interval_end` was considered when computing this data point.
+- interval_end: All data from `interval_start` up to this timestamp was considered when computing this data point. Note that data produced at exactly this time is **not** included.
+- label: The type of activity requested. Possible values are:
+        - ACTIVE: The number of unique users who visited the course.
+        - PLAYED_VIDEO: The number of unique users who started watching any video in the course.
+        - ATTEMPTED_PROBLEM: The number of unique users who answered any loncapa based question in the course.
+        - POSTED_FORUM: The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.
+- count: The number of users who performed the activity indicated by the `label`.
 
 + Parameters
     + course_id (string) ... ID of the course.
 
-        Currently accepts url encoded slash separated course key values. In the future will also accept other course identifying strings.
+        This string should uniquely identify the course.
 
-    + from_date (optional, timestamp) ... A time within the first unit to include in the results.
-
-        Defaults to midnight on the first day of the most recent complete unit at the UTC time the server processes the request.
-
-    + to_date (optional, timestamp) ... A time within the unit after the last unit to include in the results.
-    
-        Defaults to midnight on the day after the last day of the most recent complete unit at the UTC time the server processes the request.
-
-    + group_by = `week` (optional, string) ... Specifies the granularity of groups returned.
-
-        Users that appear multiple times in this interval will be counted only once.
+    + label = `active` (optional, string) ... The type of activity.
 
         + Values
-            + `week`
-            + `day`
+            + `ACTIVE`
+            + `PLAYED_VIDEO`
+            + `ATTEMPTED_PROBLEM`
+            + `POSTED_FORUM`
 
 ### User Activity over Time [GET]
 
@@ -122,20 +117,11 @@ Each data point has the following fields:
     + Body
 
             {
-                "count": 1,
-                "next": null,
-                "previous": null,
-                "results": [
-                    {
-                        "from_date": "2014-05-17T00:00:00.000Z",
-                        "to_date": "2014-05-24T00:00:00.000Z",
-                        "course_id": "edX/Demo_Course/2013_T1",
-                        "visited": 1047,
-                        "started_video": 931,
-                        "answered_question": 452,
-                        "posted_forum": 318
-                    }
-                ]
+                "course_id": "edx/Demo_Course/2014T2",
+                "interval_start": "2014-05-17T00:00:00.000Z",
+                "interval_end": "2014-05-24T00:00:00.000Z",
+                "label": "active",
+                "count": 1024
             }
 
 # Group Problem

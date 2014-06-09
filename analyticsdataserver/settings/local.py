@@ -31,6 +31,14 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+    },
+    'analytics': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 ########## END DATABASE CONFIGURATION
@@ -69,6 +77,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 ########## ANALYTICS DATA API CONFIGURATION
 
+ANALYTICS_DATABASE = 'analytics'
 ENABLE_ADMIN_SITE = True
 
 ########## END ANALYTICS DATA API CONFIGURATION

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from analyticsdataclient.client import Client, ClientError
 from analyticsdataclient.status import Status
+from analyticsdataclient.tests import InMemoryClient
 
 
 class StatusTest(TestCase):
@@ -46,23 +46,3 @@ class StatusTest(TestCase):
         self.client.resources['health'] = {}
 
         self.assertEquals(self.status.healthy, False)
-
-
-class InMemoryClient(Client):
-
-    def __init__(self):
-        super(InMemoryClient, self).__init__()
-        self.resources = {}
-
-    def has_resource(self, resource, timeout=None):
-        try:
-            self.get(resource, timeout=timeout)
-            return True
-        except ClientError:
-            return False
-
-    def get(self, resource, timeout=None):
-        try:
-            return self.resources[resource]
-        except KeyError:
-            raise ClientError('Unable to find requested resource')

@@ -1,5 +1,7 @@
 
 from contextlib import contextmanager
+from datetime import datetime
+from functools import partial
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -7,6 +9,7 @@ from django.db.utils import ConnectionHandler
 from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch
+import pytz
 from rest_framework.authtoken.models import Token
 
 from analyticsdata.views import handle_internal_server_error, handle_missing_resource_error
@@ -16,7 +19,16 @@ from analyticsdata.views import handle_internal_server_error, handle_missing_res
 # for subsequent versions if there are breaking changes introduced in those versions.
 
 
-class OperationalEndpointsTest(TestCase):
+class TestCaseWithAutenticatation(TestCase):
+
+    def setUp(self):
+        super(TestCaseWithAutenticatation, self).setUp()
+        test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
+        token = Token.objects.create(user=test_user)
+        self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key)
+
+
+class OperationalEndpointsTest(TestCaseWithAutenticatation):
 
     def test_status(self):
         response = self.client.get('/api/v0/status')
@@ -27,9 +39,7 @@ class OperationalEndpointsTest(TestCase):
         self.assertEquals(response.status_code, 401)
 
     def test_authentication_check_success(self):
-        test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
-        token = Token.objects.create(user=test_user)
-        response = self.client.get('/api/v0/authenticated', HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.authenticated_get('/api/v0/authenticated')
         self.assertEquals(response.status_code, 200)
 
     def test_health(self):
@@ -97,3 +107,55 @@ class ErrorHandlingTest(TestCase):
     def test_missing_resource_handling(self):
         response = handle_missing_resource_error(None)
         self.validate_error_response(response, 404)
+
+
+class CourseActivityLastWeekTest(TestCaseWithAutenticatation):
+
+    fixtures = ['single_course_activity']
+
+    COURSE_ID = 'edX/DemoX/Demo_Course'
+
+    def test_activity(self):
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format(self.COURSE_ID))
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, self.get_activity_record())
+
+    @staticmethod
+    def get_activity_record(**kwargs):
+        default = {
+            'course_id': 'edX/DemoX/Demo_Course',
+            'interval_start': datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
+            'interval_end': datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
+            'label': 'ACTIVE',
+            'count': 300,
+        }
+        default.update(kwargs)
+        return default
+
+    def test_activity_auth(self):
+        response = self.client.get('/api/v0/courses/{0}/recent_activity'.format(self.COURSE_ID))
+        self.assertEquals(response.status_code, 401)
+
+    def test_url_encoded_course_id(self):
+        response = self.authenticated_get('/api/v0/courses/edX%2FDemoX%2FDemo_Course/recent_activity')
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, self.get_activity_record())
+
+    def test_video_activity(self):
+        label = 'PLAYED_VIDEO'
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?label={1}'.format(self.COURSE_ID, label))
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, self.get_activity_record(label=label, count=400))
+
+    def test_unknown_activity(self):
+        label = 'MISSING_ACTIVITY_TYPE'
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?label={1}'.format(self.COURSE_ID, label))
+        self.assertEquals(response.status_code, 404)
+
+    def test_unknown_course_id(self):
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format('foo'))
+        self.assertEquals(response.status_code, 404)
+
+    def test_missing_course_id(self):
+        response = self.authenticated_get('/api/v0/courses/recent_activity')
+        self.assertEquals(response.status_code, 404)

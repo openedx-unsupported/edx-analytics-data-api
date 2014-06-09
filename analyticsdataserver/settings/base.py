@@ -237,9 +237,6 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 
 ########## REST FRAMEWORK CONFIGURATION
 REST_FRAMEWORK = {
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.HyperlinkedModelSerializer',
-
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
     ],
@@ -257,6 +254,8 @@ REST_FRAMEWORK = {
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'default'
+DATABASE_ROUTERS = ['analyticsdataserver.router.DatabaseFromSettingRouter']
+
 ENABLE_ADMIN_SITE = False
 
 ########## END ANALYTICS DATA API CONFIGURATION

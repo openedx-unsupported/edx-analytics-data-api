@@ -1,11 +1,17 @@
+
+from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import connections
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
+
+from analyticsdata.models import CourseActivityByWeek
+from analyticsdata.models import CourseActivityByWeekSerializer
 
 
 @api_view(['GET'])
@@ -90,3 +96,50 @@ def _handle_error(status_code):
     renderer = JSONRenderer()
     content_type = '{media}; charset={charset}'.format(media=renderer.media_type, charset=renderer.charset)
     return HttpResponse(renderer.render(info), content_type=content_type, status=status_code)
+
+
+class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
+
+    """
+    Counts of users who performed various actions at least once during the most recently computed week.
+
+    The default is all users who performed *any* action in the course.
+
+    The representation has the following fields:
+
+    - course_id: The ID of the course whose activity is described.
+    - interval_start: All data from this timestamp up to the `interval_end` was considered when computing this data
+      point.
+    - interval_end: All data from `interval_start` up to this timestamp was considered when computing this data point.
+      Note that data produced at exactly this time is **not** included.
+    - label: The type of activity requested. Possible values are:
+        - ACTIVE: The number of unique users who performed any action within the course, including actions not
+          enumerated below.
+        - PLAYED_VIDEO: The number of unique users who started watching any video in the course.
+        - ATTEMPTED_PROBLEM: The number of unique users who answered any loncapa based question in the course.
+        - POSTED_FORUM: The number of unique users who created a new post, responded to a post, or submitted a comment
+          on any forum in the course.
+    - count: The number of users who performed the activity indicated by the `label`.
+
+    Parameters:
+
+    - course_id (string): Unique identifier for the course.
+    - label (string): The type of activity. Possible values:
+        - `ACTIVE`
+        - `PLAYED_VIDEO`
+        - `ATTEMPTED_PROBLEM`
+        - `POSTED_FORUM`
+
+    """
+
+    serializer_class = CourseActivityByWeekSerializer
+
+    def get_object(self):  # pylint: disable=arguments-differ
+        """Select the activity report for the given course and label."""
+        course_id = self.kwargs.get('course_id')
+        label = self.request.QUERY_PARAMS.get('label', 'ACTIVE')
+
+        try:
+            return CourseActivityByWeek.get_most_recent(course_id, label)
+        except ObjectDoesNotExist:
+            raise Http404

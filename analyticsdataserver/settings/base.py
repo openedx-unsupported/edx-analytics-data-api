@@ -251,12 +251,15 @@ REST_FRAMEWORK = {
         # For the browseable API
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'PAGINATE_BY_PARAM': 'page_size',
 }
 ########## END REST FRAMEWORK CONFIGURATION
 
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'default'
+DATABASE_ROUTERS = ['analyticsdataserver.router.DatabaseFromSettingRouter']
+
 ENABLE_ADMIN_SITE = False
 
 ########## END ANALYTICS DATA API CONFIGURATION

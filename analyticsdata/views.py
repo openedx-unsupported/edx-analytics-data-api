@@ -1,3 +1,5 @@
+
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -6,6 +8,8 @@ from rest_framework.response import Response
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
+
+from analyticsdata.models import CourseUserActivityByWeek
 
 
 @api_view(['GET'])
@@ -90,3 +94,24 @@ def _handle_error(status_code):
     renderer = JSONRenderer()
     content_type = '{media}; charset={charset}'.format(media=renderer.media_type, charset=renderer.charset)
     return HttpResponse(renderer.render(info), content_type=content_type, status=status_code)
+
+
+class CourseUserActivityListView(generics.ListAPIView):
+    model = CourseUserActivityByWeek
+    paginate_by = 100
+    max_paginate_by = 500
+
+    def get_queryset(self):
+        course_id = self.kwargs.get('course_id')
+        if course_id is None:
+            course_id = self.request.QUERY_PARAMS.get('course_id')
+
+        queryset = self.model.objects.all()
+        if course_id is not None:
+            return queryset.filter(course_id=course_id)
+        else:
+            return queryset
+
+
+class CourseUserActivityView(generics.RetrieveAPIView):
+    model = CourseUserActivityByWeek

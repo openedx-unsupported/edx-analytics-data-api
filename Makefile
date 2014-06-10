@@ -27,7 +27,7 @@ test.client:
 		--cover-package=analyticsdataclient \
 		analyticsdataclient/
 
-test: test.app test.client
+test: test.requirements test.app test.client
 
 diff.report:
 	diff-cover $(COVERAGE)/coverage.xml --html-report $(COVERAGE)/diff_cover.html

@@ -1,5 +1,6 @@
 
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -10,8 +11,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import connections
 from django.http import HttpResponse, Http404
 
-from analyticsdata.models import CourseActivityByWeek
-from analyticsdata.models import CourseActivityByWeekSerializer
+from analyticsdata.models import CourseActivityByWeek, UsageProblemResponseAnswerDistribution
+from analyticsdata.models import CourseActivityByWeekSerializer, UsageProblemResponseAnswerDistributionSerializer
 
 
 @api_view(['GET'])
@@ -143,3 +144,12 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
             return CourseActivityByWeek.get_most_recent(course_id, label)
         except ObjectDoesNotExist:
             raise Http404
+
+
+class UsageProblemResponseAnswerDistributionView(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    serializer_class = UsageProblemResponseAnswerDistributionSerializer
+
+    def get_queryset(self):
+        usage_id = self.kwargs.get('usage_id')
+        return UsageProblemResponseAnswerDistribution.objects.filter(module_id=usage_id)

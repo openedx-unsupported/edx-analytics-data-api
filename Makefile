@@ -1,7 +1,7 @@
 
 ROOT = $(shell echo "$$PWD")
 COVERAGE = $(ROOT)/build/coverage
-PACKAGES = analyticsdata analyticsdataclient
+PACKAGES = analyticsdata
 DATABASES = default analytics
 
 validate: test.requirements test quality
@@ -13,22 +13,13 @@ clean:
 	find . -name '*.pyc' -delete
 	coverage erase
 
-test.app: clean
+test: clean
 	. ./.test_env && ./manage.py test --settings=analyticsdataserver.settings.test \
 		--with-coverage --cover-inclusive --cover-branches \
 		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
 		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \
 		--cover-package=analyticsdata \
 		analyticsdata/
-
-test.client:
-	nosetests --with-coverage --cover-inclusive --cover-branches \
-		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
-		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \
-		--cover-package=analyticsdataclient \
-		analyticsdataclient/
-
-test: test.app test.client
 
 diff.report:
 	diff-cover $(COVERAGE)/coverage.xml --html-report $(COVERAGE)/diff_cover.html

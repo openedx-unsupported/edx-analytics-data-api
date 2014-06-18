@@ -9,7 +9,10 @@ urlpatterns = patterns(
     url(r'^health$', views.health),
 
     # Course Activity
-    url(r'^courses/(?P<course_id>.+)/recent_activity$', views.CourseActivityMostRecentWeekView.as_view())
+    url(r'^courses/(?P<course_id>.+)/recent_activity$', views.CourseActivityMostRecentWeekView.as_view()),
+
+    # Answer Distribution
+    url(r'^problem/(?P<usage_id>.+)/answer_distribution$', views.UsageProblemResponseAnswerDistributionView.as_view()),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

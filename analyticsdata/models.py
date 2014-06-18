@@ -36,3 +36,41 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     class Meta:  # pylint: disable=old-style-class
         model = CourseActivityByWeek
         fields = ('course_id', 'interval_start', 'interval_end', 'label', 'count')
+
+
+class UsageProblemResponseAnswerDistribution(models.Model):
+    """
+    Each row stores the count of a particular answer to a response in a problem in a course (usage)
+    """
+    db_from_setting = 'ANALYTICS_DATABASE'
+
+    class Meta:
+        db_table = 'answer_distribution'
+
+    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
+    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
+    part_id = models.CharField(db_index=True, max_length=255, db_column='part_id')
+    correct = models.BooleanField(db_column='correct')
+    count = models.IntegerField(db_column='count')
+    value_id = models.CharField(db_index=True, max_length=255, db_column='value_id')
+    answer_value_text = models.TextField(db_column='answer_value_text')
+    answer_value_numeric = models.FloatField(db_column='answer_value_numeric')
+    variant = models.IntegerField(db_column='variant')
+    created = models.DateTimeField(auto_now_add=True, db_column='created')
+
+
+class UsageProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UsageProblemResponseAnswerDistribution
+        fields = (
+            'course_id',
+            'module_id',
+            'part_id',
+            'correct',
+            'count',
+            'value_id',
+            'answer_value_text',
+            'answer_value_numeric',
+            'variant',
+            'created'
+        )

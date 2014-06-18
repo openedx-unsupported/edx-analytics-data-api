@@ -124,7 +124,7 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
     Parameters:
 
     - course_id (string): Unique identifier for the course.
-    - label (string): The type of activity. Possible values:
+    - label (string): The type of activity. Defaults to `ACTIVE`. Possible values:
         - `ACTIVE`
         - `PLAYED_VIDEO`
         - `ATTEMPTED_PROBLEM`

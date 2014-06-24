@@ -4,11 +4,14 @@
 from os import environ
 from base import *
 import yaml
+from analyticsdataserver.logsettings import get_logger_config
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
+
+LOGGING = get_logger_config()
 
 def get_env_setting(setting):
     """Get the environment setting or return exception."""
@@ -29,4 +32,3 @@ with open(CONFIG_FILE) as f:
   config_from_yaml = yaml.load(f)
 
 vars().update(config_from_yaml)
-

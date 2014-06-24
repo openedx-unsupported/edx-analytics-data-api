@@ -36,7 +36,7 @@ quality:
 	pylint --rcfile=.pylintrc $(PACKAGES)
 
 	# Ignore module level docstrings and all test files
-	pep257 --ignore=D100 --match='(?!test).*py' $(PACKAGES)
+	pep257 --ignore=D100,D203 --match='(?!test).*py' $(PACKAGES)
 
 syncdb:
 	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --database=$(db_name);)

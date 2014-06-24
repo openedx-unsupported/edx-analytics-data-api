@@ -4,10 +4,16 @@ COVERAGE = $(ROOT)/build/coverage
 PACKAGES = analyticsdata
 DATABASES = default analytics
 
-validate: test.requirements test quality
+.PHONY: requirements develop clean diff.report view.diff.report quality syscdb
 
-test.requirements:
+requirements:
+	pip install -q -r requirements/base.txt
+
+test.requirements: requirements
 	pip install -q -r requirements/test.txt
+
+develop:
+	pip install -q -r requirements/local.txt
 
 clean:
 	find . -name '*.pyc' -delete
@@ -37,6 +43,8 @@ quality:
 
 	# Ignore module level docstrings and all test files
 	pep257 --ignore=D100 --match='(?!test).*py' $(PACKAGES)
+
+validate: test.requirements test quality
 
 syncdb:
 	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --database=$(db_name);)

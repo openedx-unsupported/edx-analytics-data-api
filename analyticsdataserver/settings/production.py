@@ -34,7 +34,7 @@ with open(CONFIG_FILE) as f:
 vars().update(config_from_yaml)
 
 DB_OVERRIDES = dict(
-    PASSWORD=environ.get('DB_MIGRATION_PASS', DATABASES['default']['PASS']),
+    PASSWORD=environ.get('DB_MIGRATION_PASS', DATABASES['default']['PASSWORD']),
     ENGINE=environ.get('DB_MIGRATION_ENGINE', DATABASES['default']['ENGINE']),
     USER=environ.get('DB_MIGRATION_USER', DATABASES['default']['USER']),
     NAME=environ.get('DB_MIGRATION_NAME', DATABASES['default']['NAME']),

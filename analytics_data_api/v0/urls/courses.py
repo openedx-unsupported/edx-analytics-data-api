@@ -1,0 +1,22 @@
+import re
+
+from django.conf.urls import patterns, url
+
+from analytics_data_api.v0.views.courses import CourseActivityMostRecentWeekView, CourseEnrollmentByEducationView, \
+    CourseEnrollmentByBirthYearView, CourseEnrollmentByGenderView
+
+
+COURSE_URLS = [
+    ('recent_activity', CourseActivityMostRecentWeekView, 'recent_activity'),
+    ('enrollment/birth_year', CourseEnrollmentByBirthYearView, 'enrollment_by_birth_year'),
+    ('enrollment/education', CourseEnrollmentByEducationView, 'enrollment_by_education'),
+    ('enrollment/gender', CourseEnrollmentByGenderView, 'enrollment_by_gender'),
+]
+
+urlpatterns = patterns(
+    '',
+    # url(r'^$', CourseDetailView.as_view(), name='detail')
+)
+
+for path, view, name in COURSE_URLS:
+    urlpatterns += patterns('', url(r'^(?P<course_key>.+)/' + re.escape(path) + r'$', view.as_view(), name=name))

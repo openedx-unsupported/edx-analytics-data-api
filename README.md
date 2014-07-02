@@ -1,7 +1,7 @@
 edX Analytics API Server
-======================
+========================
 
-See https://edx-wiki.atlassian.net/wiki/display/AN/Analytics+Data+API for more details. For the API *client* visit
+This repository includes the Django server for the API as well as the API package itself. The client is hosted at
 https://github.com/edx/edx-analytics-api-client.
 
 License
@@ -10,18 +10,25 @@ The code in this repository is licensed under version 3 of the AGPL unless other
 
 Please see `LICENSE.txt` for details.
 
-Testing
--------------
+Getting Started
+---------------
 
-Run `make validate`.
-
-Development
--------------
-
-1. Install dependencies:
-
+1. Install the requirements:
+ 
         $ make develop
-
-2. Launch server:
+        
+2. Run the server:
 
         $ ./manage.py runserver
+
+Loading Data
+------------
+The fixtures directory contains demo data. This data can be loaded with the following commands:
+
+        $ ./manage.py syncdb --migrate --noinput --database=analytics
+        $ ./manage.py loaddata courses education_levels single_course_activity course_enrollment_birth_year course_enrollment_education course_enrollment_gender --database=analytics
+
+Running Tests
+-------------
+
+Run `make validate` install the requirements, run the tests, and run lint.

@@ -1,0 +1,101 @@
+[
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 5,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 6,
+            "num_enrolled_students": 12255,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 6,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 7,
+            "num_enrolled_students": 70885,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 7,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 3,
+            "num_enrolled_students": 981,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 8,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 5,
+            "num_enrolled_students": 51591,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 9,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 4,
+            "num_enrolled_students": 6051,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 10,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 8,
+            "num_enrolled_students": 53216,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 11,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 1,
+            "num_enrolled_students": 667,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 12,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 2,
+            "num_enrolled_students": 5722,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 13,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 9,
+            "num_enrolled_students": 9940,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    }
+]

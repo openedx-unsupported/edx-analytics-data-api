@@ -1,0 +1,35 @@
+[
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 1,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "m",
+            "num_enrolled_students": 133240,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 2,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "f",
+            "num_enrolled_students": 77495,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 3,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "o",
+            "num_enrolled_students": 423,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    }
+]

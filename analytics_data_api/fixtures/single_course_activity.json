@@ -1,44 +1,44 @@
 [
     {
         "pk": 40, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
-            "course_id": "edX/DemoX/Demo_Course", 
+            "course": ["edX/DemoX/Demo_Course"],
             "interval_start": "2014-05-24T00:00:00Z", 
-            "label": "POSTED_FORUM", 
+            "activity_type": "posted_forum",
             "count": 100, 
             "interval_end": "2014-06-01T00:00:00Z"
         }
     }, 
     {
         "pk": 106, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
-            "course_id": "edX/DemoX/Demo_Course", 
+            "course": ["edX/DemoX/Demo_Course"], 
             "interval_start": "2014-05-24T00:00:00Z", 
-            "label": "ATTEMPTED_PROBLEM", 
+            "activity_type": "attempted_problem",
             "count": 200, 
             "interval_end": "2014-06-01T00:00:00Z"
         }
     }, 
     {
         "pk": 201, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
-            "course_id": "edX/DemoX/Demo_Course", 
+            "course": ["edX/DemoX/Demo_Course"], 
             "interval_start": "2014-05-24T00:00:00Z", 
-            "label": "ACTIVE", 
+            "activity_type": "any",
             "count": 300, 
             "interval_end": "2014-06-01T00:00:00Z"
         }
     }, 
     {
         "pk": 725, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
-            "course_id": "edX/DemoX/Demo_Course", 
+            "course": ["edX/DemoX/Demo_Course"], 
             "interval_start": "2014-05-24T00:00:00Z", 
-            "label": "PLAYED_VIDEO", 
+            "activity_type": "played_video",
             "count": 400, 
             "interval_end": "2014-06-01T00:00:00Z"
         }

@@ -1,0 +1,1234 @@
+[
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 5,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1894,
+            "num_enrolled_students": 13,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 6,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1895,
+            "num_enrolled_students": 19,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 7,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1896,
+            "num_enrolled_students": 3,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 8,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1898,
+            "num_enrolled_students": 2,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 9,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1900,
+            "num_enrolled_students": 14,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 10,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1901,
+            "num_enrolled_students": 2,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 11,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1906,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 12,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1907,
+            "num_enrolled_students": 2,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 13,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1909,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 14,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1911,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 15,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1912,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 16,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1913,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 17,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1914,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 18,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1915,
+            "num_enrolled_students": 3,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 19,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1916,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 20,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1917,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 21,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1918,
+            "num_enrolled_students": 1,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 22,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1920,
+            "num_enrolled_students": 5,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 23,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1921,
+            "num_enrolled_students": 7,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 24,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1922,
+            "num_enrolled_students": 11,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 25,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1923,
+            "num_enrolled_students": 20,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 26,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1924,
+            "num_enrolled_students": 16,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 27,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1925,
+            "num_enrolled_students": 21,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 28,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1926,
+            "num_enrolled_students": 29,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 29,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1927,
+            "num_enrolled_students": 27,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 30,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1928,
+            "num_enrolled_students": 44,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 31,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1929,
+            "num_enrolled_students": 56,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 32,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1930,
+            "num_enrolled_students": 71,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 33,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1931,
+            "num_enrolled_students": 85,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 34,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1932,
+            "num_enrolled_students": 98,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 35,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1933,
+            "num_enrolled_students": 115,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 36,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1934,
+            "num_enrolled_students": 135,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 37,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1935,
+            "num_enrolled_students": 139,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 38,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1936,
+            "num_enrolled_students": 186,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 39,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1937,
+            "num_enrolled_students": 207,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 40,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1938,
+            "num_enrolled_students": 236,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 41,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1939,
+            "num_enrolled_students": 297,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 42,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1940,
+            "num_enrolled_students": 329,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 43,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1941,
+            "num_enrolled_students": 394,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 44,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1942,
+            "num_enrolled_students": 503,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 45,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1943,
+            "num_enrolled_students": 545,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 46,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1944,
+            "num_enrolled_students": 627,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 47,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1945,
+            "num_enrolled_students": 634,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 48,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1946,
+            "num_enrolled_students": 877,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 49,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1947,
+            "num_enrolled_students": 1101,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 50,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1948,
+            "num_enrolled_students": 998,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 51,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1949,
+            "num_enrolled_students": 1081,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 52,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1950,
+            "num_enrolled_students": 1117,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 53,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1951,
+            "num_enrolled_students": 1222,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 54,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1952,
+            "num_enrolled_students": 1343,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 55,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1953,
+            "num_enrolled_students": 1406,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 56,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1954,
+            "num_enrolled_students": 1525,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 57,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1955,
+            "num_enrolled_students": 1739,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 58,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1956,
+            "num_enrolled_students": 1769,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 59,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1957,
+            "num_enrolled_students": 1882,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 60,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1958,
+            "num_enrolled_students": 1966,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 61,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1959,
+            "num_enrolled_students": 2105,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 62,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1960,
+            "num_enrolled_students": 2355,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 63,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1961,
+            "num_enrolled_students": 2261,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 64,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1962,
+            "num_enrolled_students": 2405,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 65,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1963,
+            "num_enrolled_students": 2486,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 66,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1964,
+            "num_enrolled_students": 2546,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 67,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1965,
+            "num_enrolled_students": 2648,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 68,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1966,
+            "num_enrolled_students": 2562,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 69,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1967,
+            "num_enrolled_students": 2715,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 70,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1968,
+            "num_enrolled_students": 2751,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 71,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1969,
+            "num_enrolled_students": 2925,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 72,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1970,
+            "num_enrolled_students": 3164,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 73,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1971,
+            "num_enrolled_students": 3051,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 74,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1972,
+            "num_enrolled_students": 3096,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 75,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1973,
+            "num_enrolled_students": 3073,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 76,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1974,
+            "num_enrolled_students": 3286,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 77,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1975,
+            "num_enrolled_students": 3452,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 78,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1976,
+            "num_enrolled_students": 3609,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 79,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1977,
+            "num_enrolled_students": 3890,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 80,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1978,
+            "num_enrolled_students": 3986,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 81,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1979,
+            "num_enrolled_students": 4484,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 82,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1980,
+            "num_enrolled_students": 4978,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 83,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1981,
+            "num_enrolled_students": 5033,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 84,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1982,
+            "num_enrolled_students": 5376,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 85,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1983,
+            "num_enrolled_students": 5665,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 86,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1984,
+            "num_enrolled_students": 6093,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 87,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1985,
+            "num_enrolled_students": 6343,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 88,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1986,
+            "num_enrolled_students": 6915,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 89,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1987,
+            "num_enrolled_students": 7368,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 90,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1988,
+            "num_enrolled_students": 7675,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 91,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1989,
+            "num_enrolled_students": 8282,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 92,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1990,
+            "num_enrolled_students": 8668,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 93,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1991,
+            "num_enrolled_students": 8636,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 94,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1992,
+            "num_enrolled_students": 8163,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 95,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1993,
+            "num_enrolled_students": 8067,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 96,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1994,
+            "num_enrolled_students": 7312,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 97,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1995,
+            "num_enrolled_students": 5801,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 98,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1996,
+            "num_enrolled_students": 3955,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 99,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1997,
+            "num_enrolled_students": 2780,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 100,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1998,
+            "num_enrolled_students": 1815,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 101,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 1999,
+            "num_enrolled_students": 978,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 102,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2000,
+            "num_enrolled_students": 562,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 103,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2001,
+            "num_enrolled_students": 217,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 104,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2002,
+            "num_enrolled_students": 114,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 105,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2003,
+            "num_enrolled_students": 71,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 106,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2004,
+            "num_enrolled_students": 30,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 107,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2005,
+            "num_enrolled_students": 22,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 108,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2006,
+            "num_enrolled_students": 12,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 109,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2007,
+            "num_enrolled_students": 16,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 110,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2008,
+            "num_enrolled_students": 13,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 111,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2009,
+            "num_enrolled_students": 17,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 112,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2010,
+            "num_enrolled_students": 29,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 113,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2011,
+            "num_enrolled_students": 19,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 114,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2012,
+            "num_enrolled_students": 67,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 115,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2013,
+            "num_enrolled_students": 230,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByBirthYear",
+        "pk": 116,
+        "fields": {
+            "course_id": "1",
+            "birth_year": 2014,
+            "num_enrolled_students": 79,
+            "interval_start": "2014-07-01T00:00:00Z",
+            "interval_end": "2014-07-02T23:59:59Z"
+        }
+    }
+]

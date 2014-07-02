@@ -1,6 +1,7 @@
-Django==1.4.12
+Django==1.6.5
 Markdown==2.4.1
 South==0.8.1
 django-model-utils==1.4.0
 djangorestframework==2.3.5
 ipython==2.1.0
+django-rest-swagger==0.1.14

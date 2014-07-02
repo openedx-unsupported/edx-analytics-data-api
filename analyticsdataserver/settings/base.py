@@ -185,10 +185,12 @@ THIRD_PARTY_APPS = (
     'south',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_swagger',
 )
 
 LOCAL_APPS = (
-    'analyticsdata',
+    'analytics_data_api',
+    'analytics_data_api.v0',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -250,6 +252,7 @@ REST_FRAMEWORK = {
     ),
 }
 ########## END REST FRAMEWORK CONFIGURATION
+
 
 ########## ANALYTICS DATA API CONFIGURATION
 

@@ -11,3 +11,4 @@ pep257==0.3.2
 httpretty==0.8.0
 requests==2.3.0
 pytz==2012h
+django-dynamic-fixture==1.7.0

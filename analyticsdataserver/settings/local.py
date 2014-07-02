@@ -58,6 +58,7 @@ CACHES = {
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
 INSTALLED_APPS += (
     'debug_toolbar',
+    'django_nose',
 )
 
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
@@ -70,7 +71,6 @@ MIDDLEWARE_CLASSES += (
 
 # See: https://github.com/django-debug-toolbar/django-debug-toolbar#installation
 DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
     'SHOW_TEMPLATE_CONTEXT': True,
 }
 ########## END TOOLBAR CONFIGURATION
@@ -81,3 +81,5 @@ ANALYTICS_DATABASE = 'analytics'
 ENABLE_ADMIN_SITE = True
 
 ########## END ANALYTICS DATA API CONFIGURATION
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

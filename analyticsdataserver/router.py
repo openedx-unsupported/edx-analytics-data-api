@@ -1,17 +1,18 @@
-
 from django.conf import settings
 
 
 class DatabaseFromSettingRouter(object):
-
     def db_for_read(self, model, **hints):
         return self._get_database(model)
 
     def _get_database(self, model):
+        if model._meta.app_label == 'v0':
+            return getattr(settings, 'ANALYTICS_DATABASE', 'default')
+
         if getattr(model, 'db_from_setting', None):
             return getattr(settings, model.db_from_setting, 'default')
-        else:
-            return None
+
+        return None
 
     def db_for_write(self, model, **hints):
         return self._get_database(model)

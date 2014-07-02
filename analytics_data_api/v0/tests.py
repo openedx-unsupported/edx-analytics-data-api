@@ -1,35 +1,41 @@
-
 from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
+import random
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.utils import ConnectionHandler
+from django.db.utils import ConnectionHandler, DatabaseError
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch
+from django_dynamic_fixture import G
+from mock import patch, Mock
+import mock
 import pytz
 from rest_framework.authtoken.models import Token
+from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentByEducation, EducationLevel
 
-from analyticsdata.views import handle_internal_server_error, handle_missing_resource_error
 
 # NOTE: Full URLs are used throughout these tests to ensure that the API contract is fulfilled. The URLs should *not*
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-
-class TestCaseWithAutenticatation(TestCase):
-
+class TestCaseWithAuthentication(TestCase):
     def setUp(self):
-        super(TestCaseWithAutenticatation, self).setUp()
+        super(TestCaseWithAuthentication, self).setUp()
         test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
         token = Token.objects.create(user=test_user)
         self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key)
 
 
-class OperationalEndpointsTest(TestCaseWithAutenticatation):
+@contextmanager
+def no_database():
+    cursor_mock = Mock(side_effect=DatabaseError)
+    with mock.patch("django.db.backends.util.CursorWrapper", cursor_mock):
+        yield
 
+
+class OperationalEndpointsTest(TestCaseWithAuthentication):
     def test_status(self):
         response = self.client.get('/api/v0/status')
         self.assertEquals(response.status_code, 200)
@@ -58,17 +64,10 @@ class OperationalEndpointsTest(TestCaseWithAutenticatation):
         )
         self.assertEquals(response.status_code, 200)
 
-    def test_database_down(self):
-        databases = {
-            "default": {}
-        }
-        with self.override_database_connections(databases):
-            self.assert_database_health('UNAVAILABLE')
-
     @staticmethod
     @contextmanager
     def override_database_connections(databases):
-        with patch('analyticsdata.views.connections', ConnectionHandler(databases)):
+        with patch('analytics_data_api.v0.views.connections', ConnectionHandler(databases)):
             yield
 
     @override_settings(ANALYTICS_DATABASE='reporting')
@@ -93,24 +92,7 @@ class OperationalEndpointsTest(TestCaseWithAutenticatation):
             self.assert_database_health('OK')
 
 
-class ErrorHandlingTest(TestCase):
-
-    def test_internal_server_error_handling(self):
-        response = handle_internal_server_error(None)
-        self.validate_error_response(response, 500)
-
-    def validate_error_response(self, response, status_code):
-        self.assertEquals(response.content, '{{"status": {0}}}'.format(status_code))
-        self.assertEquals(response.status_code, status_code)
-        self.assertEquals(response.get('Content-Type'), 'application/json; charset=utf-8')
-
-    def test_missing_resource_handling(self):
-        response = handle_missing_resource_error(None)
-        self.validate_error_response(response, 404)
-
-
-class CourseActivityLastWeekTest(TestCaseWithAutenticatation):
-
+class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     fixtures = ['single_course_activity']
 
     COURSE_ID = 'edX/DemoX/Demo_Course'
@@ -159,3 +141,66 @@ class CourseActivityLastWeekTest(TestCaseWithAutenticatation):
     def test_missing_course_id(self):
         response = self.authenticated_get('/api/v0/courses/recent_activity')
         self.assertEquals(response.status_code, 404)
+
+
+class CourseEnrollmentViewTestCase(object):
+    model = None
+    path = None
+
+    def test_get_not_found(self):
+        """
+        Requests made against non-existent courses should return a 404
+        """
+        course_id = random.randint(1, 9999)
+        self.assertFalse(self.model.objects.filter(course_id=course_id).exists())
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))
+        self.assertEquals(response.status_code, 404)
+
+    def test_get(self):
+        raise NotImplementedError
+
+
+class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
+    path = '/enrollment/birth_year'
+    model = CourseEnrollmentByBirthYear
+
+    @classmethod
+    def setUpClass(cls):
+        cls.course_id = 1
+        cls.ce1 = G(CourseEnrollmentByBirthYear, course_id=cls.course_id, birth_year=1956)
+        cls.ce2 = G(CourseEnrollmentByBirthYear, course_id=cls.course_id, birth_year=1986)
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+
+        expected = {
+            self.ce1.birth_year: self.ce1.num_enrolled_students,
+            self.ce2.birth_year: self.ce2.num_enrolled_students,
+        }
+        actual = response.data['birth_years']
+        self.assertEquals(actual, expected)
+
+
+class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
+    path = '/enrollment/education'
+    model = CourseEnrollmentByEducation
+
+    @classmethod
+    def setUpClass(cls):
+        cls.el1 = G(EducationLevel, name="Doctorate", short_name="doctorate")
+        cls.el2 = G(EducationLevel, name="Top Secret", short_name="top_secret")
+        cls.course_id = 1
+        cls.ce1 = G(CourseEnrollmentByEducation, course_id=cls.course_id, education_level=cls.el1)
+        cls.ce2 = G(CourseEnrollmentByEducation, course_id=cls.course_id, education_level=cls.el2)
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+
+        expected = {
+            self.ce1.education_level.short_name: self.ce1.num_enrolled_students,
+            self.ce2.education_level.short_name: self.ce2.num_enrolled_students,
+        }
+        actual = response.data['education_levels']
+        self.assertEquals(actual, expected)

@@ -1,0 +1,32 @@
+#header form#api_selector .input a#explore {
+    color: white;
+    background-color: #126F9E;
+    box-shadow: 0 2px 1px 0 #0a4a67;
+}
+
+#header form#api_selector .input a#explore:hover {
+    background-color: #1790c7;
+}
+
+#header {
+    border-bottom: 1px solid #8a8c8f;
+    box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+#header a#logo {
+    background: transparent url(../images/header-logo.png) no-repeat left center;
+    padding-left: 100px;
+}
+
+body {
+    background: #f5f5f5;
+}
+
+#swagger-ui-container, #message-bar {
+    background: white;
+}
+
+#swagger-ui-container {
+    padding-bottom: 20px;
+}

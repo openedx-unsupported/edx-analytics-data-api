@@ -4,3 +4,4 @@ South==0.8.1
 djangorestframework==2.3.5
 Markdown==2.4.1
 ipython==2.1.0
+django-rest-swagger==0.1.14

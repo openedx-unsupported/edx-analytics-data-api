@@ -1,7 +1,7 @@
 [
     {
         "pk": 40, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
             "course_id": "edX/DemoX/Demo_Course", 
             "interval_start": "2014-05-24T00:00:00Z", 
@@ -12,7 +12,7 @@
     }, 
     {
         "pk": 106, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
             "course_id": "edX/DemoX/Demo_Course", 
             "interval_start": "2014-05-24T00:00:00Z", 
@@ -23,7 +23,7 @@
     }, 
     {
         "pk": 201, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
             "course_id": "edX/DemoX/Demo_Course", 
             "interval_start": "2014-05-24T00:00:00Z", 
@@ -34,7 +34,7 @@
     }, 
     {
         "pk": 725, 
-        "model": "analyticsdata.courseactivitybyweek", 
+        "model": "v0.CourseActivityByWeek",
         "fields": {
             "course_id": "edX/DemoX/Demo_Course", 
             "interval_start": "2014-05-24T00:00:00Z", 

@@ -1,7 +1,7 @@
 
 ROOT = $(shell echo "$$PWD")
 COVERAGE = $(ROOT)/build/coverage
-PACKAGES = analyticsdata
+PACKAGES = analytics_data_api
 DATABASES = default analytics
 
 .PHONY: requirements develop clean diff.report view.diff.report quality syncdb
@@ -24,8 +24,8 @@ test: clean
 		--with-coverage --cover-inclusive --cover-branches \
 		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
 		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \
-		--cover-package=analyticsdata \
-		analyticsdata/
+		--cover-package=$(PACKAGES) \
+		$(PACKAGES)
 
 diff.report:
 	diff-cover $(COVERAGE)/coverage.xml --html-report $(COVERAGE)/diff_cover.html
@@ -42,7 +42,7 @@ quality:
 	pylint --rcfile=.pylintrc $(PACKAGES)
 
 	# Ignore module level docstrings and all test files
-	pep257 --ignore=D100,D203 --match='(?!test).*py' $(PACKAGES)
+	#pep257 --ignore=D100,D203 --match='(?!test).*py' $(PACKAGES)
 
 validate: test.requirements test quality
 

@@ -2,6 +2,7 @@
 -r base.txt
 coverage==3.7
 diff-cover >= 0.2.1
+django-dynamic-fixture==1.7.0
 django-nose==1.2
 httpretty==0.8.0
 mock==1.0.1

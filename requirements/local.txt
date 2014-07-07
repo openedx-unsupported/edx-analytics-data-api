@@ -2,4 +2,3 @@
 -r base.txt
 -r test.txt
 django-debug-toolbar==0.9.4
-Sphinx==1.2b1

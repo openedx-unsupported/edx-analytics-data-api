@@ -1,13 +1,13 @@
 # Test dependencies go here.
 -r base.txt
 coverage==3.7
-nose==1.3.3
+diff-cover >= 0.2.1
 django-nose==1.2
+httpretty==0.8.0
+mock==1.0.1
+nose==1.3.3
+pep257==0.3.2
 pep8==1.5.7
 pylint==1.2.1
-diff-cover >= 0.2.1
-mock==1.0.1
-pep257==0.3.2
-httpretty==0.8.0
-requests==2.3.0
 pytz==2012h
+requests==2.3.0

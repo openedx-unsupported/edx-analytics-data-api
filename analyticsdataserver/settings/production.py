@@ -1,15 +1,15 @@
 """Production settings and globals."""
 
-
 from os import environ
-from base import *
-import yaml
-from analyticsdataserver.logsettings import get_logger_config
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
+import yaml
+
+from analyticsdataserver.settings.base import *
+from analyticsdataserver.settings.logger import get_logger_config
 
 LOGGING = get_logger_config()
 

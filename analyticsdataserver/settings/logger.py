@@ -1,3 +1,5 @@
+"""Logging configuration"""
+
 import os
 import platform
 import sys

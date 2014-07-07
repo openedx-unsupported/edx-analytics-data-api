@@ -1,4 +1,6 @@
-from base import *
+"""Test settings and globals."""
+
+from analyticsdataserver.settings.base import *
 
 ########## IN-MEMORY TEST DATABASE
 DATABASES = {

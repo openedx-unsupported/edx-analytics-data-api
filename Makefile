@@ -12,7 +12,7 @@ requirements:
 test.requirements: requirements
 	pip install -q -r requirements/test.txt
 
-develop:
+develop: test.requirements
 	pip install -q -r requirements/local.txt
 
 clean:

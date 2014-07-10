@@ -19,4 +19,4 @@ urlpatterns = patterns(
 )
 
 for path, view, name in COURSE_URLS:
-    urlpatterns += patterns('', url(r'^(?P<course_key>.+)/' + re.escape(path) + r'$', view.as_view(), name=name))
+    urlpatterns += patterns('', url(r'^(?P<course_id>.+)/' + re.escape(path) + r'$', view.as_view(), name=name))

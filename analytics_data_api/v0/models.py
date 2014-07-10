@@ -3,8 +3,9 @@ from analytics_data_api.v0.managers import CourseManager
 
 
 class Course(models.Model):
+    course_id = models.CharField(unique=True, max_length=255)
+
     objects = CourseManager()   # pylint: disable=no-value-for-parameter
-    course_key = models.CharField(unique=True, max_length=255)
 
     class Meta(object):
         db_table = 'courses'
@@ -23,9 +24,9 @@ class CourseActivityByWeek(models.Model):
     count = models.IntegerField()
 
     @classmethod
-    def get_most_recent(cls, course_key, activity_type):
+    def get_most_recent(cls, course_id, activity_type):
         """Activity for the week that was mostly recently computed."""
-        return cls.objects.filter(course__course_key=course_key, activity_type=activity_type).latest('interval_end')
+        return cls.objects.filter(course__course_id=course_id, activity_type=activity_type).latest('interval_end')
 
 
 class BaseCourseEnrollment(models.Model):

@@ -9,11 +9,11 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     This table is managed by the data pipeline, and records can be removed and added at any time. The id for a
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
-    course_key = serializers.SerializerMethodField('get_course_key')
+    course_id = serializers.SerializerMethodField('get_course_id')
 
-    def get_course_key(self, obj):
-        return obj.course.course_key
+    def get_course_id(self, obj):
+        return obj.course.course_id
 
     class Meta(object):
         model = CourseActivityByWeek
-        fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_key')
+        fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_id')

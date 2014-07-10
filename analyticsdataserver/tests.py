@@ -16,7 +16,7 @@ class TestCaseWithAuthentication(TestCase):
         super(TestCaseWithAuthentication, self).setUp()
         test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
         token = Token.objects.create(user=test_user)
-        self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key)
+        self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key, follow=True)
 
 
 @contextmanager

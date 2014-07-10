@@ -49,7 +49,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         return default
 
     def test_activity_auth(self):
-        response = self.client.get('/api/v0/courses/{0}/recent_activity'.format(self.course_id))
+        response = self.client.get('/api/v0/courses/{0}/recent_activity'.format(self.course_id), follow=True)
         self.assertEquals(response.status_code, 401)
 
     def test_url_encoded_course_id(self):

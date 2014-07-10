@@ -55,3 +55,6 @@ docs/_build/
 # Sqlite Database
 
 *.db
+
+# PyCharm
+.idea/

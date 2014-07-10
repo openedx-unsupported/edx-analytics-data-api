@@ -2,98 +2,17 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-from contextlib import contextmanager
 from datetime import datetime
-from functools import partial
 import random
 
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import ConnectionHandler, DatabaseError
 from django.test import TestCase
-from django.test.utils import override_settings
-
 from django_dynamic_fixture import G
-from mock import patch, Mock
-import mock
 import pytz
-from rest_framework.authtoken.models import Token
 
 from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentByEducation, EducationLevel, \
     CourseEnrollmentByGender, CourseActivityByWeek, Course
-
-
-class TestCaseWithAuthentication(TestCase):
-    def setUp(self):
-        super(TestCaseWithAuthentication, self).setUp()
-        test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
-        token = Token.objects.create(user=test_user)
-        self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key)
-
-
-@contextmanager
-def no_database():
-    cursor_mock = Mock(side_effect=DatabaseError)
-    with mock.patch('django.db.backends.util.CursorWrapper', cursor_mock):
-        yield
-
-
-class OperationalEndpointsTest(TestCaseWithAuthentication):
-    def test_status(self):
-        response = self.client.get('/api/v0/status')
-        self.assertEquals(response.status_code, 200)
-
-    def test_authentication_check_failure(self):
-        response = self.client.get('/api/v0/authenticated')
-        self.assertEquals(response.status_code, 401)
-
-    def test_authentication_check_success(self):
-        response = self.authenticated_get('/api/v0/authenticated')
-        self.assertEquals(response.status_code, 200)
-
-    def test_health(self):
-        self.assert_database_health('OK')
-
-    def assert_database_health(self, status):
-        response = self.client.get('/api/v0/health')
-        self.assertEquals(
-            response.data,
-            {
-                'overall_status': status,
-                'detailed_status': {
-                    'database_connection': status
-                }
-            }
-        )
-        self.assertEquals(response.status_code, 200)
-
-    @staticmethod
-    @contextmanager
-    def override_database_connections(databases):
-        with patch('analytics_data_api.v0.views.operational.connections', ConnectionHandler(databases)):
-            yield
-
-    @override_settings(ANALYTICS_DATABASE='reporting')
-    def test_read_setting(self):
-        databases = dict(settings.DATABASES)
-        databases['reporting'] = {}
-
-        with self.override_database_connections(databases):
-            self.assert_database_health('UNAVAILABLE')
-
-    # Workaround to remove a setting from django settings. It has to be used in override_settings and then deleted.
-    @override_settings(ANALYTICS_DATABASE='reporting')
-    def test_default_setting(self):
-        del settings.ANALYTICS_DATABASE
-
-        databases = dict(settings.DATABASES)
-        databases['reporting'] = {}
-
-        with self.override_database_connections(databases):
-            # This would normally return UNAVAILABLE, however we have deleted the settings so it will use the default
-            # connection which should be OK.
-            self.assert_database_health('OK')
+from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
 class CourseActivityLastWeekTest(TestCaseWithAuthentication):
@@ -179,7 +98,7 @@ class CourseEnrollmentViewTestCase(object):
         course_id = self._get_non_existent_course_id()
         self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())  # pylint: disable=no-member
         response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))  # pylint: disable=no-member
-        self.assertEquals(response.status_code, 404)    # pylint: disable=no-member
+        self.assertEquals(response.status_code, 404)  # pylint: disable=no-member
 
     def test_get(self):
         raise NotImplementedError

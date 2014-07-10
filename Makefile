@@ -1,7 +1,7 @@
 
 ROOT = $(shell echo "$$PWD")
 COVERAGE = $(ROOT)/build/coverage
-PACKAGES = analytics_data_api
+PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 
 .PHONY: requirements develop clean diff.report view.diff.report quality syncdb
@@ -21,10 +21,10 @@ clean:
 
 test: clean
 	. ./.test_env && ./manage.py test --settings=analyticsdataserver.settings.test \
-		--with-coverage --cover-inclusive --cover-branches \
+		--exclude-dir=analyticsdataserver/settings --with-coverage --cover-inclusive --cover-branches \
 		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
 		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \
-		--cover-package=$(PACKAGES) \
+		$(foreach package,$(PACKAGES),--cover-package=$(package)) \
 		$(PACKAGES)
 
 diff.report:

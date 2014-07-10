@@ -35,7 +35,7 @@ Loading Data
 The fixtures directory contains demo data. This data can be loaded with the following commands:
 
         $ ./manage.py syncdb --migrate --noinput --database=analytics
-        $ ./manage.py loaddata courses education_levels single_course_activity course_enrollment_birth_year course_enrollment_education course_enrollment_gender --database=analytics
+        $ ./manage.py loaddata courses education_levels single_course_activity course_enrollment_birth_year course_enrollment_education course_enrollment_gender problem_response_answer_distribution --database=analytics
 
 Running Tests
 -------------

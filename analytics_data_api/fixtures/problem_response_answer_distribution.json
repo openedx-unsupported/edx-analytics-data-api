@@ -1,0 +1,114 @@
+[
+    {
+        "fields": {
+            "answer_value_numeric": 36.02736,
+            "answer_value_text": "36.02736",
+            "correct": false,
+            "count": 1,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "answer_value_numeric": 33.0,
+            "answer_value_text": "33.0",
+            "correct": false,
+            "count": 1,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "answer_value_numeric": 27.51936482,
+            "answer_value_text": "27.51936482",
+            "correct": true,
+            "count": 1,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "answer_value_numeric": 28.65,
+            "answer_value_text": "28.65",
+            "correct": true,
+            "count": 1,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 4
+    },
+    {
+        "fields": {
+            "answer_value_numeric": null,
+            "answer_value_text": "line 15: mean(glm.pred==Direction)",
+            "correct": true,
+            "count": 95,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_0",
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 5
+    },
+    {
+        "fields": {
+            "answer_value_numeric": null,
+            "answer_value_text": "line 22: Direction.2005=Smarket$Direction[!train]",
+            "correct": false,
+            "count": 1,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_2",
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 6
+    },
+    {
+        "fields": {
+            "answer_value_numeric": null,
+            "answer_value_text": "line 30: table(glm.pred,Direction.2005)",
+            "correct": false,
+            "count": 1,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:12",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_3",
+            "variant": null
+        },
+        "model": "v0.problemresponseanswerdistribution",
+        "pk": 7
+    }
+]

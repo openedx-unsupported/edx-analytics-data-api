@@ -11,7 +11,8 @@ from django_dynamic_fixture import G
 import pytz
 
 from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentByEducation, EducationLevel, \
-    CourseEnrollmentByGender, CourseActivityByWeek, Course
+    CourseEnrollmentByGender, CourseActivityByWeek, Course, ProblemResponseAnswerDistribution
+from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -179,3 +180,34 @@ class CourseManagerTests(TestCase):
 
         course = G(Course, course_id=course_id)
         self.assertEqual(course, Course.objects.get_by_natural_key(course_id))
+
+
+# pylint: disable=no-member,no-value-for-parameter
+class AnswerDistributionTests(TestCaseWithAuthentication):
+    path = '/answer_distribution'
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.course_id = "org/num/run"
+        cls.module_id = "i4x://org/num/run/problem/RANDOMNUMBER"
+        cls.part_id1 = "i4x-org-num-run-problem-RANDOMNUMBER_2_1"
+        cls.ad1 = G(
+            ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id,
+            part_id=cls.part_id1
+        )
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
+        self.assertEquals(response.status_code, 200)
+
+        expected_dict = ProblemResponseAnswerDistributionSerializer(self.ad1).data
+        actual_list = response.data
+        self.assertEquals(len(actual_list), 1)
+        self.assertDictEqual(actual_list[0], expected_dict)
+
+    def test_get_404(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
+        self.assertEquals(response.status_code, 404)

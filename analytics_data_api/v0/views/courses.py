@@ -18,7 +18,7 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
     The representation has the following fields:
 
     <ul>
-    <li>course_key: The ID of the course whose activity is described (e.g. edX/DemoX/Demo_Course).</li>
+    <li>course_id: The ID of the course whose activity is described (e.g. edX/DemoX/Demo_Course).</li>
     - interval_start: All data from this timestamp up to the `interval_end` was considered when computing this data
       point.
     - interval_end: All data from `interval_start` up to this timestamp was considered when computing this data point.
@@ -41,13 +41,13 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
 
     def get_object(self, queryset=None):
         """Select the activity report for the given course and activity type."""
-        course_key = self.kwargs.get('course_key')
+        course_id = self.kwargs.get('course_id')
         activity_type = self.request.QUERY_PARAMS.get('activity_type', 'any')
         activity_type = activity_type.lower()
 
         try:
             print CourseActivityByWeek.objects.all()
-            return CourseActivityByWeek.get_most_recent(course_key, activity_type)
+            return CourseActivityByWeek.get_most_recent(course_id, activity_type)
         except ObjectDoesNotExist:
             raise Http404
 
@@ -65,8 +65,8 @@ class AbstractCourseEnrollmentView(APIView):
         if not self.model:
             raise NotImplementedError('Subclasses must specify a model!')
 
-        course_key = self.kwargs['course_key']
-        data = self.model.objects.filter(course__course_key=course_key)
+        course_id = self.kwargs['course_id']
+        data = self.model.objects.filter(course__course_id=course_id)
 
         if not data:
             raise Http404

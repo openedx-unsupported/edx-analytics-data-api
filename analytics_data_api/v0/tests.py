@@ -99,8 +99,8 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
 class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def setUp(self):
         super(CourseActivityLastWeekTest, self).setUp()
-        self.course_key = 'edX/DemoX/Demo_Course'
-        self.course = G(Course, course_key=self.course_key)
+        self.course_id = 'edX/DemoX/Demo_Course'
+        self.course = G(Course, course_id=self.course_id)
         interval_start = '2014-05-24T00:00:00Z'
         interval_end = '2014-06-01T00:00:00Z'
         G(CourseActivityByWeek, course=self.course, interval_start=interval_start, interval_end=interval_end,
@@ -113,14 +113,14 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
           activity_type='played_video', count=400)
 
     def test_activity(self):
-        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format(self.course_key))
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format(self.course_id))
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record())
 
     @staticmethod
     def get_activity_record(**kwargs):
         default = {
-            'course_key': 'edX/DemoX/Demo_Course',
+            'course_id': 'edX/DemoX/Demo_Course',
             'interval_start': datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
             'interval_end': datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
             'activity_type': 'any',
@@ -130,10 +130,10 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         return default
 
     def test_activity_auth(self):
-        response = self.client.get('/api/v0/courses/{0}/recent_activity'.format(self.course_key))
+        response = self.client.get('/api/v0/courses/{0}/recent_activity'.format(self.course_id))
         self.assertEquals(response.status_code, 401)
 
-    def test_url_encoded_course_key(self):
+    def test_url_encoded_course_id(self):
         response = self.authenticated_get('/api/v0/courses/edX%2FDemoX%2FDemo_Course/recent_activity')
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record())
@@ -141,21 +141,21 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def test_video_activity(self):
         activity_type = 'played_video'
         response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
-            self.course_key, activity_type))
+            self.course_id, activity_type))
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=400))
 
     def test_unknown_activity(self):
         activity_type = 'missing_activity_type'
         response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
-            self.course_key, activity_type))
+            self.course_id, activity_type))
         self.assertEquals(response.status_code, 404)
 
-    def test_unknown_course_key(self):
+    def test_unknown_course_id(self):
         response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format('foo'))
         self.assertEquals(response.status_code, 404)
 
-    def test_missing_course_key(self):
+    def test_missing_course_id(self):
         response = self.authenticated_get('/api/v0/courses/recent_activity')
         self.assertEquals(response.status_code, 404)
 
@@ -164,21 +164,21 @@ class CourseEnrollmentViewTestCase(object):
     model = None
     path = None
 
-    def _get_non_existent_course_key(self):
-        course_key = random.randint(100, 9999)
+    def _get_non_existent_course_id(self):
+        course_id = random.randint(100, 9999)
 
-        if not Course.objects.filter(course_key=course_key).exists():
-            return course_key
+        if not Course.objects.filter(course_id=course_id).exists():
+            return course_id
 
-        return self._get_non_existent_course_key()
+        return self._get_non_existent_course_id()
 
     def test_get_not_found(self):
         '''
         Requests made against non-existent courses should return a 404
         '''
-        course_key = self._get_non_existent_course_key()
-        self.assertFalse(self.model.objects.filter(course__course_key=course_key).exists())  # pylint: disable=no-member
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_key, self.path))  # pylint: disable=no-member
+        course_id = self._get_non_existent_course_id()
+        self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())  # pylint: disable=no-member
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))  # pylint: disable=no-member
         self.assertEquals(response.status_code, 404)    # pylint: disable=no-member
 
     def test_get(self):
@@ -196,7 +196,7 @@ class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnr
         cls.ce2 = G(CourseEnrollmentByBirthYear, course=cls.course, birth_year=1986)
 
     def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_key, self.path,))
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         expected = {
@@ -220,7 +220,7 @@ class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnr
         cls.ce2 = G(CourseEnrollmentByEducation, course=cls.course, education_level=cls.el2)
 
     def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_key, self.path,))
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         expected = {
@@ -242,7 +242,7 @@ class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnroll
         cls.ce2 = G(CourseEnrollmentByGender, course=cls.course, gender='f')
 
     def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_key, self.path,))
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         expected = {
@@ -255,8 +255,8 @@ class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnroll
 
 class CourseManagerTests(TestCase):
     def test_get_by_natural_key(self):
-        course_key = 'edX/DemoX/Demo_Course'
-        self.assertRaises(ObjectDoesNotExist, Course.objects.get_by_natural_key, course_key)
+        course_id = 'edX/DemoX/Demo_Course'
+        self.assertRaises(ObjectDoesNotExist, Course.objects.get_by_natural_key, course_id)
 
-        course = G(Course, course_key=course_key)
-        self.assertEqual(course, Course.objects.get_by_natural_key(course_key))
+        course = G(Course, course_id=course_id)
+        self.assertEqual(course, Course.objects.get_by_natural_key(course_id))

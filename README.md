@@ -17,7 +17,16 @@ Getting Started
  
         $ make develop
         
-2. Run the server:
+2. Setup the databases:
+
+        $ ./manage.py syncdb --migrate --noinput
+        $ ./manage.py syncdb --migrate --noinput --database=analytics
+
+3. Create a user and authentication token. Note that the user will be created if one does not exist.
+
+        $ ./manage.py set_api_key <username> <token>
+
+4. Run the server:
 
         $ ./manage.py runserver
 

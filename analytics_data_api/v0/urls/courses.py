@@ -13,10 +13,7 @@ COURSE_URLS = [
     ('enrollment/gender', CourseEnrollmentByGenderView, 'enrollment_by_gender'),
 ]
 
-urlpatterns = patterns(
-    '',
-    # url(r'^$', CourseDetailView.as_view(), name='detail')
-)
+urlpatterns = []
 
 for path, view, name in COURSE_URLS:
-    urlpatterns += patterns('', url(r'^(?P<course_id>.+)/' + re.escape(path) + r'$', view.as_view(), name=name))
+    urlpatterns += patterns('', url(r'^(?P<course_id>.+)/' + re.escape(path) + r'/$', view.as_view(), name=name))

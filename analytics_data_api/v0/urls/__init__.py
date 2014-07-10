@@ -8,4 +8,5 @@ urlpatterns = patterns(
     url(r'^health$', operational.HealthView.as_view()),
 
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', namespace='courses')),
+    url(r'^problems/', include('analytics_data_api.v0.urls.problems', namespace='problems')),
 )

@@ -1,12 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from rest_framework import generics
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from analytics_data_api.v0.models import CourseActivityByWeek, CourseEnrollmentByBirthYear, \
-    CourseEnrollmentByEducation, CourseEnrollmentByGender
-from analytics_data_api.v0.serializers import CourseActivityByWeekSerializer
+    CourseEnrollmentByEducation, CourseEnrollmentByGender, CourseEnrollmentDaily
+from analytics_data_api.v0.serializers import CourseActivityByWeekSerializer, CourseEnrollmentDailySerializer
 
 
 class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
@@ -46,7 +47,6 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
         activity_type = activity_type.lower()
 
         try:
-            print CourseActivityByWeek.objects.all()
             return CourseActivityByWeek.get_most_recent(course_id, activity_type)
         except ObjectDoesNotExist:
             raise Http404
@@ -85,7 +85,7 @@ class CourseEnrollmentByBirthYearView(AbstractCourseEnrollmentView):
 
     def render_data(self, data):
         return {
-            'birth_years': dict(data.values_list('birth_year', 'num_enrolled_students'))
+            'birth_years': dict(data.values_list('birth_year', 'count'))
         }
 
 
@@ -99,7 +99,7 @@ class CourseEnrollmentByEducationView(AbstractCourseEnrollmentView):
 
     def render_data(self, data):
         return {
-            'education_levels': dict(data.values_list('education_level__short_name', 'num_enrolled_students'))
+            'education_levels': dict(data.values_list('education_level__short_name', 'count'))
         }
 
 
@@ -118,5 +118,18 @@ class CourseEnrollmentByGenderView(AbstractCourseEnrollmentView):
 
     def render_data(self, data):
         return {
-            'genders': dict(data.values_list('gender', 'num_enrolled_students'))
+            'genders': dict(data.values_list('gender', 'count'))
         }
+
+
+class CourseEnrollmentLatestView(RetrieveAPIView):
+    """ Returns the latest enrollment count for the specified course. """
+    model = CourseEnrollmentDaily
+    serializer_class = CourseEnrollmentDailySerializer
+
+    def get_object(self, queryset=None):
+        try:
+            course_id = self.kwargs['course_id']
+            return CourseEnrollmentDaily.objects.filter(course__course_id=course_id).order_by('-date')[0]
+        except IndexError:
+            raise Http404

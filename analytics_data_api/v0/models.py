@@ -5,7 +5,7 @@ from analytics_data_api.v0.managers import CourseManager
 class Course(models.Model):
     course_id = models.CharField(unique=True, max_length=255)
 
-    objects = CourseManager()   # pylint: disable=no-value-for-parameter
+    objects = CourseManager()  # pylint: disable=no-value-for-parameter
 
     class Meta(object):
         db_table = 'courses'
@@ -31,12 +31,20 @@ class CourseActivityByWeek(models.Model):
 
 class BaseCourseEnrollment(models.Model):
     course = models.ForeignKey(Course, null=False)
-    interval_start = models.DateTimeField(null=False)
-    interval_end = models.DateTimeField(null=False)
-    num_enrolled_students = models.IntegerField(null=False)
+    date = models.DateField(null=False)
+    count = models.IntegerField(null=False)
 
     class Meta(object):
         abstract = True
+        unique_together = [('course', 'date',)]
+
+
+class CourseEnrollmentDaily(BaseCourseEnrollment):
+    class Meta(object):
+        db_table = 'course_enrollment_daily'
+        ordering = ('course', '-date')
+        unique_together = [('course', 'date',)]
+        get_latest_by = 'date'
 
 
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
@@ -45,6 +53,7 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     class Meta(object):
         db_table = 'course_enrollment_birth_year'
         ordering = ('course', 'birth_year')
+        unique_together = [('course', 'date', 'birth_year')]
 
 
 class EducationLevel(models.Model):
@@ -61,6 +70,7 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
     class Meta(object):
         db_table = 'course_enrollment_education_level'
         ordering = ('course', 'education_level')
+        unique_together = [('course', 'date', 'education_level')]
 
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
@@ -69,10 +79,10 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
     class Meta(object):
         db_table = 'course_enrollment_gender'
         ordering = ('course', 'gender')
+        unique_together = [('course', 'date', 'gender')]
 
 
 class ProblemResponseAnswerDistribution(models.Model):
-
     """ Each row stores the count of a particular answer to a response in a problem in a course (usage). """
 
     class Meta(object):

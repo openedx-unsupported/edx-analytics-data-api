@@ -2,7 +2,7 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-from datetime import datetime
+from datetime import datetime, date
 import random
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,7 +11,7 @@ from django_dynamic_fixture import G
 import pytz
 
 from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentByEducation, EducationLevel, \
-    CourseEnrollmentByGender, CourseActivityByWeek, Course, ProblemResponseAnswerDistribution
+    CourseEnrollmentByGender, CourseActivityByWeek, Course, ProblemResponseAnswerDistribution, CourseEnrollmentDaily
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
@@ -93,9 +93,7 @@ class CourseEnrollmentViewTestCase(object):
         return self._get_non_existent_course_id()
 
     def test_get_not_found(self):
-        '''
-        Requests made against non-existent courses should return a 404
-        '''
+        """ Requests made against non-existent courses should return a 404 """
         course_id = self._get_non_existent_course_id()
         self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())  # pylint: disable=no-member
         response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))  # pylint: disable=no-member
@@ -211,3 +209,19 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
         self.assertEquals(response.status_code, 404)
+
+
+class CourseEnrollmentLatestViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
+    model = CourseEnrollmentDaily
+    path = '/enrollment'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.course = G(Course)
+        cls.ce = G(CourseEnrollmentDaily, course=cls.course, date=date(2014, 1, 1), num_enrolled_students=203)
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+        expected = {'course_id': self.ce.course.course_id, 'count': self.ce.num_enrolled_students, 'date': self.ce.date}
+        self.assertDictEqual(response.data, expected)

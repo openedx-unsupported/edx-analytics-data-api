@@ -34,10 +34,10 @@ Loading Data
 ------------
 The fixtures directory contains demo data. This data can be loaded with the following commands:
 
-        $ ./manage.py syncdb --migrate --noinput --database=analytics
-        $ ./manage.py loaddata courses education_levels single_course_activity course_enrollment_birth_year course_enrollment_education course_enrollment_gender problem_response_answer_distribution --database=analytics
+        $ make loaddata
 
 Running Tests
 -------------
 
-Run `make validate` install the requirements, run the tests, and run lint.
+Run `make validate` install the requirements, run the tests, and run lint. If you want to get the API server ready for
+acceptance testing or demos, `make demo` will install requirements and load the fixture data.

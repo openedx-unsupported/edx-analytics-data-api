@@ -47,4 +47,9 @@ quality:
 validate: test.requirements test quality
 
 syncdb:
-	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --database=$(db_name);)
+	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --noinput --database=$(db_name);)
+
+loaddata: syncdb
+	python manage.py loaddata courses education_levels single_course_activity course_enrollment_birth_year course_enrollment_education course_enrollment_gender problem_response_answer_distribution --database=analytics
+
+demo: clean requirements loaddata

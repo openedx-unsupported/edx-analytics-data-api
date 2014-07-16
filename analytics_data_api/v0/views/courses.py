@@ -1,13 +1,17 @@
+import datetime
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Max
 from django.http import Http404
 from rest_framework import generics
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from analytics_data_api.v0.models import CourseActivityByWeek, CourseEnrollmentByBirthYear, \
-    CourseEnrollmentByEducation, CourseEnrollmentByGender, CourseEnrollmentDaily
-from analytics_data_api.v0.serializers import CourseActivityByWeekSerializer, CourseEnrollmentDailySerializer
+    CourseEnrollmentByEducation, CourseEnrollmentByGender, CourseEnrollmentByCountry, CourseEnrollmentDaily, Course
+from analytics_data_api.v0.serializers import CourseActivityByWeekSerializer, CourseEnrollmentByCountrySerializer, \
+    CourseEnrollmentDailySerializer
 
 
 class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
@@ -61,7 +65,7 @@ class AbstractCourseEnrollmentView(APIView):
         """
         raise NotImplementedError('Subclasses must define a render_data method!')
 
-    def get(self, request, *args, **kwargs):    # pylint: disable=unused-argument
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         if not self.model:
             raise NotImplementedError('Subclasses must specify a model!')
 
@@ -133,3 +137,46 @@ class CourseEnrollmentLatestView(RetrieveAPIView):
             return CourseEnrollmentDaily.objects.filter(course__course_id=course_id).order_by('-date')[0]
         except IndexError:
             raise Http404
+
+
+# pylint: disable=line-too-long
+class CourseEnrollmentByLocationView(generics.ListAPIView):
+    """
+    Course enrollment broken down by user location
+
+    Returns the enrollment of a course with users binned by their location. Location is calculated based on the user's
+    IP address. If no start or end dates are passed, the data for the latest date is returned.
+
+    Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    serializer_class = CourseEnrollmentByCountrySerializer
+
+    def get_queryset(self):
+        course = get_object_or_404(Course, course_id=self.kwargs.get('course_id'))
+        queryset = CourseEnrollmentByCountry.objects.filter(course=course)
+
+        if 'start_date' in self.request.QUERY_PARAMS or 'end_date' in self.request.QUERY_PARAMS:
+            # Filter by start/end date
+            start_date = self.request.QUERY_PARAMS.get('start_date')
+            if start_date:
+                start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
+                queryset = queryset.filter(date__gte=start_date)
+
+            end_date = self.request.QUERY_PARAMS.get('end_date')
+            if end_date:
+                end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
+                queryset = queryset.filter(date__lt=end_date)
+        else:
+            # No date filter supplied, so only return data for the latest date
+            latest_date = queryset.aggregate(Max('date'))
+            if latest_date:
+                latest_date = latest_date['date__max']
+                queryset = queryset.filter(date=latest_date)
+
+        return queryset

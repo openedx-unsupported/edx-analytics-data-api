@@ -257,8 +257,10 @@ REST_FRAMEWORK = {
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'default'
-DATABASE_ROUTERS = ['analyticsdataserver.router.DatabaseFromSettingRouter']
+DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
 
 ENABLE_ADMIN_SITE = False
 
 ########## END ANALYTICS DATA API CONFIGURATION
+
+DATE_FORMAT = '%Y-%m-%d'

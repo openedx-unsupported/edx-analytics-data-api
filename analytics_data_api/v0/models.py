@@ -1,5 +1,5 @@
 from django.db import models
-from analytics_data_api.v0.managers import CourseManager
+from analytics_data_api.v0.managers import CourseManager, CountryManager
 
 
 class Course(models.Model):
@@ -36,23 +36,22 @@ class BaseCourseEnrollment(models.Model):
 
     class Meta(object):
         abstract = True
-        unique_together = [('course', 'date',)]
+        get_latest_by = 'date'
 
 
 class CourseEnrollmentDaily(BaseCourseEnrollment):
-    class Meta(object):
+    class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_daily'
-        ordering = ('course', '-date')
+        ordering = ('-date', 'course')
         unique_together = [('course', 'date',)]
-        get_latest_by = 'date'
 
 
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     birth_year = models.IntegerField(null=False)
 
-    class Meta(object):
+    class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_birth_year'
-        ordering = ('course', 'birth_year')
+        ordering = ('-date', 'birth_year', 'course')
         unique_together = [('course', 'date', 'birth_year')]
 
 
@@ -63,22 +62,25 @@ class EducationLevel(models.Model):
     class Meta(object):
         db_table = 'education_levels'
 
+    def __unicode__(self):
+        return "{0} - {1}".format(self.short_name, self.name)
+
 
 class CourseEnrollmentByEducation(BaseCourseEnrollment):
     education_level = models.ForeignKey(EducationLevel)
 
-    class Meta(object):
+    class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_education_level'
-        ordering = ('course', 'education_level')
+        ordering = ('-date', 'education_level', 'course')
         unique_together = [('course', 'date', 'education_level')]
 
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
     gender = models.CharField(max_length=255, null=False)
 
-    class Meta(object):
+    class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender'
-        ordering = ('course', 'gender')
+        ordering = ('-date', 'gender', 'course')
         unique_together = [('course', 'date', 'gender')]
 
 
@@ -98,3 +100,25 @@ class ProblemResponseAnswerDistribution(models.Model):
     answer_value_numeric = models.FloatField(db_column='answer_value_numeric', null=True)
     variant = models.IntegerField(db_column='variant', null=True)
     created = models.DateTimeField(auto_now_add=True, db_column='created')
+
+
+class Country(models.Model):
+    code = models.CharField(max_length=2, primary_key=True)
+    name = models.CharField(max_length=255, unique=True, null=False)
+
+    objects = CountryManager()  # pylint: disable=no-value-for-parameter
+
+    class Meta(object):
+        db_table = 'countries'
+
+    def __unicode__(self):
+        return "{0} - {1}".format(self.code, self.name)
+
+
+class CourseEnrollmentByCountry(BaseCourseEnrollment):
+    country = models.ForeignKey(Country, null=False, db_column='country_code')
+
+    class Meta(BaseCourseEnrollment.Meta):
+        db_table = 'course_enrollment_location'
+        ordering = ('-date', 'country', 'course')
+        unique_together = [('course', 'date', 'country')]

@@ -2,16 +2,17 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-from datetime import datetime, date
+import datetime
 import random
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.test import TestCase
+from django.conf import settings
 from django_dynamic_fixture import G
 import pytz
 
 from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentByEducation, EducationLevel, \
-    CourseEnrollmentByGender, CourseActivityByWeek, Course, ProblemResponseAnswerDistribution, CourseEnrollmentDaily
+    CourseEnrollmentByGender, CourseActivityByWeek, Course, ProblemResponseAnswerDistribution, CourseEnrollmentDaily, \
+    Country, \
+    CourseEnrollmentByCountry
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
@@ -41,8 +42,8 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def get_activity_record(**kwargs):
         default = {
             'course_id': 'edX/DemoX/Demo_Course',
-            'interval_start': datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
-            'interval_end': datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
+            'interval_start': datetime.datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
+            'interval_end': datetime.datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
             'activity_type': 'any',
             'count': 300,
         }
@@ -171,15 +172,6 @@ class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnroll
         self.assertEquals(actual, expected)
 
 
-class CourseManagerTests(TestCase):
-    def test_get_by_natural_key(self):
-        course_id = 'edX/DemoX/Demo_Course'
-        self.assertRaises(ObjectDoesNotExist, Course.objects.get_by_natural_key, course_id)
-
-        course = G(Course, course_id=course_id)
-        self.assertEqual(course, Course.objects.get_by_natural_key(course_id))
-
-
 # pylint: disable=no-member,no-value-for-parameter
 class AnswerDistributionTests(TestCaseWithAuthentication):
     path = '/answer_distribution'
@@ -218,10 +210,60 @@ class CourseEnrollmentLatestViewTests(TestCaseWithAuthentication, CourseEnrollme
     @classmethod
     def setUpClass(cls):
         cls.course = G(Course)
-        cls.ce = G(CourseEnrollmentDaily, course=cls.course, date=date(2014, 1, 1), count=203)
+        cls.ce = G(CourseEnrollmentDaily, course=cls.course, date=datetime.date(2014, 1, 1), count=203)
 
     def test_get(self):
         response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
         expected = {'course_id': self.ce.course.course_id, 'count': self.ce.count, 'date': self.ce.date}
         self.assertDictEqual(response.data, expected)
+
+
+class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
+    path = '/enrollment/location/'
+    model = CourseEnrollmentByCountry
+
+    def get_expected_response(self, *args):
+        return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+                 'country': {'code': ce.country.code, 'name': ce.country.name}} for ce in args]
+
+    def test_get(self):
+        course = G(Course)
+        date1 = datetime.date(2014, 1, 1)
+        date2 = datetime.date(2013, 1, 1)
+        ce1 = G(CourseEnrollmentByCountry, course=course, country=G(Country), count=455, date=date1)
+        ce2 = G(CourseEnrollmentByCountry, course=course, country=G(Country), count=356, date=date1)
+
+        # This should not be returned as the view should return only the latest data when no interval is supplied.
+        G(CourseEnrollmentByCountry, course=course, country=G(Country), count=12, date=date2)
+
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+
+        expected = self.get_expected_response(ce1, ce2)
+        self.assertListEqual(response.data, expected)
+
+    def test_get_with_intervals(self):
+        course = G(Course)
+        country1 = G(Country)
+        country2 = G(Country)
+        date = datetime.date(2014, 1, 1)
+        ce1 = G(CourseEnrollmentByCountry, course=course, country=country1, date=date)
+        ce2 = G(CourseEnrollmentByCountry, course=course, country=country2, date=date)
+
+        # If start date is after date of existing data, no data should be returned
+        response = self.authenticated_get('/api/v0/courses/%s%s?start_date=2014-02-01' % (course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual([], response.data)
+
+        # If end date is before date of existing data, no data should be returned
+        response = self.authenticated_get('/api/v0/courses/%s%s?end_date=2013-02-01' % (course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual([], response.data)
+
+        # If data falls in date range, data should be returned
+        response = self.authenticated_get(
+            '/api/v0/courses/%s%s?start_date=2013-02-01&end_date=2014-02-01' % (course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+        expected = self.get_expected_response(ce1, ce2)
+        self.assertListEqual(response.data, expected)

@@ -1,10 +1,16 @@
+from django.conf import settings
 from rest_framework import serializers
-from analytics_data_api.v0.models import CourseActivityByWeek, ProblemResponseAnswerDistribution, CourseEnrollmentDaily
+from analytics_data_api.v0.models import CourseActivityByWeek, ProblemResponseAnswerDistribution, \
+    CourseEnrollmentDaily, CourseEnrollmentByCountry, Country
 
 
 class CourseIdMixin(object):
     def get_course_id(self, obj):
         return obj.course.course_id
+
+
+class RequiredSerializerMethodField(serializers.SerializerMethodField):
+    required = True
 
 
 class CourseActivityByWeekSerializer(serializers.ModelSerializer, CourseIdMixin):
@@ -14,7 +20,8 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer, CourseIdMixin)
     This table is managed by the data pipeline, and records can be removed and added at any time. The id for a
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
-    course_id = serializers.SerializerMethodField('get_course_id')
+
+    course_id = RequiredSerializerMethodField('get_course_id')
 
     class Meta(object):
         model = CourseActivityByWeek
@@ -50,8 +57,25 @@ class CourseEnrollmentDailySerializer(serializers.ModelSerializer, CourseIdMixin
     Representation of course enrollment for a single day and course.
     """
 
-    course_id = serializers.SerializerMethodField('get_course_id')
+    course_id = RequiredSerializerMethodField('get_course_id')
 
     class Meta(object):
         model = CourseEnrollmentDaily
         fields = ('course_id', 'date', 'count')
+
+
+# pylint: disable=no-value-for-parameter
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = Country
+        fields = ('code', 'name')
+
+
+class CourseEnrollmentByCountrySerializer(serializers.ModelSerializer, CourseIdMixin):
+    course_id = RequiredSerializerMethodField('get_course_id')
+    country = CountrySerializer()
+    date = serializers.DateField(format=settings.DATE_FORMAT)
+
+    class Meta(object):
+        model = CourseEnrollmentByCountry
+        fields = ('date', 'course_id', 'country', 'count')

@@ -1,16 +1,13 @@
 from django.conf import settings
 
 
-class DatabaseFromSettingRouter(object):
+class AnalyticsApiRouter(object):
     def db_for_read(self, model, **hints):  # pylint: disable=unused-argument
         return self._get_database(model)
 
     def _get_database(self, model):
         if model._meta.app_label == 'v0':   # pylint: disable=protected-access
             return getattr(settings, 'ANALYTICS_DATABASE', 'default')
-
-        if getattr(model, 'db_from_setting', None):
-            return getattr(settings, model.db_from_setting, 'default')
 
         return None
 

@@ -2,16 +2,16 @@ import re
 
 from django.conf.urls import patterns, url
 
-from analytics_data_api.v0.views.courses import CourseActivityMostRecentWeekView, CourseEnrollmentByEducationView, \
-    CourseEnrollmentByBirthYearView, CourseEnrollmentByGenderView, CourseEnrollmentLatestView
+from analytics_data_api.v0.views import courses as views
 
 
 COURSE_URLS = [
-    ('recent_activity', CourseActivityMostRecentWeekView, 'recent_activity'),
-    ('enrollment', CourseEnrollmentLatestView, 'enrollment_latest'),
-    ('enrollment/birth_year', CourseEnrollmentByBirthYearView, 'enrollment_by_birth_year'),
-    ('enrollment/education', CourseEnrollmentByEducationView, 'enrollment_by_education'),
-    ('enrollment/gender', CourseEnrollmentByGenderView, 'enrollment_by_gender'),
+    ('recent_activity', views.CourseActivityMostRecentWeekView, 'recent_activity'),
+    ('enrollment', views.CourseEnrollmentLatestView, 'enrollment_latest'),
+    ('enrollment/birth_year', views.CourseEnrollmentByBirthYearView, 'enrollment_by_birth_year'),
+    ('enrollment/education', views.CourseEnrollmentByEducationView, 'enrollment_by_education'),
+    ('enrollment/gender', views.CourseEnrollmentByGenderView, 'enrollment_by_gender'),
+    ('enrollment/location', views.CourseEnrollmentByLocationView, 'enrollment_by_location'),
 ]
 
 urlpatterns = []

@@ -81,6 +81,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
+# pylint: disable=no-member
 class CourseEnrollmentViewTestCase(object):
     model = None
     path = None
@@ -93,15 +94,49 @@ class CourseEnrollmentViewTestCase(object):
 
         return self._get_non_existent_course_id()
 
+    def get_expected_response(self, *args):
+        raise NotImplementedError
+
     def test_get_not_found(self):
         """ Requests made against non-existent courses should return a 404 """
         course_id = self._get_non_existent_course_id()
-        self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())  # pylint: disable=no-member
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))  # pylint: disable=no-member
-        self.assertEquals(response.status_code, 404)  # pylint: disable=no-member
+        self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))
+        self.assertEquals(response.status_code, 404)
 
     def test_get(self):
-        raise NotImplementedError
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
+        self.assertEquals(response.status_code, 200)
+
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
+        self.assertEquals(response.data, expected)
+
+    def test_get_with_intervals(self):
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
+        self.assertIntervalFilteringWorks(expected, self.date, self.date + datetime.timedelta(days=1))
+
+    def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
+        course = self.course
+
+        # If start date is after date of existing data, no data should be returned
+        date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
+        response = self.authenticated_get('/api/v0/courses/%s%s?start_date=%s' % (course.course_id, self.path, date))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual([], response.data)
+
+        # If end date is before date of existing data, no data should be returned
+        date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
+        response = self.authenticated_get('/api/v0/courses/%s%s?end_date=%s' % (course.course_id, self.path, date))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual([], response.data)
+
+        # If data falls in date range, data should be returned
+        start_date = start_date.strftime(settings.DATE_FORMAT)
+        end_date = end_date.strftime(settings.DATE_FORMAT)
+        response = self.authenticated_get(
+            '/api/v0/courses/%s%s?start_date=%s&end_date=%s' % (course.course_id, self.path, start_date, end_date))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected_response)
 
 
 class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
@@ -111,23 +146,30 @@ class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnr
     @classmethod
     def setUpClass(cls):
         cls.course = G(Course)
-        cls.ce1 = G(CourseEnrollmentByBirthYear, course=cls.course, birth_year=1956)
-        cls.ce2 = G(CourseEnrollmentByBirthYear, course=cls.course, birth_year=1986)
+        cls.date = datetime.date(2014, 1, 1)
+        G(cls.model, course=cls.course, date=cls.date, birth_year=1956)
+        G(cls.model, course=cls.course, date=cls.date, birth_year=1986)
+        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=10), birth_year=1956)
+        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=10), birth_year=1986)
+
+    def get_expected_response(self, *args):
+        return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+                 'birth_year': ce.birth_year} for ce in args]
 
     def test_get(self):
         response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
-        expected = {
-            self.ce1.birth_year: self.ce1.count,
-            self.ce2.birth_year: self.ce2.count,
-        }
-        actual = response.data['birth_years']
-        self.assertEquals(actual, expected)
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
+        self.assertEquals(response.data, expected)
+
+    def test_get_with_intervals(self):
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
+        self.assertIntervalFilteringWorks(expected, self.date, self.date + datetime.timedelta(days=1))
 
 
 class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
-    path = '/enrollment/education'
+    path = '/enrollment/education/'
     model = CourseEnrollmentByEducation
 
     @classmethod
@@ -135,41 +177,33 @@ class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnr
         cls.el1 = G(EducationLevel, name='Doctorate', short_name='doctorate')
         cls.el2 = G(EducationLevel, name='Top Secret', short_name='top_secret')
         cls.course = G(Course)
-        cls.ce1 = G(CourseEnrollmentByEducation, course=cls.course, education_level=cls.el1)
-        cls.ce2 = G(CourseEnrollmentByEducation, course=cls.course, education_level=cls.el2)
+        cls.date = datetime.date(2014, 1, 1)
+        G(cls.model, course=cls.course, date=cls.date, education_level=cls.el1)
+        G(cls.model, course=cls.course, date=cls.date, education_level=cls.el2)
+        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=2),
+          education_level=cls.el2)
 
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-
-        expected = {
-            self.ce1.education_level.short_name: self.ce1.count,
-            self.ce2.education_level.short_name: self.ce2.count,
-        }
-        actual = response.data['education_levels']
-        self.assertEquals(actual, expected)
+    def get_expected_response(self, *args):
+        return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+                 'education_level': {'name': ce.education_level.name, 'short_name': ce.education_level.short_name}} for
+                ce in args]
 
 
 class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
-    path = '/enrollment/gender'
+    path = '/enrollment/gender/'
     model = CourseEnrollmentByGender
 
     @classmethod
     def setUpClass(cls):
         cls.course = G(Course)
-        cls.ce1 = G(CourseEnrollmentByGender, course=cls.course, gender='m')
-        cls.ce2 = G(CourseEnrollmentByGender, course=cls.course, gender='f')
+        cls.date = datetime.date(2014, 1, 1)
+        G(cls.model, course=cls.course, gender='m', date=cls.date, count=34)
+        G(cls.model, course=cls.course, gender='f', date=cls.date, count=45)
+        G(cls.model, course=cls.course, gender='f', date=cls.date - datetime.timedelta(days=2), count=45)
 
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-
-        expected = {
-            self.ce1.gender: self.ce1.count,
-            self.ce2.gender: self.ce2.count,
-        }
-        actual = response.data['genders']
-        self.assertEquals(actual, expected)
+    def get_expected_response(self, *args):
+        return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+                 'gender': ce.gender} for ce in args]
 
 
 # pylint: disable=no-member,no-value-for-parameter
@@ -203,20 +237,20 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
-class CourseEnrollmentLatestViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
+class CourseEnrollmentViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
     model = CourseEnrollmentDaily
     path = '/enrollment'
 
     @classmethod
     def setUpClass(cls):
         cls.course = G(Course)
-        cls.ce = G(CourseEnrollmentDaily, course=cls.course, date=datetime.date(2014, 1, 1), count=203)
+        cls.date = datetime.date(2014, 1, 1)
+        G(cls.model, course=cls.course, date=cls.date, count=203)
+        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=5), count=203)
 
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-        expected = {'course_id': self.ce.course.course_id, 'count': self.ce.count, 'date': self.ce.date}
-        self.assertDictEqual(response.data, expected)
+    def get_expected_response(self, *args):
+        return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT)}
+                for ce in args]
 
 
 class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
@@ -227,43 +261,10 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
         return [{'course_id': ce.course.course_id, 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
                  'country': {'code': ce.country.code, 'name': ce.country.name}} for ce in args]
 
-    def test_get(self):
-        course = G(Course)
-        date1 = datetime.date(2014, 1, 1)
-        date2 = datetime.date(2013, 1, 1)
-        ce1 = G(CourseEnrollmentByCountry, course=course, country=G(Country), count=455, date=date1)
-        ce2 = G(CourseEnrollmentByCountry, course=course, country=G(Country), count=356, date=date1)
-
-        # This should not be returned as the view should return only the latest data when no interval is supplied.
-        G(CourseEnrollmentByCountry, course=course, country=G(Country), count=12, date=date2)
-
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-
-        expected = self.get_expected_response(ce1, ce2)
-        self.assertListEqual(response.data, expected)
-
-    def test_get_with_intervals(self):
-        course = G(Course)
-        country1 = G(Country)
-        country2 = G(Country)
-        date = datetime.date(2014, 1, 1)
-        ce1 = G(CourseEnrollmentByCountry, course=course, country=country1, date=date)
-        ce2 = G(CourseEnrollmentByCountry, course=course, country=country2, date=date)
-
-        # If start date is after date of existing data, no data should be returned
-        response = self.authenticated_get('/api/v0/courses/%s%s?start_date=2014-02-01' % (course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-        self.assertListEqual([], response.data)
-
-        # If end date is before date of existing data, no data should be returned
-        response = self.authenticated_get('/api/v0/courses/%s%s?end_date=2013-02-01' % (course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-        self.assertListEqual([], response.data)
-
-        # If data falls in date range, data should be returned
-        response = self.authenticated_get(
-            '/api/v0/courses/%s%s?start_date=2013-02-01&end_date=2014-02-01' % (course.course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
-        expected = self.get_expected_response(ce1, ce2)
-        self.assertListEqual(response.data, expected)
+    @classmethod
+    def setUpClass(cls):
+        cls.course = G(Course)
+        cls.date = datetime.date(2014, 1, 1)
+        G(cls.model, course=cls.course, country=G(Country), count=455, date=cls.date)
+        G(cls.model, course=cls.course, country=G(Country), count=356, date=cls.date)
+        G(cls.model, course=cls.course, country=G(Country), count=12, date=cls.date - datetime.timedelta(days=29))

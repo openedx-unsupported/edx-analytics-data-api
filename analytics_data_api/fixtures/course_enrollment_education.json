@@ -88,5 +88,95 @@
             "count": 9940,
             "date": "2014-07-01"
         }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 14,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 6,
+            "count": 12295,
+            "date": "2014-07-02"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 6,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 7,
+            "count": 70885,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 7,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 3,
+            "count": 981,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 8,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 5,
+            "count": 51591,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 9,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 4,
+            "count": 6051,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 10,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 8,
+            "count": 53216,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 11,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 1,
+            "count": 667,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 12,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 2,
+            "count": 5722,
+            "date": "2014-07-01"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByEducation",
+        "pk": 13,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "education_level": 9,
+            "count": 9940,
+            "date": "2014-07-01"
+        }
     }
 ]

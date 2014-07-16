@@ -83,3 +83,7 @@ ENABLE_ADMIN_SITE = True
 ########## END ANALYTICS DATA API CONFIGURATION
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+SWAGGER_SETTINGS = {
+    'api_key': 'analytics'
+}

@@ -28,5 +28,35 @@
             "count": 423,
             "date": "2014-07-01"
         }
+    },
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 4,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "m",
+            "count": 1332,
+            "date": "2014-07-02"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 5,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "f",
+            "count": 77445,
+            "date": "2014-07-02"
+        }
+    },
+    {
+        "model": "v0.CourseEnrollmentByGender",
+        "pk": 6,
+        "fields": {
+            "course": ["edX/DemoX/Demo_Course"],
+            "gender": "o",
+            "count": 34,
+            "date": "2014-07-02"
+        }
     }
 ]

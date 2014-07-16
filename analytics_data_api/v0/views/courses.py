@@ -1,17 +1,13 @@
 import datetime
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.http import Http404
 from rest_framework import generics
-from rest_framework.generics import RetrieveAPIView, get_object_or_404
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 
-from analytics_data_api.v0.models import CourseActivityByWeek, CourseEnrollmentByBirthYear, \
-    CourseEnrollmentByEducation, CourseEnrollmentByGender, CourseEnrollmentByCountry, CourseEnrollmentDaily, Course
-from analytics_data_api.v0.serializers import CourseActivityByWeekSerializer, CourseEnrollmentByCountrySerializer, \
-    CourseEnrollmentDailySerializer
+from analytics_data_api.v0 import models, serializers
 
 
 class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
@@ -42,7 +38,7 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
 
     """
 
-    serializer_class = CourseActivityByWeekSerializer
+    serializer_class = serializers.CourseActivityByWeekSerializer
 
     def get_object(self, queryset=None):
         """Select the activity report for the given course and activity type."""
@@ -51,116 +47,16 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
         activity_type = activity_type.lower()
 
         try:
-            return CourseActivityByWeek.get_most_recent(course_id, activity_type)
+            return models.CourseActivityByWeek.get_most_recent(course_id, activity_type)
         except ObjectDoesNotExist:
             raise Http404
 
 
-class AbstractCourseEnrollmentView(APIView):
-    model = None
+class BaseCourseEnrollmentView(generics.ListAPIView):
+    def get_course_or_404(self):
+        return get_object_or_404(models.Course, course_id=self.kwargs.get('course_id'))
 
-    def render_data(self, data):
-        """
-        Render view data
-        """
-        raise NotImplementedError('Subclasses must define a render_data method!')
-
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        if not self.model:
-            raise NotImplementedError('Subclasses must specify a model!')
-
-        course_id = self.kwargs['course_id']
-        data = self.model.objects.filter(course__course_id=course_id)
-
-        if not data:
-            raise Http404
-
-        return Response(self.render_data(data))
-
-
-class CourseEnrollmentByBirthYearView(AbstractCourseEnrollmentView):
-    """
-    Course enrollment broken down by user birth year
-
-    Returns the enrollment of a course with users binned by their birth years.
-    """
-
-    model = CourseEnrollmentByBirthYear
-
-    def render_data(self, data):
-        return {
-            'birth_years': dict(data.values_list('birth_year', 'count'))
-        }
-
-
-class CourseEnrollmentByEducationView(AbstractCourseEnrollmentView):
-    """
-    Course enrollment broken down by user level of education
-
-    Returns the enrollment of a course with users binned by their education levels.
-    """
-    model = CourseEnrollmentByEducation
-
-    def render_data(self, data):
-        return {
-            'education_levels': dict(data.values_list('education_level__short_name', 'count'))
-        }
-
-
-class CourseEnrollmentByGenderView(AbstractCourseEnrollmentView):
-    """
-    Course enrollment broken down by user gender
-
-    Returns the enrollment of a course with users binned by their genders.
-
-    Genders:
-        m - male
-        f - female
-        o - other
-    """
-    model = CourseEnrollmentByGender
-
-    def render_data(self, data):
-        return {
-            'genders': dict(data.values_list('gender', 'count'))
-        }
-
-
-class CourseEnrollmentLatestView(RetrieveAPIView):
-    """ Returns the latest enrollment count for the specified course. """
-    model = CourseEnrollmentDaily
-    serializer_class = CourseEnrollmentDailySerializer
-
-    def get_object(self, queryset=None):
-        try:
-            course_id = self.kwargs['course_id']
-            return CourseEnrollmentDaily.objects.filter(course__course_id=course_id).order_by('-date')[0]
-        except IndexError:
-            raise Http404
-
-
-# pylint: disable=line-too-long
-class CourseEnrollmentByLocationView(generics.ListAPIView):
-    """
-    Course enrollment broken down by user location
-
-    Returns the enrollment of a course with users binned by their location. Location is calculated based on the user's
-    IP address. If no start or end dates are passed, the data for the latest date is returned.
-
-    Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
-
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
-
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
-    """
-
-    serializer_class = CourseEnrollmentByCountrySerializer
-
-    def get_queryset(self):
-        course = get_object_or_404(Course, course_id=self.kwargs.get('course_id'))
-        queryset = CourseEnrollmentByCountry.objects.filter(course=course)
-
+    def apply_date_filtering(self, queryset):
         if 'start_date' in self.request.QUERY_PARAMS or 'end_date' in self.request.QUERY_PARAMS:
             # Filter by start/end date
             start_date = self.request.QUERY_PARAMS.get('start_date')
@@ -178,5 +74,110 @@ class CourseEnrollmentByLocationView(generics.ListAPIView):
             if latest_date:
                 latest_date = latest_date['date__max']
                 queryset = queryset.filter(date=latest_date)
+        return queryset
 
+    def get_queryset(self):
+        course = self.get_course_or_404()
+        queryset = self.model.objects.filter(course=course)
+        queryset = self.apply_date_filtering(queryset)
+        return queryset
+
+
+class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
+    """
+    Course enrollment broken down by user birth year
+
+    Returns the enrollment of a course with users binned by their birth years.
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    serializer_class = serializers.CourseEnrollmentByBirthYearSerializer
+    model = models.CourseEnrollmentByBirthYear
+
+
+class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
+    """
+    Course enrollment broken down by user level of education
+
+    Returns the enrollment of a course with users binned by their education levels.
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+    serializer_class = serializers.CourseEnrollmentByEducationSerializer
+    model = models.CourseEnrollmentByEducation
+
+
+class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
+    """
+    Course enrollment broken down by user gender
+
+    Returns the enrollment of a course with users binned by their genders.
+
+    Genders:
+        m - male
+        f - female
+        o - other
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+    serializer_class = serializers.CourseEnrollmentByGenderSerializer
+    model = models.CourseEnrollmentByGender
+
+
+class CourseEnrollmentView(BaseCourseEnrollmentView):
+    """
+    Returns the enrollment count for the specified course.
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    serializer_class = serializers.CourseEnrollmentDailySerializer
+    model = models.CourseEnrollmentDaily
+
+
+# pylint: disable=line-too-long
+class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
+    """
+    Course enrollment broken down by user location
+
+    Returns the enrollment of a course with users binned by their location. Location is calculated based on the user's
+    IP address.
+
+    Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    serializer_class = serializers.CourseEnrollmentByCountrySerializer
+
+    def get_queryset(self):
+        course = self.get_course_or_404()
+        queryset = models.CourseEnrollmentByCountry.objects.filter(course=course)
+        queryset = self.apply_date_filtering(queryset)
         return queryset

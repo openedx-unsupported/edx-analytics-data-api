@@ -1,6 +1,7 @@
 [run]
 omit = analyticsdataserver/settings*
        *wsgi.py
+       analytics_data_api/management/commands/generate_fake_enrollment_data.py
 
 [report]
 # Regexes for lines to exclude from consideration

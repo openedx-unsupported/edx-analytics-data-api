@@ -32,12 +32,12 @@ Getting Started
 
 Loading Data
 ------------
-The fixtures directory contains demo data. This data can be loaded with the following commands:
+The fixtures directory contains demo data and the `generate_fake_enrollment_data` management command can generate 
+enrollment data. Run the command below to load/generate this data in the database.
 
         $ make loaddata
 
 Running Tests
 -------------
 
-Run `make validate` install the requirements, run the tests, and run lint. If you want to get the API server ready for
-acceptance testing or demos, `make demo` will install requirements and load the fixture data.
+Run `make validate` install the requirements, run the tests, and run lint.

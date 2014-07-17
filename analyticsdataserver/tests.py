@@ -1,12 +1,11 @@
 from contextlib import contextmanager
-from functools import partial
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.utils import ConnectionHandler, DatabaseError
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch, Mock
+
 import mock
 from rest_framework.authtoken.models import Token
 
@@ -15,13 +14,16 @@ class TestCaseWithAuthentication(TestCase):
     def setUp(self):
         super(TestCaseWithAuthentication, self).setUp()
         test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
-        token = Token.objects.create(user=test_user)
-        self.authenticated_get = partial(self.client.get, HTTP_AUTHORIZATION='Token ' + token.key, follow=True)
+        self.token = Token.objects.create(user=test_user)
+
+    def authenticated_get(self, path, data=None, follow=True, **extra):
+        data = data or {}
+        return self.client.get(path, data, follow, HTTP_AUTHORIZATION='Token ' + self.token.key, **extra)
 
 
 @contextmanager
 def no_database():
-    cursor_mock = Mock(side_effect=DatabaseError)
+    cursor_mock = mock.Mock(side_effect=DatabaseError)
     with mock.patch('django.db.backends.util.CursorWrapper', cursor_mock):
         yield
 
@@ -58,7 +60,7 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
     @staticmethod
     @contextmanager
     def override_database_connections(databases):
-        with patch('analyticsdataserver.views.connections', ConnectionHandler(databases)):
+        with mock.patch('analyticsdataserver.views.connections', ConnectionHandler(databases)):
             yield
 
     @override_settings(ANALYTICS_DATABASE='reporting')

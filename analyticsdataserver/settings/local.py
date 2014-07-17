@@ -85,5 +85,5 @@ ENABLE_ADMIN_SITE = True
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 SWAGGER_SETTINGS = {
-    'api_key': 'analytics'
+    'api_key': 'edx'
 }

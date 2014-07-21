@@ -31,7 +31,7 @@ class CourseActivityByWeek(models.Model):
 
 class BaseCourseEnrollment(models.Model):
     course = models.ForeignKey(Course, null=False)
-    date = models.DateField(null=False)
+    date = models.DateField(null=False, db_index=True)
     count = models.IntegerField(null=False)
 
     class Meta(object):

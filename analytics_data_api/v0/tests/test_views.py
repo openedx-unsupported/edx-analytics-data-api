@@ -84,6 +84,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
 class CourseEnrollmentViewTestCase(object):
     model = None
     path = None
+    order_by = []
 
     def _get_non_existent_course_id(self):
         course_id = random.randint(100, 9999)
@@ -108,8 +109,8 @@ class CourseEnrollmentViewTestCase(object):
         response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
-        # Validate the actual data
-        expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
+        # Validate the data is correct and sorted chronologically
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date).order_by('date', *self.order_by))  # pylint: disable=line-too-long
         self.assertEquals(response.data, expected)
 
     def test_get_csv(self):
@@ -167,6 +168,7 @@ class CourseEnrollmentViewTestCase(object):
 class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
     path = '/enrollment/birth_year'
     model = models.CourseEnrollmentByBirthYear
+    order_by = ['birth_year']
 
     @classmethod
     def setUpClass(cls):
@@ -197,6 +199,7 @@ class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnr
 class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
     path = '/enrollment/education/'
     model = models.CourseEnrollmentByEducation
+    order_by = ['education_level']
 
     @classmethod
     def setUpClass(cls):
@@ -219,6 +222,7 @@ class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnr
 class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnrollmentViewTestCase):
     path = '/enrollment/gender/'
     model = models.CourseEnrollmentByGender
+    order_by = ['gender']
 
     @classmethod
     def setUpClass(cls):

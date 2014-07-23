@@ -91,6 +91,8 @@ class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
 
     If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
 
+    Data is sorted chronologically (earliest to latest).
+
     Date format: YYYY-mm-dd (e.g. 2014-01-31)
 
     start_date --   Date after which all data should be returned (inclusive)
@@ -108,6 +110,8 @@ class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
     Returns the enrollment of a course with users binned by their education levels.
 
     If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Data is sorted chronologically (earliest to latest).
 
     Date format: YYYY-mm-dd (e.g. 2014-01-31)
 
@@ -131,6 +135,8 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
 
     If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
 
+    Data is sorted chronologically (earliest to latest).
+
     Date format: YYYY-mm-dd (e.g. 2014-01-31)
 
     start_date --   Date after which all data should be returned (inclusive)
@@ -145,6 +151,8 @@ class CourseEnrollmentView(BaseCourseEnrollmentView):
     Returns the enrollment count for the specified course.
 
     If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Data is sorted chronologically (earliest to latest).
 
     Date format: YYYY-mm-dd (e.g. 2014-01-31)
 
@@ -167,6 +175,8 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
 
     If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Data is sorted chronologically (earliest to latest).
 
     Date format: YYYY-mm-dd (e.g. 2014-01-31)
 

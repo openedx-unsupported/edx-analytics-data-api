@@ -42,7 +42,7 @@ class BaseCourseEnrollment(models.Model):
 class CourseEnrollmentDaily(BaseCourseEnrollment):
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_daily'
-        ordering = ('-date', 'course')
+        ordering = ('date', 'course')
         unique_together = [('course', 'date',)]
 
 
@@ -51,7 +51,7 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_birth_year'
-        ordering = ('-date', 'birth_year', 'course')
+        ordering = ('date', 'course', 'birth_year')
         unique_together = [('course', 'date', 'birth_year')]
 
 
@@ -71,7 +71,7 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_education_level'
-        ordering = ('-date', 'education_level', 'course')
+        ordering = ('date', 'course', 'education_level')
         unique_together = [('course', 'date', 'education_level')]
 
 
@@ -80,7 +80,7 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender'
-        ordering = ('-date', 'gender', 'course')
+        ordering = ('date', 'course', 'gender')
         unique_together = [('course', 'date', 'gender')]
 
 
@@ -120,5 +120,5 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location'
-        ordering = ('-date', 'country', 'course')
+        ordering = ('date', 'course', 'country')
         unique_together = [('course', 'date', 'country')]

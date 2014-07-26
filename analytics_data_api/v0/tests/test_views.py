@@ -4,7 +4,6 @@
 import StringIO
 import csv
 import datetime
-import random
 
 from django.conf import settings
 from django_dynamic_fixture import G
@@ -18,19 +17,19 @@ from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
 class CourseActivityLastWeekTest(TestCaseWithAuthentication):
+    # pylint: disable=line-too-long
     def setUp(self):
         super(CourseActivityLastWeekTest, self).setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
-        self.course = G(models.Course, course_id=self.course_id)
         interval_start = '2014-05-24T00:00:00Z'
         interval_end = '2014-06-01T00:00:00Z'
-        G(models.CourseActivityByWeek, course=self.course, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
           activity_type='posted_forum', count=100)
-        G(models.CourseActivityByWeek, course=self.course, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
           activity_type='attempted_problem', count=200)
-        G(models.CourseActivityByWeek, course=self.course, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
           activity_type='any', count=300)
-        G(models.CourseActivityByWeek, course=self.course, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
           activity_type='played_video', count=400)
 
     def test_activity(self):
@@ -87,27 +86,18 @@ class CourseEnrollmentViewTestCase(object):
     path = None
     order_by = []
 
-    def _get_non_existent_course_id(self):
-        course_id = random.randint(100, 9999)
-
-        if not models.Course.objects.filter(course_id=course_id).exists():
-            return course_id
-
-        return self._get_non_existent_course_id()
-
     def get_expected_response(self, *args):
         raise NotImplementedError
 
     def test_get_not_found(self):
         """ Requests made against non-existent courses should return a 404 """
-        course_id = self._get_non_existent_course_id()
-        self.assertFalse(self.model.objects.filter(course__course_id=course_id).exists())
+        course_id = 'edX/DemoX/Non_Existent_Course'
         response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path))
         self.assertEquals(response.status_code, 404)
 
     def test_get(self):
         # Validate the basic response status
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
@@ -115,7 +105,7 @@ class CourseEnrollmentViewTestCase(object):
         self.assertEquals(response.data, expected)
 
     def test_get_csv(self):
-        path = '/api/v0/courses/%s%s' % (self.course.course_id, self.path,)
+        path = '/api/v0/courses/%s%s' % (self.course_id, self.path,)
         csv_content_type = 'text/csv'
         response = self.authenticated_get(path, HTTP_ACCEPT=csv_content_type)
 
@@ -143,17 +133,15 @@ class CourseEnrollmentViewTestCase(object):
         self.assertIntervalFilteringWorks(expected, self.date, self.date + datetime.timedelta(days=1))
 
     def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
-        course = self.course
-
         # If start date is after date of existing data, no data should be returned
         date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
-        response = self.authenticated_get('/api/v0/courses/%s%s?start_date=%s' % (course.course_id, self.path, date))
+        response = self.authenticated_get('/api/v0/courses/%s%s?start_date=%s' % (self.course_id, self.path, date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual([], response.data)
 
         # If end date is before date of existing data, no data should be returned
         date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
-        response = self.authenticated_get('/api/v0/courses/%s%s?end_date=%s' % (course.course_id, self.path, date))
+        response = self.authenticated_get('/api/v0/courses/%s%s?end_date=%s' % (self.course_id, self.path, date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual([], response.data)
 
@@ -161,7 +149,7 @@ class CourseEnrollmentViewTestCase(object):
         start_date = start_date.strftime(settings.DATE_FORMAT)
         end_date = end_date.strftime(settings.DATE_FORMAT)
         response = self.authenticated_get(
-            '/api/v0/courses/%s%s?start_date=%s&end_date=%s' % (course.course_id, self.path, start_date, end_date))
+            '/api/v0/courses/%s%s?start_date=%s&end_date=%s' % (self.course_id, self.path, start_date, end_date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
@@ -173,20 +161,20 @@ class CourseEnrollmentByBirthYearViewTests(TestCaseWithAuthentication, CourseEnr
 
     @classmethod
     def setUpClass(cls):
-        cls.course = G(models.Course)
+        cls.course_id = 'edX/DemoX/Demo_Course'
         cls.date = datetime.date(2014, 1, 1)
-        G(cls.model, course=cls.course, date=cls.date, birth_year=1956)
-        G(cls.model, course=cls.course, date=cls.date, birth_year=1986)
-        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=10), birth_year=1956)
-        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=10), birth_year=1986)
+        G(cls.model, course_id=cls.course_id, date=cls.date, birth_year=1956)
+        G(cls.model, course_id=cls.course_id, date=cls.date, birth_year=1986)
+        G(cls.model, course_id=cls.course_id, date=cls.date - datetime.timedelta(days=10), birth_year=1956)
+        G(cls.model, course_id=cls.course_id, date=cls.date - datetime.timedelta(days=10), birth_year=1986)
 
     def get_expected_response(self, *args):
         return [
-            {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'birth_year': ce.birth_year} for ce in args]
 
     def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course.course_id, self.path,))
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         expected = self.get_expected_response(*self.model.objects.filter(date=self.date))
@@ -206,16 +194,16 @@ class CourseEnrollmentByEducationViewTests(TestCaseWithAuthentication, CourseEnr
     def setUpClass(cls):
         cls.el1 = G(models.EducationLevel, name='Doctorate', short_name='doctorate')
         cls.el2 = G(models.EducationLevel, name='Top Secret', short_name='top_secret')
-        cls.course = G(models.Course)
+        cls.course_id = 'edX/DemoX/Demo_Course'
         cls.date = datetime.date(2014, 1, 1)
-        G(cls.model, course=cls.course, date=cls.date, education_level=cls.el1)
-        G(cls.model, course=cls.course, date=cls.date, education_level=cls.el2)
-        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=2),
+        G(cls.model, course_id=cls.course_id, date=cls.date, education_level=cls.el1)
+        G(cls.model, course_id=cls.course_id, date=cls.date, education_level=cls.el2)
+        G(cls.model, course_id=cls.course_id, date=cls.date - datetime.timedelta(days=2),
           education_level=cls.el2)
 
     def get_expected_response(self, *args):
         return [
-            {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'education_level': {'name': ce.education_level.name, 'short_name': ce.education_level.short_name}} for
             ce in args]
 
@@ -227,15 +215,15 @@ class CourseEnrollmentByGenderViewTests(TestCaseWithAuthentication, CourseEnroll
 
     @classmethod
     def setUpClass(cls):
-        cls.course = G(models.Course)
+        cls.course_id = 'edX/DemoX/Demo_Course'
         cls.date = datetime.date(2014, 1, 1)
-        G(cls.model, course=cls.course, gender='m', date=cls.date, count=34)
-        G(cls.model, course=cls.course, gender='f', date=cls.date, count=45)
-        G(cls.model, course=cls.course, gender='f', date=cls.date - datetime.timedelta(days=2), count=45)
+        G(cls.model, course_id=cls.course_id, gender='m', date=cls.date, count=34)
+        G(cls.model, course_id=cls.course_id, gender='f', date=cls.date, count=45)
+        G(cls.model, course_id=cls.course_id, gender='f', date=cls.date - datetime.timedelta(days=2), count=45)
 
     def get_expected_response(self, *args):
         return [
-            {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'gender': ce.gender} for ce in args]
 
 
@@ -276,14 +264,14 @@ class CourseEnrollmentViewTests(TestCaseWithAuthentication, CourseEnrollmentView
 
     @classmethod
     def setUpClass(cls):
-        cls.course = G(models.Course)
+        cls.course_id = 'edX/DemoX/Demo_Course'
         cls.date = datetime.date(2014, 1, 1)
-        G(cls.model, course=cls.course, date=cls.date, count=203)
-        G(cls.model, course=cls.course, date=cls.date - datetime.timedelta(days=5), count=203)
+        G(cls.model, course_id=cls.course_id, date=cls.date, count=203)
+        G(cls.model, course_id=cls.course_id, date=cls.date - datetime.timedelta(days=5), count=203)
 
     def get_expected_response(self, *args):
         return [
-            {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT)}
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT)}
             for ce in args]
 
 
@@ -292,16 +280,16 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
     model = models.CourseEnrollmentByCountry
 
     def get_expected_response(self, *args):
-        args = sorted(args, key=lambda item: (item.date, item.course.course_id, item.country.code))
+        args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.code))
         return [
-            {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'code': ce.country.code, 'name': ce.country.name}} for ce in args]
 
     @classmethod
     def setUpClass(cls):
-        cls.course = G(models.Course)
+        cls.course_id = 'edX/DemoX/Demo_Course'
         cls.date = datetime.date(2014, 1, 1)
         cls.country = countries.get('US')
-        G(cls.model, course=cls.course, country_code='US', count=455, date=cls.date)
-        G(cls.model, course=cls.course, country_code='CA', count=356, date=cls.date)
-        G(cls.model, course=cls.course, country_code='IN', count=12, date=cls.date - datetime.timedelta(days=29))
+        G(cls.model, course_id=cls.course_id, country_code='US', count=455, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='CA', count=356, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='IN', count=12, date=cls.date - datetime.timedelta(days=29))

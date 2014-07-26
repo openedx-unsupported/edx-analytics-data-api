@@ -8,6 +8,7 @@ import random
 
 from django.conf import settings
 from django_dynamic_fixture import G
+from iso3166 import countries
 import pytz
 
 from analytics_data_api.v0 import models
@@ -291,6 +292,7 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
     model = models.CourseEnrollmentByCountry
 
     def get_expected_response(self, *args):
+        args = sorted(args, key=lambda item: (item.date, item.course.course_id, item.country.code))
         return [
             {'course_id': str(ce.course.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'code': ce.country.code, 'name': ce.country.name}} for ce in args]
@@ -299,7 +301,7 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
     def setUpClass(cls):
         cls.course = G(models.Course)
         cls.date = datetime.date(2014, 1, 1)
-        G(cls.model, course=cls.course, country=G(models.Country), count=455, date=cls.date)
-        G(cls.model, course=cls.course, country=G(models.Country), count=356, date=cls.date)
-        G(cls.model, course=cls.course, country=G(models.Country), count=12,
-          date=cls.date - datetime.timedelta(days=29))
+        cls.country = countries.get('US')
+        G(cls.model, course=cls.course, country_code='US', count=455, date=cls.date)
+        G(cls.model, course=cls.course, country_code='CA', count=356, date=cls.date)
+        G(cls.model, course=cls.course, country_code='IN', count=12, date=cls.date - datetime.timedelta(days=29))

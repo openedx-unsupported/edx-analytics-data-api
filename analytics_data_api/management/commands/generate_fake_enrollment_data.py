@@ -58,8 +58,11 @@ class Command(BaseCommand):
         birth_years = dict(zip(birth_years, ratios))
 
         # Delete existing data
-        for model in [models.CourseEnrollmentDaily, models.CourseEnrollmentByGender, models.CourseEnrollmentByEducation,
-                      models.CourseEnrollmentByBirthYear, models.CourseEnrollmentByCountry]:
+        for model in [models.CourseEnrollmentDaily,
+                      models.CourseEnrollmentByGender,
+                      models.CourseEnrollmentByEducation,
+                      models.CourseEnrollmentByBirthYear,
+                      models.CourseEnrollmentByCountry]:
             model.objects.all().delete()
 
         # Create new data data
@@ -79,10 +82,10 @@ class Command(BaseCommand):
                 models.CourseEnrollmentByEducation.objects.create(course=course, date=date, count=count,
                                                                   education_level=education_level)
 
-            for code, ratio in countries.iteritems():
-                country = models.Country.objects.get(code=code)
+            for country_code, ratio in countries.iteritems():
                 count = int(ratio * daily_total)
-                models.CourseEnrollmentByCountry.objects.create(course=course, date=date, count=count, country=country)
+                models.CourseEnrollmentByCountry.objects.create(course=course, date=date, count=count,
+                                                                country_code=country_code)
 
             for birth_year, ratio in birth_years.iteritems():
                 count = int(ratio * daily_total)

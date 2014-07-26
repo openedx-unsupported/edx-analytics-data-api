@@ -1,5 +1,7 @@
+from collections import namedtuple
 from django.db import models
-from analytics_data_api.v0.managers import CourseManager, CountryManager
+from iso3166 import countries
+from analytics_data_api.v0.managers import CourseManager
 
 
 class Course(models.Model):
@@ -33,10 +35,12 @@ class BaseCourseEnrollment(models.Model):
     course = models.ForeignKey(Course, null=False)
     date = models.DateField(null=False, db_index=True)
     count = models.IntegerField(null=False)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):
         abstract = True
         get_latest_by = 'date'
+        index_together = [('course', 'date',)]
 
 
 class CourseEnrollmentDaily(BaseCourseEnrollment):
@@ -50,7 +54,7 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     birth_year = models.IntegerField(null=False)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_birth_year'
+        db_table = 'course_enrollment_birth_year_daily'
         ordering = ('date', 'course', 'birth_year')
         unique_together = [('course', 'date', 'birth_year')]
 
@@ -70,7 +74,7 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
     education_level = models.ForeignKey(EducationLevel)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_education_level'
+        db_table = 'course_enrollment_education_level_daily'
         ordering = ('date', 'course', 'education_level')
         unique_together = [('course', 'date', 'education_level')]
 
@@ -79,7 +83,7 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
     gender = models.CharField(max_length=255, null=False)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_gender'
+        db_table = 'course_enrollment_gender_daily'
         ordering = ('date', 'course', 'gender')
         unique_together = [('course', 'date', 'gender')]
 
@@ -102,23 +106,18 @@ class ProblemResponseAnswerDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_column='created')
 
 
-class Country(models.Model):
-    code = models.CharField(max_length=2, primary_key=True)
-    name = models.CharField(max_length=255, unique=True, null=False)
-
-    objects = CountryManager()  # pylint: disable=no-value-for-parameter
-
-    class Meta(object):
-        db_table = 'countries'
-
-    def __unicode__(self):
-        return "{0} - {1}".format(self.code, self.name)
+Country = namedtuple('Country', 'name, code')
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):
-    country = models.ForeignKey(Country, null=False, db_column='country_code')
+    country_code = models.CharField(max_length=255, null=False, db_column='country_code')
+
+    @property
+    def country(self):
+        country = countries.get(self.country_code)
+        return Country(country.name, country.alpha2)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_location'
-        ordering = ('date', 'course', 'country')
-        unique_together = [('course', 'date', 'country')]
+        db_table = 'course_enrollment_location_current'
+        ordering = ('date', 'course', 'country_code')
+        unique_together = [('course', 'date', 'country_code')]

@@ -96,7 +96,7 @@ class ProblemResponseAnswerDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_column='created')
 
 
-Country = namedtuple('Country', 'name, code')
+Country = namedtuple('Country', 'name code')
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):

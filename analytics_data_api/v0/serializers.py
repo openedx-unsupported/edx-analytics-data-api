@@ -3,24 +3,13 @@ from rest_framework import serializers
 from analytics_data_api.v0 import models
 
 
-class CourseIdMixin(object):
-    def get_course_id(self, obj):
-        return obj.course.course_id
-
-
-class RequiredSerializerMethodField(serializers.SerializerMethodField):
-    required = True
-
-
-class CourseActivityByWeekSerializer(serializers.ModelSerializer, CourseIdMixin):
+class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     """
     Representation of CourseActivityByWeek that excludes the id field.
 
     This table is managed by the data pipeline, and records can be removed and added at any time. The id for a
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
-
-    course_id = RequiredSerializerMethodField('get_course_id')
 
     class Meta(object):
         model = models.CourseActivityByWeek
@@ -51,8 +40,7 @@ class ProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
         )
 
 
-class BaseCourseEnrollmentModelSerializer(serializers.ModelSerializer, CourseIdMixin):
-    course_id = RequiredSerializerMethodField('get_course_id')
+class BaseCourseEnrollmentModelSerializer(serializers.ModelSerializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
 
 
@@ -64,11 +52,9 @@ class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
         fields = ('course_id', 'date', 'count')
 
 
-# pylint: disable=no-value-for-parameter
-class CountrySerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = models.Country
-        fields = ('code', 'name')
+class CountrySerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
 
 
 # pylint: disable=no-value-for-parameter
@@ -79,7 +65,8 @@ class EducationLevelSerializer(serializers.ModelSerializer):
 
 
 class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
-    country = CountrySerializer()
+    # pylint: disable=unexpected-keyword-arg
+    country = CountrySerializer(many=False)
 
     class Meta(object):
         model = models.CourseEnrollmentByCountry

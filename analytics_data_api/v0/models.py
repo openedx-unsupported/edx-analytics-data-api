@@ -1,14 +1,6 @@
+from collections import namedtuple
 from django.db import models
-from analytics_data_api.v0.managers import CourseManager, CountryManager
-
-
-class Course(models.Model):
-    course_id = models.CharField(unique=True, max_length=255)
-
-    objects = CourseManager()  # pylint: disable=no-value-for-parameter
-
-    class Meta(object):
-        db_table = 'courses'
+from iso3166 import countries
 
 
 class CourseActivityByWeek(models.Model):
@@ -17,7 +9,7 @@ class CourseActivityByWeek(models.Model):
     class Meta(object):
         db_table = 'course_activity'
 
-    course = models.ForeignKey(Course, null=False)
+    course_id = models.CharField(max_length=255)
     interval_start = models.DateTimeField()
     interval_end = models.DateTimeField()
     activity_type = models.CharField(db_index=True, max_length=255)
@@ -26,33 +18,35 @@ class CourseActivityByWeek(models.Model):
     @classmethod
     def get_most_recent(cls, course_id, activity_type):
         """Activity for the week that was mostly recently computed."""
-        return cls.objects.filter(course__course_id=course_id, activity_type=activity_type).latest('interval_end')
+        return cls.objects.filter(course_id=course_id, activity_type=activity_type).latest('interval_end')
 
 
 class BaseCourseEnrollment(models.Model):
-    course = models.ForeignKey(Course, null=False)
+    course_id = models.CharField(max_length=255)
     date = models.DateField(null=False, db_index=True)
     count = models.IntegerField(null=False)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):
         abstract = True
         get_latest_by = 'date'
+        index_together = [('course_id', 'date',)]
 
 
 class CourseEnrollmentDaily(BaseCourseEnrollment):
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_daily'
-        ordering = ('date', 'course')
-        unique_together = [('course', 'date',)]
+        ordering = ('date', 'course_id')
+        unique_together = [('course_id', 'date',)]
 
 
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     birth_year = models.IntegerField(null=False)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_birth_year'
-        ordering = ('date', 'course', 'birth_year')
-        unique_together = [('course', 'date', 'birth_year')]
+        db_table = 'course_enrollment_birth_year_daily'
+        ordering = ('date', 'course_id', 'birth_year')
+        unique_together = [('course_id', 'date', 'birth_year')]
 
 
 class EducationLevel(models.Model):
@@ -70,18 +64,18 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
     education_level = models.ForeignKey(EducationLevel)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_education_level'
-        ordering = ('date', 'course', 'education_level')
-        unique_together = [('course', 'date', 'education_level')]
+        db_table = 'course_enrollment_education_level_daily'
+        ordering = ('date', 'course_id', 'education_level')
+        unique_together = [('course_id', 'date', 'education_level')]
 
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
     gender = models.CharField(max_length=255, null=False)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_gender'
-        ordering = ('date', 'course', 'gender')
-        unique_together = [('course', 'date', 'gender')]
+        db_table = 'course_enrollment_gender_daily'
+        ordering = ('date', 'course_id', 'gender')
+        unique_together = [('course_id', 'date', 'gender')]
 
 
 class ProblemResponseAnswerDistribution(models.Model):
@@ -102,23 +96,18 @@ class ProblemResponseAnswerDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_column='created')
 
 
-class Country(models.Model):
-    code = models.CharField(max_length=2, primary_key=True)
-    name = models.CharField(max_length=255, unique=True, null=False)
-
-    objects = CountryManager()  # pylint: disable=no-value-for-parameter
-
-    class Meta(object):
-        db_table = 'countries'
-
-    def __unicode__(self):
-        return "{0} - {1}".format(self.code, self.name)
+Country = namedtuple('Country', 'name, code')
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):
-    country = models.ForeignKey(Country, null=False, db_column='country_code')
+    country_code = models.CharField(max_length=255, null=False, db_column='country_code')
+
+    @property
+    def country(self):
+        country = countries.get(self.country_code)
+        return Country(country.name, country.alpha2)
 
     class Meta(BaseCourseEnrollment.Meta):
-        db_table = 'course_enrollment_location'
-        ordering = ('date', 'course', 'country')
-        unique_together = [('course', 'date', 'country')]
+        db_table = 'course_enrollment_location_current'
+        ordering = ('date', 'course_id', 'country_code')
+        unique_together = [('course_id', 'date', 'country_code')]

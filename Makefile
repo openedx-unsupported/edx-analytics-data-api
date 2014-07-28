@@ -50,7 +50,7 @@ syncdb:
 	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --noinput --database=$(db_name);)
 
 loaddata: syncdb
-	python manage.py loaddata courses education_levels countries single_course_activity problem_response_answer_distribution --database=analytics
+	python manage.py loaddata education_levels single_course_activity problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_enrollment_data
 
 demo: clean requirements loaddata

@@ -5,7 +5,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.http import Http404
 from rest_framework import generics
-from rest_framework.generics import get_object_or_404
 
 from analytics_data_api.v0 import models, serializers
 
@@ -53,8 +52,11 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
 
 
 class BaseCourseEnrollmentView(generics.ListAPIView):
-    def get_course_or_404(self):
-        return get_object_or_404(models.Course, course_id=self.kwargs.get('course_id'))
+    def verify_course_exists_or_404(self, course_id):
+        if self.model.objects.filter(course_id=course_id).exists():
+            return True
+
+        raise Http404
 
     def apply_date_filtering(self, queryset):
         if 'start_date' in self.request.QUERY_PARAMS or 'end_date' in self.request.QUERY_PARAMS:
@@ -77,8 +79,9 @@ class BaseCourseEnrollmentView(generics.ListAPIView):
         return queryset
 
     def get_queryset(self):
-        course = self.get_course_or_404()
-        queryset = self.model.objects.filter(course=course)
+        course_id = self.kwargs.get('course_id')
+        self.verify_course_exists_or_404(course_id)
+        queryset = self.model.objects.filter(course_id=course_id)
         queryset = self.apply_date_filtering(queryset)
         return queryset
 
@@ -185,9 +188,4 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     """
 
     serializer_class = serializers.CourseEnrollmentByCountrySerializer
-
-    def get_queryset(self):
-        course = self.get_course_or_404()
-        queryset = models.CourseEnrollmentByCountry.objects.filter(course=course)
-        queryset = self.apply_date_filtering(queryset)
-        return queryset
+    model = models.CourseEnrollmentByCountry

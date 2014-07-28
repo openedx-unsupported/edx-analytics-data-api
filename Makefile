@@ -51,7 +51,7 @@ syncdb:
 
 loaddata: syncdb
 	python manage.py loaddata education_levels single_course_activity problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_enrollment_data
+	python manage.py generate_fake_course_data
 
 demo: clean requirements loaddata
 	python manage.py set_api_key edx edx

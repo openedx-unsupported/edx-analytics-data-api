@@ -106,7 +106,7 @@ class Command(BaseCommand):
         logger.info("Done!")
 
     def generate_weekly_data(self, course_id, start_date, end_date):
-        activity_types = ['played_video', 'attempted_problem', 'posted_forum']
+        activity_types = ['PLAYED_VIDEO', 'ATTEMPTED_PROBLEM', 'POSTED_FORUM']
         start = start_date
 
         models.CourseActivityByWeek.objects.all().delete()
@@ -124,7 +124,7 @@ class Command(BaseCommand):
                 models.CourseActivityByWeek.objects.create(course_id=course_id, activity_type=activity_type,
                                                            count=count, interval_start=start, interval_end=end)
 
-            models.CourseActivityByWeek.objects.create(course_id=course_id, activity_type='any', count=active_students,
+            models.CourseActivityByWeek.objects.create(course_id=course_id, activity_type='ACTIVE', count=active_students,
                                                        interval_start=start, interval_end=end)
 
             start = end

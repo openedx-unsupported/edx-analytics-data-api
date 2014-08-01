@@ -24,13 +24,13 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         interval_start = '2014-05-24T00:00:00Z'
         interval_end = '2014-06-01T00:00:00Z'
         G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
-          activity_type='posted_forum', count=100)
+          activity_type='POSTED_FORUM', count=100)
         G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
-          activity_type='attempted_problem', count=200)
+          activity_type='ATTEMPTED_PROBLEM', count=200)
         G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
-          activity_type='any', count=300)
+          activity_type='ACTIVE', count=300)
         G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
-          activity_type='played_video', count=400)
+          activity_type='PLAYED_VIDEO', count=400)
 
     def test_activity(self):
         response = self.authenticated_get('/api/v0/courses/{0}/recent_activity'.format(self.course_id))
@@ -43,10 +43,11 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
             'course_id': 'edX/DemoX/Demo_Course',
             'interval_start': datetime.datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
             'interval_end': datetime.datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
-            'activity_type': 'any',
+            'activity_type': 'ACTIVE',
             'count': 300,
         }
         default.update(kwargs)
+        default['activity_type'] = default['activity_type'].upper()
         return default
 
     def test_activity_auth(self):
@@ -78,6 +79,13 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def test_missing_course_id(self):
         response = self.authenticated_get('/api/v0/courses/recent_activity')
         self.assertEquals(response.status_code, 404)
+
+    def test_label_parameter(self):
+        activity_type = 'played_video'
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?label={1}'.format(
+            self.course_id, activity_type))
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=400))
 
 
 # pylint: disable=no-member

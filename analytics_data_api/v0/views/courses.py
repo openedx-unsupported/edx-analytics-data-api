@@ -38,12 +38,37 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
     """
 
     serializer_class = serializers.CourseActivityByWeekSerializer
+    DEFAULT_ACTIVITY_TYPE = 'ACTIVE'
+
+    def _format_activity_type(self, activity_type):
+        """
+        Modify the activity type parameter for use with our data.
+
+        Arguments:
+            activity_type (str): String to be formatted
+        """
+        activity_type = activity_type.upper()
+
+        if activity_type == 'ANY':
+            activity_type = self.DEFAULT_ACTIVITY_TYPE
+        return activity_type
+
+    def _get_activity_type(self):
+        """ Retrieve the activity type from the query string. """
+
+        # Support the old label param
+        activity_type = self.request.QUERY_PARAMS.get('label', None)
+
+        activity_type = activity_type or self.request.QUERY_PARAMS.get('activity_type', self.DEFAULT_ACTIVITY_TYPE)
+        activity_type = self._format_activity_type(activity_type)
+
+        return activity_type
 
     def get_object(self, queryset=None):
         """Select the activity report for the given course and activity type."""
+
         course_id = self.kwargs.get('course_id')
-        activity_type = self.request.QUERY_PARAMS.get('activity_type', 'any')
-        activity_type = activity_type.lower()
+        activity_type = self._get_activity_type()
 
         try:
             return models.CourseActivityByWeek.get_most_recent(course_id, activity_type)

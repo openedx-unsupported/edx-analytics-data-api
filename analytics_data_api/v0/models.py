@@ -8,11 +8,12 @@ class CourseActivityByWeek(models.Model):
 
     class Meta(object):
         db_table = 'course_activity'
+        index_together = [['course_id', 'activity_type']]
 
-    course_id = models.CharField(max_length=255)
+    course_id = models.CharField(db_index=True, max_length=255)
     interval_start = models.DateTimeField()
     interval_end = models.DateTimeField()
-    activity_type = models.CharField(db_index=True, max_length=255)
+    activity_type = models.CharField(db_index=True, max_length=255, db_column='label')
     count = models.IntegerField()
 
     @classmethod

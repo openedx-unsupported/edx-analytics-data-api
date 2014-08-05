@@ -11,6 +11,19 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
 
+    activity_type = serializers.SerializerMethodField('get_activity_type')
+
+    def get_activity_type(self, obj):
+        """
+        Lower-case activity type and change active to any.
+        """
+
+        activity_type = obj.activity_type.lower()
+        if activity_type == 'active':
+            activity_type = 'any'
+
+        return activity_type
+
     class Meta(object):
         model = models.CourseActivityByWeek
         fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_id')

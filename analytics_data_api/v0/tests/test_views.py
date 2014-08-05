@@ -43,11 +43,11 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
             'course_id': 'edX/DemoX/Demo_Course',
             'interval_start': datetime.datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
             'interval_end': datetime.datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
-            'activity_type': 'ACTIVE',
+            'activity_type': 'any',
             'count': 300,
         }
         default.update(kwargs)
-        default['activity_type'] = default['activity_type'].upper()
+        default['activity_type'] = default['activity_type'].lower()
         return default
 
     def test_activity_auth(self):

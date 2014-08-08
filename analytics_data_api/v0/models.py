@@ -1,4 +1,3 @@
-from collections import namedtuple
 from django.db import models
 from iso3166 import countries
 
@@ -97,16 +96,15 @@ class ProblemResponseAnswerDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_column='created')
 
 
-Country = namedtuple('Country', 'name code')
-
-
 class CourseEnrollmentByCountry(BaseCourseEnrollment):
     country_code = models.CharField(max_length=255, null=False, db_column='country_code')
 
     @property
     def country(self):
-        country = countries.get(self.country_code)
-        return Country(country.name, country.alpha2)
+        """
+        Returns a Country object representing the country in this model's country_code.
+        """
+        return countries.get(self.country_code)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

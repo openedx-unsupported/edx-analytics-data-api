@@ -66,7 +66,15 @@ class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
 
 
 class CountrySerializer(serializers.Serializer):
-    code = serializers.CharField()
+    """
+    Serialize country to an object with fields for the complete country name
+    and the ISO-3166 two- and three-digit codes.
+
+    Some downstream consumers need two-digit codes, others need three. Both are provided to avoid the need
+    for conversion.
+    """
+    alpha2 = serializers.CharField()
+    alpha3 = serializers.CharField()
     name = serializers.CharField()
 
 

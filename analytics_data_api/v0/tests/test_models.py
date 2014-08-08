@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from django_dynamic_fixture import G
+from iso3166 import countries
 
 from analytics_data_api.v0 import models
 
@@ -16,17 +17,9 @@ class EducationLevelTests(TestCase):
                          "{0} - {1}".format(short_name, name))
 
 
-class CountryTests(TestCase):
-    # pylint: disable=no-member
-    def test_attributes(self):
-        country = models.Country('Canada', 'CA')
-        self.assertEqual(country.code, 'CA')
-        self.assertEqual(country.name, 'Canada')
-
-
 class CourseEnrollmentByCountryTests(TestCase):
     def test_country(self):
-        country = models.Country('United States', 'US')
-        instance = G(models.CourseEnrollmentByCountry,
-                     country_code=country.code)
+        country = countries.get('US')
+        self.assertEqual(country.alpha2, 'US')
+        instance = G(models.CourseEnrollmentByCountry, country_code=country.alpha2)
         self.assertEqual(instance.country, country)

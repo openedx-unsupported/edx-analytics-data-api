@@ -23,13 +23,17 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         self.course_id = 'edX/DemoX/Demo_Course'
         interval_start = '2014-05-24T00:00:00Z'
         interval_end = '2014-06-01T00:00:00Z'
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+          interval_end=interval_end,
           activity_type='POSTED_FORUM', count=100)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+          interval_end=interval_end,
           activity_type='ATTEMPTED_PROBLEM', count=200)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+          interval_end=interval_end,
           activity_type='ACTIVE', count=300)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start, interval_end=interval_end,
+        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+          interval_end=interval_end,
           activity_type='PLAYED_VIDEO', count=400)
 
     def test_activity(self):
@@ -109,7 +113,8 @@ class CourseEnrollmentViewTestCase(object):
         self.assertEquals(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
-        expected = self.get_expected_response(*self.model.objects.filter(date=self.date).order_by('date', *self.order_by))  # pylint: disable=line-too-long
+        expected = self.get_expected_response(*self.model.objects.filter(date=self.date).order_by('date',
+                                                                                                  *self.order_by))  # pylint: disable=line-too-long
         self.assertEquals(response.data, expected)
 
     def test_get_csv(self):
@@ -288,10 +293,11 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
     model = models.CourseEnrollmentByCountry
 
     def get_expected_response(self, *args):
-        args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.code))
+        args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
         return [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'country': {'code': ce.country.code, 'name': ce.country.name}} for ce in args]
+             'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name}} for ce in
+            args]
 
     @classmethod
     def setUpClass(cls):

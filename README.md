@@ -14,9 +14,9 @@ Getting Started
 ---------------
 
 1. Install the requirements:
- 
+
         $ make develop
-        
+
 2. Setup the databases:
 
         $ ./manage.py syncdb --migrate --noinput
@@ -32,7 +32,7 @@ Getting Started
 
 Loading Data
 ------------
-The fixtures directory contains demo data and the `generate_fake_enrollment_data` management command can generate 
+The fixtures directory contains demo data and the `generate_fake_enrollment_data` management command can generate
 enrollment data. Run the command below to load/generate this data in the database.
 
         $ make loaddata
@@ -41,3 +41,14 @@ Running Tests
 -------------
 
 Run `make validate` install the requirements, run the tests, and run lint.
+
+
+How to Contribute
+-----------------
+
+Contributions are very welcome, but for legal reasons, you must submit a signed
+[individual contributor's agreement](http://code.edx.org/individual-contributor-agreement.pdf)
+before we can accept your contribution. See our
+[CONTRIBUTING](https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst)
+file for more information -- it also contains guidelines for how to maintain
+high code quality, which will make your contribution more likely to be accepted.

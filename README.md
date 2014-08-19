@@ -2,7 +2,7 @@ edX Analytics API Server
 ========================
 
 This repository includes the Django server for the API as well as the API package itself. The client is hosted at
-https://github.com/edx/edx-analytics-api-client.
+https://github.com/edx/edx-analytics-data-api-client.
 
 License
 -------

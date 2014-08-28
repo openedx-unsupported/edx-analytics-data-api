@@ -299,6 +299,7 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
     model = models.CourseEnrollmentByCountry
 
     def get_expected_response(self, *args):
+        args = [arg for arg in args if arg.country_code not in ['', 'A1', 'A2', 'AP', 'EU', 'O1', 'UNKNOWN']]
         args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
         return [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
@@ -313,3 +314,9 @@ class CourseEnrollmentByLocationViewTests(TestCaseWithAuthentication, CourseEnro
         G(cls.model, course_id=cls.course_id, country_code='US', count=455, date=cls.date)
         G(cls.model, course_id=cls.course_id, country_code='CA', count=356, date=cls.date)
         G(cls.model, course_id=cls.course_id, country_code='IN', count=12, date=cls.date - datetime.timedelta(days=29))
+        G(cls.model, course_id=cls.course_id, country_code='', count=356, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='A1', count=1, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='A2', count=2, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='AP', count=1, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='EU', count=4, date=cls.date)
+        G(cls.model, course_id=cls.course_id, country_code='O1', count=7, date=cls.date)

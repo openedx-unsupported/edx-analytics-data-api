@@ -104,7 +104,11 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         """
         Returns a Country object representing the country in this model's country_code.
         """
-        return countries.get(self.country_code)
+        try:
+            return countries.get(self.country_code)
+        except (KeyError, ValueError):
+            # Country code is not valid ISO-3166
+            return None
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

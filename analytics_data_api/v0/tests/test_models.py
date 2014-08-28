@@ -23,3 +23,13 @@ class CourseEnrollmentByCountryTests(TestCase):
         self.assertEqual(country.alpha2, 'US')
         instance = G(models.CourseEnrollmentByCountry, country_code=country.alpha2)
         self.assertEqual(instance.country, country)
+
+    def test_invalid_country(self):
+        instance = G(models.CourseEnrollmentByCountry, country_code='')
+        self.assertIsNone(instance.country)
+
+        instance = G(models.CourseEnrollmentByCountry, country_code='A1')
+        self.assertIsNone(instance.country)
+
+        instance = G(models.CourseEnrollmentByCountry, country_code='GobbledyGoop!')
+        self.assertIsNone(instance.country)

@@ -8,6 +8,8 @@ from django.test.utils import override_settings
 
 import mock
 from rest_framework.authtoken.models import Token
+from analytics_data_api.v0.models import CourseEnrollmentDaily, CourseEnrollmentByBirthYear
+from analyticsdataserver.router import AnalyticsApiRouter
 
 
 class TestCaseWithAuthentication(TestCase):
@@ -83,3 +85,15 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
             # This would normally return UNAVAILABLE, however we have deleted the settings so it will use the default
             # connection which should be OK.
             self.assert_database_health('OK')
+
+
+class AnalyticsApiRouterTests(TestCase):
+    def setUp(self):
+        self.router = AnalyticsApiRouter()
+
+    def test_allow_relation(self):
+        """
+        Relations should only be allowed for objects contained within the same database.
+        """
+        self.assertFalse(self.router.allow_relation(CourseEnrollmentDaily, User))
+        self.assertTrue(self.router.allow_relation(CourseEnrollmentDaily, CourseEnrollmentByBirthYear))

@@ -41,6 +41,12 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record())
 
+    def assertValidActivityResponse(self, activity_type, count):
+        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
+            self.course_id, activity_type))
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=count))
+
     @staticmethod
     def get_activity_record(**kwargs):
         default = {
@@ -63,12 +69,12 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record())
 
+    def test_any_activity(self):
+        self.assertValidActivityResponse('ANY', 300)
+        self.assertValidActivityResponse('any', 300)
+
     def test_video_activity(self):
-        activity_type = 'played_video'
-        response = self.authenticated_get('/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
-            self.course_id, activity_type))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=400))
+        self.assertValidActivityResponse('played_video', 400)
 
     def test_unknown_activity(self):
         activity_type = 'missing_activity_type'

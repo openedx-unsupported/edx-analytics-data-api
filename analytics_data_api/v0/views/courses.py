@@ -214,3 +214,14 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
 
     serializer_class = serializers.CourseEnrollmentByCountrySerializer
     model = models.CourseEnrollmentByCountry
+
+    def get_queryset(self):
+        queryset = super(CourseEnrollmentByLocationView, self).get_queryset()
+
+        # Remove all items where country is None
+        items = [item for item in queryset.all() if item.country is not None]
+
+        # Note: We are returning a list, instead of a queryset. This is
+        # acceptable since the consuming code simply expects the returned
+        # value to be iterable, not necessarily a queryset.
+        return items

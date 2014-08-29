@@ -20,7 +20,7 @@ clean:
 	coverage erase
 
 test: clean
-	. ./.test_env && ./manage.py test --settings=analyticsdataserver.settings.test \
+	. ./.test_env && ./manage.py test --settings=analyticsdataserver.settings.test --with-ignore-docstrings \
 		--exclude-dir=analyticsdataserver/settings --with-coverage --cover-inclusive --cover-branches \
 		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
 		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \

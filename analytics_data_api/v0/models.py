@@ -2,16 +2,18 @@ from django.db import models
 from iso3166 import countries
 
 
-class CourseActivityByWeek(models.Model):
+class CourseActivityWeekly(models.Model):
     """A count of unique users who performed a particular action during a week."""
 
     class Meta(object):
         db_table = 'course_activity'
         index_together = [['course_id', 'activity_type']]
+        ordering = ('interval_end', 'interval_start', 'course_id')
+        get_latest_by = 'interval_end'
 
     course_id = models.CharField(db_index=True, max_length=255)
     interval_start = models.DateTimeField()
-    interval_end = models.DateTimeField()
+    interval_end = models.DateTimeField(db_index=True)
     activity_type = models.CharField(db_index=True, max_length=255, db_column='label')
     count = models.IntegerField()
 

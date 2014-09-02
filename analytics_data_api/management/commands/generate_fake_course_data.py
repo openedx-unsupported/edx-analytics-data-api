@@ -109,7 +109,7 @@ class Command(BaseCommand):
         activity_types = ['PLAYED_VIDEO', 'ATTEMPTED_PROBLEM', 'POSTED_FORUM']
         start = start_date
 
-        models.CourseActivityByWeek.objects.all().delete()
+        models.CourseActivityWeekly.objects.all().delete()
         logger.info("Deleted all weekly course activity.")
 
         logger.info("Generating new weekly course activity data...")
@@ -121,10 +121,10 @@ class Command(BaseCommand):
             counts = constrained_sum_sample_pos(len(activity_types), active_students)
 
             for activity_type, count in zip(activity_types, counts):
-                models.CourseActivityByWeek.objects.create(course_id=course_id, activity_type=activity_type,
+                models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type=activity_type,
                                                            count=count, interval_start=start, interval_end=end)
 
-            models.CourseActivityByWeek.objects.create(course_id=course_id, activity_type='ACTIVE', count=active_students,
+            models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type='ACTIVE', count=active_students,
                                                        interval_start=start, interval_end=end)
 
             start = end

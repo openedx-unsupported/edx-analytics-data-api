@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 from analytics_data_api.v0 import models
+from analytics_data_api.v0.models import CourseActivityWeekly
 
 
 class CourseActivityByWeekSerializer(serializers.ModelSerializer):
@@ -25,7 +26,7 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
         return activity_type
 
     class Meta(object):
-        model = models.CourseActivityByWeek
+        model = models.CourseActivityWeekly
         fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_id')
 
 
@@ -112,3 +113,17 @@ class CourseEnrollmentByBirthYearSerializer(BaseCourseEnrollmentModelSerializer)
     class Meta(object):
         model = models.CourseEnrollmentByBirthYear
         fields = ('course_id', 'date', 'birth_year', 'count')
+
+
+class CourseActivityWeeklySerializer(serializers.ModelSerializer):
+    interval_start = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+    interval_end = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+    any = serializers.IntegerField(required=False)
+    attempted_problem = serializers.IntegerField(required=False)
+    played_video = serializers.IntegerField(required=False)
+    posted_forum = serializers.IntegerField(required=False)
+
+    class Meta(object):
+        model = CourseActivityWeekly
+        fields = (
+            'interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'posted_forum')

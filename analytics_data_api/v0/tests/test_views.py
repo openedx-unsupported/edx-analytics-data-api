@@ -4,6 +4,7 @@
 import StringIO
 import csv
 import datetime
+from itertools import groupby
 
 from django.conf import settings
 from django_dynamic_fixture import G
@@ -11,6 +12,7 @@ from iso3166 import countries
 import pytz
 
 from analytics_data_api.v0 import models
+from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.tests.utils import flatten
 from analyticsdataserver.tests import TestCaseWithAuthentication
@@ -89,25 +91,28 @@ class CourseViewTestCaseMixin(object):
     def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
         # If start date is after date of existing data, no data should be returned
         date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
-        response = self.authenticated_get('%scourses/%s%s?start_date=%s' % (self.api_root_path, self.course_id, self.path, date))
+        response = self.authenticated_get(
+            '%scourses/%s%s?start_date=%s' % (self.api_root_path, self.course_id, self.path, date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual([], response.data)
 
         # If end date is before date of existing data, no data should be returned
         date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
-        response = self.authenticated_get('%scourses/%s%s?end_date=%s' % (self.api_root_path, self.course_id, self.path, date))
+        response = self.authenticated_get(
+            '%scourses/%s%s?end_date=%s' % (self.api_root_path, self.course_id, self.path, date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual([], response.data)
 
         # If data falls in date range, data should be returned
         start_date = start_date.strftime(settings.DATE_FORMAT)
         end_date = end_date.strftime(settings.DATE_FORMAT)
-        response = self.authenticated_get(
-            '%scourses/%s%s?start_date=%s&end_date=%s' % (self.api_root_path, self.course_id, self.path, start_date, end_date))
+        response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
+            self.api_root_path, self.course_id, self.path, start_date, end_date))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
 
+# pylint: disable=abstract-method
 class CourseEnrollmentViewTestCaseMixin(CourseViewTestCaseMixin):
     def setUp(self):
         super(CourseEnrollmentViewTestCaseMixin, self).setUp()
@@ -127,18 +132,18 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def setUp(self):
         super(CourseActivityLastWeekTest, self).setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
-        interval_start = '2014-05-24T00:00:00Z'
-        interval_end = '2014-06-01T00:00:00Z'
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+        interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
+        interval_end = interval_start + datetime.timedelta(weeks=1)
+        G(models.CourseActivityWeekly, course_id=self.course_id, interval_start=interval_start,
           interval_end=interval_end,
           activity_type='POSTED_FORUM', count=100)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+        G(models.CourseActivityWeekly, course_id=self.course_id, interval_start=interval_start,
           interval_end=interval_end,
           activity_type='ATTEMPTED_PROBLEM', count=200)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+        G(models.CourseActivityWeekly, course_id=self.course_id, interval_start=interval_start,
           interval_end=interval_end,
           activity_type='ACTIVE', count=300)
-        G(models.CourseActivityByWeek, course_id=self.course_id, interval_start=interval_start,
+        G(models.CourseActivityWeekly, course_id=self.course_id, interval_start=interval_start,
           interval_end=interval_end,
           activity_type='PLAYED_VIDEO', count=400)
 
@@ -157,8 +162,8 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def get_activity_record(**kwargs):
         default = {
             'course_id': 'edX/DemoX/Demo_Course',
-            'interval_start': datetime.datetime(2014, 5, 24, 0, 0, tzinfo=pytz.utc),
-            'interval_end': datetime.datetime(2014, 6, 1, 0, 0, tzinfo=pytz.utc),
+            'interval_start': datetime.datetime(2014, 1, 1, 0, 0, tzinfo=pytz.utc),
+            'interval_end': datetime.datetime(2014, 1, 8, 0, 0, tzinfo=pytz.utc),
             'activity_type': 'any',
             'count': 300,
         }
@@ -208,7 +213,7 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
     path = '/enrollment/birth_year'
     model = models.CourseEnrollmentByBirthYear
     order_by = ['birth_year']
-    
+
     def setUp(self):
         super(CourseEnrollmentByBirthYearViewTests, self).setUp()
         G(self.model, course_id=self.course_id, date=self.date, birth_year=1956)
@@ -227,10 +232,6 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
         expected = self.format_as_response(*self.model.objects.filter(date=self.date))
         self.assertEquals(response.data, expected)
-
-    def test_get_with_intervals(self):
-        expected = self.format_as_response(*self.model.objects.filter(date=self.date))
-        self.assertIntervalFilteringWorks(expected, self.date, self.date + datetime.timedelta(days=1))
 
 
 class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
@@ -334,10 +335,77 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
         self.country = countries.get('US')
         G(self.model, course_id=self.course_id, country_code='US', count=455, date=self.date)
         G(self.model, course_id=self.course_id, country_code='CA', count=356, date=self.date)
-        G(self.model, course_id=self.course_id, country_code='IN', count=12, date=self.date - datetime.timedelta(days=29))
+        G(self.model, course_id=self.course_id, country_code='IN', count=12,
+          date=self.date - datetime.timedelta(days=29))
         G(self.model, course_id=self.course_id, country_code='', count=356, date=self.date)
         G(self.model, course_id=self.course_id, country_code='A1', count=1, date=self.date)
         G(self.model, course_id=self.course_id, country_code='A2', count=2, date=self.date)
         G(self.model, course_id=self.course_id, country_code='AP', count=1, date=self.date)
         G(self.model, course_id=self.course_id, country_code='EU', count=4, date=self.date)
         G(self.model, course_id=self.course_id, country_code='O1', count=7, date=self.date)
+
+
+class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthentication):
+    path = '/activity/'
+    default_order_by = 'interval_end'
+    model = CourseActivityWeekly
+    activity_types = ['ACTIVE', 'ATTEMPTED_PROBLEM', 'PLAYED_VIDEO', 'POSTED_FORUM']
+
+    def setUp(self):
+        super(CourseActivityWeeklyViewTests, self).setUp()
+        self.course_id = 'edX/DemoX/Demo_Course'
+        self.interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
+        self.interval_end = self.interval_start + datetime.timedelta(weeks=1)
+
+        for activity_type in self.activity_types:
+            G(CourseActivityWeekly,
+              course_id=self.course_id,
+              interval_start=self.interval_start,
+              interval_end=self.interval_end,
+              activity_type=activity_type,
+              count=100)
+
+    def get_latest_data(self):
+        return self.model.objects.filter(course_id=self.course_id, interval_end=self.interval_end)
+
+    def format_as_response(self, *args):
+        response = []
+
+        # Group by date
+        for _key, group in groupby(args, lambda x: x.interval_end):
+            # Iterate over groups and create a single item with all activity types
+            item = {}
+
+            for activity in group:
+                activity_type = activity.activity_type.lower()
+                if activity_type == 'active':
+                    activity_type = 'any'
+
+                item.update({
+                    u'course_id': activity.course_id,
+                    u'interval_start': activity.interval_start.strftime(settings.DATETIME_FORMAT),
+                    u'interval_end': activity.interval_end.strftime(settings.DATETIME_FORMAT),
+                    activity_type: activity.count
+                })
+
+            response.append(item)
+
+        return response
+
+    def test_get_with_intervals(self):
+        """ Verify the endpoint returns multiple data points when supplied with an interval of dates. """
+        # Create additional data
+        interval_start = self.interval_start + datetime.timedelta(weeks=1)
+        interval_end = self.interval_end + datetime.timedelta(weeks=1)
+
+        for activity_type in self.activity_types:
+            G(CourseActivityWeekly,
+              course_id=self.course_id,
+              interval_start=interval_start,
+              interval_end=interval_end,
+              activity_type=activity_type,
+              count=200)
+
+        expected = self.format_as_response(*self.model.objects.all())
+        self.assertEqual(len(expected), 2)
+        self.assertIntervalFilteringWorks(expected, self.interval_start, interval_end + datetime.timedelta(days=1))

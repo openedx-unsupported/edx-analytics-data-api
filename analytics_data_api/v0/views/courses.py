@@ -1,12 +1,142 @@
 import datetime
+from itertools import groupby
+import warnings
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.http import Http404
+from django.utils.timezone import make_aware, utc
 from rest_framework import generics
 
 from analytics_data_api.v0 import models, serializers
+
+
+class BaseCourseView(generics.ListAPIView):
+    start_date = None
+    end_date = None
+
+    def get(self, request, *args, **kwargs):
+        start_date = request.QUERY_PARAMS.get('start_date')
+        end_date = request.QUERY_PARAMS.get('end_date')
+        timezone = utc
+
+        if start_date:
+            start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
+            start_date = make_aware(start_date, timezone)
+
+        if end_date:
+            end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
+            end_date = make_aware(end_date, timezone)
+
+        self.start_date = start_date
+        self.end_date = end_date
+
+        return super(BaseCourseView, self).get(request, *args, **kwargs)
+
+    def verify_course_exists_or_404(self, course_id):
+        if self.model.objects.filter(course_id=course_id).exists():
+            return True
+
+        raise Http404
+
+    def apply_date_filtering(self, queryset):
+        raise NotImplementedError
+
+    def get_queryset(self):
+        course_id = self.kwargs.get('course_id')
+        self.verify_course_exists_or_404(course_id)
+        queryset = self.model.objects.filter(course_id=course_id)
+        queryset = self.apply_date_filtering(queryset)
+        return queryset
+
+
+# pylint: disable=line-too-long
+class CourseActivityWeeklyView(BaseCourseView):
+    """
+    Weekly course activity
+
+    Returns the course activity. Each row/item will contain all activity types for the course-week.
+
+    <strong>Activity Types</strong>
+    <dl>
+        <dt>ANY</dt>
+        <dd>The number of unique users who performed any action within the course, including actions not enumerated below.</dd>
+        <dt>ATTEMPTED_PROBLEM</dt>
+        <dd>The number of unique users who answered any loncapa based question in the course.</dd>
+        <dt>PLAYED_VIDEO</dt>
+        <dd>The number of unique users who started watching any video in the course.</dd>
+        <dt>POSTED_FORUM</dt>
+        <dd>The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.</dd>
+    </dl>
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+
+    Data is sorted chronologically (earliest to latest).
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    model = models.CourseActivityWeekly
+    serializer_class = serializers.CourseActivityWeeklySerializer
+
+    def apply_date_filtering(self, queryset):
+        if self.start_date or self.end_date:
+            # Filter by start/end date
+            if self.start_date:
+                queryset = queryset.filter(interval_start__gte=self.start_date)
+
+            if self.end_date:
+                queryset = queryset.filter(interval_end__lt=self.end_date)
+        else:
+            # No date filter supplied, so only return data for the latest date
+            latest_date = queryset.aggregate(Max('interval_end'))
+            if latest_date:
+                latest_date = latest_date['interval_end__max']
+                queryset = queryset.filter(interval_end=latest_date)
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(CourseActivityWeeklyView, self).get_queryset()
+        queryset = self.format_data(queryset)
+        return queryset
+
+    def _format_activity_type(self, activity_type):
+        activity_type = activity_type.lower()
+
+        # The data pipeline stores "any" as "active"; however, the API should display "any".
+        if activity_type == 'active':
+            activity_type = 'any'
+
+        return activity_type
+
+    def format_data(self, data):
+        """
+        Group the data by date and combine multiple activity rows into a single row/element.
+
+        Arguments
+            data (iterable) -- Data to be formatted.
+        """
+        formatted_data = []
+
+        for key, group in groupby(data, lambda x: (x.course_id, x.interval_start, x.interval_end)):
+            # Iterate over groups and create a single item with all activity types
+            item = {
+                u'course_id': key[0],
+                u'interval_start': key[1],
+                u'interval_end': key[2],
+            }
+
+            for activity in group:
+                activity_type = self._format_activity_type(activity.activity_type)
+                item[activity_type] = activity.count
+
+            formatted_data.append(item)
+
+        return formatted_data
 
 
 class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
@@ -67,47 +197,32 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
     def get_object(self, queryset=None):
         """Select the activity report for the given course and activity type."""
 
+        warnings.warn('CourseActivityMostRecentWeekView has been deprecated! Use CourseActivityWeeklyView instead.',
+                      DeprecationWarning)
         course_id = self.kwargs.get('course_id')
         activity_type = self._get_activity_type()
 
         try:
-            return models.CourseActivityByWeek.get_most_recent(course_id, activity_type)
+            return models.CourseActivityWeekly.get_most_recent(course_id, activity_type)
         except ObjectDoesNotExist:
             raise Http404
 
 
-class BaseCourseEnrollmentView(generics.ListAPIView):
-    def verify_course_exists_or_404(self, course_id):
-        if self.model.objects.filter(course_id=course_id).exists():
-            return True
-
-        raise Http404
-
+class BaseCourseEnrollmentView(BaseCourseView):
     def apply_date_filtering(self, queryset):
-        if 'start_date' in self.request.QUERY_PARAMS or 'end_date' in self.request.QUERY_PARAMS:
+        if self.start_date or self.end_date:
             # Filter by start/end date
-            start_date = self.request.QUERY_PARAMS.get('start_date')
-            if start_date:
-                start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
-                queryset = queryset.filter(date__gte=start_date)
+            if self.start_date:
+                queryset = queryset.filter(date__gte=self.start_date)
 
-            end_date = self.request.QUERY_PARAMS.get('end_date')
-            if end_date:
-                end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
-                queryset = queryset.filter(date__lt=end_date)
+            if self.end_date:
+                queryset = queryset.filter(date__lt=self.end_date)
         else:
             # No date filter supplied, so only return data for the latest date
             latest_date = queryset.aggregate(Max('date'))
             if latest_date:
                 latest_date = latest_date['date__max']
                 queryset = queryset.filter(date=latest_date)
-        return queryset
-
-    def get_queryset(self):
-        course_id = self.kwargs.get('course_id')
-        self.verify_course_exists_or_404(course_id)
-        queryset = self.model.objects.filter(course_id=course_id)
-        queryset = self.apply_date_filtering(queryset)
         return queryset
 
 

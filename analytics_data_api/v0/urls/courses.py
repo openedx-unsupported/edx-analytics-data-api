@@ -6,6 +6,7 @@ from analytics_data_api.v0.views import courses as views
 
 
 COURSE_URLS = [
+    ('activity', views.CourseActivityWeeklyView, 'activity'),
     ('recent_activity', views.CourseActivityMostRecentWeekView, 'recent_activity'),
     ('enrollment', views.CourseEnrollmentView, 'enrollment_latest'),
     ('enrollment/birth_year', views.CourseEnrollmentByBirthYearView, 'enrollment_by_birth_year'),

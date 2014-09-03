@@ -11,3 +11,4 @@ pep257==0.3.2
 pep8==1.5.7
 pylint==1.2.1
 pytz==2012h
+nose-ignore-docstring==0.2

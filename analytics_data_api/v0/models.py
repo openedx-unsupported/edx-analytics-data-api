@@ -89,7 +89,7 @@ class ProblemResponseAnswerDistribution(models.Model):
     course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
     module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
     part_id = models.CharField(db_index=True, max_length=255, db_column='part_id')
-    correct = models.BooleanField(db_column='correct')
+    correct = models.NullBooleanField(db_column='correct')
     count = models.IntegerField(db_column='count')
     value_id = models.CharField(db_index=True, max_length=255, db_column='value_id', null=True)
     answer_value_text = models.TextField(db_column='answer_value_text', null=True)

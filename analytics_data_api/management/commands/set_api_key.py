@@ -2,10 +2,13 @@
 
 from optparse import make_option
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from analytics_data_api.utils import delete_user_auth_token, set_user_auth_token
+
+
+User = get_user_model()
 
 
 class Command(BaseCommand):
@@ -30,6 +33,7 @@ class Command(BaseCommand):
             if len(args) < 2:
                 raise CommandError("You must supply both a username and key.")
 
+            # pylint: disable=no-member
             user, _ = User.objects.get_or_create(username=username)
 
             try:

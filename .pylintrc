@@ -62,7 +62,10 @@ disable=
 # E1103: maybe no member
     E1103,
 # C0111: missing docstring (handled by pep257)
-    C0111
+    C0111,
+
+# We can decide if names are invalid on our own
+    invalid-name,
 
 [REPORTS]
 

@@ -181,6 +181,7 @@ DJANGO_APPS = (
 )
 
 THIRD_PARTY_APPS = (
+    'south',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',

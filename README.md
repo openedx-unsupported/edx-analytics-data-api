@@ -19,8 +19,8 @@ Getting Started
 
 2. Setup the databases:
 
-        $ ./manage.py migrate --noinput
-        $ ./manage.py migrate --noinput --database=analytics
+        $ ./manage.py syncdb --migrate --noinput
+        $ ./manage.py syncdb --migrate --noinput --database=analytics
 
 3. Create a user and authentication token. Note that the user will be created if one does not exist.
 

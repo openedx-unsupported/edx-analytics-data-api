@@ -107,7 +107,10 @@ class Command(BaseCommand):
 
     def generate_weekly_data(self, course_id, start_date, end_date):
         activity_types = ['PLAYED_VIDEO', 'ATTEMPTED_PROBLEM', 'POSTED_FORUM']
-        start = start_date
+
+        # Ensure we start on a Sunday 00:00
+        days_ahead = 6 - start_date.weekday()
+        start = start_date + datetime.timedelta(days_ahead)
 
         models.CourseActivityWeekly.objects.all().delete()
         logger.info("Deleted all weekly course activity.")
@@ -116,7 +119,8 @@ class Command(BaseCommand):
 
         while start < end_date:
             active_students = random.randint(100, 4000)
-            end = min(start + datetime.timedelta(weeks=1), end_date)
+            # End date should occur on Saturday at 23:59:59
+            end = start + datetime.timedelta(weeks=1, milliseconds=-1)
 
             counts = constrained_sum_sample_pos(len(activity_types), active_students)
 

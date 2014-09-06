@@ -49,7 +49,7 @@ validate: test.requirements test quality
 syncdb:
 	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --noinput --database=$(db_name);)
 
-loaddata: migrate
+loaddata: syncdb
 	python manage.py loaddata education_levels problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data
 

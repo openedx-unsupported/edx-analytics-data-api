@@ -109,7 +109,7 @@ class Command(BaseCommand):
         activity_types = ['PLAYED_VIDEO', 'ATTEMPTED_PROBLEM', 'POSTED_FORUM']
 
         # Ensure we start on a Sunday 00:00
-        days_ahead = 6 - start_date.weekday()
+        days_ahead = -start_date.weekday()
         start = start_date + datetime.timedelta(days_ahead)
 
         models.CourseActivityWeekly.objects.all().delete()
@@ -120,7 +120,7 @@ class Command(BaseCommand):
         while start < end_date:
             active_students = random.randint(100, 4000)
             # End date should occur on Saturday at 23:59:59
-            end = start + datetime.timedelta(weeks=1, milliseconds=-1)
+            end = start + datetime.timedelta(weeks=1)
 
             counts = constrained_sum_sample_pos(len(activity_types), active_students)
 

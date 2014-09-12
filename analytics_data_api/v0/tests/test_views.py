@@ -323,12 +323,26 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
     model = models.CourseEnrollmentByCountry
 
     def format_as_response(self, *args):
+        unknown = {'course_id': None, 'count': 0, 'date': None,
+                   'country': {'alpha2': None, 'alpha3': None, 'name': u'UNKNOWN'}}
+
+        for arg in args:
+            if not arg.country:
+                unknown['course_id'] = arg.course_id
+                unknown['date'] = arg.date.strftime(settings.DATE_FORMAT)
+                unknown['count'] += arg.count
+
         args = [arg for arg in args if arg.country_code not in ['', 'A1', 'A2', 'AP', 'EU', 'O1', 'UNKNOWN']]
         args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
-        return [
+        response = [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name}} for ce in
             args]
+
+        # Unknown comes last
+        response.append(unknown)
+
+        return response
 
     def setUp(self):
         super(CourseEnrollmentByLocationViewTests, self).setUp()

@@ -313,7 +313,8 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     Course enrollment broken down by user location
 
     Returns the enrollment of a course with users binned by their location. Location is calculated based on the user's
-    IP address.
+    IP address. Enrollment counts for users whose location cannot be determined will be included in an entry with
+    country.name set to UNKNOWN.
 
     Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
 
@@ -333,10 +334,36 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     def get_queryset(self):
         queryset = super(CourseEnrollmentByLocationView, self).get_queryset()
 
-        # Remove all items where country is None
-        items = [item for item in queryset.all() if item.country is not None]
+        # Get all of the data from the database
+        items = queryset.all()
+
+        # Split into known and unknown
+        knowns = []
+        unknowns = []
+        for item in items:
+            if item.country:
+                knowns.append(item)
+            else:
+                unknowns.append(item)
+
+        # Group the unknowns by date and combine the counts
+        for key, group in groupby(unknowns, lambda x: (x.date, x.course_id)):
+            date = key[0]
+            course_id = key[1]
+
+            count = 0
+            for item in group:
+                count += item.count
+
+            # pylint: disable=unexpected-keyword-arg,no-value-for-parameter
+            knowns.append(models.CourseEnrollmentByCountry(
+                course_id=course_id,
+                date=date,
+                country_code=models.CourseEnrollmentByCountry.UNKNOWN_COUNTRY_CODE,
+                count=count
+            ))
 
         # Note: We are returning a list, instead of a queryset. This is
         # acceptable since the consuming code simply expects the returned
         # value to be iterable, not necessarily a queryset.
-        return items
+        return knowns

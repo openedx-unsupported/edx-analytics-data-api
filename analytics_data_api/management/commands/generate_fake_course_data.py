@@ -48,12 +48,13 @@ class Command(BaseCommand):
             'doctorate': 0.0470
         }
         country_ratios = {
-            'US': 0.34,
+            'US': 0.33,
             'GH': 0.12,
             'IN': 0.10,
             'CA': 0.14,
             'CN': 0.22,
-            'DE': 0.08
+            'DE': 0.08,
+            'UNKNOWN': 0.01
         }
 
         # Generate birth year ratios

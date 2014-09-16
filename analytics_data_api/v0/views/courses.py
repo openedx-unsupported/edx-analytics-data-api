@@ -332,38 +332,35 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     model = models.CourseEnrollmentByCountry
 
     def get_queryset(self):
-        queryset = super(CourseEnrollmentByLocationView, self).get_queryset()
-
         # Get all of the data from the database
+        queryset = super(CourseEnrollmentByLocationView, self).get_queryset()
         items = queryset.all()
 
-        # Split into known and unknown
-        knowns = []
-        unknowns = []
-        for item in items:
-            if item.country:
-                knowns.append(item)
-            else:
-                unknowns.append(item)
+        # Data must be sorted in order for groupby to work properly
+        items = sorted(items, key=lambda x: x.country.alpha2)
 
-        # Group the unknowns by date and combine the counts
-        for key, group in groupby(unknowns, lambda x: (x.date, x.course_id)):
-            date = key[0]
-            course_id = key[1]
+        # Items to be returned by this method
+        returned_items = []
 
+        # Group data by date, country, and course ID
+        for key, group in groupby(items, lambda x: (x.date, x.country.alpha2, x.course_id)):
             count = 0
+            date = key[0]
+            country_code = key[1]
+            course_id = key[2]
+
             for item in group:
                 count += item.count
 
-            # pylint: disable=unexpected-keyword-arg,no-value-for-parameter
-            knowns.append(models.CourseEnrollmentByCountry(
+            # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
+            returned_items.append(models.CourseEnrollmentByCountry(
                 course_id=course_id,
                 date=date,
-                country_code=models.CourseEnrollmentByCountry.UNKNOWN_COUNTRY_CODE,
+                country_code=country_code,
                 count=count
             ))
 
         # Note: We are returning a list, instead of a queryset. This is
         # acceptable since the consuming code simply expects the returned
         # value to be iterable, not necessarily a queryset.
-        return knowns
+        return returned_items

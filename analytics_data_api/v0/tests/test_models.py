@@ -1,9 +1,9 @@
 from django.test import TestCase
-
 from django_dynamic_fixture import G
 from iso3166 import countries
 
 from analytics_data_api.v0 import models
+from analytics_data_api.v0.constants import UNKNOWN_COUNTRY
 
 
 class EducationLevelTests(TestCase):
@@ -26,10 +26,13 @@ class CourseEnrollmentByCountryTests(TestCase):
 
     def test_invalid_country(self):
         instance = G(models.CourseEnrollmentByCountry, country_code='')
-        self.assertIsNone(instance.country)
+        self.assertEqual(instance.country, UNKNOWN_COUNTRY)
 
         instance = G(models.CourseEnrollmentByCountry, country_code='A1')
-        self.assertIsNone(instance.country)
+        self.assertEqual(instance.country, UNKNOWN_COUNTRY)
 
         instance = G(models.CourseEnrollmentByCountry, country_code='GobbledyGoop!')
-        self.assertIsNone(instance.country)
+        self.assertEqual(instance.country, UNKNOWN_COUNTRY)
+
+        instance = G(models.CourseEnrollmentByCountry, country_code='UNKNOWN')
+        self.assertEqual(instance.country, UNKNOWN_COUNTRY)

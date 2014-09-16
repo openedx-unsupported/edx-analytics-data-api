@@ -12,6 +12,7 @@ from iso3166 import countries
 import pytz
 
 from analytics_data_api.v0 import models
+from analytics_data_api.v0.constants import UNKNOWN_COUNTRY, UNKNOWN_COUNTRY_CODE
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.tests.utils import flatten
@@ -324,23 +325,22 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
     def format_as_response(self, *args):
         unknown = {'course_id': None, 'count': 0, 'date': None,
-                   'country': {'alpha2': None, 'alpha3': None, 'name': u'UNKNOWN'}}
+                   'country': {'alpha2': None, 'alpha3': None, 'name': UNKNOWN_COUNTRY_CODE}}
 
         for arg in args:
-            if not arg.country:
+            if arg.country.name == UNKNOWN_COUNTRY_CODE:
                 unknown['course_id'] = arg.course_id
                 unknown['date'] = arg.date.strftime(settings.DATE_FORMAT)
                 unknown['count'] += arg.count
 
-        args = [arg for arg in args if arg.country_code not in ['', 'A1', 'A2', 'AP', 'EU', 'O1', 'UNKNOWN']]
+        args = [arg for arg in args if arg.country != UNKNOWN_COUNTRY]
         args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
-        response = [
+
+        response = [unknown]
+        response += [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name}} for ce in
             args]
-
-        # Unknown comes last
-        response.append(unknown)
 
         return response
 

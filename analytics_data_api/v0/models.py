@@ -1,5 +1,7 @@
 from django.db import models
-from iso3166 import countries, Country
+from iso3166 import countries
+
+from analytics_data_api.v0.constants import UNKNOWN_COUNTRY
 
 
 class CourseActivityWeekly(models.Model):
@@ -99,7 +101,6 @@ class ProblemResponseAnswerDistribution(models.Model):
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):
-    UNKNOWN_COUNTRY_CODE = 'UNKNOWN'
     country_code = models.CharField(max_length=255, null=False, db_column='country_code')
 
     @property
@@ -108,13 +109,10 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         Returns a Country object representing the country in this model's country_code.
         """
         try:
-            if self.country_code == self.UNKNOWN_COUNTRY_CODE:
-                return Country(self.UNKNOWN_COUNTRY_CODE, None, None, None)
-
             return countries.get(self.country_code)
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, AttributeError):
             # Country code is not valid ISO-3166
-            return None
+            return UNKNOWN_COUNTRY
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

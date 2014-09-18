@@ -128,11 +128,13 @@ class CourseActivityWeeklyView(BaseCourseView):
                 u'course_id': key[0],
                 u'interval_start': key[1],
                 u'interval_end': key[2],
+                u'created': None
             }
 
             for activity in group:
                 activity_type = self._format_activity_type(activity.activity_type)
                 item[activity_type] = activity.count
+                item[u'created'] = max(activity.created, item[u'created']) if item[u'created'] else activity.created
 
             formatted_data.append(item)
 
@@ -348,8 +350,10 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
             date = key[0]
             country_code = key[1]
             course_id = key[2]
+            created = None
 
             for item in group:
+                created = max(created, item.created) if created else item.created
                 count += item.count
 
             # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
@@ -357,7 +361,8 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
                 course_id=course_id,
                 date=date,
                 country_code=country_code,
-                count=count
+                count=count,
+                created=created
             ))
 
         # Note: We are returning a list, instead of a queryset. This is

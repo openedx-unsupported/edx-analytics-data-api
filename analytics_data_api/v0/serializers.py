@@ -56,6 +56,7 @@ class ProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
 
 class BaseCourseEnrollmentModelSerializer(serializers.ModelSerializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
+    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
 class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
@@ -63,7 +64,7 @@ class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
 
     class Meta(object):
         model = models.CourseEnrollmentDaily
-        fields = ('course_id', 'date', 'count')
+        fields = ('course_id', 'date', 'count', 'created')
 
 
 class CountrySerializer(serializers.Serializer):
@@ -92,13 +93,13 @@ class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
 
     class Meta(object):
         model = models.CourseEnrollmentByCountry
-        fields = ('date', 'course_id', 'country', 'count')
+        fields = ('date', 'course_id', 'country', 'count', 'created')
 
 
 class CourseEnrollmentByGenderSerializer(BaseCourseEnrollmentModelSerializer):
     class Meta(object):
         model = models.CourseEnrollmentByGender
-        fields = ('course_id', 'date', 'gender', 'count')
+        fields = ('course_id', 'date', 'gender', 'count', 'created')
 
 
 class CourseEnrollmentByEducationSerializer(BaseCourseEnrollmentModelSerializer):
@@ -106,13 +107,13 @@ class CourseEnrollmentByEducationSerializer(BaseCourseEnrollmentModelSerializer)
 
     class Meta(object):
         model = models.CourseEnrollmentByEducation
-        fields = ('course_id', 'date', 'education_level', 'count')
+        fields = ('course_id', 'date', 'education_level', 'count', 'created')
 
 
 class CourseEnrollmentByBirthYearSerializer(BaseCourseEnrollmentModelSerializer):
     class Meta(object):
         model = models.CourseEnrollmentByBirthYear
-        fields = ('course_id', 'date', 'birth_year', 'count')
+        fields = ('course_id', 'date', 'birth_year', 'count', 'created')
 
 
 class CourseActivityWeeklySerializer(serializers.ModelSerializer):
@@ -122,8 +123,10 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
     attempted_problem = serializers.IntegerField(required=False)
     played_video = serializers.IntegerField(required=False)
     posted_forum = serializers.IntegerField(required=False)
+    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
     class Meta(object):
         model = CourseActivityWeekly
         fields = (
-            'interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'posted_forum')
+            'interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'posted_forum',
+            'created')

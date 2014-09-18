@@ -225,7 +225,7 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
     def format_as_response(self, *args):
         return [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'birth_year': ce.birth_year} for ce in args]
+             'birth_year': ce.birth_year, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
 
     def test_get(self):
         response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
@@ -252,7 +252,8 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
     def format_as_response(self, *args):
         return [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'education_level': {'name': ce.education_level.name, 'short_name': ce.education_level.short_name}} for
+             'education_level': {'name': ce.education_level.name, 'short_name': ce.education_level.short_name},
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for
             ce in args]
 
 
@@ -270,7 +271,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestC
     def format_as_response(self, *args):
         return [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'gender': ce.gender} for ce in args]
+             'gender': ce.gender, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
 
 
 # pylint: disable=no-member,no-value-for-parameter
@@ -315,7 +316,8 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
 
     def format_as_response(self, *args):
         return [
-            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT)}
+            {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)}
             for ce in args]
 
 
@@ -332,6 +334,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
                 unknown['course_id'] = arg.course_id
                 unknown['date'] = arg.date.strftime(settings.DATE_FORMAT)
                 unknown['count'] += arg.count
+                unknown['created'] = arg.created.strftime(settings.DATETIME_FORMAT)
 
         args = [arg for arg in args if arg.country != UNKNOWN_COUNTRY]
         args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
@@ -339,7 +342,8 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
         response = [unknown]
         response += [
             {'course_id': str(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name}} for ce in
+             'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name},
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in
             args]
 
         return response
@@ -399,6 +403,7 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
                     u'course_id': activity.course_id,
                     u'interval_start': activity.interval_start.strftime(settings.DATETIME_FORMAT),
                     u'interval_end': activity.interval_end.strftime(settings.DATETIME_FORMAT),
+                    u'created': activity.created.strftime(settings.DATETIME_FORMAT),
                     activity_type: activity.count
                 })
 

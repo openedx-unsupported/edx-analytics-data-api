@@ -18,6 +18,7 @@ class CourseActivityWeekly(models.Model):
     interval_end = models.DateTimeField(db_index=True)
     activity_type = models.CharField(db_index=True, max_length=255, db_column='label')
     count = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def get_most_recent(cls, course_id, activity_type):

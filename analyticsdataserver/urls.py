@@ -15,9 +15,9 @@ urlpatterns = patterns(
     url(r'^api/', include('analytics_data_api.urls', namespace='api')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
-    url(r'^status/$', views.StatusView.as_view()),
-    url(r'^authenticated/$', views.AuthenticationTestView.as_view()),
-    url(r'^health/$', views.HealthView.as_view()),
+    url(r'^status/$', views.StatusView.as_view(), name='status'),
+    url(r'^authenticated/$', views.AuthenticationTestView.as_view(), name='authenticated'),
+    url(r'^health/$', views.HealthView.as_view(), name='health'),
 )
 
 if settings.ENABLE_ADMIN_SITE:  # pragma: no cover

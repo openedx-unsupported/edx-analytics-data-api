@@ -39,7 +39,7 @@ view.diff.report:
 
 quality:
 	pep8 --config=.pep8 $(PACKAGES)
-	pylint --rcfile=.pylintrc $(PACKAGES)
+	pylint $(PACKAGES)
 
 	# Ignore module level docstrings and all test files
 	#pep257 --ignore=D100,D203 --match='(?!test).*py' $(PACKAGES)

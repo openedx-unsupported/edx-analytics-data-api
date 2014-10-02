@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+from optparse import make_option
 import random
 
 from django.core.management.base import BaseCommand
@@ -28,6 +29,11 @@ def get_count(start):
 
 
 class Command(BaseCommand):
+    help = 'Generate fake data'
+    option_list = BaseCommand.option_list + (
+        make_option('-n', '--num-weeks', action='store', type="int", dest='num_weeks', help='"Number of weeks worth of data to generate.'),
+    )
+
     def generate_daily_data(self, course_id, start_date, end_date):
         # Use the preset ratios below to generate data in the specified demographics
 
@@ -129,7 +135,8 @@ class Command(BaseCommand):
                 models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type=activity_type,
                                                            count=count, interval_start=start, interval_end=end)
 
-            models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type='ACTIVE', count=active_students,
+            models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type='ACTIVE',
+                                                       count=active_students,
                                                        interval_start=start, interval_end=end)
 
             start = end
@@ -139,7 +146,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         course_id = 'edX/DemoX/Demo_Course'
         start_date = datetime.datetime(year=2014, month=1, day=1, tzinfo=timezone.utc)
-        end_date = timezone.now().replace(microsecond=0)
+
+        num_weeks = options['num_weeks']
+        if num_weeks:
+            end_date = start_date + datetime.timedelta(weeks=num_weeks)
+        else:
+            end_date = timezone.now().replace(microsecond=0)
+
         logger.info("Generating data for %s...", course_id)
         self.generate_weekly_data(course_id, start_date, end_date)
         self.generate_daily_data(course_id, start_date, end_date)

@@ -55,3 +55,8 @@ loaddata: syncdb
 
 demo: clean requirements loaddata
 	python manage.py set_api_key edx edx
+
+travis: clean requirements syncdb
+	python manage.py set_api_key edx edx
+	python manage.py loaddata education_levels problem_response_answer_distribution --database=analytics
+	python manage.py generate_fake_course_data --num-weeks=1

@@ -1,10 +1,8 @@
-import re
-
 from django.conf.urls import patterns, url
 
 from analytics_data_api.v0.views import courses as views
 
-
+COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+[/+][^/+]+[/+][^/]+)'
 COURSE_URLS = [
     ('activity', views.CourseActivityWeeklyView, 'activity'),
     ('recent_activity', views.CourseActivityMostRecentWeekView, 'recent_activity'),
@@ -18,4 +16,5 @@ COURSE_URLS = [
 urlpatterns = []
 
 for path, view, name in COURSE_URLS:
-    urlpatterns += patterns('', url(r'^(?P<course_id>.+)/' + re.escape(path) + r'/$', view.as_view(), name=name))
+    regex = r'^{0}/{1}/$'.format(COURSE_ID_PATTERN, path)
+    urlpatterns += patterns('', url(regex, view.as_view(), name=name))

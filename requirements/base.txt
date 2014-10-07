@@ -7,3 +7,4 @@ ipython==2.1.0						# BSD
 django-rest-swagger==0.1.14 		# BSD
 djangorestframework-csv==1.3.3		# BSD
 iso3166==0.1 						# MIT
+-e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys

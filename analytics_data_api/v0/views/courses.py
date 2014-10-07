@@ -8,6 +8,7 @@ from django.db.models import Max
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
 from rest_framework import generics
+from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.v0 import models, serializers
 
@@ -15,8 +16,11 @@ from analytics_data_api.v0 import models, serializers
 class BaseCourseView(generics.ListAPIView):
     start_date = None
     end_date = None
+    course_id = None
+    slug = None
 
     def get(self, request, *args, **kwargs):
+        self.course_id = self.kwargs.get('course_id')
         start_date = request.QUERY_PARAMS.get('start_date')
         end_date = request.QUERY_PARAMS.get('end_date')
         timezone = utc
@@ -44,11 +48,20 @@ class BaseCourseView(generics.ListAPIView):
         raise NotImplementedError
 
     def get_queryset(self):
-        course_id = self.kwargs.get('course_id')
-        self.verify_course_exists_or_404(course_id)
-        queryset = self.model.objects.filter(course_id=course_id)
+        self.verify_course_exists_or_404(self.course_id)
+        queryset = self.model.objects.filter(course_id=self.course_id)
         queryset = self.apply_date_filtering(queryset)
         return queryset
+
+    def get_csv_filename(self):
+        course_key = CourseKey.from_string(self.course_id)
+        course_id = u'-'.join([course_key.org, course_key.course, course_key.run])
+        return u'{0}--{1}.csv'.format(course_id, self.slug)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if request.META.get('HTTP_ACCEPT') == u'text/csv':
+            response['Content-Disposition'] = u'attachment; filename={}'.format(self.get_csv_filename())
+        return super(BaseCourseView, self).finalize_response(request, response, *args, **kwargs)
 
 
 # pylint: disable=line-too-long
@@ -80,6 +93,7 @@ class CourseActivityWeeklyView(BaseCourseView):
     end_date   --   Date before which all data should be returned (exclusive)
     """
 
+    slug = u'engagement-activity'
     model = models.CourseActivityWeekly
     serializer_class = serializers.CourseActivityWeeklySerializer
 
@@ -244,6 +258,7 @@ class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
     end_date   --   Date before which all data should be returned (exclusive)
     """
 
+    slug = u'enrollment-age'
     serializer_class = serializers.CourseEnrollmentByBirthYearSerializer
     model = models.CourseEnrollmentByBirthYear
 
@@ -263,6 +278,7 @@ class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
     start_date --   Date after which all data should be returned (inclusive)
     end_date   --   Date before which all data should be returned (exclusive)
     """
+    slug = u'enrollment-education'
     serializer_class = serializers.CourseEnrollmentByEducationSerializer
     model = models.CourseEnrollmentByEducation
 
@@ -287,6 +303,7 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
     start_date --   Date after which all data should be returned (inclusive)
     end_date   --   Date before which all data should be returned (exclusive)
     """
+    slug = u'enrollment-gender'
     serializer_class = serializers.CourseEnrollmentByGenderSerializer
     model = models.CourseEnrollmentByGender
 
@@ -304,7 +321,7 @@ class CourseEnrollmentView(BaseCourseEnrollmentView):
     start_date --   Date after which all data should be returned (inclusive)
     end_date   --   Date before which all data should be returned (exclusive)
     """
-
+    slug = u'enrollment'
     serializer_class = serializers.CourseEnrollmentDailySerializer
     model = models.CourseEnrollmentDaily
 
@@ -329,7 +346,7 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     start_date --   Date after which all data should be returned (inclusive)
     end_date   --   Date before which all data should be returned (exclusive)
     """
-
+    slug = u'enrollment-location'
     serializer_class = serializers.CourseEnrollmentByCountrySerializer
     model = models.CourseEnrollmentByCountry
 

@@ -15,6 +15,8 @@ from analytics_data_api.v0 import models
 from analytics_data_api.v0.constants import UNKNOWN_COUNTRY, UNKNOWN_COUNTRY_CODE
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
+from analytics_data_api.v0.serializers import GradeDistributionSerializer
+from analytics_data_api.v0.serializers import SequentialOpenDistributionSerializer
 from analytics_data_api.v0.tests.utils import flatten
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
@@ -429,3 +431,61 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
         expected = self.format_as_response(*self.model.objects.all())
         self.assertEqual(len(expected), 2)
         self.assertIntervalFilteringWorks(expected, self.interval_start, interval_end + datetime.timedelta(days=1))
+
+
+# pylint: disable=no-member,no-value-for-parameter
+class GradeDistributionTests(TestCaseWithAuthentication):
+    path = '/grade_distribution'
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.course_id = "org/class/test"
+        cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
+        cls.ad1 = G(
+            models.GradeDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id,
+        )
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
+        self.assertEquals(response.status_code, 200)
+
+        expected_dict = GradeDistributionSerializer(self.ad1).data
+        actual_list = response.data
+        self.assertEquals(len(actual_list), 1)
+        self.assertDictEqual(actual_list[0], expected_dict)
+
+    def test_get_404(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
+        self.assertEquals(response.status_code, 404)
+
+
+# pylint: disable=no-member,no-value-for-parameter
+class SequentialOpenDistributionTests(TestCaseWithAuthentication):
+    path = '/sequential_open_distribution'
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.course_id = "org/class/test"
+        cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
+        cls.ad1 = G(
+            models.SequentialOpenDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id,
+        )
+
+    def test_get(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
+        self.assertEquals(response.status_code, 200)
+
+        expected_dict = SequentialOpenDistributionSerializer(self.ad1).data
+        actual_list = response.data
+        self.assertEquals(len(actual_list), 1)
+        self.assertDictEqual(actual_list[0], expected_dict)
+
+    def test_get_404(self):
+        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
+        self.assertEquals(response.status_code, 404)

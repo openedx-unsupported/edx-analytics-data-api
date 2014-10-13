@@ -54,6 +54,38 @@ class ProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
         )
 
 
+class GradeDistributionSerializer(serializers.ModelSerializer):
+    """
+    Representation of the grade_distribution table without id
+    """
+
+    class Meta(object):
+        model = models.GradeDistribution
+        fields = (
+            'module_id',
+            'course_id',
+            'grade',
+            'max_grade',
+            'count',
+            'created'
+        )
+
+
+class SequentialOpenDistributionSerializer(serializers.ModelSerializer):
+    """
+    Representation of the sequential_open_distribution table without id
+    """
+
+    class Meta(object):
+        model = models.SequentialOpenDistribution
+        fields = (
+            'module_id',
+            'course_id',
+            'count',
+            'created'
+        )
+
+
 class BaseCourseEnrollmentModelSerializer(serializers.ModelSerializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)

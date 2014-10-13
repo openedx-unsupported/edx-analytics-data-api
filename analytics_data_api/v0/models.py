@@ -119,3 +119,29 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         db_table = 'course_enrollment_location_current'
         ordering = ('date', 'course_id', 'country_code')
         unique_together = [('course_id', 'date', 'country_code')]
+
+
+class GradeDistribution(models.Model):
+    """ Each row stores the count of a particular grade on a module for a given course. """
+
+    class Meta(object):
+        db_table = 'grade_distribution'
+
+    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
+    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
+    grade = models.IntegerField(db_column='grade')
+    max_grade = models.IntegerField(db_column='max_grade')
+    count = models.IntegerField(db_column='count')
+    created = models.DateTimeField(auto_now_add=True, db_column='created')
+
+
+class SequentialOpenDistribution(models.Model):
+    """ Each row stores the count of views a particular module has had in a given course. """
+
+    class Meta(object):
+        db_table = 'sequential_open_distribution'
+
+    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
+    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
+    count = models.IntegerField(db_column='count')
+    created = models.DateTimeField(auto_now_add=True, db_column='created')

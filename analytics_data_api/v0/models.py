@@ -127,12 +127,12 @@ class GradeDistribution(models.Model):
     class Meta(object):
         db_table = 'grade_distribution'
 
-    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
-    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
-    grade = models.IntegerField(db_column='grade')
-    max_grade = models.IntegerField(db_column='max_grade')
-    count = models.IntegerField(db_column='count')
-    created = models.DateTimeField(auto_now_add=True, db_column='created')
+    module_id = models.CharField(db_index=True, max_length=255)
+    course_id = models.CharField(db_index=True, max_length=255)
+    grade = models.IntegerField()
+    max_grade = models.IntegerField()
+    count = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
 
 
 class SequentialOpenDistribution(models.Model):
@@ -141,7 +141,7 @@ class SequentialOpenDistribution(models.Model):
     class Meta(object):
         db_table = 'sequential_open_distribution'
 
-    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
-    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
-    count = models.IntegerField(db_column='count')
-    created = models.DateTimeField(auto_now_add=True, db_column='created')
+    module_id = models.CharField(db_index=True, max_length=255)
+    course_id = models.CharField(db_index=True, max_length=255)
+    count = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)

@@ -83,7 +83,7 @@ class CourseActivityWeeklyView(BaseCourseView):
         <dd>The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.</dd>
     </dl>
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 
@@ -248,7 +248,7 @@ class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
 
     Returns the enrollment of a course with users binned by their birth years.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 
@@ -269,7 +269,7 @@ class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
 
     Returns the enrollment of a course with users binned by their education levels.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 
@@ -287,14 +287,15 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
     """
     Course enrollment broken down by user gender
 
-    Returns the enrollment of a course with users binned by their genders.
+    Returns the enrollment of a course where each row/item contains user genders for the day.
 
     Genders:
-        m - male
-        f - female
-        o - other
+        male
+        female
+        other
+        unknown
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 
@@ -307,12 +308,35 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
     serializer_class = serializers.CourseEnrollmentByGenderSerializer
     model = models.CourseEnrollmentByGender
 
+    def get_queryset(self):
+        queryset = super(CourseEnrollmentByGenderView, self).get_queryset()
+        formatted_data = []
+
+        for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
+            # Iterate over groups and create a single item with gender data
+            item = {
+                u'course_id': key[0],
+                u'date': key[1],
+                u'created': None
+            }
+
+            for enrollment in group:
+                gender = enrollment.cleaned_gender.lower()
+                count = item.get(gender, 0)
+                count += enrollment.count
+                item[gender] = count
+                item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
+
+            formatted_data.append(item)
+
+        return formatted_data
+
 
 class CourseEnrollmentView(BaseCourseEnrollmentView):
     """
     Returns the enrollment count for the specified course.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 
@@ -337,7 +361,7 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
 
     Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates should are in the UTC zone.
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
 

@@ -314,18 +314,40 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestC
 
     def generate_data(self, course_id=None):
         course_id = course_id or self.course_id
-        G(self.model, course_id=course_id, gender='m', date=self.date, count=34)
-        G(self.model, course_id=course_id, gender='f', date=self.date, count=45)
-        G(self.model, course_id=course_id, gender='f', date=self.date - datetime.timedelta(days=2), count=45)
+        genders = ['f', 'm', 'o', None]
+        days = 2
+
+        for day in range(days):
+            for gender in genders:
+                G(self.model,
+                  course_id=course_id,
+                  date=self.date - datetime.timedelta(days=day),
+                  gender=gender,
+                  count=100 + day)
 
     def setUp(self):
         super(CourseEnrollmentByGenderViewTests, self).setUp()
         self.generate_data()
 
     def format_as_response(self, *args):
-        return [
-            {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'gender': ce.gender, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
+        response = []
+
+        # Group by date
+        for _key, group in groupby(args, lambda x: x.date):
+            # Iterate over groups and create a single item with genders
+            item = {}
+
+            for enrollment in group:
+                item.update({
+                    'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
+                    'course_id': unicode(enrollment.course_id),
+                    'date': enrollment.date.strftime(settings.DATE_FORMAT),
+                    enrollment.cleaned_gender: enrollment.count
+                })
+
+            response.append(item)
+
+        return response
 
 
 # pylint: disable=no-member,no-value-for-parameter

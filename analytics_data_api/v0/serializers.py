@@ -1,7 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
 from analytics_data_api.v0 import models
-from analytics_data_api.v0.models import CourseActivityWeekly
 
 
 class CourseActivityByWeekSerializer(serializers.ModelSerializer):
@@ -97,9 +96,14 @@ class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
 
 
 class CourseEnrollmentByGenderSerializer(BaseCourseEnrollmentModelSerializer):
+    female = serializers.IntegerField(required=False)
+    male = serializers.IntegerField(required=False)
+    other = serializers.IntegerField(required=False)
+    unknown = serializers.IntegerField(required=False)
+
     class Meta(object):
         model = models.CourseEnrollmentByGender
-        fields = ('course_id', 'date', 'gender', 'count', 'created')
+        fields = ('course_id', 'date', 'female', 'male', 'other', 'unknown', 'created')
 
 
 class CourseEnrollmentByEducationSerializer(BaseCourseEnrollmentModelSerializer):
@@ -126,6 +130,6 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
     class Meta(object):
-        model = CourseActivityWeekly
+        model = models.CourseActivityWeekly
         # TODO: Add 'posted_forum' here to restore forum data
         fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'created')

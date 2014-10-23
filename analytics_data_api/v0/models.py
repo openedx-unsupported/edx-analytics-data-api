@@ -1,7 +1,7 @@
 from django.db import models
 from iso3166 import countries
 
-from analytics_data_api.v0.constants import UNKNOWN_COUNTRY
+from analytics_data_api.v0.constants import UNKNOWN_COUNTRY, FEMALE_GENDER, MALE_GENDER, OTHER_GENDER, UNKNOWN_GENDER
 
 
 class CourseActivityWeekly(models.Model):
@@ -75,7 +75,20 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
-    gender = models.CharField(max_length=255, null=False)
+    CLEANED_GENDERS = {
+        'f': FEMALE_GENDER,
+        'm': MALE_GENDER,
+        'o': OTHER_GENDER
+    }
+
+    gender = models.CharField(max_length=255, null=True, db_column='gender')
+
+    @property
+    def cleaned_gender(self):
+        """
+        Returns the gender with full names and 'unknown' replacing null/None.
+        """
+        return self.CLEANED_GENDERS.get(self.gender, UNKNOWN_GENDER)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender_daily'

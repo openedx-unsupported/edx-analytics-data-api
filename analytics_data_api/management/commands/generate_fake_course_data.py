@@ -31,7 +31,8 @@ def get_count(start):
 class Command(BaseCommand):
     help = 'Generate fake data'
     option_list = BaseCommand.option_list + (
-        make_option('-n', '--num-weeks', action='store', type="int", dest='num_weeks', help='"Number of weeks worth of data to generate.'),
+        make_option('-n', '--num-weeks', action='store', type="int", dest='num_weeks',
+                    help='"Number of weeks worth of data to generate.'),
     )
 
     def generate_daily_data(self, course_id, start_date, end_date):
@@ -63,6 +64,13 @@ class Command(BaseCommand):
             'UNKNOWN': 0.01
         }
 
+        enrollment_mode_ratios = {
+            'audit': 0.15,
+            'honor': 0.35,
+            'professional': 0.10,
+            'verified': 0.40
+        }
+
         # Generate birth year ratios
         birth_years = range(1960, 2005)
         ratios = [n / 1000.0 for n in constrained_sum_sample_pos(len(birth_years), 1000)]
@@ -86,6 +94,11 @@ class Command(BaseCommand):
         while date <= end_date:
             daily_total = get_count(daily_total)
             models.CourseEnrollmentDaily.objects.create(course_id=course_id, date=date, count=daily_total)
+
+            for mode, ratio in enrollment_mode_ratios.iteritems():
+                count = int(ratio * daily_total)
+                models.CourseEnrollmentModeDaily.objects.create(course_id=course_id, date=date, count=count,
+                                                                mode=mode)
 
             for gender, ratio in gender_ratios.iteritems():
                 count = int(ratio * daily_total)

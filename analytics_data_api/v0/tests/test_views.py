@@ -15,7 +15,7 @@ import pytz
 from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.v0 import models
-from analytics_data_api.v0.constants import UNKNOWN_COUNTRY, UNKNOWN_COUNTRY_CODE
+from analytics_data_api.constants import UNKNOWN_COUNTRY, UNKNOWN_COUNTRY_CODE, enrollment_modes
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.serializers import GradeDistributionSerializer
@@ -402,6 +402,39 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
             {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'created': ce.created.strftime(settings.DATETIME_FORMAT)}
             for ce in args]
+
+
+class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
+    model = models.CourseEnrollmentModeDaily
+    path = '/enrollment/mode'
+    csv_filename_slug = u'enrollment_mode'
+
+    def setUp(self):
+        super(CourseEnrollmentModeViewTests, self).setUp()
+        self.generate_data()
+
+    def generate_data(self, course_id=None):
+        course_id = course_id or self.course_id
+
+        for mode in enrollment_modes.ALL:
+            G(self.model, course_id=course_id, date=self.date, mode=mode)
+
+    def format_as_response(self, *args):
+        arg = args[0]
+        response = {
+            u'course_id': arg.course_id,
+            u'date': arg.date.strftime(settings.DATE_FORMAT),
+            u'created': arg.created.strftime(settings.DATETIME_FORMAT)
+        }
+        total = 0
+
+        for ce in args:
+            total += ce.count
+            response[ce.mode] = ce.count
+
+        response[u'count'] = total
+
+        return [response]
 
 
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):

@@ -7,6 +7,7 @@ COURSE_URLS = [
     ('activity', views.CourseActivityWeeklyView, 'activity'),
     ('recent_activity', views.CourseActivityMostRecentWeekView, 'recent_activity'),
     ('enrollment', views.CourseEnrollmentView, 'enrollment_latest'),
+    ('enrollment/mode', views.CourseEnrollmentModeView, 'enrollment_by_mode'),
     ('enrollment/birth_year', views.CourseEnrollmentByBirthYearView, 'enrollment_by_birth_year'),
     ('enrollment/education', views.CourseEnrollmentByEducationView, 'enrollment_by_education'),
     ('enrollment/gender', views.CourseEnrollmentByGenderView, 'enrollment_by_gender'),

@@ -1,7 +1,7 @@
 from django.db import models
 from iso3166 import countries
 
-from analytics_data_api.v0.constants import UNKNOWN_COUNTRY, FEMALE_GENDER, MALE_GENDER, OTHER_GENDER, UNKNOWN_GENDER
+from analytics_data_api.constants import country, genders
 
 
 class CourseActivityWeekly(models.Model):
@@ -45,6 +45,15 @@ class CourseEnrollmentDaily(BaseCourseEnrollment):
         unique_together = [('course_id', 'date',)]
 
 
+class CourseEnrollmentModeDaily(BaseCourseEnrollment):
+    mode = models.CharField(max_length=255)
+
+    class Meta(BaseCourseEnrollment.Meta):
+        db_table = 'course_enrollment_mode_daily'
+        ordering = ('date', 'course_id', 'mode')
+        unique_together = [('course_id', 'date', 'mode')]
+
+
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     birth_year = models.IntegerField(null=False)
 
@@ -76,9 +85,9 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
     CLEANED_GENDERS = {
-        'f': FEMALE_GENDER,
-        'm': MALE_GENDER,
-        'o': OTHER_GENDER
+        u'f': genders.FEMALE,
+        u'm': genders.MALE,
+        u'o': genders.OTHER
     }
 
     gender = models.CharField(max_length=255, null=True, db_column='gender')
@@ -88,7 +97,7 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
         """
         Returns the gender with full names and 'unknown' replacing null/None.
         """
-        return self.CLEANED_GENDERS.get(self.gender, UNKNOWN_GENDER)
+        return self.CLEANED_GENDERS.get(self.gender, genders.UNKNOWN)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender_daily'
@@ -126,7 +135,7 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
             return countries.get(self.country_code)
         except (KeyError, ValueError, AttributeError):
             # Country code is not valid ISO-3166
-            return UNKNOWN_COUNTRY
+            return country.UNKNOWN_COUNTRY
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

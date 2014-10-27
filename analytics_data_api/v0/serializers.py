@@ -1,5 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
+from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models
 
 
@@ -96,6 +97,26 @@ class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
     class Meta(object):
         model = models.CourseEnrollmentDaily
         fields = ('course_id', 'date', 'count', 'created')
+
+
+class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
+    """ Representation of course enrollment, broken down by mode, for a single day and course. """
+
+    def get_default_fields(self):
+        # pylint: disable=super-on-old-class
+        fields = super(CourseEnrollmentModeDailySerializer, self).get_default_fields()
+
+        # Create a field for each enrollment mode
+        for mode in enrollment_modes.ALL:
+            fields[mode] = serializers.IntegerField(required=True)
+
+        return fields
+
+    class Meta(object):
+        model = models.CourseEnrollmentDaily
+
+        # Declare the dynamically-created fields here as well so that they will be picked up by Swagger.
+        fields = ['course_id', 'date', 'count', 'created'] + enrollment_modes.ALL
 
 
 class CountrySerializer(serializers.Serializer):

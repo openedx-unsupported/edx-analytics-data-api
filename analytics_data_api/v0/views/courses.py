@@ -289,12 +289,6 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
 
     Returns the enrollment of a course where each row/item contains user genders for the day.
 
-    Genders:
-        male
-        female
-        other
-        unknown
-
     If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
 
     Data is sorted chronologically (earliest to latest).
@@ -348,6 +342,50 @@ class CourseEnrollmentView(BaseCourseEnrollmentView):
     slug = u'enrollment'
     serializer_class = serializers.CourseEnrollmentDailySerializer
     model = models.CourseEnrollmentDaily
+
+
+class CourseEnrollmentModeView(BaseCourseEnrollmentView):
+    """
+    Course enrollment broken down by enrollment mode.
+
+    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+
+    Data is sorted chronologically (earliest to latest).
+
+    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+
+    start_date --   Date after which all data should be returned (inclusive)
+    end_date   --   Date before which all data should be returned (exclusive)
+    """
+
+    slug = u'enrollment_mode'
+    serializer_class = serializers.CourseEnrollmentModeDailySerializer
+    model = models.CourseEnrollmentModeDaily
+
+    def get_queryset(self):
+        queryset = super(CourseEnrollmentModeView, self).get_queryset()
+        formatted_data = []
+
+        for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
+            item = {
+                u'course_id': key[0],
+                u'date': key[1],
+                u'created': None
+            }
+
+            total = 0
+
+            for enrollment in group:
+                mode = enrollment.mode
+                item[mode] = enrollment.count
+                item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
+                total += enrollment.count
+
+            item[u'count'] = total
+
+            formatted_data.append(item)
+
+        return formatted_data
 
 
 # pylint: disable=line-too-long

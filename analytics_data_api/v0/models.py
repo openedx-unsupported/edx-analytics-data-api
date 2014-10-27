@@ -1,7 +1,7 @@
 from django.db import models
 from iso3166 import countries
 
-from analytics_data_api.constants import UNKNOWN_COUNTRY, genders
+from analytics_data_api.constants import country, genders
 
 
 class CourseActivityWeekly(models.Model):
@@ -135,7 +135,7 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
             return countries.get(self.country_code)
         except (KeyError, ValueError, AttributeError):
             # Country code is not valid ISO-3166
-            return UNKNOWN_COUNTRY
+            return country.UNKNOWN_COUNTRY
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

@@ -15,7 +15,7 @@ import pytz
 from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.v0 import models
-from analytics_data_api.constants import UNKNOWN_COUNTRY, UNKNOWN_COUNTRY_CODE, enrollment_modes
+from analytics_data_api.constants import country, enrollment_modes
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.serializers import GradeDistributionSerializer
@@ -444,16 +444,16 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
     def format_as_response(self, *args):
         unknown = {'course_id': None, 'count': 0, 'date': None,
-                   'country': {'alpha2': None, 'alpha3': None, 'name': UNKNOWN_COUNTRY_CODE}}
+                   'country': {'alpha2': None, 'alpha3': None, 'name': country.UNKNOWN_COUNTRY_CODE}}
 
         for arg in args:
-            if arg.country.name == UNKNOWN_COUNTRY_CODE:
+            if arg.country.name == country.UNKNOWN_COUNTRY_CODE:
                 unknown['course_id'] = arg.course_id
                 unknown['date'] = arg.date.strftime(settings.DATE_FORMAT)
                 unknown['count'] += arg.count
                 unknown['created'] = arg.created.strftime(settings.DATETIME_FORMAT)
 
-        args = [arg for arg in args if arg.country != UNKNOWN_COUNTRY]
+        args = [arg for arg in args if arg.country != country.UNKNOWN_COUNTRY]
         args = sorted(args, key=lambda item: (item.date, item.course_id, item.country.alpha3))
 
         response = [unknown]

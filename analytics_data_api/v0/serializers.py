@@ -132,15 +132,8 @@ class CountrySerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
-# pylint: disable=no-value-for-parameter
-class EducationLevelSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = models.EducationLevel
-        fields = ('name', 'short_name')
-
-
 class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
-    # pylint: disable=unexpected-keyword-arg
+    # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
     country = CountrySerializer(many=False)
 
     class Meta(object):
@@ -160,8 +153,6 @@ class CourseEnrollmentByGenderSerializer(BaseCourseEnrollmentModelSerializer):
 
 
 class CourseEnrollmentByEducationSerializer(BaseCourseEnrollmentModelSerializer):
-    education_level = EducationLevelSerializer()
-
     class Meta(object):
         model = models.CourseEnrollmentByEducation
         fields = ('course_id', 'date', 'education_level', 'count', 'created')

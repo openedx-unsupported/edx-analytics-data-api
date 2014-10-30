@@ -296,15 +296,14 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def setUp(self):
         super(CourseEnrollmentByEducationViewTests, self).setUp()
-        self.el1 = G(models.EducationLevel, name='Doctorate', short_name='doctorate')
-        self.el2 = G(models.EducationLevel, name='Top Secret', short_name='top_secret')
+        self.el1 = 'doctorate'
+        self.el2 = 'top_secret'
         self.generate_data()
 
     def format_as_response(self, *args):
         return [
             {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'education_level': {'name': ce.education_level.name, 'short_name': ce.education_level.short_name},
-             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for
+             'education_level': ce.education_level, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for
             ce in args]
 
 

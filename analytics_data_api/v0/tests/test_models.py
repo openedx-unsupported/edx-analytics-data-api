@@ -6,17 +6,6 @@ from analytics_data_api.v0 import models
 from analytics_data_api.constants.country import UNKNOWN_COUNTRY
 
 
-class EducationLevelTests(TestCase):
-    def test_unicode(self):
-        short_name = 'high_school'
-        name = 'High School'
-        education_level = G(models.EducationLevel, short_name=short_name,
-                            name=name)
-
-        self.assertEqual(unicode(education_level),
-                         "{0} - {1}".format(short_name, name))
-
-
 class CourseEnrollmentByCountryTests(TestCase):
     def test_country(self):
         country = countries.get('US')

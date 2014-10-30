@@ -63,19 +63,8 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'birth_year')]
 
 
-class EducationLevel(models.Model):
-    name = models.CharField(max_length=255, null=False, unique=True)
-    short_name = models.CharField(max_length=255, null=False, unique=True)
-
-    class Meta(object):
-        db_table = 'education_levels'
-
-    def __unicode__(self):
-        return "{0} - {1}".format(self.short_name, self.name)
-
-
 class CourseEnrollmentByEducation(BaseCourseEnrollment):
-    education_level = models.ForeignKey(EducationLevel)
+    education_level = models.CharField(max_length=255, null=True)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_education_level_daily'

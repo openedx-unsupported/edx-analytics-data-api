@@ -105,8 +105,7 @@ class Command(BaseCommand):
                 models.CourseEnrollmentByGender.objects.create(course_id=course_id, date=date, count=count,
                                                                gender=gender)
 
-            for short_name, ratio in education_level_ratios.iteritems():
-                education_level = models.EducationLevel.objects.get(short_name=short_name)
+            for education_level, ratio in education_level_ratios.iteritems():
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByEducation.objects.create(course_id=course_id, date=date, count=count,
                                                                   education_level=education_level)

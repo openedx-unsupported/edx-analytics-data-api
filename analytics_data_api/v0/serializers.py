@@ -108,7 +108,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
 
         # Create a field for each enrollment mode
         for mode in enrollment_modes.ALL:
-            fields[mode] = serializers.IntegerField(required=True)
+            fields[mode] = serializers.IntegerField(required=True, default=0)
 
         return fields
 

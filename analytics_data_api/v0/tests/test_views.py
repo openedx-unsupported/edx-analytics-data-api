@@ -15,7 +15,7 @@ import pytz
 from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.v0 import models
-from analytics_data_api.constants import country, enrollment_modes
+from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.serializers import GradeDistributionSerializer
@@ -35,6 +35,20 @@ class DemoCourseMixin(object):
         self.course_id = DEMO_COURSE_ID
         self.course_key = CourseKey.from_string(self.course_id)
         super(DemoCourseMixin, self).setUp()
+
+
+class DefaultFillTestMixin(object):
+    """
+    Test that the view fills in missing data with a default value.
+    """
+
+    model = None
+
+    def destroy_data(self):
+        self.model.objects.all().delete()
+
+    def test_default_fill(self):
+        raise NotImplementedError
 
 
 # pylint: disable=no-member
@@ -75,15 +89,18 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
         response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
         self.assertEquals(response.status_code, 404)
 
-    def test_get(self):
-        """ Verify the endpoint returns an HTTP 200 status and the correct data. """
+    def assertViewReturnsExpectedData(self, expected):
         # Validate the basic response status
         response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, self.course_id, self.path))
         self.assertEquals(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
-        expected = self.format_as_response(*self.get_latest_data())
         self.assertEquals(response.data, expected)
+
+    def test_get(self):
+        """ Verify the endpoint returns an HTTP 200 status and the correct data. """
+        expected = self.format_as_response(*self.get_latest_data())
+        self.assertViewReturnsExpectedData(expected)
 
     def assertCSVIsValid(self, course_id, filename):
         path = u'{0}courses/{1}{2}'.format(self.api_root_path, course_id, self.path)
@@ -307,7 +324,8 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
             ce in args]
 
 
-class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
+class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
+                                        TestCaseWithAuthentication):
     path = '/enrollment/gender/'
     model = models.CourseEnrollmentByGender
     order_by = ['gender']
@@ -315,11 +333,11 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestC
 
     def generate_data(self, course_id=None):
         course_id = course_id or self.course_id
-        genders = ['f', 'm', 'o', None]
+        _genders = ['f', 'm', 'o', None]
         days = 2
 
         for day in range(days):
-            for gender in genders:
+            for gender in _genders:
                 G(self.model,
                   course_id=course_id,
                   date=self.date - datetime.timedelta(days=day),
@@ -330,6 +348,14 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestC
         super(CourseEnrollmentByGenderViewTests, self).setUp()
         self.generate_data()
 
+    def serialize_enrollment(self, enrollment):
+        return {
+            'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
+            'course_id': unicode(enrollment.course_id),
+            'date': enrollment.date.strftime(settings.DATE_FORMAT),
+            enrollment.cleaned_gender: enrollment.count
+        }
+
     def format_as_response(self, *args):
         response = []
 
@@ -339,16 +365,29 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, TestC
             item = {}
 
             for enrollment in group:
-                item.update({
-                    'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
-                    'course_id': unicode(enrollment.course_id),
-                    'date': enrollment.date.strftime(settings.DATE_FORMAT),
-                    enrollment.cleaned_gender: enrollment.count
-                })
+                item.update(self.serialize_enrollment(enrollment))
 
             response.append(item)
 
         return response
+
+    def test_default_fill(self):
+        self.destroy_data()
+
+        # Create a single entry for a single gender
+        enrollment = G(self.model, course_id=self.course_id, date=self.date, gender='f', count=1)
+
+        # Create the expected data
+        _genders = list(genders.ALL)
+        _genders.remove(genders.FEMALE)
+
+        expected = self.serialize_enrollment(enrollment)
+
+        for gender in _genders:
+            expected[gender] = 0
+
+        expected = [expected]
+        self.assertViewReturnsExpectedData(expected)
 
 
 # pylint: disable=no-member,no-value-for-parameter
@@ -403,7 +442,8 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
             for ce in args]
 
 
-class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
+class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
+                                    TestCaseWithAuthentication):
     model = models.CourseEnrollmentModeDaily
     path = '/enrollment/mode'
     csv_filename_slug = u'enrollment_mode'
@@ -418,13 +458,17 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseW
         for mode in enrollment_modes.ALL:
             G(self.model, course_id=course_id, date=self.date, mode=mode)
 
+    def serialize_enrollment(self, enrollment):
+        return {
+            u'course_id': enrollment.course_id,
+            u'date': enrollment.date.strftime(settings.DATE_FORMAT),
+            u'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
+            enrollment.mode: enrollment.count
+        }
+
     def format_as_response(self, *args):
         arg = args[0]
-        response = {
-            u'course_id': arg.course_id,
-            u'date': arg.date.strftime(settings.DATE_FORMAT),
-            u'created': arg.created.strftime(settings.DATETIME_FORMAT)
-        }
+        response = self.serialize_enrollment(arg)
         total = 0
 
         for ce in args:
@@ -434,6 +478,25 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseW
         response[u'count'] = total
 
         return [response]
+
+    def test_default_fill(self):
+        self.destroy_data()
+
+        # Create a single entry for a single enrollment mode
+        enrollment = G(self.model, course_id=self.course_id, date=self.date, mode=enrollment_modes.AUDIT, count=1)
+
+        # Create the expected data
+        modes = list(enrollment_modes.ALL)
+        modes.remove(enrollment_modes.AUDIT)
+
+        expected = self.serialize_enrollment(enrollment)
+        expected[u'count'] = 1
+
+        for mode in modes:
+            expected[mode] = 0
+
+        expected = [expected]
+        self.assertViewReturnsExpectedData(expected)
 
 
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):

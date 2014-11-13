@@ -9,6 +9,7 @@ from django.http import Http404
 from django.utils.timezone import make_aware, utc
 from rest_framework import generics
 from opaque_keys.edx.keys import CourseKey
+from analytics_data_api.constants import enrollment_modes
 
 from analytics_data_api.v0 import models, serializers
 
@@ -380,6 +381,9 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
                 item[mode] = enrollment.count
                 item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
                 total += enrollment.count
+
+            # Merge audit and honor
+            item[enrollment_modes.HONOR] = item.get(enrollment_modes.HONOR, 0) + item.pop(enrollment_modes.AUDIT, 0)
 
             item[u'count'] = total
 

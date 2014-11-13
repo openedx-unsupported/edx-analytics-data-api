@@ -3,6 +3,9 @@ from rest_framework import serializers
 from analytics_data_api.constants import enrollment_modes, genders
 from analytics_data_api.v0 import models
 
+# Below are the enrollment modes supported by this API. The audit and honor enrollment modes are merged into honor.
+ENROLLMENT_MODES = [enrollment_modes.HONOR, enrollment_modes.PROFESSIONAL, enrollment_modes.VERIFIED]
+
 
 class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     """
@@ -110,7 +113,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
         fields = super(CourseEnrollmentModeDailySerializer, self).get_default_fields()
 
         # Create a field for each enrollment mode
-        for mode in enrollment_modes.ALL:
+        for mode in ENROLLMENT_MODES:
             fields[mode] = serializers.IntegerField(required=True, default=0)
 
             # Create a transform method for each field
@@ -125,7 +128,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
         model = models.CourseEnrollmentDaily
 
         # Declare the dynamically-created fields here as well so that they will be picked up by Swagger.
-        fields = ['course_id', 'date', 'count', 'created'] + enrollment_modes.ALL
+        fields = ['course_id', 'date', 'count', 'created'] + ENROLLMENT_MODES
 
 
 class CountrySerializer(serializers.Serializer):

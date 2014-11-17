@@ -459,6 +459,10 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
             G(self.model, course_id=course_id, date=self.date, mode=mode)
 
     def serialize_enrollment(self, enrollment):
+        # Treat audit as honor
+        if enrollment.mode is enrollment_modes.AUDIT:
+            enrollment.mode = enrollment_modes.HONOR
+
         return {
             u'course_id': enrollment.course_id,
             u'date': enrollment.date.strftime(settings.DATE_FORMAT),
@@ -475,6 +479,10 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
             total += ce.count
             response[ce.mode] = ce.count
 
+        # Merge the honor and audit modes
+        response[enrollment_modes.HONOR] += response[enrollment_modes.AUDIT]
+        del response[enrollment_modes.AUDIT]
+
         response[u'count'] = total
 
         return [response]
@@ -489,11 +497,12 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         modes = list(enrollment_modes.ALL)
         modes.remove(enrollment_modes.AUDIT)
 
-        expected = self.serialize_enrollment(enrollment)
-        expected[u'count'] = 1
-
+        expected = {}
         for mode in modes:
             expected[mode] = 0
+
+        expected.update(self.serialize_enrollment(enrollment))
+        expected[u'count'] = 1
 
         expected = [expected]
         self.assertViewReturnsExpectedData(expected)

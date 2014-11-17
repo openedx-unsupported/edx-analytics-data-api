@@ -17,7 +17,7 @@ class AnalyticsApiRouter(object):
     def allow_relation(self, obj1, obj2, **hints):  # pylint: disable=unused-argument
         return self._get_database(obj1) == self._get_database(obj2)
 
-    def allow_syncdb(self, database, model):
+    def allow_migrate(self, database, model):
         dest_db = self._get_database(model)
         if dest_db is not None:
             return database == dest_db

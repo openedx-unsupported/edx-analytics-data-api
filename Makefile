@@ -4,7 +4,7 @@ COVERAGE = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 
-.PHONY: requirements develop clean diff.report view.diff.report quality syncdb
+.PHONY: requirements develop clean diff.report view.diff.report quality
 
 requirements:
 	pip install -q -r requirements/base.txt
@@ -46,17 +46,17 @@ quality:
 
 validate: test.requirements test quality
 
-syncdb:
-	$(foreach db_name,$(DATABASES),./manage.py syncdb --migrate --noinput --database=$(db_name);)
+migrate:
+	$(foreach db_name,$(DATABASES),./manage.py migrate --noinput --database=$(db_name);)
 
-loaddata: syncdb
+loaddata: migrate
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data
 
 demo: clean requirements loaddata
 	python manage.py set_api_key edx edx
 
-travis: clean requirements syncdb
+travis: clean requirements migrate
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=1

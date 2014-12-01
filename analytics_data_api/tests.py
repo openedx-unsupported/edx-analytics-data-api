@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from django.core.management import call_command, CommandError
 from django.test import TestCase
-
 from django_dynamic_fixture import G
 from rest_framework.authtoken.models import Token
+
+from analytics_data_api.constants.country import get_country, UNKNOWN_COUNTRY
 
 from analytics_data_api.utils import delete_user_auth_token, set_user_auth_token
 
@@ -77,3 +78,16 @@ class SetApiKeyTests(TestCase):
         self.assertFalse(Token.objects.filter(user=user2).exists())
         call_command('set_api_key', user2.username, key)
         self.assertFalse(Token.objects.filter(user=user2).exists())
+
+
+class CountryTests(TestCase):
+    def test_get_country(self):
+        # Countries should be accessible 2 or 3 digit country code
+        self.assertEqual(get_country('US'), get_country('USA'))
+
+        # Use common name for Taiwan
+        self.assertEqual(get_country('TW').name, 'Taiwan')
+
+        # Return unknown country if code is invalid
+        self.assertEqual(get_country('A1'), UNKNOWN_COUNTRY)
+        self.assertEqual(get_country(None), UNKNOWN_COUNTRY)

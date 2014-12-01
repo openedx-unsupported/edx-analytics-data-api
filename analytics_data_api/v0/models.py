@@ -1,5 +1,4 @@
 from django.db import models
-from iso3166 import countries
 
 from analytics_data_api.constants import country, genders
 
@@ -120,11 +119,7 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         """
         Returns a Country object representing the country in this model's country_code.
         """
-        try:
-            return countries.get(self.country_code)
-        except (KeyError, ValueError, AttributeError):
-            # Country code is not valid ISO-3166
-            return country.UNKNOWN_COUNTRY
+        return country.get_country(self.country_code)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'

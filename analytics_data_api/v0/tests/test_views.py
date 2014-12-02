@@ -10,9 +10,9 @@ import urllib
 
 from django.conf import settings
 from django_dynamic_fixture import G
-from iso3166 import countries
 import pytz
 from opaque_keys.edx.keys import CourseKey
+from analytics_data_api.constants.country import get_country
 
 from analytics_data_api.v0 import models
 from analytics_data_api.constants import country, enrollment_modes, genders
@@ -550,7 +550,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
     def setUp(self):
         super(CourseEnrollmentByLocationViewTests, self).setUp()
-        self.country = countries.get('US')
+        self.country = get_country('US')
         self.generate_data()
 
 

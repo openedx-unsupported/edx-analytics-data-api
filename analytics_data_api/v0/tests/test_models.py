@@ -1,14 +1,13 @@
 from django.test import TestCase
 from django_dynamic_fixture import G
-from iso3166 import countries
 
 from analytics_data_api.v0 import models
-from analytics_data_api.constants.country import UNKNOWN_COUNTRY
+from analytics_data_api.constants.country import UNKNOWN_COUNTRY, get_country
 
 
 class CourseEnrollmentByCountryTests(TestCase):
     def test_country(self):
-        country = countries.get('US')
+        country = get_country('US')
         self.assertEqual(country.alpha2, 'US')
         instance = G(models.CourseEnrollmentByCountry, country_code=country.alpha2)
         self.assertEqual(instance.country, country)

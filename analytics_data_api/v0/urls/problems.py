@@ -13,9 +13,9 @@ PROBLEM_URLS = [
 
 urlpatterns = patterns(
     '',
-    url(r'^(?P<module_id>.+)/sequential_open_distribution$',
+    url(r'^(?P<module_id>.+)/sequential_open_distribution/$',
         SequentialOpenDistributionView.as_view(), name='sequential_open_distribution'),
 )
 
 for path, view, name in PROBLEM_URLS:
-    urlpatterns += patterns('', url(r'^(?P<problem_id>.+)/' + re.escape(path) + r'$', view.as_view(), name=name))
+    urlpatterns += patterns('', url(r'^(?P<problem_id>.+)/' + re.escape(path) + r'/$', view.as_view(), name=name))

@@ -392,7 +392,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
 
 # pylint: disable=no-member,no-value-for-parameter
 class AnswerDistributionTests(TestCaseWithAuthentication):
-    path = '/answer_distribution'
+    path = '/answer_distribution/'
     maxDiff = None
 
     @classmethod
@@ -630,7 +630,7 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
 
 # pylint: disable=no-member,no-value-for-parameter
 class GradeDistributionTests(TestCaseWithAuthentication):
-    path = '/grade_distribution'
+    path = '/grade_distribution/'
     maxDiff = None
 
     @classmethod
@@ -659,7 +659,7 @@ class GradeDistributionTests(TestCaseWithAuthentication):
 
 # pylint: disable=no-member,no-value-for-parameter
 class SequentialOpenDistributionTests(TestCaseWithAuthentication):
-    path = '/sequential_open_distribution'
+    path = '/sequential_open_distribution/'
     maxDiff = None
 
     @classmethod

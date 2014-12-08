@@ -12,9 +12,34 @@ from analytics_data_api.v0.serializers import SequentialOpenDistributionSerializ
 
 class ProblemResponseAnswerDistributionView(generics.ListAPIView):
     """
-    Distribution of student answers for a particular problem, as used in a particular course.
+    Get the distribution of student answers to a specific problem.
 
-    Results are available for most (but not all) multiple-choice and short answer response types.
+    **Example request**
+
+        GET /api/v0/problems/{problem_id}/answer_distribution
+
+    **Response Values**
+
+        Returns a collection for each unique answer given to specified
+        problem. Each collection contains:
+
+            * course_id: The ID of the course for which data is returned.
+            * module_id: The ID of the problem.
+            * part_id: The ID for the part of the problem. For multi-part
+              problems, a collection is returned for each part.
+            * correct: Whether the answer was correct (``true``) or not
+              (``false``).
+            * count: The number of times the answer in this collection was
+              given.
+            * value_id: The ID of the answer in this collection.
+            * answer_value_text: The text of this answer, for text problems.
+            * answer_value_numeric: The number for this answer, for numeric
+              problems.
+            * problem_display_name: The display name for the specified problem.
+            * question_text: The question for the specified problem.
+            * variant: For randomized problems, the random seed used. If problem
+              is not randomized, value is null.
+            * created: The date the count was computed.
     """
 
     serializer_class = ProblemResponseAnswerDistributionSerializer
@@ -28,7 +53,24 @@ class ProblemResponseAnswerDistributionView(generics.ListAPIView):
 
 class GradeDistributionView(generics.ListAPIView):
     """
-    Distribution of grades for a particular module in a given course
+    Get the distribution of grades for a specific problem.
+
+    **Example request**
+
+        GET /api/v0/problems/{problem_id}/grade_distribution
+
+    **Response Values**
+
+        Returns a collection for each unique grade given to a specified
+        problem. Each collection contains:
+
+            * course_id: The ID of the course for which data is returned.
+            * module_id: The ID of the problem.
+            * grade: The grade being counted in this collection.
+            * count: The number of times the grade in this collection was
+              given.
+            * max_grade: The highest possible grade for this problem.
+            * created: The date the count was computed.
     """
 
     serializer_class = GradeDistributionSerializer
@@ -42,7 +84,21 @@ class GradeDistributionView(generics.ListAPIView):
 
 class SequentialOpenDistributionView(generics.ListAPIView):
     """
-    Distribution of view counts for a particular module in a given course
+    Get the number of views of a subsection, or sequential, in the course.
+
+    **Example request**
+
+        GET /api/v0/problems/{module_id}/sequential_open_distribution
+
+    **Response Values**
+
+        Returns a collection that contains the number of views of the specified
+        problem. The collection contains:
+
+            * course_id: The ID of the course for which data is returned.
+            * module_id: The ID of the subsection, or sequential.
+            * count: The number of times the subsection was viewed.
+            * created: The date the count computed.
     """
 
     serializer_class = SequentialOpenDistributionSerializer

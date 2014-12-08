@@ -68,30 +68,48 @@ class BaseCourseView(generics.ListAPIView):
 # pylint: disable=line-too-long
 class CourseActivityWeeklyView(BaseCourseView):
     """
-    Weekly course activity
+    Get counts of users who performed specific activities in a course.
 
-    Returns the course activity. Each row/item will contain all activity types for the course-week.
+    **Example request**
 
-    <strong>Activity Types</strong>
-    <dl>
-        <dt>ANY</dt>
-        <dd>The number of unique users who performed any action within the course, including actions not enumerated below.</dd>
-        <dt>ATTEMPTED_PROBLEM</dt>
-        <dd>The number of unique users who answered any loncapa based question in the course.</dd>
-        <dt>PLAYED_VIDEO</dt>
-        <dd>The number of unique users who started watching any video in the course.</dd>
-        <dt>POSTED_FORUM</dt>
-        <dd>The number of unique users who created a new post, responded to a post, or submitted a comment on any forum in the course.</dd>
-    </dl>
+        GET /api/v0/courses/{course_id}/activity/
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+    **Response Values**
 
-    Data is sorted chronologically (earliest to latest).
+        Returns a list of key/value pairs for student activities, as well as the
+        interval start and end dates and the course ID.
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+            * any: The number of unique users who performed any action in the
+              course, including actions not counted in other categories in the
+              response.
+            * attempted_problem: The number of unique users who answered any
+              loncapa-based problem in the course.
+            * played_video: The number of unique users who started watching any
+              video in the course.
+            * posted_forum: The number of unique users who created a new post,
+              responded to a post, or submitted a comment on any discussion in
+              the course.
+            * interval_start: The time and date at which data started being
+              included in returned values.
+            * interval_end: The time and date at which data stopped being
+              included in returned values.
+            * course_id: The ID of the course for which data is returned.
+            * created: The date the counts were computed.
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+    **Parameters**
+
+        You can specify the start and end dates for the time period for which
+        you want to get activity.
+
+        You specify dates in the format: YYYY-mm-ddTtttttt; for example,
+        ``2014-12-15T000000``.
+
+        If no start or end dates are specified, the data for the week ending on
+        the previous day is returned.
+
+        start_date -- Date after which all data is returned (inclusive).
+
+        end_date -- Date before which all data is returned (exclusive).
     """
 
     slug = u'engagement-activity'
@@ -158,29 +176,42 @@ class CourseActivityWeeklyView(BaseCourseView):
 
 class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
     """
-    Counts of users who performed various actions at least once during the most recently computed week.
+    Get counts of users who performed specific activities at least once during the most recently computed week.
 
-    The default is all users who performed <strong>any</strong> action in the course.
+    **Example request**
 
-    The representation has the following fields:
+        GET /api/v0/courses/{course_id}/recent_activity/
 
-    <ul>
-    <li>course_id: The string identifying the course whose activity is described (e.g. edX/DemoX/Demo_Course).</li>
-    - interval_start: All data from this timestamp up to the `interval_end` was considered when computing this data
-      point.
-    - interval_end: All data from `interval_start` up to this timestamp was considered when computing this data point.
-      Note that data produced at exactly this time is **not** included.
-    - activity_type: The type of activity requested. Possible values are:
-        - ANY: The number of unique users who performed any action within the course, including actions not
-          enumerated below.
-        - PLAYED_VIDEO: The number of unique users who started watching any video in the course.
-        - ATTEMPTED_PROBLEM: The number of unique users who answered any loncapa based question in the course.
-        - POSTED_FORUM: The number of unique users who created a new post, responded to a post, or submitted a comment
-          on any forum in the course.
-    - count: The number of users who performed the activity indicated by the `activity_type`.
-    </ul>
+    **Response Values**
 
-    activity_type -- The type of activity. (Defaults to "any".)
+        Returns a list of key/value pairs for student activities, as well as the
+        interval start and end dates and the course ID.
+
+            * activity_type: The type of activity counted. Possible values are:
+
+              * any: The number of unique users who performed any action in the
+                course, including actions not counted in other categories in the
+                response.
+              * attempted_problem: The number of unique users who answered any
+                loncapa-based problem in the course.
+              * played_video: The number of unique users who started watching
+                any video in the course.
+              * posted_forum: The number of unique users who created a new post,
+                responded to a post, or submitted a comment on any discussion in
+                the course.
+            * count: The number of unique users who performed the specified
+              action.
+            * interval_start: The time and date at which data started being
+              included in returned values.
+            * interval_end: The time and date at which data stopped being
+              included in returned values.
+            * course_id: The ID of the course for which data is returned.
+
+    **Parameters**
+
+        You can specify the activity type for which you want to get the count.
+
+        activity_type -- The type of activity: any (default), attempted_problem, played_video, posted_forum.
 
     """
 
@@ -245,18 +276,37 @@ class BaseCourseEnrollmentView(BaseCourseView):
 
 class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
     """
-    Course enrollment broken down by user birth year
+    Get the number of enrolled users by birth year.
 
-    Returns the enrollment of a course with users binned by their birth years.
+    **Example request**
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+        GET /api/v0/courses/{course_id}/enrollment/birth_year/
 
-    Data is sorted chronologically (earliest to latest).
+    **Response Values**
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+        Returns an array with a collection for each year in which a user was
+        born. Each collection contains:
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * birth_year: The birth year for which the enrollment count applies.
+            * count: The number of users who were born in the specified year.
+            * created: The date the count was computed.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for example,
+        ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
 
     slug = u'enrollment-age'
@@ -266,18 +316,39 @@ class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
 
 class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
     """
-    Course enrollment broken down by user level of education
+    Get the number of enrolled users by education level.
 
-    Returns the enrollment of a course with users binned by their education levels.
+    **Example request**
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+        GET /api/v0/courses/{course_id}/enrollment/education/
 
-    Data is sorted chronologically (earliest to latest).
+    **Response Values**
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+        Returns a collection for each level of education reported by a user.
+        Each collection contains:
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * education_level: The education level for which the enrollment
+              count applies.
+            * count: The number of userswho reported the specified education
+              level.
+            * created: The date the count was computed.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for
+        example, ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
     slug = u'enrollment-education'
     serializer_class = serializers.CourseEnrollmentByEducationSerializer
@@ -286,18 +357,38 @@ class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
 
 class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
     """
-    Course enrollment broken down by user gender
+    Get the number of enrolled users by gender.
 
-    Returns the enrollment of a course where each row/item contains user genders for the day.
+    **Example request**
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+        GET /api/v0/courses/{course_id}/enrollment/gender/
 
-    Data is sorted chronologically (earliest to latest).
+    **Response Values**
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+        Returns the count of each gender specified by users:
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * female: The count of self-identified female users.
+            * male: The count of self-identified male users.
+            * other: The count of self-identified other users.
+            * unknown: The count of users who did not specify a gender.
+            * created: The date the counts were computed.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for
+        example, ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
     slug = u'enrollment-gender'
     serializer_class = serializers.CourseEnrollmentByGenderSerializer
@@ -329,16 +420,35 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
 
 class CourseEnrollmentView(BaseCourseEnrollmentView):
     """
-    Returns the enrollment count for the specified course.
+    Get the number of enrolled users.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+    **Example request**
 
-    Data is sorted chronologically (earliest to latest).
+        GET /api/v0/courses/{course_id}/enrollment/
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+    **Response Values**
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+        Returns the count of enrolled users:
+
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * count: The count of enrolled users.
+            * created: The date the count was computed.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for
+        example, ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
     slug = u'enrollment'
     serializer_class = serializers.CourseEnrollmentDailySerializer
@@ -347,16 +457,38 @@ class CourseEnrollmentView(BaseCourseEnrollmentView):
 
 class CourseEnrollmentModeView(BaseCourseEnrollmentView):
     """
-    Course enrollment broken down by enrollment mode.
+    Get the number of enrolled users by enrollment mode.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+    **Example request**
 
-    Data is sorted chronologically (earliest to latest).
+        GET /api/v0/courses/{course_id}/enrollment/mode/
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+    **Response Values**
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+        Returns the counts of users by mode:
+
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * count: The total count of enrolled users.
+            * created: The date the counts were computed.
+            * honor: The number of users enrolled in honor code mode.
+            * professional: The number of users enrolled in professional mode.
+            * verified: The number of users enrolled in verified mode.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for
+        example, ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
 
     slug = u'enrollment_mode'
@@ -395,23 +527,47 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
 # pylint: disable=line-too-long
 class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
     """
-    Course enrollment broken down by user location
+    Get the number of enrolled users by location.
 
-    Returns the enrollment of a course with users binned by their location. Location is calculated based on the user's
-    IP address. Enrollment counts for users whose location cannot be determined will be included in an entry with
-    country.name set to UNKNOWN.
+    Location is calculated based on the user's IP address. Users whose location
+    cannot be determined are counted as having a country.name of UNKNOWN.
 
-    Countries are denoted by their <a href="http://www.iso.org/iso/country_codes/country_codes" target="_blank">ISO 3166 country code</a>.
+    Countries are denoted by their ISO 3166 country code.
 
-    If no start or end dates are passed, the data for the latest date is returned. All dates are in the UTC zone.
+    **Example request**
 
-    Data is sorted chronologically (earliest to latest).
+        GET /api/v0/courses/{course_id}/enrollment/location/
 
-    Date format: YYYY-mm-dd (e.g. 2014-01-31)
+    **Response Values**
 
-    start_date --   Date after which all data should be returned (inclusive)
-    end_date   --   Date before which all data should be returned (exclusive)
+        Returns counts of genders specified by users:
+
+            * course_id: The ID of the course for which data is returned.
+            * date: The date for which the enrollment count was computed.
+            * country: Contains the following fields:
+
+              * alpha2: The two-letter country code.
+              * alpha3: The three-letter country code.
+              * name: The country name.
+            * count: The count of users from the country.
+            * created: The date the count was computed.
+
+    **Parameters**
+
+        You can specify the start and end dates for which to count enrolled
+        users.
+
+        You specify dates in the format: YYYY-mm-dd; for
+        example, ``2014-12-15``.
+
+        If no start or end dates are specified, the data for the previous day is
+        returned.
+
+        start_date -- Date after which enrolled students are counted (inclusive).
+
+        end_date -- Date before which enrolled students are counted (exclusive).
     """
+
     slug = u'enrollment-location'
     serializer_class = serializers.CourseEnrollmentByCountrySerializer
     model = models.CourseEnrollmentByCountry

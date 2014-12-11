@@ -33,7 +33,11 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
         fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_id')
 
 
-class ProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
+class ModelSerializerWithCreatedField(serializers.ModelSerializer):
+    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+
+
+class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the Answer Distribution table, without id.
 
@@ -57,11 +61,10 @@ class ProblemResponseAnswerDistributionSerializer(serializers.ModelSerializer):
         )
 
 
-class GradeDistributionSerializer(serializers.ModelSerializer):
+class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the grade_distribution table without id
     """
-
     class Meta(object):
         model = models.GradeDistribution
         fields = (
@@ -74,7 +77,7 @@ class GradeDistributionSerializer(serializers.ModelSerializer):
         )
 
 
-class SequentialOpenDistributionSerializer(serializers.ModelSerializer):
+class SequentialOpenDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the sequential_open_distribution table without id
     """
@@ -89,9 +92,8 @@ class SequentialOpenDistributionSerializer(serializers.ModelSerializer):
         )
 
 
-class BaseCourseEnrollmentModelSerializer(serializers.ModelSerializer):
+class BaseCourseEnrollmentModelSerializer(ModelSerializerWithCreatedField):
     date = serializers.DateField(format=settings.DATE_FORMAT)
-    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
     def default_if_none(self, value, default=0):
         return value if value is not None else default

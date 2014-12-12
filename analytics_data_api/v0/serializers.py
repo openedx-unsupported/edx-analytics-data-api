@@ -56,6 +56,8 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
             'value_id',
             'answer_value_text',
             'answer_value_numeric',
+            'problem_display_name',
+            'question_text',
             'variant',
             'created'
         )

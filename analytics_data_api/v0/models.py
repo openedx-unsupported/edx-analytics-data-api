@@ -99,16 +99,18 @@ class ProblemResponseAnswerDistribution(models.Model):
     class Meta(object):
         db_table = 'answer_distribution'
 
-    course_id = models.CharField(db_index=True, max_length=255, db_column='course_id')
-    module_id = models.CharField(db_index=True, max_length=255, db_column='module_id')
-    part_id = models.CharField(db_index=True, max_length=255, db_column='part_id')
-    correct = models.NullBooleanField(db_column='correct')
-    count = models.IntegerField(db_column='count')
-    value_id = models.CharField(db_index=True, max_length=255, db_column='value_id', null=True)
-    answer_value_text = models.TextField(db_column='answer_value_text', null=True)
-    answer_value_numeric = models.FloatField(db_column='answer_value_numeric', null=True)
-    variant = models.IntegerField(db_column='variant', null=True)
-    created = models.DateTimeField(auto_now_add=True, db_column='created')
+    course_id = models.CharField(db_index=True, max_length=255)
+    module_id = models.CharField(db_index=True, max_length=255)
+    part_id = models.CharField(db_index=True, max_length=255)
+    correct = models.NullBooleanField()
+    count = models.IntegerField()
+    value_id = models.CharField(db_index=True, max_length=255, null=True)
+    answer_value_text = models.TextField(null=True)
+    answer_value_numeric = models.FloatField(null=True)
+    variant = models.IntegerField(null=True)
+    problem_display_name = models.TextField(null=True)
+    question_text = models.TextField(null=True)
+    created = models.DateTimeField(auto_now_add=True)
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):

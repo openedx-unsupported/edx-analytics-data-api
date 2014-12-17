@@ -10,6 +10,7 @@ from django_dynamic_fixture import G
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer, \
     GradeDistributionSerializer, SequentialOpenDistributionSerializer
+from analytics_data_api.v0.tests.views import DemoCourseMixin
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -97,3 +98,68 @@ class SequentialOpenDistributionTests(TestCaseWithAuthentication):
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
         self.assertEquals(response.status_code, 404)
+
+
+class SubmissionCountsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+    path = '/api/v0/problems/submission_counts/'
+
+    @classmethod
+    def setUpClass(cls):
+        super(SubmissionCountsListViewTests, cls).setUpClass()
+        cls.ad_1 = G(models.ProblemResponseAnswerDistribution)
+        cls.ad_2 = G(models.ProblemResponseAnswerDistribution)
+
+    def _get_data(self, problem_ids=None):
+        """
+        Retrieve data for the specified problems from the server.
+        """
+
+        url = self.path
+
+        if problem_ids:
+            problem_ids = ','.join(problem_ids)
+            url = '{}?problem_ids={}'.format(url, problem_ids)
+
+        return self.authenticated_get(url)
+
+    def assertValidResponse(self, *problem_ids):
+        expected_data = []
+        for problem_id in problem_ids:
+            _models = models.ProblemResponseAnswerDistribution.objects.filter(module_id=problem_id)
+            serialized = [{'module_id': model.module_id, 'total': model.count, 'correct': model.correct or 0} for model
+                          in _models]
+            expected_data += serialized
+
+        response = self._get_data(problem_ids)
+        self.assertEquals(response.status_code, 200)
+
+        actual = response.data
+        self.assertListEqual(actual, expected_data)
+
+    def test_get(self):
+        """
+        The view should return data when data exists for at least one of the problems.
+        """
+
+        problem_id_1 = self.ad_1.module_id
+        problem_id_2 = self.ad_2.module_id
+
+        self.assertValidResponse(problem_id_1)
+        self.assertValidResponse(problem_id_1, problem_id_2)
+        self.assertValidResponse(problem_id_1, problem_id_2, 'DOES-NOT-EXIST')
+
+    def test_get_404(self):
+        """
+        The view should return 404 if data does not exist for at least one of the provided problems.
+        """
+
+        problem_ids = ['DOES-NOT-EXIST']
+        response = self._get_data(problem_ids)
+        self.assertEquals(response.status_code, 404)
+
+    def test_get_406(self):
+        """
+        The view should return a 406 if no problem ID values are supplied.
+        """
+        response = self._get_data()
+        self.assertEquals(response.status_code, 406)

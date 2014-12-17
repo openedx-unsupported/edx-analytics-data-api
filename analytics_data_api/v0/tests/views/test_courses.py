@@ -12,27 +12,14 @@ import urllib
 from django.conf import settings
 from django_dynamic_fixture import G
 import pytz
-from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.constants.country import get_country
 from analytics_data_api.v0 import models
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.tests.utils import flatten
+from analytics_data_api.v0.tests.views import DemoCourseMixin, DEMO_COURSE_ID
 from analyticsdataserver.tests import TestCaseWithAuthentication
-
-
-DEMO_COURSE_ID = u'course-v1:edX+DemoX+Demo_2014'
-
-
-class DemoCourseMixin(object):
-    course_key = None
-    course_id = None
-
-    def setUp(self):
-        self.course_id = DEMO_COURSE_ID
-        self.course_key = CourseKey.from_string(self.course_id)
-        super(DemoCourseMixin, self).setUp()
 
 
 class DefaultFillTestMixin(object):

@@ -2,6 +2,7 @@
 # NOTE: Full URLs are used throughout these tests to ensure that the API contract is fulfilled. The URLs should *not*
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
+
 import StringIO
 import csv
 import datetime
@@ -11,30 +12,14 @@ import urllib
 from django.conf import settings
 from django_dynamic_fixture import G
 import pytz
-from opaque_keys.edx.keys import CourseKey
-from analytics_data_api.constants.country import get_country
 
+from analytics_data_api.constants.country import get_country
 from analytics_data_api.v0 import models
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.v0.models import CourseActivityWeekly
-from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
-from analytics_data_api.v0.serializers import GradeDistributionSerializer
-from analytics_data_api.v0.serializers import SequentialOpenDistributionSerializer
 from analytics_data_api.v0.tests.utils import flatten
+from analytics_data_api.v0.tests.views import DemoCourseMixin, DEMO_COURSE_ID
 from analyticsdataserver.tests import TestCaseWithAuthentication
-
-
-DEMO_COURSE_ID = u'course-v1:edX+DemoX+Demo_2014'
-
-
-class DemoCourseMixin(object):
-    course_key = None
-    course_id = None
-
-    def setUp(self):
-        self.course_id = DEMO_COURSE_ID
-        self.course_key = CourseKey.from_string(self.course_id)
-        super(DemoCourseMixin, self).setUp()
 
 
 class DefaultFillTestMixin(object):
@@ -390,37 +375,6 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
         self.assertViewReturnsExpectedData(expected)
 
 
-# pylint: disable=no-member,no-value-for-parameter
-class AnswerDistributionTests(TestCaseWithAuthentication):
-    path = '/answer_distribution/'
-    maxDiff = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.course_id = "org/num/run"
-        cls.module_id = "i4x://org/num/run/problem/RANDOMNUMBER"
-        cls.part_id1 = "i4x-org-num-run-problem-RANDOMNUMBER_2_1"
-        cls.ad1 = G(
-            models.ProblemResponseAnswerDistribution,
-            course_id=cls.course_id,
-            module_id=cls.module_id,
-            part_id=cls.part_id1
-        )
-
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
-        self.assertEquals(response.status_code, 200)
-
-        expected_dict = ProblemResponseAnswerDistributionSerializer(self.ad1).data
-        actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
-        self.assertDictEqual(actual_list[0], expected_dict)
-
-    def test_get_404(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)
-
-
 class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     model = models.CourseEnrollmentDaily
     path = '/enrollment'
@@ -626,61 +580,3 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
         expected = self.format_as_response(*self.model.objects.all())
         self.assertEqual(len(expected), 2)
         self.assertIntervalFilteringWorks(expected, self.interval_start, interval_end + datetime.timedelta(days=1))
-
-
-# pylint: disable=no-member,no-value-for-parameter
-class GradeDistributionTests(TestCaseWithAuthentication):
-    path = '/grade_distribution/'
-    maxDiff = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.course_id = "org/class/test"
-        cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
-        cls.ad1 = G(
-            models.GradeDistribution,
-            course_id=cls.course_id,
-            module_id=cls.module_id,
-        )
-
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
-        self.assertEquals(response.status_code, 200)
-
-        expected_dict = GradeDistributionSerializer(self.ad1).data
-        actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
-        self.assertDictEqual(actual_list[0], expected_dict)
-
-    def test_get_404(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)
-
-
-# pylint: disable=no-member,no-value-for-parameter
-class SequentialOpenDistributionTests(TestCaseWithAuthentication):
-    path = '/sequential_open_distribution/'
-    maxDiff = None
-
-    @classmethod
-    def setUpClass(cls):
-        cls.course_id = "org/class/test"
-        cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
-        cls.ad1 = G(
-            models.SequentialOpenDistribution,
-            course_id=cls.course_id,
-            module_id=cls.module_id,
-        )
-
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
-        self.assertEquals(response.status_code, 200)
-
-        expected_dict = SequentialOpenDistributionSerializer(self.ad1).data
-        actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
-        self.assertDictEqual(actual_list[0], expected_dict)
-
-    def test_get_404(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)

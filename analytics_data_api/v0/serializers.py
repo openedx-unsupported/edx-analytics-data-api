@@ -1,7 +1,9 @@
 from django.conf import settings
 from rest_framework import serializers
+
 from analytics_data_api.constants import enrollment_modes, genders
 from analytics_data_api.v0 import models
+
 
 # Below are the enrollment modes supported by this API. The audit and honor enrollment modes are merged into honor.
 ENROLLMENT_MODES = [enrollment_modes.HONOR, enrollment_modes.PROFESSIONAL, enrollment_modes.VERIFIED]
@@ -37,6 +39,16 @@ class ModelSerializerWithCreatedField(serializers.ModelSerializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
+class ProblemSubmissionCountSerializer(serializers.Serializer):
+    """
+    Serializer for problem submission counts.
+    """
+
+    module_id = serializers.CharField()
+    total = serializers.IntegerField(default=0)
+    correct = serializers.IntegerField(default=0)
+
+
 class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the Answer Distribution table, without id.
@@ -67,6 +79,7 @@ class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the grade_distribution table without id
     """
+
     class Meta(object):
         model = models.GradeDistribution
         fields = (

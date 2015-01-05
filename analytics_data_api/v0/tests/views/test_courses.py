@@ -580,3 +580,60 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
         expected = self.format_as_response(*self.model.objects.all())
         self.assertEqual(len(expected), 2)
         self.assertIntervalFilteringWorks(expected, self.interval_start, interval_end + datetime.timedelta(days=1))
+
+
+class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+    def _get_data(self, course_id=None):
+        """
+        Retrieve data for the specified course.
+        """
+
+        course_id = course_id or self.course_id
+        url = '/api/v0/courses/{}/problems/'.format(course_id)
+        return self.authenticated_get(url)
+
+    def test_get(self):
+        """
+        The view should return data when data exists for the course.
+        """
+
+        # This data should never be returned by the tests below because the course_id doesn't match.
+        G(models.ProblemResponseAnswerDistribution)
+
+        # This test assumes the view is using Python's groupby for grouping. Create multiple objects here to test the
+        # grouping. Add a model with a different module_id to break up the natural order and ensure the view properly
+        # sorts the objects before grouping.
+        module_id = 'i4x://test/problem/1'
+        alt_module_id = 'i4x://test/problem/2'
+        o1 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=True,
+               count=100)
+        o2 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
+               correct=True, count=100)
+        o3 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=False,
+               count=200)
+        expected = [
+            {
+                'module_id': module_id,
+                'total_submissions': 300,
+                'correct_submissions': 100,
+                'part_ids': [o1.part_id, o3.part_id]
+            },
+            {
+                'module_id': alt_module_id,
+                'total_submissions': 100,
+                'correct_submissions': 100,
+                'part_ids': [o2.part_id]
+            }
+        ]
+
+        response = self._get_data(self.course_id)
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected)
+
+    def test_get_404(self):
+        """
+        The view should return 404 if no data exists for the course.
+        """
+
+        response = self._get_data('foo/bar/course')
+        self.assertEquals(response.status_code, 404)

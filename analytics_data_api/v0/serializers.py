@@ -39,14 +39,15 @@ class ModelSerializerWithCreatedField(serializers.ModelSerializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
-class ProblemSubmissionCountSerializer(serializers.Serializer):
+class ProblemSerializer(serializers.Serializer):
     """
-    Serializer for problem submission counts.
+    Serializer for problems.
     """
 
-    module_id = serializers.CharField()
-    total = serializers.IntegerField(default=0)
-    correct = serializers.IntegerField(default=0)
+    module_id = serializers.CharField(required=True)
+    total_submissions = serializers.IntegerField(default=0)
+    correct_submissions = serializers.IntegerField(default=0)
+    part_ids = serializers.CharField()
 
 
 class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):

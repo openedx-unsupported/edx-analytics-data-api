@@ -20,23 +20,107 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
     @classmethod
     def setUpClass(cls):
         cls.course_id = "org/num/run"
-        cls.module_id = "i4x://org/num/run/problem/RANDOMNUMBER"
-        cls.part_id1 = "i4x-org-num-run-problem-RANDOMNUMBER_2_1"
+        cls.module_id1 = "i4x://org/num/run/problem/RANDOMNUMBER"
+        cls.module_id2 = "i4x://org/num/run/problem/OTHERRANDOM"
+        cls.part_id = "i4x-org-num-run-problem-RANDOMNUMBER_2_1"
+        cls.correct = True
+        cls.value_id1 = '3'
+        cls.value_id2 = '4'
+        cls.answer_value_text = '3'
+        cls.answer_value_numeric = 3.0
+        cls.problem_display_name = 'Test Problem'
+        cls.question_text = 'Question Text'
+
         cls.ad1 = G(
             models.ProblemResponseAnswerDistribution,
             course_id=cls.course_id,
-            module_id=cls.module_id,
-            part_id=cls.part_id1
+            module_id=cls.module_id1,
+            part_id=cls.part_id,
+            correct=cls.correct,
+            value_id=cls.value_id1,
+            answer_value_text=cls.answer_value_text,
+            answer_value_numeric=cls.answer_value_numeric,
+            problem_display_name=cls.problem_display_name,
+            question_text=cls.question_text,
+            variant=123,
+            count=1
+        )
+        cls.ad2 = G(
+            models.ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id1,
+            part_id=cls.part_id,
+            correct=cls.correct,
+            value_id=cls.value_id1,
+            answer_value_text=cls.answer_value_text,
+            answer_value_numeric=cls.answer_value_numeric,
+            problem_display_name=cls.problem_display_name,
+            question_text=cls.question_text,
+            variant=345,
+            count=2
+        )
+        cls.ad3 = G(
+            models.ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id1,
+            part_id=cls.part_id,
+        )
+        cls.ad4 = G(
+            models.ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id2,
+            part_id=cls.part_id,
+            value_id=cls.value_id1,
+            correct=True,
+        )
+        cls.ad5 = G(
+            models.ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id2,
+            part_id=cls.part_id,
+            value_id=cls.value_id2,
+            correct=True
+        )
+        cls.ad6 = G(
+            models.ProblemResponseAnswerDistribution,
+            course_id=cls.course_id,
+            module_id=cls.module_id2,
+            part_id=cls.part_id,
+            value_id=cls.value_id1,
+            correct=False,
         )
 
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
+    def test_nonconsolidated_get(self):
+        """ Verify that answers which should not be consolidated are not. """
+        response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id2, self.path))
         self.assertEquals(response.status_code, 200)
 
-        expected_dict = ProblemResponseAnswerDistributionSerializer(self.ad1).data
-        actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
-        self.assertDictEqual(actual_list[0], expected_dict)
+        expected_data = models.ProblemResponseAnswerDistribution.objects.filter(module_id=self.module_id2)
+        expected_data = [ProblemResponseAnswerDistributionSerializer(answer).data for answer in expected_data]
+
+        for answer in expected_data:
+            answer['consolidated_variant'] = False
+
+        self.assertEqual(response.data, expected_data)
+
+    def test_consolidated_get(self):
+        """ Verify that valid consolidation does occur. """
+        response = self.authenticated_get(
+            '/api/v0/problems/{0}{1}'.format(self.module_id1, self.path))
+        self.assertEquals(response.status_code, 200)
+
+        expected_data = [
+            ProblemResponseAnswerDistributionSerializer(self.ad1).data,
+            ProblemResponseAnswerDistributionSerializer(self.ad3).data,
+        ]
+
+        expected_data[0]['count'] += self.ad2.count
+        expected_data[0]['variant'] = None
+        expected_data[0]['consolidated_variant'] = True
+
+        expected_data[1]['consolidated_variant'] = False
+
+        self.assertEquals(response.data, expected_data)
 
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))

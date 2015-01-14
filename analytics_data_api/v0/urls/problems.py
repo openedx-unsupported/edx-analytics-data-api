@@ -11,7 +11,6 @@ PROBLEM_URLS = [
 
 urlpatterns = patterns(
     '',
-    url(r'^submission_counts/$', views.SubmissionCountsListView.as_view(), name='submission_counts'),
     url(r'^(?P<module_id>.+)/sequential_open_distribution/$',
         views.SequentialOpenDistributionView.as_view(), name='sequential_open_distribution'),
 )

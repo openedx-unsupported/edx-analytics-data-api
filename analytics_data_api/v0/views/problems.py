@@ -1,69 +1,11 @@
-from itertools import groupby
-
 from rest_framework import generics
-from rest_framework.exceptions import NotAcceptable
 
 from analytics_data_api.v0.models import ProblemResponseAnswerDistribution
-from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer, \
-    ProblemSubmissionCountSerializer
+from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer
 from analytics_data_api.v0.models import GradeDistribution
 from analytics_data_api.v0.serializers import GradeDistributionSerializer
 from analytics_data_api.v0.models import SequentialOpenDistribution
 from analytics_data_api.v0.serializers import SequentialOpenDistributionSerializer
-
-
-class SubmissionCountsListView(generics.ListAPIView):
-    """
-    Get the number of submissions to one, or more, problems.
-
-    **Example request**
-
-        GET /api/v0/problems/submission_counts/?problem_ids={problem_id},{problem_id}
-
-    **Response Values**
-
-        Returns a collection of counts of total and correct solutions to the specified
-        problems. Each collection contains:
-
-            * module_id: The ID of the problem.
-            * total: Total number of submissions
-            * correct: Total number of *correct* submissions.
-
-    **Parameters**
-        problem_ids -- Comma-separated list of problem IDs representing the problems whose data should be returned.
-    """
-
-    serializer_class = ProblemSubmissionCountSerializer
-    allow_empty = False
-
-    def get_queryset(self):
-        problem_ids = self.request.QUERY_PARAMS.get('problem_ids', '')
-
-        if not problem_ids:
-            raise NotAcceptable
-
-        problem_ids = problem_ids.split(',')
-        queryset = ProblemResponseAnswerDistribution.objects.filter(module_id__in=problem_ids).order_by('module_id')
-
-        data = []
-
-        for problem_id, distribution in groupby(queryset, lambda x: x.module_id):
-            total = 0
-            correct = 0
-
-            for answer in distribution:
-                count = answer.count
-                total += count
-                if answer.correct:
-                    correct += count
-
-            data.append({
-                'module_id': problem_id,
-                'total': total,
-                'correct': correct
-            })
-
-        return data
 
 
 class ProblemResponseAnswerDistributionView(generics.ListAPIView):

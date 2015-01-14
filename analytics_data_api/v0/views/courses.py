@@ -9,8 +9,8 @@ from django.http import Http404
 from django.utils.timezone import make_aware, utc
 from rest_framework import generics
 from opaque_keys.edx.keys import CourseKey
-from analytics_data_api.constants import enrollment_modes
 
+from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
 
 
@@ -608,3 +608,55 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
         # acceptable since the consuming code simply expects the returned
         # value to be iterable, not necessarily a queryset.
         return returned_items
+
+
+class ProblemsListView(BaseCourseView):
+    """
+    Get the problems.
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/problems/
+
+    **Response Values**
+
+        Returns a collection of submission counts and part IDs for each problem. Each collection contains:
+
+            * module_id: The ID of the problem.
+            * total_submissions: Total number of submissions
+            * correct_submissions: Total number of *correct* submissions.
+            * part_ids: List of problem part IDs
+    """
+    model = models.ProblemResponseAnswerDistribution
+    serializer_class = serializers.ProblemSerializer
+
+    def apply_date_filtering(self, queryset):
+        # Date filtering is not possible for this data.
+        return queryset
+
+    def get_queryset(self):
+        queryset = super(ProblemsListView, self).get_queryset()
+        queryset = queryset.order_by('module_id', 'part_id')
+
+        data = []
+
+        for problem_id, distribution in groupby(queryset, lambda x: x.module_id):
+            total = 0
+            correct = 0
+            part_ids = set()    # Use a set to remove duplicate values.
+
+            for answer in distribution:
+                part_ids.add(answer.part_id)
+                count = answer.count
+                total += count
+                if answer.correct:
+                    correct += count
+
+            data.append({
+                'module_id': problem_id,
+                'total_submissions': total,
+                'correct_submissions': correct,
+                'part_ids': sorted(part_ids)
+            })
+
+        return data

@@ -1,8 +1,7 @@
 [
     {
         "fields": {
-            "answer_value_numeric": 36.02736,
-            "answer_value_text": "36.02736",
+            "answer_value": "36.02736",
             "correct": false,
             "count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
@@ -19,8 +18,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 33.0,
-            "answer_value_text": "33.0",
+            "answer_value": "33.0",
             "correct": false,
             "count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
@@ -37,8 +35,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 27.51936482,
-            "answer_value_text": "27.51936482",
+            "answer_value": "27.51936482",
             "correct": true,
             "count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
@@ -55,8 +52,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 28.65,
-            "answer_value_text": "28.65",
+            "answer_value": "28.65",
             "correct": true,
             "count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
@@ -73,8 +69,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "line 15: mean(glm.pred==Direction)",
+            "answer_value": "line 15: mean(glm.pred==Direction)",
             "correct": true,
             "count": 95,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
@@ -91,8 +86,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "line 22: Direction.2005=Smarket$Direction[!train]",
+            "answer_value": "line 22: Direction.2005=Smarket$Direction[!train]",
             "correct": false,
             "count": 1,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
@@ -109,8 +103,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "line 30: table(glm.pred,Direction.2005)",
+            "answer_value": "line 30: table(glm.pred,Direction.2005)",
             "correct": false,
             "count": 1,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
@@ -127,8 +120,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 5.02,
-            "answer_value_text": null,
+            "answer_value": "5.02",
             "correct": true,
             "count": 95,
             "course_id": "edX/DemoX/Demo_Course",
@@ -145,8 +137,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 62,
-            "answer_value_text": null,
+            "answer_value": "62",
             "correct": false,
             "count": 13,
             "course_id": "edX/DemoX/Demo_Course",
@@ -163,8 +154,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 10.2,
-            "answer_value_text": null,
+            "answer_value": "10.2",
             "correct": false,
             "count": 100,
             "course_id": "edX/DemoX/Demo_Course",
@@ -181,8 +171,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": 5.02,
-            "answer_value_text": null,
+            "answer_value": null,
             "correct": true,
             "count": 5,
             "course_id": "edX/DemoX/Demo_Course",
@@ -199,8 +188,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": null,
+            "answer_value": null,
             "correct": true,
             "count": 213,
             "course_id": "edX/DemoX/Demo_Course",
@@ -218,8 +206,7 @@
 
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "North America",
+            "answer_value": "North America",
             "correct": true,
             "count": 95,
             "course_id": "edX/DemoX/Demo_Course",
@@ -236,8 +223,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "Africa",
+            "answer_value": "Africa",
             "correct": false,
             "count": 13,
             "course_id": "edX/DemoX/Demo_Course",
@@ -254,8 +240,7 @@
     },
     {
         "fields": {
-            "answer_value_numeric": null,
-            "answer_value_text": "Asia",
+            "answer_value": "Asia",
             "correct": false,
             "count": 100,
             "course_id": "edX/DemoX/Demo_Course",

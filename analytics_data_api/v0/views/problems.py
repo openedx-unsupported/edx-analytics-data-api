@@ -30,9 +30,7 @@ class ProblemResponseAnswerDistributionView(generics.ListAPIView):
             * count: The number of times the answer in this collection was
               given.
             * value_id: The ID of the answer in this collection.
-            * answer_value_text: The text of this answer, for text problems.
-            * answer_value_numeric: The number for this answer, for numeric
-              problems.
+            * answer_value: An answer for this problem.
             * problem_display_name: The display name for the specified problem.
             * question_text: The question for the specified problem.
             * variant: For randomized problems, the random seed used. If problem

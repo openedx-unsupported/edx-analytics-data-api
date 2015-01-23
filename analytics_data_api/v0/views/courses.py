@@ -4,6 +4,7 @@ import warnings
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import connections
 from django.db.models import Max
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
@@ -11,6 +12,7 @@ from rest_framework import generics
 from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.constants import enrollment_modes
+from analytics_data_api.utils import dictfetchall
 from analytics_data_api.v0 import models, serializers
 
 
@@ -610,6 +612,7 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
         return returned_items
 
 
+# pylint: disable=abstract-method
 class ProblemsListView(BaseCourseView):
     """
     Get the problems.
@@ -627,36 +630,36 @@ class ProblemsListView(BaseCourseView):
             * correct_submissions: Total number of *correct* submissions.
             * part_ids: List of problem part IDs
     """
-    model = models.ProblemResponseAnswerDistribution
     serializer_class = serializers.ProblemSerializer
-
-    def apply_date_filtering(self, queryset):
-        # Date filtering is not possible for this data.
-        return queryset
+    allow_empty = False
 
     def get_queryset(self):
-        queryset = super(ProblemsListView, self).get_queryset()
-        queryset = queryset.order_by('module_id', 'part_id')
+        sql = """
+SELECT
+    module_id,
+    SUM(count) AS total_submissions,
+    SUM(CASE WHEN correct=1 THEN count ELSE 0 END) AS correct_submissions,
+    GROUP_CONCAT(DISTINCT part_id) AS part_ids,
+    MAX(created) AS created
+FROM answer_distribution
+WHERE course_id = %s
+GROUP BY module_id;
+        """
+        with connections[settings.ANALYTICS_DATABASE].cursor() as cursor:
+            cursor.execute(sql, [self.course_id])
+            rows = dictfetchall(cursor)
 
-        data = []
+        for row in rows:
+            # Convert the comma-separated list into an array of strings.
+            row['part_ids'] = row['part_ids'].split(',')
 
-        for problem_id, distribution in groupby(queryset, lambda x: x.module_id):
-            total = 0
-            correct = 0
-            part_ids = set()    # Use a set to remove duplicate values.
+            # Convert the aggregated decimal fields to integers
+            row['total_submissions'] = int(row['total_submissions'])
+            row['correct_submissions'] = int(row['correct_submissions'])
 
-            for answer in distribution:
-                part_ids.add(answer.part_id)
-                count = answer.count
-                total += count
-                if answer.correct:
-                    correct += count
+            # Rather than write custom SQL for the SQLite backend, simply parse the timestamp.
+            created = row['created']
+            if not isinstance(created, datetime.datetime):
+                row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S.%f')
 
-            data.append({
-                'module_id': problem_id,
-                'total_submissions': total,
-                'correct_submissions': correct,
-                'part_ids': sorted(part_ids)
-            })
-
-        return data
+        return rows

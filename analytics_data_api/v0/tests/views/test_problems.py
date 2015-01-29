@@ -26,8 +26,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         cls.correct = True
         cls.value_id1 = '3'
         cls.value_id2 = '4'
-        cls.answer_value_text = '3'
-        cls.answer_value_numeric = 3.0
+        cls.answer_value = '3'
         cls.problem_display_name = 'Test Problem'
         cls.question_text = 'Question Text'
 
@@ -38,8 +37,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             part_id=cls.part_id,
             correct=cls.correct,
             value_id=cls.value_id1,
-            answer_value_text=cls.answer_value_text,
-            answer_value_numeric=cls.answer_value_numeric,
+            answer_value=cls.answer_value,
             problem_display_name=cls.problem_display_name,
             question_text=cls.question_text,
             variant=123,
@@ -52,8 +50,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             part_id=cls.part_id,
             correct=cls.correct,
             value_id=cls.value_id1,
-            answer_value_text=cls.answer_value_text,
-            answer_value_numeric=cls.answer_value_numeric,
+            answer_value=cls.answer_value,
             problem_display_name=cls.problem_display_name,
             question_text=cls.question_text,
             variant=345,

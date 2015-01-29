@@ -39,8 +39,7 @@ def matching_tuple(answer):
     """ Return tuple containing values which must match for consolidation. """
     return (
         answer.question_text,
-        answer.answer_value_text,
-        answer.answer_value_numeric,
+        answer.answer_value,
         answer.problem_display_name,
         answer.correct,
     )

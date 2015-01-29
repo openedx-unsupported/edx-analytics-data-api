@@ -82,3 +82,13 @@ def consolidate_answers(problem):
         consolidated_answers.append(consolidated_answer)
 
     return consolidated_answers
+
+
+def dictfetchall(cursor):
+    """Returns all rows from a cursor as a dict"""
+
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]

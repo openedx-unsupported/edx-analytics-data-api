@@ -600,29 +600,34 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         # This data should never be returned by the tests below because the course_id doesn't match.
         G(models.ProblemResponseAnswerDistribution)
 
-        # This test assumes the view is using Python's groupby for grouping. Create multiple objects here to test the
-        # grouping. Add a model with a different module_id to break up the natural order and ensure the view properly
-        # sorts the objects before grouping.
+        # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
+        # natural order and ensure the view properly sorts the objects before grouping.
         module_id = 'i4x://test/problem/1'
         alt_module_id = 'i4x://test/problem/2'
+        created = datetime.datetime.utcnow()
+        alt_created = created + datetime.timedelta(seconds=2)
+
         o1 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=True,
-               count=100)
+               count=100, created=created)
         o2 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
-               correct=True, count=100)
+               correct=True, count=100, created=created)
         o3 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=False,
-               count=200)
+               count=200, created=alt_created)
+
         expected = [
             {
                 'module_id': module_id,
                 'total_submissions': 300,
                 'correct_submissions': 100,
-                'part_ids': [o1.part_id, o3.part_id]
+                'part_ids': [o1.part_id, o3.part_id],
+                'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 100,
                 'correct_submissions': 100,
-                'part_ids': [o2.part_id]
+                'part_ids': [o2.part_id],
+                'created': created.strftime(settings.DATETIME_FORMAT)
             }
         ]
 

@@ -75,6 +75,29 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
         )
 
 
+class ConsolidatedAnswerDistributionSerializer(ProblemResponseAnswerDistributionSerializer):
+    """
+    Serializer for consolidated answer distributions.
+    """
+
+    consolidated_variant = serializers.BooleanField()
+
+    class Meta(ProblemResponseAnswerDistributionSerializer.Meta):
+        fields = ProblemResponseAnswerDistributionSerializer.Meta.fields + ('consolidated_variant',)
+
+    # pylint: disable=super-on-old-class
+    def restore_object(self, attrs, instance=None):
+        """
+        Pops and restores non-model field.
+        """
+
+        consolidated_variant = attrs.pop('consolidated_variant', None)
+        distribution = super(ConsolidatedAnswerDistributionSerializer, self).restore_object(attrs, instance)
+        distribution.consolidated_variant = consolidated_variant
+
+        return distribution
+
+
 class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the grade_distribution table without id

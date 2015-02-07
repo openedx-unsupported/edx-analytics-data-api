@@ -38,7 +38,7 @@ view.diff.report:
 	xdg-open file:///$(COVERAGE)/diff_quality_pylint.html
 
 quality:
-	pep8 --config=.pep8 $(PACKAGES)
+	pep8 $(PACKAGES)
 	pylint $(PACKAGES)
 
 	# Ignore module level docstrings and all test files

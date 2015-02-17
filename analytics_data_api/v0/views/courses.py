@@ -645,7 +645,14 @@ FROM answer_distribution
 WHERE course_id = %s
 GROUP BY module_id;
         """
-        with connections[settings.ANALYTICS_DATABASE].cursor() as cursor:
+        connection = connections[settings.ANALYTICS_DATABASE]
+        with connection.cursor() as cursor:
+            if connection.vendor == 'mysql':
+                # The default value of group_concat_max_len, 1024, is too low for some course data. Increase this value
+                # to its maximum possible value. For more information see
+                # http://code.openark.org/blog/mysql/those-oversized-undersized-variables-defaults.
+                cursor.execute("SET @@group_concat_max_len = @@max_allowed_packet;")
+
             cursor.execute(sql, [self.course_id])
             rows = dictfetchall(cursor)
 

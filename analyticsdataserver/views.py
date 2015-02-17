@@ -69,8 +69,11 @@ class HealthView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        overall_status = 'UNAVAILABLE'
-        db_conn_status = 'UNAVAILABLE'
+        OK = 'OK'
+        UNAVAILABLE = 'UNAVAILABLE'
+
+        overall_status = UNAVAILABLE
+        db_conn_status = UNAVAILABLE
 
         try:
             connection_name = getattr(settings, 'ANALYTICS_DATABASE', 'default')
@@ -78,8 +81,9 @@ class HealthView(APIView):
             try:
                 cursor.execute("SELECT 1")
                 cursor.fetchone()
-                overall_status = 'OK'
-                db_conn_status = 'OK'
+
+                overall_status = OK
+                db_conn_status = OK
             finally:
                 cursor.close()
         except Exception:  # pylint: disable=broad-except
@@ -92,4 +96,4 @@ class HealthView(APIView):
             }
         }
 
-        return Response(response)
+        return Response(response, status=200 if overall_status == OK else 503)

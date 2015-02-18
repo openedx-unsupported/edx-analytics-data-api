@@ -46,7 +46,7 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
     def test_health(self):
         self.assert_database_health('OK')
 
-    def assert_database_health(self, status):
+    def assert_database_health(self, status, status_code=200):
         response = self.client.get('/health', follow=True)
         self.assertEquals(
             response.data,
@@ -57,7 +57,7 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
                 }
             }
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.status_code, status_code)
 
     @staticmethod
     @contextmanager
@@ -71,7 +71,7 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
         databases['reporting'] = {}
 
         with self.override_database_connections(databases):
-            self.assert_database_health('UNAVAILABLE')
+            self.assert_database_health('UNAVAILABLE', status_code=503)
 
     # Workaround to remove a setting from django settings. It has to be used in override_settings and then deleted.
     @override_settings(ANALYTICS_DATABASE='reporting')

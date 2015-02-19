@@ -596,7 +596,7 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         """
 
         # This data should never be returned by the tests below because the course_id doesn't match.
-        G(models.ProblemResponseAnswerDistribution)
+        G(models.ProblemFirstLastResponseAnswerDistribution)
 
         # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
         # natural order and ensure the view properly sorts the objects before grouping.
@@ -606,12 +606,12 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         alt_created = created + datetime.timedelta(seconds=2)
         date_time_format = '%Y-%m-%d %H:%M:%S'
 
-        o1 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=True,
-               count=100, created=created.strftime(date_time_format))
-        o2 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
-               correct=True, count=100, created=created.strftime(date_time_format))
-        o3 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=False,
-               count=200, created=alt_created.strftime(date_time_format))
+        o1 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=module_id,
+               correct=True, last_response_count=100, created=created.strftime(date_time_format))
+        o2 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
+               correct=True, last_response_count=100, created=created.strftime(date_time_format))
+        o3 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=module_id,
+               correct=False, last_response_count=200, created=alt_created.strftime(date_time_format))
 
         expected = [
             {

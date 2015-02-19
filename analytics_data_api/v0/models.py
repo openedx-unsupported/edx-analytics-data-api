@@ -93,23 +93,42 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'gender')]
 
 
-class ProblemResponseAnswerDistribution(models.Model):
-    """ Each row stores the count of a particular answer to a response in a problem in a course (usage). """
+class BaseProblemResponseAnswerDistribution(models.Model):
+    """ Base model for the answer_distribution table. """
 
     class Meta(object):
         db_table = 'answer_distribution'
+        abstract = True
 
     course_id = models.CharField(db_index=True, max_length=255)
     module_id = models.CharField(db_index=True, max_length=255)
     part_id = models.CharField(db_index=True, max_length=255)
     correct = models.NullBooleanField()
-    count = models.IntegerField()
     value_id = models.CharField(db_index=True, max_length=255, null=True)
     answer_value = models.TextField(null=True, db_column='answer_value_text')
     variant = models.IntegerField(null=True)
     problem_display_name = models.TextField(null=True)
     question_text = models.TextField(null=True)
     created = models.DateTimeField(auto_now_add=True)
+
+
+class ProblemResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
+    """ Original model for the count of a particular answer to a response to a problem in a course. """
+
+    class Meta(BaseProblemResponseAnswerDistribution.Meta):
+        managed = False
+
+    count = models.IntegerField()
+
+
+class ProblemFirstLastResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
+    """ Updated model for answer_distribution table with counts of first and last attempts at problems. """
+
+    class Meta(BaseProblemResponseAnswerDistribution.Meta):
+        verbose_name = 'first_last_answer_distribution'
+
+    first_response_count = models.IntegerField()
+    last_response_count = models.IntegerField()
 
 
 class CourseEnrollmentByCountry(BaseCourseEnrollment):

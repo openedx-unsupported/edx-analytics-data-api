@@ -6,9 +6,10 @@
 # pylint: disable=no-member,no-value-for-parameter
 
 from django_dynamic_fixture import G
+import json
 
 from analytics_data_api.v0 import models
-from analytics_data_api.v0.serializers import ProblemResponseAnswerDistributionSerializer, \
+from analytics_data_api.v0.serializers import ProblemFirstLastResponseAnswerDistributionSerializer, \
     GradeDistributionSerializer, SequentialOpenDistributionSerializer
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
@@ -31,7 +32,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         cls.question_text = 'Question Text'
 
         cls.ad1 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id1,
             part_id=cls.part_id,
@@ -41,10 +42,11 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             problem_display_name=cls.problem_display_name,
             question_text=cls.question_text,
             variant=123,
-            count=1
+            first_response_count=1,
+            last_response_count=3,
         )
         cls.ad2 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id1,
             part_id=cls.part_id,
@@ -54,16 +56,17 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             problem_display_name=cls.problem_display_name,
             question_text=cls.question_text,
             variant=345,
-            count=2
+            first_reponse_count=0,
+            last_response_count=2,
         )
         cls.ad3 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id1,
             part_id=cls.part_id,
         )
         cls.ad4 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id2,
             part_id=cls.part_id,
@@ -71,7 +74,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             correct=True,
         )
         cls.ad5 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id2,
             part_id=cls.part_id,
@@ -79,7 +82,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             correct=True
         )
         cls.ad6 = G(
-            models.ProblemResponseAnswerDistribution,
+            models.ProblemFirstLastResponseAnswerDistribution,
             course_id=cls.course_id,
             module_id=cls.module_id2,
             part_id=cls.part_id,
@@ -92,11 +95,14 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id2, self.path))
         self.assertEquals(response.status_code, 200)
 
-        expected_data = models.ProblemResponseAnswerDistribution.objects.filter(module_id=self.module_id2)
-        expected_data = [ProblemResponseAnswerDistributionSerializer(answer).data for answer in expected_data]
+        expected_data = models.ProblemFirstLastResponseAnswerDistribution.objects.filter(module_id=self.module_id2)
+        expected_data = [ProblemFirstLastResponseAnswerDistributionSerializer(answer).data for answer in expected_data]
 
         for answer in expected_data:
             answer['consolidated_variant'] = False
+
+        response.data = set([json.dumps(answer) for answer in response.data])
+        expected_data = set([json.dumps(answer) for answer in expected_data])
 
         self.assertEqual(response.data, expected_data)
 
@@ -106,16 +112,20 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             '/api/v0/problems/{0}{1}'.format(self.module_id1, self.path))
         self.assertEquals(response.status_code, 200)
 
-        expected_data = [
-            ProblemResponseAnswerDistributionSerializer(self.ad1).data,
-            ProblemResponseAnswerDistributionSerializer(self.ad3).data,
-        ]
+        expected_data = [self.ad1, self.ad3]
 
-        expected_data[0]['count'] += self.ad2.count
+        expected_data[0].first_response_count += self.ad2.first_response_count
+        expected_data[0].last_response_count += self.ad2.last_response_count
+
+        expected_data = [ProblemFirstLastResponseAnswerDistributionSerializer(answer).data for answer in expected_data]
+
         expected_data[0]['variant'] = None
         expected_data[0]['consolidated_variant'] = True
 
         expected_data[1]['consolidated_variant'] = False
+
+        response.data = set([json.dumps(answer) for answer in response.data])
+        expected_data = set([json.dumps(answer) for answer in expected_data])
 
         self.assertEquals(response.data, expected_data)
 

@@ -144,19 +144,17 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
         raise NotImplementedError
 
     def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
-        # If start date is after date of existing data, no data should be returned
+        # If start date is after date of existing data, return a 404
         date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?start_date=%s' % (self.api_root_path, self.course_id, self.path, date))
-        self.assertEquals(response.status_code, 200)
-        self.assertListEqual([], response.data)
+        self.assertEquals(response.status_code, 404)
 
-        # If end date is before date of existing data, no data should be returned
+        # If end date is before date of existing data, return a 404
         date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?end_date=%s' % (self.api_root_path, self.course_id, self.path, date))
-        self.assertEquals(response.status_code, 200)
-        self.assertListEqual([], response.data)
+        self.assertEquals(response.status_code, 404)
 
         # If data falls in date range, data should be returned
         start_date = start_date.strftime(settings.DATE_FORMAT)

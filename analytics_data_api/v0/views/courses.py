@@ -48,6 +48,8 @@ class BaseCourseView(generics.ListAPIView):
     def get_queryset(self):
         queryset = self.model.objects.filter(course_id=self.course_id)
         queryset = self.apply_date_filtering(queryset)
+        if not queryset:
+            raise Http404
         return queryset
 
     def get_csv_filename(self):

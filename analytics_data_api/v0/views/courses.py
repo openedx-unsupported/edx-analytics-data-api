@@ -19,6 +19,7 @@ class BaseCourseView(generics.ListAPIView):
     end_date = None
     course_id = None
     slug = None
+    allow_empty = False
 
     def get(self, request, *args, **kwargs):
         self.course_id = self.kwargs.get('course_id')
@@ -39,17 +40,10 @@ class BaseCourseView(generics.ListAPIView):
 
         return super(BaseCourseView, self).get(request, *args, **kwargs)
 
-    def verify_course_exists_or_404(self, course_id):
-        if self.model.objects.filter(course_id=course_id).exists():
-            return True
-
-        raise Http404
-
     def apply_date_filtering(self, queryset):
         raise NotImplementedError
 
     def get_queryset(self):
-        self.verify_course_exists_or_404(self.course_id)
         queryset = self.model.objects.filter(course_id=self.course_id)
         queryset = self.apply_date_filtering(queryset)
         return queryset

@@ -39,19 +39,14 @@ class BaseCourseView(generics.ListAPIView):
 
         return super(BaseCourseView, self).get(request, *args, **kwargs)
 
-    def verify_course_exists_or_404(self, course_id):
-        if self.model.objects.filter(course_id=course_id).exists():
-            return True
-
-        raise Http404
-
     def apply_date_filtering(self, queryset):
         raise NotImplementedError
 
     def get_queryset(self):
-        self.verify_course_exists_or_404(self.course_id)
         queryset = self.model.objects.filter(course_id=self.course_id)
         queryset = self.apply_date_filtering(queryset)
+        if not queryset:
+            raise Http404
         return queryset
 
     def get_csv_filename(self):

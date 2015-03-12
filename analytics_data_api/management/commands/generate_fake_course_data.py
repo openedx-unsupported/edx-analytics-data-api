@@ -91,6 +91,7 @@ class Command(BaseCommand):
         # Create new data
         daily_total = 1500
         date = start_date
+        cumulative_count = 0
 
         while date <= end_date:
             daily_total = get_count(daily_total)
@@ -98,8 +99,9 @@ class Command(BaseCommand):
 
             for mode, ratio in enrollment_mode_ratios.iteritems():
                 count = int(ratio * daily_total)
+                cumulative_count = max(cumulative_count + 10, count)
                 models.CourseEnrollmentModeDaily.objects.create(course_id=course_id, date=date, count=count,
-                                                                mode=mode)
+                                                                cumulative_count=cumulative_count, mode=mode)
 
             for gender, ratio in gender_ratios.iteritems():
                 count = int(ratio * daily_total)

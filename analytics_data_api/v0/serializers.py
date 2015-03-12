@@ -198,6 +198,8 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
             # Create a transform method for each field
             setattr(self, 'transform_%s' % mode, self._transform_mode)
 
+        fields['cumulative_count'] = serializers.IntegerField(required=True, default=0)
+
         return fields
 
     def _transform_mode(self, _obj, value):
@@ -207,7 +209,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
         model = models.CourseEnrollmentDaily
 
         # Declare the dynamically-created fields here as well so that they will be picked up by Swagger.
-        fields = ['course_id', 'date', 'count', 'created'] + ENROLLMENT_MODES
+        fields = ['course_id', 'date', 'count', 'cumulative_count', 'created'] + ENROLLMENT_MODES
 
 
 class CountrySerializer(serializers.Serializer):

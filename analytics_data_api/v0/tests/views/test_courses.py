@@ -426,9 +426,11 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         arg = args[0]
         response = self.serialize_enrollment(arg)
         total = 0
+        cumulative = 0
 
         for ce in args:
             total += ce.count
+            cumulative += ce.cumulative_count
             response[ce.mode] = ce.count
 
         # Merge the honor and audit modes
@@ -439,6 +441,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         del response[enrollment_modes.PROFESSIONAL_NO_ID]
 
         response[u'count'] = total
+        response[u'cumulative_count'] = cumulative
 
         return [response]
 
@@ -446,7 +449,8 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         self.destroy_data()
 
         # Create a single entry for a single enrollment mode
-        enrollment = G(self.model, course_id=self.course_id, date=self.date, mode=enrollment_modes.AUDIT, count=1)
+        enrollment = G(self.model, course_id=self.course_id, date=self.date, mode=enrollment_modes.AUDIT,
+                       count=1, cumulative_count=100)
 
         # Create the expected data
         modes = list(enrollment_modes.ALL)
@@ -459,6 +463,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
 
         expected.update(self.serialize_enrollment(enrollment))
         expected[u'count'] = 1
+        expected[u'cumulative_count'] = 100
 
         expected = [expected]
         self.assertViewReturnsExpectedData(expected)

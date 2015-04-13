@@ -661,6 +661,6 @@ GROUP BY module_id;
             # Rather than write custom SQL for the SQLite backend, simply parse the timestamp.
             created = row['created']
             if not isinstance(created, datetime.datetime):
-                row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S.%f')
+                row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S')
 
         return rows

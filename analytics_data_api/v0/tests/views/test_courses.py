@@ -604,13 +604,14 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         alt_module_id = 'i4x://test/problem/2'
         created = datetime.datetime.utcnow()
         alt_created = created + datetime.timedelta(seconds=2)
+        date_time_format = '%Y-%m-%d %H:%M:%S'
 
         o1 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=True,
-               count=100, created=created)
+               count=100, created=created.strftime(date_time_format))
         o2 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
-               correct=True, count=100, created=created)
+               correct=True, count=100, created=created.strftime(date_time_format))
         o3 = G(models.ProblemResponseAnswerDistribution, course_id=self.course_id, module_id=module_id, correct=False,
-               count=200, created=alt_created)
+               count=200, created=alt_created.strftime(date_time_format))
 
         expected = [
             {

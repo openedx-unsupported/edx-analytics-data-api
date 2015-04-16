@@ -152,3 +152,37 @@ class SequentialOpenDistribution(models.Model):
     course_id = models.CharField(db_index=True, max_length=255)
     count = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class BaseVideo(models.Model):
+    """ Base video model. """
+    pipeline_video_id = models.CharField(db_index=True, max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta(object):
+        abstract = True
+
+
+class VideoTimeline(BaseVideo):
+    """ Timeline of video segments. """
+
+    segment = models.IntegerField()
+    num_users = models.IntegerField()
+    num_views = models.IntegerField()
+
+    class Meta(BaseVideo.Meta):
+        db_table = 'video_timeline'
+
+
+class Video(BaseVideo):
+    """ Videos associated with a particular course. """
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    encoded_module_id = models.CharField(db_index=True, max_length=255)
+    duration = models.IntegerField()
+    segment_length = models.IntegerField()
+    start_views = models.IntegerField()
+    end_views = models.IntegerField()
+
+    class Meta(BaseVideo.Meta):
+        db_table = 'video'

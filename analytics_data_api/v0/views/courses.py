@@ -664,3 +664,33 @@ GROUP BY module_id;
                 row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S')
 
         return rows
+
+
+class VideosListView(BaseCourseView):
+    """
+    Get videos for a course.
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/videos/
+
+    **Response Values**
+
+        Returns a collection of video views and metadata for each video. Each collection contains:
+
+            * video_id: The ID of the video.
+            * encoded_module_id: The encoded module ID.
+            * duration: Length of the video in seconds.
+            * segment_length: Length of each segment of the video in seconds.
+            * start_views: Number of views at the start of the video.
+            * end_views: Number of views at the end of the video.
+            * created: The date the video data was updated.
+    """
+
+    serializer_class = serializers.VideoSerializer
+    allow_empty = False
+    model = models.Video
+
+    def apply_date_filtering(self, queryset):
+        # no date filtering for videos -- just return the queryset
+        return queryset

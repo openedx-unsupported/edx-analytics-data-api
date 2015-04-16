@@ -641,3 +641,61 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
 
         response = self._get_data('foo/bar/course')
         self.assertEquals(response.status_code, 404)
+
+
+class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+    def _get_data(self, course_id=None):
+        """
+        Retrieve videos for a specified course.
+        """
+        course_id = course_id or self.course_id
+        url = '/api/v0/courses/{}/videos/'.format(course_id)
+        return self.authenticated_get(url)
+
+    def test_get(self):
+        # add a blank row, which shouldn't be included in results
+        G(models.Video)
+
+        module_id = 'i4x-test-video-1'
+        video_id = 'v1d30'
+        created = datetime.datetime.utcnow()
+        date_time_format = '%Y-%m-%d %H:%M:%S'
+        G(models.Video, course_id=self.course_id, encoded_module_id=module_id,
+          pipeline_video_id=video_id, duration=100, segment_length=1, start_views=50, end_views=10,
+          created=created.strftime(date_time_format))
+
+        alt_module_id = 'i4x-test-video-2'
+        alt_video_id = 'a1d30'
+        alt_created = created + datetime.timedelta(seconds=10)
+        G(models.Video, course_id=self.course_id, encoded_module_id=alt_module_id,
+          pipeline_video_id=alt_video_id, duration=200, segment_length=5, start_views=1050, end_views=50,
+          created=alt_created.strftime(date_time_format))
+
+        expected = [
+            {
+                'duration': 100,
+                'encoded_module_id': module_id,
+                'pipeline_video_id': video_id,
+                'segment_length': 1,
+                'start_views': 50,
+                'end_views': 10,
+                'created': created.strftime(settings.DATETIME_FORMAT)
+            },
+            {
+                'duration': 200,
+                'encoded_module_id': alt_module_id,
+                'pipeline_video_id': alt_video_id,
+                'segment_length': 5,
+                'start_views': 1050,
+                'end_views': 50,
+                'created': alt_created.strftime(settings.DATETIME_FORMAT)
+            }
+        ]
+
+        response = self._get_data(self.course_id)
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected)
+
+    def test_get_404(self):
+        response = self._get_data('foo/bar/course')
+        self.assertEquals(response.status_code, 404)

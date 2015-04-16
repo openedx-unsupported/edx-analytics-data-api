@@ -241,3 +241,28 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
         model = models.CourseActivityWeekly
         # TODO: Add 'posted_forum' here to restore forum data
         fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'created')
+
+
+class VideoSerializer(ModelSerializerWithCreatedField):
+    class Meta(object):
+        model = models.Video
+        fields = (
+            'pipeline_video_id',
+            'encoded_module_id',
+            'duration',
+            'segment_length',
+            'start_views',
+            'end_views',
+            'created'
+        )
+
+
+class VideoTimelineSerializer(ModelSerializerWithCreatedField):
+    class Meta(object):
+        model = models.VideoTimeline
+        fields = (
+            'segment',
+            'num_users',
+            'num_views',
+            'created'
+        )

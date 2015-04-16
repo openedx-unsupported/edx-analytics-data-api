@@ -78,6 +78,7 @@ class Command(BaseCommand):
 
         # Delete existing data
         for model in [models.CourseEnrollmentDaily,
+                      models.CourseEnrollmentModeDaily,
                       models.CourseEnrollmentByGender,
                       models.CourseEnrollmentByEducation,
                       models.CourseEnrollmentByBirthYear,
@@ -155,8 +156,34 @@ class Command(BaseCommand):
 
         logger.info("Done!")
 
+    def generate_video_timeline_data(self, video_id):
+        logger.info("Deleting video timeline data...")
+        models.VideoTimeline.objects.all().delete()
+
+        logger.info("Generating new video timeline...")
+        for segment in range(100):
+            active_students = random.randint(100, 4000)
+            counts = constrained_sum_sample_pos(2, active_students)
+            models.VideoTimeline.objects.create(pipeline_video_id=video_id, segment=segment,
+                                                num_users=counts[0], num_views=counts[1])
+
+        logger.info("Done!")
+
+    def generate_video_data(self, course_id, video_id, module_id):
+        logger.info("Deleting course video data...")
+        models.Video.objects.all().delete()
+
+        logger.info("Generating new course videos...")
+        start_views = 1234
+        models.Video.objects.create(course_id=course_id, pipeline_video_id=video_id,
+                                    encoded_module_id=module_id, duration=500, segment_length=5,
+                                    start_views=start_views,
+                                    end_views=random.randint(100, start_views))
+
     def handle(self, *args, **options):
         course_id = 'edX/DemoX/Demo_Course'
+        video_id = '0fac49ba'
+        video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
         start_date = datetime.datetime(year=2014, month=1, day=1, tzinfo=timezone.utc)
 
         num_weeks = options['num_weeks']
@@ -168,3 +195,5 @@ class Command(BaseCommand):
         logger.info("Generating data for %s...", course_id)
         self.generate_weekly_data(course_id, start_date, end_date)
         self.generate_daily_data(course_id, start_date, end_date)
+        self.generate_video_data(course_id, video_id, video_module_id)
+        self.generate_video_timeline_data(video_id)

@@ -99,6 +99,44 @@ class ConsolidatedAnswerDistributionSerializer(ProblemResponseAnswerDistribution
         return distribution
 
 
+class ProblemFirstLastResponseAnswerDistributionSerializer(ProblemResponseAnswerDistributionSerializer):
+    """
+    Serializer for answer distribution table including counts of first and last response values.
+    """
+
+    class Meta(ProblemResponseAnswerDistributionSerializer.Meta):
+        model = models.ProblemFirstLastResponseAnswerDistribution
+        fields = ProblemResponseAnswerDistributionSerializer.Meta.fields + (
+            'first_response_count',
+            'last_response_count',
+        )
+
+        fields = tuple([field for field in fields if field != 'count'])
+
+
+class ConsolidatedFirstLastAnswerDistributionSerializer(ProblemFirstLastResponseAnswerDistributionSerializer):
+    """
+    Serializer for consolidated answer distributions including first attempt counts.
+    """
+
+    consolidated_variant = serializers.BooleanField()
+
+    class Meta(ProblemFirstLastResponseAnswerDistributionSerializer.Meta):
+        fields = ProblemFirstLastResponseAnswerDistributionSerializer.Meta.fields + ('consolidated_variant',)
+
+    # pylint: disable=super-on-old-class
+    def restore_object(self, attrs, instance=None):
+        """
+        Pops and restores non-model field.
+        """
+
+        consolidated_variant = attrs.pop('consolidated_variant', None)
+        distribution = super(ConsolidatedFirstLastAnswerDistributionSerializer, self).restore_object(attrs, instance)
+        distribution.consolidated_variant = consolidated_variant
+
+        return distribution
+
+
 class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the grade_distribution table without id

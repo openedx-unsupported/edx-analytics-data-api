@@ -628,17 +628,18 @@ class ProblemsListView(BaseCourseView):
     allow_empty = False
 
     def get_queryset(self):
-        sql = """
+        aggregation_query = """
 SELECT
     module_id,
-    SUM(count) AS total_submissions,
-    SUM(CASE WHEN correct=1 THEN count ELSE 0 END) AS correct_submissions,
+    SUM(last_response_count) AS total_submissions,
+    SUM(CASE WHEN correct=1 THEN last_response_count ELSE 0 END) AS correct_submissions,
     GROUP_CONCAT(DISTINCT part_id) AS part_ids,
     MAX(created) AS created
 FROM answer_distribution
 WHERE course_id = %s
 GROUP BY module_id;
         """
+
         connection = connections[settings.ANALYTICS_DATABASE]
         with connection.cursor() as cursor:
             if connection.vendor == 'mysql':
@@ -647,7 +648,18 @@ GROUP BY module_id;
                 # http://code.openark.org/blog/mysql/those-oversized-undersized-variables-defaults.
                 cursor.execute("SET @@group_concat_max_len = @@max_allowed_packet;")
 
-            cursor.execute(sql, [self.course_id])
+                cursor.execute("DESCRIBE answer_distribution;")
+                column_names = [row[0] for row in cursor.fetchall()]
+            # Alternate query for sqlite test database
+            else:
+                cursor.execute("PRAGMA table_info(answer_distribution)")
+                column_names = [row[1] for row in cursor.fetchall()]
+
+            if u'last_response_count' in column_names:
+                cursor.execute(aggregation_query, [self.course_id])
+            else:
+                cursor.execute(aggregation_query.replace('last_response_count', 'count'), [self.course_id])
+
             rows = dictfetchall(cursor)
 
         for row in rows:

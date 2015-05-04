@@ -184,7 +184,7 @@ class Command(BaseCommand):
         course_id = 'edX/DemoX/Demo_Course'
         video_id = '0fac49ba'
         video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
-        start_date = datetime.datetime(year=2014, month=1, day=1, tzinfo=timezone.utc)
+        start_date = datetime.datetime(year=2015, month=1, day=1, tzinfo=timezone.utc)
 
         num_weeks = options['num_weeks']
         if num_weeks:

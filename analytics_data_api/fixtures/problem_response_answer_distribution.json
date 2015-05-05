@@ -3,7 +3,8 @@
         "fields": {
             "answer_value": "36.02736",
             "correct": false,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
@@ -13,14 +14,15 @@
             "problem_display_name": "Earth Science Question",
             "question_text": "Enter your answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 1
     },
     {
         "fields": {
             "answer_value": "33.0",
             "correct": false,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
@@ -30,14 +32,15 @@
             "problem_display_name": "Earth Science Question",
             "question_text": "Enter your answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 2
     },
     {
         "fields": {
             "answer_value": "27.51936482",
             "correct": true,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
@@ -47,14 +50,15 @@
             "problem_display_name": "Earth Science Question",
             "question_text": "Enter your answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 3
     },
     {
         "fields": {
             "answer_value": "28.65",
             "correct": true,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "EarthSciences/GP202/Spring2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
@@ -64,14 +68,15 @@
             "problem_display_name": "Earth Science Question",
             "question_text": "Enter your answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 4
     },
     {
         "fields": {
             "answer_value": "line 15: mean(glm.pred==Direction)",
             "correct": true,
-            "count": 95,
+            "first_response_count": 0,
+            "last_response_count": 95,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
@@ -81,14 +86,15 @@
             "problem_display_name": null,
             "question_text": null
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 5
     },
     {
         "fields": {
             "answer_value": "line 22: Direction.2005=Smarket$Direction[!train]",
             "correct": false,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
@@ -98,14 +104,15 @@
             "problem_display_name": null,
             "question_text": null
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 6
     },
     {
         "fields": {
             "answer_value": "line 30: table(glm.pred,Direction.2005)",
             "correct": false,
-            "count": 1,
+            "first_response_count": 0,
+            "last_response_count": 1,
             "course_id": "HumanitiesScience/StatLearning/Winter2014",
             "created": "2014-06-24T17:13:12",
             "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
@@ -115,14 +122,15 @@
             "problem_display_name": null,
             "question_text": null
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 7
     },
     {
         "fields": {
             "answer_value": "5.02",
             "correct": true,
-            "count": 95,
+            "first_response_count": 0,
+            "last_response_count": 95,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -132,14 +140,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Enter an answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 8
     },
     {
         "fields": {
             "answer_value": "62",
             "correct": false,
-            "count": 13,
+            "first_response_count": 0,
+            "last_response_count": 13,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -149,14 +158,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Enter an answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 9
     },
     {
         "fields": {
             "answer_value": "10.2",
             "correct": false,
-            "count": 100,
+            "first_response_count": 0,
+            "last_response_count": 100,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:12",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -166,14 +176,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Enter an answer:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 10
     },
     {
         "fields": {
             "answer_value": null,
             "correct": true,
-            "count": 5,
+            "first_response_count": 0,
+            "last_response_count": 5,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -183,14 +194,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Randomized answer"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 11
     },
     {
         "fields": {
             "answer_value": null,
             "correct": true,
-            "count": 213,
+            "first_response_count": 0,
+            "last_response_count": 213,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -200,7 +212,7 @@
             "problem_display_name": "Example problem",
             "question_text": "Randomized answer"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 12
     },
 
@@ -208,7 +220,8 @@
         "fields": {
             "answer_value": "North America",
             "correct": true,
-            "count": 95,
+            "first_response_count": 0,
+            "last_response_count": 95,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -218,14 +231,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Select from the choices below:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 13
     },
     {
         "fields": {
             "answer_value": "Africa",
             "correct": false,
-            "count": 13,
+            "first_response_count": 0,
+            "last_response_count": 13,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:11",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -235,14 +249,15 @@
             "problem_display_name": "Example problem",
             "question_text": "Select from the choices below:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 14
     },
     {
         "fields": {
             "answer_value": "Asia",
             "correct": false,
-            "count": 100,
+            "first_response_count": 0,
+            "last_response_count": 100,
             "course_id": "edX/DemoX/Demo_Course",
             "created": "2014-06-24T17:13:12",
             "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
@@ -252,7 +267,7 @@
             "problem_display_name": "Example problem",
             "question_text": "Select from the choices below:"
         },
-        "model": "v0.problemresponseanswerdistribution",
+        "model": "v0.problemfirstlastresponseanswerdistribution",
         "pk": 15
     }
 

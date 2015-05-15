@@ -10,19 +10,20 @@ from analytics_data_api.v0.serializers import VideoTimelineSerializer
 
 class VideoTimelineView(generics.ListAPIView):
     """
-    Get the timeline for a video.
+    Get the counts of users and views for a video.
 
-    **Example request**
+    **Example Request**
 
         GET /api/v0/videos/{video_id}/timeline/
 
     **Response Values**
 
-        Returns viewing data for segments of a video.  Each collection contains:
+        Returns viewing data for each segment of a video.  For each segment,
+        the collection contains the following data.
 
-            * segment: Order of the segment in the timeline.
-            * num_users: Number of unique users that have viewed this segment.
-            * num_views: Number of total views for this segment.
+            * segment: The order of the segment in the video timeline.
+            * num_users: The number of unique users who viewed this segment.
+            * num_views: The number of views for this segment.
             * created: The date the segment data was computed.
     """
 

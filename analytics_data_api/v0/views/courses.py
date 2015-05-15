@@ -680,7 +680,7 @@ GROUP BY module_id;
 
 class VideosListView(BaseCourseView):
     """
-    Get videos for a course.
+    Get data for the videos in a course.
 
     **Example request**
 
@@ -688,14 +688,15 @@ class VideosListView(BaseCourseView):
 
     **Response Values**
 
-        Returns a collection of video views and metadata for each video. Each collection contains:
+        Returns a collection of video views and metadata for each video.
+        For each video, the collection the following data.
 
             * video_id: The ID of the video.
             * encoded_module_id: The encoded module ID.
-            * duration: Length of the video in seconds.
-            * segment_length: Length of each segment of the video in seconds.
-            * start_views: Number of views at the start of the video.
-            * end_views: Number of views at the end of the video.
+            * duration: The length of the video in seconds.
+            * segment_length: The length of each segment of the video in seconds.
+            * start_views: The number of views at the start of the video.
+            * end_views: The number of views at the end of the video.
             * created: The date the video data was updated.
     """
 

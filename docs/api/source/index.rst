@@ -6,9 +6,11 @@ edX Data Analytics API Version 0
     :maxdepth: 2
     
     read_me
+    change_log
     overview
     setup
     authentication
     endpoints
     courses
     problems
+    videos

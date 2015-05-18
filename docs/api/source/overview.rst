@@ -1,18 +1,14 @@
 .. _edX Data Analytics API Overview:
 
-################################################
+################################
 edX Data Analytics API Overview
-################################################
+################################
 
 The edX Data Analytics API provides the tools for building applications to view
 and analyze student activity in your course.
 
-The edX Data Analytics API uses Representational State Transfer (REST) design
-principles and supports JavaScript Object Notation (JSON) data-interchange
-format. Our REST API is simple, lightweight and optimized.
-
-You can use the edX Data Analytics API for web, desktop, and mobile
-applications.
+The edX Platform APIs use REST design principles and support the JSON 
+data-interchange format.
 
 ****************************************
 edX Data Analytics API Version 0, Alpha
@@ -44,6 +40,8 @@ With the edX Data Analytics API, you can:
 * :ref:`Get the Course Enrollment by Education Level`
 * :ref:`Get the Course Enrollment by Gender`
 * :ref:`Get the Course Enrollment by Location`
+* :ref:`Get the Course Video Data`
 * :ref:`Get the Grade Distribution for a Course`
 * :ref:`Get the Answer Distribution for a Problem`
 * :ref:`Get the View Count for a Subsection`
+* :ref:`Get the Timeline for a Video`

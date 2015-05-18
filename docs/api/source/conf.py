@@ -45,7 +45,7 @@ extensions = [
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['build']
+exclude_patterns = ['build', 'links.rst']
 
 project = u'edX Data Analytics API Version 0 Alpha'
-copyright = u'2014, edX'
+copyright = u'2015, edX'

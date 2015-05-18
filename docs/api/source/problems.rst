@@ -1,14 +1,12 @@
-##################################################
-Problem Information API Module
-##################################################
+########################
+Problem Information API
+########################
 
-This page contains information to:
-
-* `Get the Grade Distribution for a Course`_
-* `Get the Answer Distribution for a Problem`_
-* `Get the View Count for a Subsection`_
+.. contents:: Section Contents 
+  :local:
+  :depth: 1
   
- .. _Get the Grade Distribution for a Course:
+.. _Get the Grade Distribution for a Course:
 
 ***************************************
 Get the Grade Distribution for a Course
@@ -16,7 +14,7 @@ Get the Grade Distribution for a Course
 
 .. autoclass:: analytics_data_api.v0.views.problems.GradeDistributionView 
 
-**Example response**
+**Example Response**
 
 .. code-block:: json
 
@@ -52,7 +50,7 @@ Get the Answer Distribution for a Problem
 
 .. autoclass:: analytics_data_api.v0.views.problems.ProblemResponseAnswerDistributionView
 
-**Example response**
+**Example Response**
 
 .. code-block:: json
 
@@ -106,7 +104,7 @@ Get the View Count for a Subsection
 
 .. autoclass:: analytics_data_api.v0.views.problems.SequentialOpenDistributionView
 
-**Example response**
+**Example Response**
 
 .. code-block:: json
 

@@ -174,11 +174,11 @@ class Command(BaseCommand):
         models.Video.objects.all().delete()
 
         logger.info("Generating new course videos...")
-        start_views = 1234
+        users_at_start = 1234
         models.Video.objects.create(course_id=course_id, pipeline_video_id=video_id,
                                     encoded_module_id=module_id, duration=500, segment_length=5,
-                                    start_views=start_views,
-                                    end_views=random.randint(100, start_views))
+                                    users_at_start=users_at_start,
+                                    users_at_end=random.randint(100, users_at_start))
 
     def handle(self, *args, **options):
         course_id = 'edX/DemoX/Demo_Course'

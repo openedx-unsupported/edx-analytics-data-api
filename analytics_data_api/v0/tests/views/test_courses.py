@@ -661,14 +661,14 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         created = datetime.datetime.utcnow()
         date_time_format = '%Y-%m-%d %H:%M:%S'
         G(models.Video, course_id=self.course_id, encoded_module_id=module_id,
-          pipeline_video_id=video_id, duration=100, segment_length=1, start_views=50, end_views=10,
+          pipeline_video_id=video_id, duration=100, segment_length=1, users_at_start=50, users_at_end=10,
           created=created.strftime(date_time_format))
 
         alt_module_id = 'i4x-test-video-2'
         alt_video_id = 'a1d30'
         alt_created = created + datetime.timedelta(seconds=10)
         G(models.Video, course_id=self.course_id, encoded_module_id=alt_module_id,
-          pipeline_video_id=alt_video_id, duration=200, segment_length=5, start_views=1050, end_views=50,
+          pipeline_video_id=alt_video_id, duration=200, segment_length=5, users_at_start=1050, users_at_end=50,
           created=alt_created.strftime(date_time_format))
 
         expected = [
@@ -677,8 +677,8 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
                 'encoded_module_id': module_id,
                 'pipeline_video_id': video_id,
                 'segment_length': 1,
-                'start_views': 50,
-                'end_views': 10,
+                'users_at_start': 50,
+                'users_at_end': 10,
                 'created': created.strftime(settings.DATETIME_FORMAT)
             },
             {
@@ -686,8 +686,8 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
                 'encoded_module_id': alt_module_id,
                 'pipeline_video_id': alt_video_id,
                 'segment_length': 5,
-                'start_views': 1050,
-                'end_views': 50,
+                'users_at_start': 1050,
+                'users_at_end': 50,
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             }
         ]

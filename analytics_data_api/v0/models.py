@@ -200,8 +200,8 @@ class Video(BaseVideo):
     encoded_module_id = models.CharField(db_index=True, max_length=255)
     duration = models.IntegerField()
     segment_length = models.IntegerField()
-    start_views = models.IntegerField()
-    end_views = models.IntegerField()
+    users_at_start = models.IntegerField()
+    users_at_end = models.IntegerField()
 
     class Meta(BaseVideo.Meta):
         db_table = 'video'

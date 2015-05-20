@@ -695,8 +695,8 @@ class VideosListView(BaseCourseView):
             * encoded_module_id: The encoded module ID.
             * duration: The length of the video in seconds.
             * segment_length: The length of each segment of the video in seconds.
-            * start_views: The number of views at the start of the video.
-            * end_views: The number of views at the end of the video.
+            * users_at_start: The number of viewers at the start of the video.
+            * users_at_end: The number of viewers at the end of the video.
             * created: The date the video data was updated.
     """
 

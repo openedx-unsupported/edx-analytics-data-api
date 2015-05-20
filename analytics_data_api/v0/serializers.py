@@ -289,8 +289,8 @@ class VideoSerializer(ModelSerializerWithCreatedField):
             'encoded_module_id',
             'duration',
             'segment_length',
-            'start_views',
-            'end_views',
+            'users_at_start',
+            'users_at_end',
             'created'
         )
 

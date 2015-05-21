@@ -280,8 +280,8 @@ Get the Course Video Data
           02874e0ae0c74ae7b16faa5d6fdc8085",
         "duration": 142,
         "segment_length": 5,
-        "start_views": 2,
-        "end_views": 0,
+        "users_at_start": 2,
+        "users_at_end": 0,
         "created": "2015-04-15T214158"
       },
       {
@@ -291,8 +291,8 @@ Get the Course Video Data
           03454e0ae0c72ae7b16fab3d6fdc2143",
         "duration": 66,
         "segment_length": 5,
-        "start_views": 1044,
-        "end_views": 0,
+        "users_at_start": 1044,
+        "users_at_end": 0,
         "created": "2015-04-15T214158"
       },     
     ]

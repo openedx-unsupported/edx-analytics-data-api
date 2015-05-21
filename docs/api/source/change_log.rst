@@ -8,5 +8,8 @@ Change Log
 
    * - Date
      - Change
-   * - 05/18/15
+   * - 21 May 2015
+     - Updated :ref:`Get the Course Video Data` to add the ``users_at_start``
+       and ``users_at_end`` response values.
+   * - 18 May 2015
      - Added :ref:`Get the Course Video Data` and :ref:`Video Data API`.

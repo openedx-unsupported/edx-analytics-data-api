@@ -513,6 +513,10 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
             # Merge audit and honor
             item[enrollment_modes.HONOR] = item.get(enrollment_modes.HONOR, 0) + item.pop(enrollment_modes.AUDIT, 0)
 
+            # Merge professional with non verified professional
+            item[enrollment_modes.PROFESSIONAL] = \
+                item.get(enrollment_modes.PROFESSIONAL, 0) + item.pop(enrollment_modes.PROFESSIONAL_NO_ID, 0)
+
             item[u'count'] = total
 
             formatted_data.append(item)

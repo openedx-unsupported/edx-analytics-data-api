@@ -435,6 +435,9 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         response[enrollment_modes.HONOR] += response[enrollment_modes.AUDIT]
         del response[enrollment_modes.AUDIT]
 
+        response[enrollment_modes.PROFESSIONAL] += response[enrollment_modes.PROFESSIONAL_NO_ID]
+        del response[enrollment_modes.PROFESSIONAL_NO_ID]
+
         response[u'count'] = total
 
         return [response]
@@ -448,6 +451,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         # Create the expected data
         modes = list(enrollment_modes.ALL)
         modes.remove(enrollment_modes.AUDIT)
+        modes.remove(enrollment_modes.PROFESSIONAL_NO_ID)
 
         expected = {}
         for mode in modes:

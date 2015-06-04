@@ -632,11 +632,14 @@ class ProblemsListView(BaseCourseView):
     allow_empty = False
 
     def get_queryset(self):
+        # last_response_count is the number of submissions for the problem part and must
+        # be divided by the number of problem parts to get the problem submission rather
+        # than the problem *part* submissions
         aggregation_query = """
 SELECT
     module_id,
-    SUM(last_response_count) AS total_submissions,
-    SUM(CASE WHEN correct=1 THEN last_response_count ELSE 0 END) AS correct_submissions,
+    SUM(last_response_count)/COUNT(DISTINCT part_id) AS total_submissions,
+    SUM(CASE WHEN correct=1 THEN last_response_count ELSE 0 END)/COUNT(DISTINCT part_id) AS correct_submissions,
     GROUP_CONCAT(DISTINCT part_id) AS part_ids,
     MAX(created) AS created
 FROM answer_distribution

@@ -620,8 +620,8 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         expected = [
             {
                 'module_id': module_id,
-                'total_submissions': 300,
-                'correct_submissions': 100,
+                'total_submissions': 150,
+                'correct_submissions': 50,
                 'part_ids': [o1.part_id, o3.part_id],
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },

@@ -466,6 +466,7 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
             * course_id: The ID of the course for which data is returned.
             * date: The date for which the enrollment count was computed.
             * count: The total count of enrolled users.
+            * cumulative_count: The cumulative count of users ever enrolled.
             * created: The date the counts were computed.
             * honor: The number of users enrolled in honor code mode.
             * professional: The number of users enrolled in professional mode.
@@ -503,12 +504,14 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
             }
 
             total = 0
+            cumulative_total = 0
 
             for enrollment in group:
                 mode = enrollment.mode
                 item[mode] = enrollment.count
                 item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
                 total += enrollment.count
+                cumulative_total += enrollment.cumulative_count
 
             # Merge audit and honor
             item[enrollment_modes.HONOR] = item.get(enrollment_modes.HONOR, 0) + item.pop(enrollment_modes.AUDIT, 0)
@@ -518,6 +521,7 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
                 item.get(enrollment_modes.PROFESSIONAL, 0) + item.pop(enrollment_modes.PROFESSIONAL_NO_ID, 0)
 
             item[u'count'] = total
+            item[u'cumulative_count'] = cumulative_total
 
             formatted_data.append(item)
 

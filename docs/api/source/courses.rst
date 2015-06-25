@@ -107,6 +107,7 @@ Get the Course Enrollment by Mode
         "course_id": "edX/DemoX/Demo_Course",
         "date": "2014-12-10",
         "count": 1890,
+        "cumulative_count": 1931,
         "created": "2014-12-10T193146",
         "honor": 945,
         "professional": 189,

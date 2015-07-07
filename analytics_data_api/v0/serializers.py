@@ -306,3 +306,23 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
             'num_views',
             'created'
         )
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    gender = serializers.CharField()
+    level_of_education = serializers.CharField()
+
+    class Meta(object):
+        model = models.UserProfile
+        fields = (
+            'id',
+            'username',
+            'last_login',
+            'date_joined',
+            'is_staff',
+            'email',
+            'name',
+            'gender',
+            'year_of_birth',
+            'level_of_education',
+        )

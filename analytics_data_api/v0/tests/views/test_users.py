@@ -62,7 +62,11 @@ class UsersTests(TestCaseWithAuthentication):
         ]
         response = self.authenticated_get('/api/v0/users/')
         self.assertEquals(response.status_code, 200)
-        self.assertListEqual(response.data, expected)
+        self.assertIsInstance(response.data, dict)
+        self.assertEqual(response.data['count'], 2)
+        self.assertEqual(response.data['previous'], None)
+        self.assertEqual(response.data['next'], None)
+        self.assertListEqual(response.data['results'], expected)
 
     def test_get_profile(self):
         date_value = timezone.now()

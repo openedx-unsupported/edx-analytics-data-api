@@ -16,9 +16,17 @@ class UserListView(generics.ListAPIView):
 
         GET /api/v0/users/
 
+    **Additional parameters**
+
+        These query parameters can be specified to control pagination of the results:
+
+            * limit: Specify how many results to return per page (default is 100).
+            * page: Specify which page of results. 1 is the first page.
+
     **Response Values**
 
-        Returns a collection of user objects. Each user object contains:
+        Returns an object with pagination info and a 'results' entry that is a collection of user
+        objects. Each user object contains:
 
             * id: The user's ID (integer)
             * username: The username (string)
@@ -33,6 +41,8 @@ class UserListView(generics.ListAPIView):
     """
 
     serializer_class = UserProfileSerializer
+    paginate_by = 100  # When django-rest-framework is updated, convert this to LimitOffsetPagination
+    paginate_by_param = 'limit'
 
     def get_queryset(self):
         """Select the view count for a specific module"""

@@ -174,6 +174,19 @@ class SequentialOpenDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
+class UserProblemWeeklyData(models.Model):
+    """ User problem history per week """
+    week_ending = models.CharField(max_length=30)
+    course_id = models.CharField(max_length=255)
+    user_id = models.IntegerField()
+    problem_id = models.CharField(max_length=255)
+    num_attempts = models.IntegerField()
+    final_score = models.CharField(max_length=20)
+
+    class Meta(object):
+        db_table = 'user_problem_weekly_data'
+
+
 class BaseVideo(models.Model):
     """ Base video model. """
     pipeline_video_id = models.CharField(db_index=True, max_length=255)

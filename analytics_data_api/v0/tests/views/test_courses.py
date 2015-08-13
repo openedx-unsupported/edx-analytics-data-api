@@ -652,6 +652,84 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
+class CourseUsersProblemDataTests(DemoCourseMixin, TestCaseWithAuthentication):
+    def _get_data(self, user_id=None):
+        return self.authenticated_get('/api/v0/courses/{}/users/{}/problem_data/'.format(self.course_id, user_id))
+
+    def test_get_problem_data(self):
+        user_id = 111
+        G(
+            models.UserProblemWeeklyData,
+            id=1,
+            week_ending="2015-08-20",
+            course_id=self.course_id,
+            user_id=user_id,
+            problem_id="dummy_problem_1",
+            num_attempts=11,
+            final_score='0/3',
+        )
+        G(
+            models.UserProblemWeeklyData,
+            id=2,
+            week_ending="2015-08-27",
+            course_id=self.course_id,
+            user_id=user_id,
+            problem_id="dummy_problem_2",
+            num_attempts=22,
+            final_score='1/3',
+        )
+        G(
+            models.UserProblemWeeklyData,
+            id=3,
+            week_ending="2015-09-03",
+            course_id='dummy_course',  # Belongs to another course, so shouldn't show up in results
+            user_id=user_id,
+            problem_id="dummy_problem_3",
+            num_attempts=33,
+            final_score='2/3',
+        )
+        G(
+            models.UserProblemWeeklyData,
+            id=4,
+            week_ending="2015-09-10",
+            course_id=self.course_id,
+            user_id=222,  # Submitted by another user, so shouldn't show up in results
+            problem_id="dummy_problem_4",
+            num_attempts=44,
+            final_score='2/3',
+        )
+
+        expected = [
+            {
+                "id": 1,
+                "week_ending": "2015-08-20",
+                "course_id": self.course_id,
+                "user_id": user_id,
+                "problem_id": "dummy_problem_1",
+                "num_attempts": 11,
+                "final_score": '0/3',
+            },
+            {
+                "id": 2,
+                "week_ending": "2015-08-27",
+                "course_id": self.course_id,
+                "user_id": user_id,
+                "problem_id": "dummy_problem_2",
+                "num_attempts": 22,
+                "final_score": '1/3',
+            },
+        ]
+        response = self._get_data(user_id)
+        self.assertEquals(response.status_code, 200)
+        self.assertIsInstance(response.data, list)
+        for expected_dict, actual_dict in zip(expected, response.data):
+            self.assertDictEqual(expected_dict, actual_dict)
+
+    def test_get_problem_data_404(self):
+        response = self._get_data('no_id')
+        self.assertEquals(response.status_code, 404)
+
+
 class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
     def _get_data(self, course_id=None):
         """

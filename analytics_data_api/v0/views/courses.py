@@ -14,6 +14,8 @@ from opaque_keys.edx.keys import CourseKey
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.utils import dictfetchall
 from analytics_data_api.v0 import models, serializers
+from analytics_data_api.v0.models import UserProblemWeeklyData
+from analytics_data_api.v0.serializers import UserProblemWeeklyDataSerializer
 
 
 class BaseCourseView(generics.ListAPIView):
@@ -687,6 +689,40 @@ GROUP BY module_id;
                 row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S')
 
         return rows
+
+
+class UserProblemWeeklyDataView(generics.ListAPIView):
+    """
+    Get weekly reports about problem history of a user.
+
+    **Example Request**
+
+        GET /api/v0/courses/{course_id}/users/{user_id}/problem_data/
+
+    **Response Values**
+
+        Returns a list of report objects. Each report object contains:
+
+            * id: ID of problem report
+            * week_ending: Last day of week to which problem report belongs (string)
+            * course_id: ID of course targeted by problem report (string)
+            * user_id: ID of user targeted by problem report (int)
+            * problem_id: ID of problem targeted by problem report (string)
+            * num_attempts: Number of times user identified by user_id submitted problem identified by problem_id (int)
+            * final_score: Grade obtained/max grade, e.g.: 5/10 (string)
+    """
+    serializer_class = UserProblemWeeklyDataSerializer
+
+    def get_queryset(self):
+        """
+        Select problem reports for a specific user.
+        """
+        try:
+            course_id = self.kwargs.get('course_id')
+            user_id = int(self.kwargs.get('user_id'))
+        except ValueError:
+            raise Http404
+        return UserProblemWeeklyData.objects.filter(user_id=user_id, course_id=course_id)
 
 
 class VideosListView(BaseCourseView):

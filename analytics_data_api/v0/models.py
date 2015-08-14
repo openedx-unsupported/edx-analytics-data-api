@@ -88,6 +88,17 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'gender')]
 
 
+class CourseEnrollmentSnapshot(models.Model):
+    """ The most up-to-date enrollment information """
+    course_id = models.CharField(max_length=255, null=False)
+    user = models.ForeignKey('UserProfile', related_name='courses', null=False, db_column='user_id')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta(object):
+        db_table = 'course_enrollment_snapshot'
+        unique_together = [('course_id', 'user',)]
+
+
 class BaseProblemResponseAnswerDistribution(models.Model):
     """ Base model for the answer_distribution table. """
 

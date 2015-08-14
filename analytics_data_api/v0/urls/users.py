@@ -3,8 +3,7 @@ from django.conf.urls import patterns, url
 from analytics_data_api.v0.views import users as views
 
 USER_URLS = [
-    (r'^$', views.UserListView, 'user_list'),
-    (r'^(?P<user_id>.+)/$', views.UserProfileView, 'user_profile'),
+    (r'^(?P<username>[^/]+)/$', views.UserProfileView, 'user_profile'),
 ]
 
 urlpatterns = []

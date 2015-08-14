@@ -689,6 +689,48 @@ GROUP BY module_id;
         return rows
 
 
+class UserListView(generics.ListAPIView):
+    """
+    Get the (paginated) list of all users (students and staff) in the given course.
+
+    **Example Request**
+
+        GET /api/v0/courses/{course_id}/users/
+
+    **Additional parameters**
+
+        These query parameters can be specified to control pagination of the results:
+
+            * limit: Specify how many results to return per page (default is 100).
+            * page: Specify which page of results. 1 is the first page.
+
+    **Response Values**
+
+        Returns an object with pagination info and a 'results' entry that is a collection of user
+        objects. Each user object contains:
+
+            * id: The user's ID (integer)
+            * username: The username (string)
+            * last_login: When the user last logged in to the LMS/Studio (datetime)
+            * date_joined: When the user registered (datetime)
+            * is_staff: True if the user is staff (boolean)
+            * email: The user's email address (string)
+            * name: The user's full name (string)
+            * gender: One of "male", "female", "other", or "unknown" (string)
+            * year_of_birth: Year of birth as integer or null
+            * level_of_education: String indicating self-reported education level, or "unknown"
+    """
+
+    serializer_class = serializers.UserProfileSerializer
+    paginate_by = 100  # When django-rest-framework is updated, convert this to LimitOffsetPagination
+    paginate_by_param = 'limit'
+
+    def get_queryset(self):
+        """ Get the (paginated) list of users enrolled in a specific course """
+        course_id = self.kwargs.get('course_id')
+        return models.UserProfile.objects.filter(courses__course_id=course_id)
+
+
 class VideosListView(BaseCourseView):
     """
     Get data for the videos in a course.

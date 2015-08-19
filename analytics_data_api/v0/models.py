@@ -203,7 +203,7 @@ class UserProfile(models.Model):
         """
         Returns the user's level of education with 'unknown' replacing null/None.
         """
-        return educ_level.LEVEL_OF_EDUCATION_LOOKUP.get(self.level_of_education_raw, educ_level.UNKNOWN)
+        return educ_level.EDUCATION_LEVELS.get(self.level_of_education_raw, educ_level.UNKNOWN)
 
     class Meta(object):
         db_table = 'user_profile'

@@ -1,6 +1,6 @@
 UNKNOWN = 'unknown'
 
-LEVEL_OF_EDUCATION_LOOKUP = {
+EDUCATION_LEVELS = {
     'p': 'doctorate',
     'm': 'masters',  # Master's or professional degree
     'b': 'bachelors',

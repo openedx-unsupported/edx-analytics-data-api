@@ -652,6 +652,82 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
+class CoursePassingGradeBreakdownViewTest(DemoCourseMixin, TestCaseWithAuthentication):
+    def _get_data(self, course_id=None, start_date=None, end_date=None):
+        """ Retrieve data for the specified course. """
+        course_id = course_id or self.course_id
+        url = '/api/v0/courses/{}/pass_fail_distribution/'.format(course_id)
+        if start_date:
+            url += '?start_date={}'.format(start_date)
+            if end_date:
+                url += '&end_date={}'.format(end_date)
+        return self.authenticated_get(url)
+
+    def setUp(self):
+        """ Create some grade entries for use in these tests """
+        super(CoursePassingGradeBreakdownViewTest, self).setUp()
+        self.created = datetime.datetime.utcnow()
+        self.total_students = 33.
+
+        def add_entry(day, letter_grade, num_students):
+            G(
+                models.CourseGradeBreakdown,
+                course_id=self.course_id,
+                date=datetime.date(2015, 01, day),
+                letter_grade=letter_grade,
+                num_students=num_students,
+                percent_students=num_students / self.total_students * 100.,
+                is_passing=letter_grade is not None,
+                created=self.created,
+            )
+        for day in range(10, 21):
+            add_entry(day, 'A', day - 10)  # 0..10
+            add_entry(day, 'C', day)  # 10..20
+            add_entry(day, None, self.total_students - (2 * day) + 10)  # 23..3
+
+    def test_get_all(self):
+        response = self._get_data()
+        self.assertEquals(response.status_code, 200)
+        for row in response.data:
+            row['percent_students'] = round(row['percent_students'], 1)  # Round floats so we can compare them reliably
+        expected = [
+            {"date": "2015-01-10", "num_students": 10, "percent_students": round(10 / self.total_students * 100., 1)},
+            {"date": "2015-01-11", "num_students": 12, "percent_students": round(12 / self.total_students * 100., 1)},
+            {"date": "2015-01-12", "num_students": 14, "percent_students": round(14 / self.total_students * 100., 1)},
+            {"date": "2015-01-13", "num_students": 16, "percent_students": round(16 / self.total_students * 100., 1)},
+            {"date": "2015-01-14", "num_students": 18, "percent_students": round(18 / self.total_students * 100., 1)},
+            {"date": "2015-01-15", "num_students": 20, "percent_students": round(20 / self.total_students * 100., 1)},
+            {"date": "2015-01-16", "num_students": 22, "percent_students": round(22 / self.total_students * 100., 1)},
+            {"date": "2015-01-17", "num_students": 24, "percent_students": round(24 / self.total_students * 100., 1)},
+            {"date": "2015-01-18", "num_students": 26, "percent_students": round(26 / self.total_students * 100., 1)},
+            {"date": "2015-01-19", "num_students": 28, "percent_students": round(28 / self.total_students * 100., 1)},
+            {"date": "2015-01-20", "num_students": 30, "percent_students": round(30 / self.total_students * 100., 1)},
+        ]
+        self.assertListEqual(response.data, expected)
+
+    def test_get_range(self):
+        """
+        The view should return data between start_date and end_date only.
+        """
+        response = self._get_data(start_date='2015-01-01', end_date='2015-01-10')
+        self.assertEquals(response.status_code, 200)
+        expected = [
+            {
+                "date": "2015-01-10",
+                "num_students": 10,
+                "percent_students": (10 / self.total_students) * 100,
+            }
+        ]
+        self.assertListEqual(response.data, expected)
+
+    def test_get_404(self):
+        """
+        The view should return 404 if no data exists for the course.
+        """
+        response = self._get_data('foo/bar/course')
+        self.assertEquals(response.status_code, 404)
+
+
 class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
     def _get_data(self, course_id=None):
         """

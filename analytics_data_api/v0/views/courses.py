@@ -5,7 +5,7 @@ import warnings
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connections
-from django.db.models import Max
+from django.db.models import Max, Sum
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
 from rest_framework import generics
@@ -687,6 +687,48 @@ GROUP BY module_id;
                 row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S')
 
         return rows
+
+
+class CoursePassingGradeBreakdownView(BaseCourseView):
+    """
+    Get the number/percent of users who are passing the course over time.
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/pass_fail_distribution/
+
+    **Response Values**
+
+        Returns a date-ordered list of objects, each of which has the following fields:
+
+            * date: The date for this data point.
+            * num_passing: The total number of students who are passing the course on this date.
+            * percent_passing: Same, as a percentage of the total enrollment.
+
+        Note that while the returned data will be ordered by date, some date values may
+        be missing (in other words, the dates are not guaranteed to be sequential.)
+    """
+
+    serializer_class = serializers.CoursePassingGradeBreakdownSerializer
+    model = models.CourseGradeBreakdown
+
+    def apply_date_filtering(self, queryset):
+        if self.start_date:
+            queryset = queryset.filter(date__gte=self.start_date)
+        if self.end_date:
+            queryset = queryset.filter(date__lte=self.end_date)
+        return queryset
+
+    def get_queryset(self):
+        """
+        Do some aggregation to return only 'date', 'num_students', and 'percent_students'
+        """
+        queryset = super(CoursePassingGradeBreakdownView, self).get_queryset()
+        queryset = queryset.filter(is_passing=True).values('date').annotate(
+            num_students=Sum('num_students'),
+            percent_students=Sum('percent_students')
+        ).order_by('date')
+        return queryset
 
 
 class VideosListView(BaseCourseView):

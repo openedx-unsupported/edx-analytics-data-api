@@ -661,62 +661,68 @@ class CourseUsersProblemDataTests(DemoCourseMixin, TestCaseWithAuthentication):
         G(
             models.UserProblemWeeklyData,
             id=1,
-            week_ending="2015-08-20",
+            week_ending=datetime.date(2015, 8, 20),
             course_id=self.course_id,
             user_id=user_id,
             problem_id="dummy_problem_1",
             num_attempts=11,
-            final_score='0/3',
+            most_recent_score=0,
+            max_score=3,
         )
         G(
             models.UserProblemWeeklyData,
             id=2,
-            week_ending="2015-08-27",
+            week_ending=datetime.date(2015, 8, 27),
             course_id=self.course_id,
             user_id=user_id,
             problem_id="dummy_problem_2",
             num_attempts=22,
-            final_score='1/3',
+            most_recent_score=1,
+            max_score=3,
         )
         G(
             models.UserProblemWeeklyData,
             id=3,
-            week_ending="2015-09-03",
+            week_ending=datetime.date(2015, 9, 3),
             course_id='dummy_course',  # Belongs to another course, so shouldn't show up in results
             user_id=user_id,
             problem_id="dummy_problem_3",
             num_attempts=33,
-            final_score='2/3',
+            most_recent_score=2,
+            max_score=3,
         )
         G(
             models.UserProblemWeeklyData,
             id=4,
-            week_ending="2015-09-10",
+            week_ending=datetime.date(2015, 9, 10),
             course_id=self.course_id,
             user_id=222,  # Submitted by another user, so shouldn't show up in results
             problem_id="dummy_problem_4",
             num_attempts=44,
-            final_score='2/3',
+            most_recent_score=3,
+            max_score=3,
         )
 
         expected = [
             {
                 "id": 1,
-                "week_ending": "2015-08-20",
+                "week_ending": '2015-08-20',
                 "course_id": self.course_id,
                 "user_id": user_id,
                 "problem_id": "dummy_problem_1",
                 "num_attempts": 11,
-                "final_score": '0/3',
+                "most_recent_score": 0,
+                "max_score": 3,
             },
             {
                 "id": 2,
-                "week_ending": "2015-08-27",
+                "week_ending": '2015-08-27',
                 "course_id": self.course_id,
                 "user_id": user_id,
                 "problem_id": "dummy_problem_2",
                 "num_attempts": 22,
-                "final_score": '1/3',
+                "most_recent_score": 1,
+                "max_score": 3,
             },
         ]
         response = self._get_data(user_id)

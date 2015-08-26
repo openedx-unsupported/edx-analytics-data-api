@@ -709,7 +709,8 @@ class UserProblemWeeklyDataView(generics.ListAPIView):
             * user_id: ID of user targeted by problem report (int)
             * problem_id: ID of problem targeted by problem report (string)
             * num_attempts: Number of times user identified by user_id submitted problem identified by problem_id (int)
-            * final_score: Grade obtained/max grade, e.g.: 5/10 (string)
+            * most_recent_score: Most recent score obtained for problem identified by problem_id (int)
+            * max_score: Max possible score for problem identified by problem_id (int)
     """
     serializer_class = UserProblemWeeklyDataSerializer
 

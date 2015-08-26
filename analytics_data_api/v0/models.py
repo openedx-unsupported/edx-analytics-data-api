@@ -176,15 +176,17 @@ class SequentialOpenDistribution(models.Model):
 
 class UserProblemWeeklyData(models.Model):
     """ User problem history per week """
-    week_ending = models.CharField(max_length=30)
+    week_ending = models.DateField()
     course_id = models.CharField(max_length=255)
     user_id = models.IntegerField()
     problem_id = models.CharField(max_length=255)
     num_attempts = models.IntegerField()
-    final_score = models.CharField(max_length=20)
+    most_recent_score = models.IntegerField()
+    max_score = models.IntegerField()
 
     class Meta(object):
         db_table = 'user_problem_weekly_data'
+        ordering = ('week_ending',)
 
 
 class BaseVideo(models.Model):

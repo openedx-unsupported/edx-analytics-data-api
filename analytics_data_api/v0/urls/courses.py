@@ -13,6 +13,7 @@ COURSE_URLS = [
     ('enrollment/gender', views.CourseEnrollmentByGenderView, 'enrollment_by_gender'),
     ('enrollment/location', views.CourseEnrollmentByLocationView, 'enrollment_by_location'),
     ('problems', views.ProblemsListView, 'problems'),
+    ('typology', views.TypologyListView, 'typology'),
     ('videos', views.VideosListView, 'videos')
 ]
 

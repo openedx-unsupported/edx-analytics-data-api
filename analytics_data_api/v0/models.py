@@ -174,6 +174,19 @@ class SequentialOpenDistribution(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
+class TypologyEntry(models.Model):
+    """ Categorization of students into 'types' per course section """
+    course_id = models.CharField(db_index=True, max_length=255)
+    chapter_id = models.CharField(max_length=255)
+    video_type = models.IntegerField(null=False)
+    problem_type = models.IntegerField(null=False)
+    num_users = models.IntegerField(null=False)  # The number of users who match video_type and problem_type
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta(object):
+        db_table = 'trajectory'
+
+
 class BaseVideo(models.Model):
     """ Base video model. """
     pipeline_video_id = models.CharField(db_index=True, max_length=255)

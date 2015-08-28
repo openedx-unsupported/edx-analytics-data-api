@@ -689,6 +689,35 @@ GROUP BY module_id;
         return rows
 
 
+class TypologyListView(BaseCourseView):
+    """
+    Get typology data for a course.
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/typology/
+
+    **Response Values**
+
+        Returns a collection of entries that each describe a "type" of user
+        in one section of the course. Each entry has the following fields:
+
+            * chapter_id: The block ID of the course section (string)
+            * video_type: How thoroughly these users interacted with videos
+              (integer: 0 = watched none, 1 = watched some, 2 = watched all)
+            * problem_type: How thoroughly these users interacted with problems
+              (integer: 0 = watched none, 1 = watched some, 2 = watched all)
+            * num_users: How many users match video_type and problem_type in this section
+            * created: The date this entry's data was last updated.
+    """
+    serializer_class = serializers.TypologySerializer
+    model = models.TypologyEntry
+
+    def apply_date_filtering(self, queryset):
+        # no date filtering for typology -- just return the queryset
+        return queryset
+
+
 class VideosListView(BaseCourseView):
     """
     Get data for the videos in a course.

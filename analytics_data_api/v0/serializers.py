@@ -283,6 +283,18 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
         fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'created')
 
 
+class TypologySerializer(ModelSerializerWithCreatedField):
+    class Meta(object):
+        model = models.TypologyEntry
+        fields = (
+            'chapter_id',
+            'video_type',
+            'problem_type',
+            'num_users',
+            'created'
+        )
+
+
 class VideoSerializer(ModelSerializerWithCreatedField):
     class Meta(object):
         model = models.Video

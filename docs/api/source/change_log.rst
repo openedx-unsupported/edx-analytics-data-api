@@ -8,6 +8,9 @@ Change Log
 
    * - Date
      - Change
+   * - 5 Aug 2015
+     - Updated :ref:`Get the Course Enrollment by Mode` to add the
+       ``cumulative_count`` response value.
    * - 21 May 2015
      - Updated :ref:`Get the Course Video Data` to add the ``users_at_start``
        and ``users_at_end`` response values.

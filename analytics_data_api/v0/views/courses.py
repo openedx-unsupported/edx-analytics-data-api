@@ -465,12 +465,12 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
 
             * course_id: The ID of the course for which data is returned.
             * date: The date for which the enrollment count was computed.
-            * count: The total count of enrolled users.
-            * cumulative_count: The cumulative count of users ever enrolled.
+            * count: The count of currently enrolled users.
+            * cumulative_count: The cumulative total of all users ever enrolled.
             * created: The date the counts were computed.
-            * honor: The number of users enrolled in honor code mode.
-            * professional: The number of users enrolled in professional mode.
-            * verified: The number of users enrolled in verified mode.
+            * honor: The number of users currently enrolled in honor code mode.
+            * professional: The number of users currently enrolled in professional mode.
+            * verified: The number of users currently enrolled in verified mode.
 
     **Parameters**
 

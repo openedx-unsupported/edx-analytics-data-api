@@ -1,6 +1,6 @@
 from django.db import models
 
-from analytics_data_api.constants import country, genders
+from analytics_data_api.constants import country, genders, educ_level
 
 
 class CourseActivityWeekly(models.Model):
@@ -73,12 +73,6 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
-    CLEANED_GENDERS = {
-        u'f': genders.FEMALE,
-        u'm': genders.MALE,
-        u'o': genders.OTHER
-    }
-
     gender = models.CharField(max_length=255, null=True, db_column='gender')
 
     @property
@@ -86,12 +80,23 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
         """
         Returns the gender with full names and 'unknown' replacing null/None.
         """
-        return self.CLEANED_GENDERS.get(self.gender, genders.UNKNOWN)
+        return genders.CLEANED_GENDERS.get(self.gender, genders.UNKNOWN)
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender_daily'
         ordering = ('date', 'course_id', 'gender')
         unique_together = [('course_id', 'date', 'gender')]
+
+
+class CourseEnrollmentSnapshot(models.Model):
+    """ The most up-to-date enrollment information """
+    course_id = models.CharField(max_length=255, null=False)
+    user = models.ForeignKey('UserProfile', related_name='courses', null=False, db_column='user_id')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta(object):
+        db_table = 'course_enrollment_snapshot'
+        unique_together = [('course_id', 'user',)]
 
 
 class BaseProblemResponseAnswerDistribution(models.Model):
@@ -172,6 +177,36 @@ class SequentialOpenDistribution(models.Model):
     course_id = models.CharField(db_index=True, max_length=255)
     count = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
+
+
+class UserProfile(models.Model):
+    """ User Account and Profile information """
+    username = models.CharField(max_length=30, unique=True, db_index=True)
+    last_login = models.DateTimeField()
+    date_joined = models.DateTimeField()
+    is_staff = models.BooleanField(default=False, null=False)
+    email = models.EmailField(blank=True, max_length=75)
+    name = models.CharField(max_length=255)
+    gender_raw = models.CharField(max_length=6, null=True, db_column='gender')
+    year_of_birth = models.IntegerField(null=True)
+    level_of_education_raw = models.CharField(max_length=6, null=True, db_column='level_of_education')
+
+    @property
+    def gender(self):
+        """
+        Returns the gender with full names and 'unknown' replacing null/None.
+        """
+        return genders.CLEANED_GENDERS.get(self.gender_raw, genders.UNKNOWN)
+
+    @property
+    def level_of_education(self):
+        """
+        Returns the user's level of education with 'unknown' replacing null/None.
+        """
+        return educ_level.EDUCATION_LEVELS.get(self.level_of_education_raw, educ_level.UNKNOWN)
+
+    class Meta(object):
+        db_table = 'user_profile'
 
 
 class BaseVideo(models.Model):

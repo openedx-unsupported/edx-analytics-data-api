@@ -11,6 +11,7 @@ import urllib
 
 from django.conf import settings
 from django_dynamic_fixture import G
+from django.utils import timezone
 import pytz
 
 from analytics_data_api.constants.country import get_country
@@ -650,6 +651,79 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
 
         response = self._get_data('foo/bar/course')
         self.assertEquals(response.status_code, 404)
+
+
+class CourseUsersListTests(DemoCourseMixin, TestCaseWithAuthentication):
+    def test_get_list(self):
+        date_value = timezone.now()
+        bob = G(
+            models.UserProfile,
+            id=2000,
+            username="bob",
+            last_login=date_value,
+            date_joined=date_value,
+            email="bob@example.com",
+            name="Bob Loblaw",
+            year_of_birth=1789,
+        )
+        alexa = G(
+            models.UserProfile,
+            id=2001,
+            username="alexa",
+            last_login=date_value,
+            date_joined=date_value,
+            email="alexa@example.com",
+            name="Alexa Anderson",
+            gender_raw="f",
+            year_of_birth=1987,
+        )
+        # Enroll the above users:
+        G(models.CourseEnrollmentSnapshot, user=bob, course_id=self.course_id)
+        G(models.CourseEnrollmentSnapshot, user=alexa, course_id=self.course_id)
+        # And add another user that won't be enrolled in the demo course:
+        G(
+            models.UserProfile,
+            id=2002,
+            username="other",
+            last_login=date_value,
+            date_joined=date_value,
+            email="other@example.com",
+            name="Other Manning",
+        )
+
+        expected = [
+            {
+                "id": 2000,
+                "username": "bob",
+                "last_login": date_value,
+                "date_joined": date_value,
+                "is_staff": False,
+                "email": "bob@example.com",
+                "name": "Bob Loblaw",
+                "gender": "unknown",
+                "year_of_birth": 1789,
+                "level_of_education": "unknown"
+            },
+            {
+                "id": 2001,
+                "username": "alexa",
+                "last_login": date_value,
+                "date_joined": date_value,
+                "is_staff": False,
+                "email": "alexa@example.com",
+                "name": "Alexa Anderson",
+                "gender": "female",
+                "year_of_birth": 1987,
+                "level_of_education": "unknown"
+            },
+        ]
+        response = self.authenticated_get('/api/v0/courses/{}/users/'.format(self.course_id))
+        self.assertEquals(response.status_code, 200)
+        self.assertIsInstance(response.data, dict)
+        self.assertEqual(response.data['count'], 2)
+        self.assertEqual(response.data['previous'], None)
+        self.assertEqual(response.data['next'], None)
+        self.assertListEqual(response.data['results'], expected)
 
 
 class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):

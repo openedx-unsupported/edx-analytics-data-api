@@ -13,7 +13,8 @@ COURSE_URLS = [
     ('enrollment/gender', views.CourseEnrollmentByGenderView, 'enrollment_by_gender'),
     ('enrollment/location', views.CourseEnrollmentByLocationView, 'enrollment_by_location'),
     ('problems', views.ProblemsListView, 'problems'),
-    ('videos', views.VideosListView, 'videos')
+    ('users', views.UserListView, 'users'),
+    ('videos', views.VideosListView, 'videos'),
 ]
 
 urlpatterns = []

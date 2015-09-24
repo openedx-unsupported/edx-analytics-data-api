@@ -306,3 +306,10 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
             'num_views',
             'created'
         )
+
+
+class UserProblemWeeklyDataSerializer(serializers.ModelSerializer):
+    week_ending = serializers.DateField(format=settings.DATE_FORMAT)
+
+    class Meta(object):
+        model = models.UserProblemWeeklyData

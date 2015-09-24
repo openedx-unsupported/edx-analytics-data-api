@@ -1,5 +1,7 @@
+.. _Open EdX Data Analytics API:
+
 ################################################
-edX Data Analytics API Version 0
+Open edX Data Analytics API Version 0
 ################################################
 
 .. toctree::

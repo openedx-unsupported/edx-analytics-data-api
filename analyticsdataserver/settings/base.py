@@ -1,5 +1,6 @@
 """Common settings and globals."""
 
+from os import environ
 from os.path import abspath, basename, dirname, join, normpath
 from sys import stderr
 
@@ -49,6 +50,11 @@ DATABASES = {
     }
 }
 ########## END DATABASE CONFIGURATION
+
+########## ELASTICSEARCH CONFIGURATION
+ELASTICSEARCH_LEARNERS_HOST = environ.get('ELASTICSEARCH_LEARNERS_HOST', None)
+ELASTICSEARCH_LEARNERS_INDEX = environ.get('ELASTICSEARCH_LEARNERS_INDEX', None)
+########## END ELASTICSEARCH CONFIGURATION
 
 
 ########## GENERAL CONFIGURATION

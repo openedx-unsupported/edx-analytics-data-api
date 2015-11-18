@@ -5,8 +5,9 @@ from rest_framework import status
 from analytics_data_api.v0.exceptions import (
     CourseKeyMalformedError,
     CourseNotSpecifiedError,
-    ParameterValueError,
+    LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
+    ParameterValueError,
 )
 
 
@@ -52,6 +53,24 @@ class LearnerNotFoundErrorMiddleware(BaseProcessErrorMiddleware):
     @property
     def error_code(self):
         return 'no_learner_for_course'
+
+    @property
+    def status_code(self):
+        return status.HTTP_404_NOT_FOUND
+
+
+class LearnerEngagementTimelineNotFoundErrorMiddleware(BaseProcessErrorMiddleware):
+    """
+    Raise 404 if learner engagement timeline not found.
+    """
+
+    @property
+    def error(self):
+        return LearnerEngagementTimelineNotFoundError
+
+    @property
+    def error_code(self):
+        return 'no_learner_engagement_timeline'
 
     @property
     def status_code(self):

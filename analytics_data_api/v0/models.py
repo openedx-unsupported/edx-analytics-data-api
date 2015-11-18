@@ -1,8 +1,11 @@
+from itertools import groupby
+
 from django.conf import settings
 from django.db import models
+from django.db.models import Sum
 from elasticsearch_dsl import DocType, Q
 
-from analytics_data_api.constants import country, genders
+from analytics_data_api.constants import country, engagement_entity_types, genders
 
 
 class CourseActivityWeekly(models.Model):
@@ -272,3 +275,54 @@ class RosterEntry(DocType):
         search = search.sort(sort_term)
 
         return search
+
+
+class ModuleEngagementTimelineManager(models.Manager):
+    """
+    Modifies the ModuleEngagement queryset to aggregate engagement data for
+    the learner engagement timeline.
+    """
+    def get_timelines(self, course_id, username):
+        queryset = ModuleEngagement.objects.all().filter(course_id=course_id, username=username) \
+            .values('date', 'entity_type', 'event') \
+            .annotate(count=Sum('count')) \
+            .order_by('date')
+
+        timelines = []
+
+        for key, group in groupby(queryset, lambda x: (x['date'])):
+            # Iterate over groups and create a single item with engagement data
+            item = {
+                u'date': key,
+            }
+            for engagement in group:
+                entity_type = engagement_entity_types.SINGULAR_TO_PLURAL[engagement['entity_type']]
+                engagement_type = '{}_{}'.format(entity_type, engagement['event'])
+                count = item.get(engagement_type, 0)
+                count += engagement['count']
+                item[engagement_type] = count
+            timelines.append(item)
+
+        return timelines
+
+
+class ModuleEngagement(models.Model):
+    """User interactions with entities within the courseware."""
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    username = models.CharField(max_length=255)
+    date = models.DateTimeField()
+    # This will be one of "problem", "video" or "forum"
+    entity_type = models.CharField(max_length=255)
+    # For problems this will be the usage key, for videos it will be the html encoded module ID,
+    # for forums it will be the commentable_id
+    entity_id = models.CharField(max_length=255)
+    # A description of what interaction occurred, e.g. "contributed" or "viewed"
+    event = models.CharField(max_length=255)
+    # The number of times the user interacted with this entity in this way on this day.
+    count = models.IntegerField()
+
+    objects = ModuleEngagementTimelineManager()
+
+    class Meta(object):
+        db_table = 'module_engagement'

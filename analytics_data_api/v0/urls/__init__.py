@@ -2,12 +2,16 @@ from django.conf.urls import patterns, url, include
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
+USERNAME_PATTERN = r'(?P<username>.+)'
+
 urlpatterns = patterns(
     '',
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', namespace='courses')),
     url(r'^problems/', include('analytics_data_api.v0.urls.problems', namespace='problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', namespace='videos')),
     url('^learners/', include('analytics_data_api.v0.urls.learners', namespace='learners')),
+    url(r'^engagement_timelines/', include('analytics_data_api.v0.urls.engagement_timelines',
+                                           namespace='engagement_timelines')),
 
     # pylint: disable=no-value-for-parameter
     url(r'^authenticated/$', RedirectView.as_view(url=reverse_lazy('authenticated')), name='authenticated'),

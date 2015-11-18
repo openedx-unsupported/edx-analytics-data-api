@@ -164,6 +164,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',

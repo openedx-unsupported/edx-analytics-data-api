@@ -8,7 +8,7 @@ import random
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from analytics_data_api.v0 import models
-
+from analytics_data_api.constants import engagement_entity_types, engagement_events
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -182,6 +182,24 @@ class Command(BaseCommand):
                                     users_at_start=users_at_start,
                                     users_at_end=random.randint(100, users_at_start))
 
+    def generate_learner_engagement_data(self, course_id, username, start_date, end_date):
+        logger.info("Deleting learner engagement module data...")
+        models.ModuleEngagement.objects.all().delete()
+
+        logger.info("Generating learner engagement module data...")
+        current = start_date
+        while current < end_date:
+            current = current + datetime.timedelta(days=1)
+            for entity_type in engagement_entity_types.INDIVIDUAL_TYPES:
+                for event in engagement_events.EVENTS[entity_type]:
+                    count = random.randint(0, 100)
+                    if count:
+                        entity_id = 'an-id-{}-{}'.format(entity_type, event)
+                        models.ModuleEngagement.objects.create(
+                            course_id=course_id, username=username, date=current,
+                            entity_type=entity_type, entity_id=entity_id, event=event, count=count)
+            logger.info("Done!")
+
     def handle(self, *args, **options):
         course_id = 'edX/DemoX/Demo_Course'
         video_id = '0fac49ba'
@@ -199,3 +217,4 @@ class Command(BaseCommand):
         self.generate_daily_data(course_id, start_date, end_date)
         self.generate_video_data(course_id, video_id, video_module_id)
         self.generate_video_timeline_data(video_id)
+        self.generate_learner_engagement_data(course_id, 'ed_xavier', start_date, end_date)

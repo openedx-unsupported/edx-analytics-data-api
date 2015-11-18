@@ -1,7 +1,11 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from analytics_data_api.constants import enrollment_modes, genders
+from analytics_data_api.constants import (
+    engagement_entity_types,
+    engagement_events,
+    enrollment_modes,
+    genders,)
 from analytics_data_api.v0 import models
 
 
@@ -306,3 +310,30 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
             'num_views',
             'created'
         )
+
+
+class LearnerSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    enrollment_mode = serializers.CharField()
+    name = serializers.CharField()
+    email = serializers.CharField()
+    segments = serializers.Field(source='segments')
+    engagement = serializers.SerializerMethodField('get_engagement')
+
+    # TODO: add these back in when the index returns them
+    # enrollment_date = serializers.DateField(format=settings.DATE_FORMAT, allow_empty=True)
+    # last_updated = serializers.DateField(format=settings.DATE_FORMAT)
+    # cohort = serializers.CharField(allow_none=True)
+
+    def get_engagement(self, obj):
+        """
+        Add the engagement totals.
+        """
+        engagement = {}
+        for entity_type in engagement_entity_types.ALL:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+                print metric
+                engagement[metric] = getattr(obj, metric, 0)
+                print engagement[metric]
+        return engagement

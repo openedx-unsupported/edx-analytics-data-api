@@ -1,7 +1,12 @@
+from urlparse import urljoin
 from django.conf import settings
 from rest_framework import serializers
 
-from analytics_data_api.constants import enrollment_modes, genders
+from analytics_data_api.constants import (
+    engagement_entity_types,
+    engagement_events,
+    enrollment_modes,
+    genders,)
 from analytics_data_api.v0 import models
 
 
@@ -306,3 +311,35 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
             'num_views',
             'created'
         )
+
+
+class LearnerSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    enrollment_mode = serializers.CharField()
+    name = serializers.CharField()
+    account_url = serializers.SerializerMethodField('get_account_url')
+    email = serializers.CharField()
+    segments = serializers.Field(source='segments')
+    engagements = serializers.SerializerMethodField('get_engagements')
+
+    # TODO: add these back in when the index returns them
+    # enrollment_date = serializers.DateField(format=settings.DATE_FORMAT, allow_empty=True)
+    # last_updated = serializers.DateField(format=settings.DATE_FORMAT)
+    # cohort = serializers.CharField(allow_none=True)
+
+    def get_account_url(self, obj):
+        if settings.LMS_USER_ACCOUNT_BASE_URL:
+            return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)
+        else:
+            return None
+
+    def get_engagements(self, obj):
+        """
+        Add the engagement totals.
+        """
+        engagements = {}
+        for entity_type in engagement_entity_types.ALL:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+                engagements[metric] = getattr(obj, metric, 0)
+        return engagements

@@ -165,6 +165,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
+    'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
+    'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -271,7 +274,11 @@ DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
 
 ENABLE_ADMIN_SITE = False
 
+# base url to generate link to user api
+LMS_USER_ACCOUNT_BASE_URL = None
+
 ########## END ANALYTICS DATA API CONFIGURATION
+
 
 DATE_FORMAT = '%Y-%m-%d'
 DATETIME_FORMAT = '%Y-%m-%dT%H%M%S'

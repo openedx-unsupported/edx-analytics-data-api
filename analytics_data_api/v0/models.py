@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from elasticsearch_dsl import DocType
 
 from analytics_data_api.constants import country, genders
 
@@ -206,3 +208,15 @@ class Video(BaseVideo):
 
     class Meta(BaseVideo.Meta):
         db_table = 'video'
+
+
+class RosterEntry(DocType):
+    # pylint: disable=old-style-class
+    class Meta:
+        index = settings.ELASTICSEARCH_LEARNERS_INDEX
+        doc_type = 'roster_entry'
+
+    @classmethod
+    def get_course_user(cls, course_id, username):
+        return cls.search().query('term', course_id=course_id).query(
+            'term', username=username).execute()

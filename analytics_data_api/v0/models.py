@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from elasticsearch_dsl import connections, Index, DocType
 
 from analytics_data_api.constants import country, genders
 
@@ -206,3 +208,22 @@ class Video(BaseVideo):
 
     class Meta(BaseVideo.Meta):
         db_table = 'video'
+
+
+if settings.ELASTICSEARCH_LEARNERS_HOST:
+    connections.connections.create_connection(hosts=[settings.ELASTICSEARCH_LEARNERS_HOST])
+
+# By creating the roster index, we can use the @roster.doc_type decorator below
+roster = Index(settings.ELASTICSEARCH_LEARNERS_INDEX)
+
+
+@roster.doc_type
+class RosterEntry(DocType):
+    # pylint: disable=old-style-class
+    class Meta:
+        doc_type = 'roster_entry'
+
+    @classmethod
+    def get_course_user(cls, course_id, username):
+        return cls.search().filter('term', course_id=course_id).query(
+            'match', username=username).execute()

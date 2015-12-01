@@ -7,7 +7,7 @@ urlpatterns = patterns(
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', namespace='courses')),
     url(r'^problems/', include('analytics_data_api.v0.urls.problems', namespace='problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', namespace='videos')),
-    url(r'^learners/', include('analytics_data_api.v0.urls.learners', namespace='learners')),
+    url('^learners/', include('analytics_data_api.v0.urls.learners', namespace='learners')),
 
     # pylint: disable=no-value-for-parameter
     url(r'^authenticated/$', RedirectView.as_view(url=reverse_lazy('authenticated')), name='authenticated'),

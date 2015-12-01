@@ -56,7 +56,6 @@ ELASTICSEARCH_LEARNERS_HOST = environ.get('ELASTICSEARCH_LEARNERS_HOST', None)
 ELASTICSEARCH_LEARNERS_INDEX = environ.get('ELASTICSEARCH_LEARNERS_INDEX', None)
 ########## END ELASTICSEARCH CONFIGURATION
 
-
 ########## GENERAL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
 TIME_ZONE = 'UTC'
@@ -168,6 +167,7 @@ MIDDLEWARE_CLASSES = (
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',
+    'analytics_data_api.v0.middleware.ParameterValueErrorMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 

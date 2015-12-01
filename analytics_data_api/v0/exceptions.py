@@ -50,3 +50,10 @@ class CourseKeyMalformedError(BaseError):
     @property
     def message_template(self):
         return 'Course id/key {course_id} malformed.'
+
+
+class ParameterValueError(BaseError):
+    """Raise if multiple incompatible parameters were provided."""
+    def __init__(self, message, *args, **kwargs):
+        super(ParameterValueError, self).__init__(*args, **kwargs)
+        self.message = message

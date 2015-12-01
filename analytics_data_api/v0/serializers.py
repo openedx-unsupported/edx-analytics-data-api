@@ -1,12 +1,13 @@
 from urlparse import urljoin
 from django.conf import settings
-from rest_framework import serializers
+from rest_framework import pagination, serializers
 
 from analytics_data_api.constants import (
     engagement_entity_types,
     engagement_events,
     enrollment_modes,
-    genders,)
+    genders,
+)
 from analytics_data_api.v0 import models
 
 
@@ -343,3 +344,24 @@ class LearnerSerializer(serializers.Serializer):
                 metric = '{0}_{1}'.format(entity_type, event)
                 engagements[metric] = getattr(obj, metric, 0)
         return engagements
+
+
+class EdxPaginationSerializer(pagination.PaginationSerializer):
+    """
+    Adds values to the response according to edX REST API Conventions.
+    """
+    count = serializers.Field(source='paginator.count')
+    num_pages = serializers.Field(source='paginator.num_pages')
+
+
+class ElasticsearchDSLSearchSerializer(EdxPaginationSerializer):
+    def __init__(self, *args, **kwargs):
+        """Make sure that the elasticsearch query is executed."""
+        # Because the elasticsearch-dsl search object has a different
+        # API from the queryset object that's expected by the django
+        # Paginator object, we have to manually execute the query.
+        # Note that the `kwargs['instance']` is the Page object, and
+        # `kwargs['instance'].object_list` is actually an
+        # elasticsearch-dsl search object.
+        kwargs['instance'].object_list = kwargs['instance'].object_list.execute()
+        super(ElasticsearchDSLSearchSerializer, self).__init__(*args, **kwargs)

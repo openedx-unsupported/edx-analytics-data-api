@@ -3,9 +3,10 @@ from django.http.response import JsonResponse
 from rest_framework import status
 
 from analytics_data_api.v0.exceptions import (
-    LearnerNotFoundError,
+    CourseKeyMalformedError,
     CourseNotSpecifiedError,
-    CourseKeyMalformedError
+    ParameterValueError,
+    LearnerNotFoundError,
 )
 
 
@@ -87,6 +88,24 @@ class CourseKeyMalformedErrorMiddleware(BaseProcessErrorMiddleware):
     @property
     def error_code(self):
         return 'course_key_malformed'
+
+    @property
+    def status_code(self):
+        return status.HTTP_400_BAD_REQUEST
+
+
+class ParameterValueErrorMiddleware(BaseProcessErrorMiddleware):
+    """
+    Raise 400 if illegal parameter values are provided.
+    """
+
+    @property
+    def error(self):
+        return ParameterValueError
+
+    @property
+    def error_code(self):
+        return 'illegal_parameter_values'
 
     @property
     def status_code(self):

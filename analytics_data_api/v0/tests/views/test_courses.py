@@ -369,8 +369,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
         for gender in _genders:
             expected[gender] = 0
 
-        expected = [expected]
-        self.assertViewReturnsExpectedData(expected)
+        self.assertViewReturnsExpectedData([expected])
 
 
 class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
@@ -465,8 +464,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         expected[u'count'] = 1
         expected[u'cumulative_count'] = 100
 
-        expected = [expected]
-        self.assertViewReturnsExpectedData(expected)
+        self.assertViewReturnsExpectedData([expected])
 
 
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):

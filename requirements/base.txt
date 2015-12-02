@@ -6,4 +6,5 @@ ipython==2.4.1						# BSD
 django-rest-swagger==0.2.8  		# BSD
 djangorestframework-csv==1.3.3		# BSD
 django-countries==3.2               # MIT
+elasticsearch-dsl==0.0.9           # Apache 2.0
 -e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys

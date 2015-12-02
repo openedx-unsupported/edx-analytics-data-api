@@ -41,6 +41,10 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+ELASTICSEARCH_LEARNERS_HOST = 'https://search-dev-edx-insights-7nxf4fiyp47ftvhzvruauwswqa.us-east-1.es.amazonaws.com:8443/'
+ELASTICSEARCH_LEARNERS_INDEX = 'roster_1_1'
+
 ########## END DATABASE CONFIGURATION
 
 

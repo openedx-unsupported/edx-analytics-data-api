@@ -19,10 +19,10 @@ DATABASES = {
     },
     'analytics': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'analytics',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'NAME': 'reports_2_0',
+        'USER': 'readonly001',
+        'PASSWORD': 'meringues unfreehold sisterize morsing',
+        'HOST': 'stage-edx-analytics-report-rds.edx.org',
+        'PORT': '3306',
     }
 }

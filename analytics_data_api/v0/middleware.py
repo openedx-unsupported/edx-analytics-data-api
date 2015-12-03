@@ -32,7 +32,7 @@ class BaseProcessErrorMiddleware(object):
         pass
 
     def process_exception(self, _request, exception):
-        if type(exception) is self.error:
+        if isinstance(exception, self.error):
             return JsonResponse({
                 "error_code": self.error_code,
                 "developer_message": str(exception)

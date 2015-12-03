@@ -74,7 +74,7 @@ def consolidate_answers(problem):
 
         for answer in answers:
             if consolidated_answer:
-                if type(consolidated_answer) == ProblemResponseAnswerDistribution:
+                if isinstance(consolidated_answer, ProblemResponseAnswerDistribution):
                     consolidated_answer.count += answer.count
                 else:
                     consolidated_answer.first_response_count += answer.first_response_count

@@ -5,8 +5,9 @@
 
 # pylint: disable=no-member,no-value-for-parameter
 
-from django_dynamic_fixture import G
 import json
+
+from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.serializers import ProblemFirstLastResponseAnswerDistributionSerializer, \
@@ -124,10 +125,10 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
 
         expected_data[1]['consolidated_variant'] = False
 
-        response.data = set([json.dumps(answer) for answer in response.data])
-        expected_data = set([json.dumps(answer) for answer in expected_data])
+        response.data = [json.dumps(answer) for answer in response.data]
+        expected_data = [json.dumps(answer) for answer in expected_data]
 
-        self.assertEquals(response.data, expected_data)
+        self.assertEquals(set(response.data), set(expected_data))
 
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))

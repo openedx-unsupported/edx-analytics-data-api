@@ -1,54 +1,134 @@
 import json
 
-from elasticsearch_dsl.connections import connections
+from elasticsearch import Elasticsearch
 from mock import patch, Mock
 from rest_framework import status
+
+from django.conf import settings
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
-class LearnerTests(TestCaseWithAuthentication):
+class LearnerAPITestMixin(object):
+    """Manages an elasticsearch index for testing the learner API."""
+    def setUp(self):
+        """Creates the index and defines a mapping."""
+        super(LearnerAPITestMixin, self).setUp()
+        self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
+        self._es.indices.create(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+        self._es.indices.put_mapping(
+            index=settings.ELASTICSEARCH_LEARNERS_INDEX,
+            doc_type='roster_entry',
+            body={
+                'properties': {
+                    'name': {
+                        'type': 'string'
+                    },
+                    'username': {
+                        'type': 'string', 'index': 'not_analyzed'
+                    },
+                    'email': {
+                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                    },
+                    'course_id': {
+                        'type': 'string', 'index': 'not_analyzed'
+                    },
+                    'enrollment_mode': {
+                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                    },
+                    'segments': {
+                        'type': 'string'
+                    },
+                    'cohort': {
+                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                    },
+                    'discsussions_contributed': {
+                        'type': 'integer', 'doc_values': True
+                    },
+                    'problems_attempted': {
+                        'type': 'integer', 'doc_values': True
+                    },
+                    'problems_completed': {
+                        'type': 'integer', 'doc_values': True
+                    },
+                    'attempts_per_problem_completed': {
+                        'type': 'float', 'doc_values': True
+                    },
+                    'videos_viewed': {
+                        'type': 'integer', 'doc_values': True
+                    }
+                }
+            }
+        )
+
+    def tearDown(self):
+        """Remove the index after every test."""
+        super(LearnerAPITestMixin, self).tearDown()
+        self._es.indices.delete(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+
+    def _create_learner(
+            self,
+            username,
+            course_id,
+            name=None,
+            email=None,
+            enrollment_mode='honor',
+            segments=None,
+            cohort='',
+            discussions_contributed=0,
+            problems_attempted=0,
+            problems_completed=0,
+            attempts_per_problem_completed=0,
+            videos_viewed=0
+    ):
+        """Create a single learner roster entry in the elasticsearch index."""
+        self._es.create(
+            index=settings.ELASTICSEARCH_LEARNERS_INDEX,
+            doc_type='roster_entry',
+            body={
+                'username': username,
+                'course_id': course_id,
+                'name': name if name is not None else username,
+                'email': email if email is not None else '{}@example.com'.format(username),
+                'enrollment_mode': enrollment_mode,
+                'segments': segments if segments is not None else list(),
+                'cohort': cohort,
+                'discussions_contributed': discussions_contributed,
+                'problems_attempted': problems_attempted,
+                'problems_completed': problems_completed,
+                'attempts_per_problem_completed': attempts_per_problem_completed,
+                'videos_viewed': videos_viewed
+            }
+        )
+
+    def create_learners(self, *learners):
+        """
+        Creates multiple learner roster entries.  `learners` is a list of
+        dicts, each representing a learner which must at least contain
+        the keys 'username' and 'course_id'.  Other learner fields can
+        be provided as additional keys in the dict - see the mapping
+        defined in `setUp`.
+        """
+        for learner in learners:
+            self._create_learner(**learner)
+        self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+
+
+class LearnerTests(LearnerAPITestMixin, TestCaseWithAuthentication):
     path_template = '/api/v0/learners/{}/?course_id={}'
 
-    @classmethod
-    def get_fixture(cls):
-        return {
-            "took": 11,
-            "_shards": {
-                "total": 10,
-                "successful": 10,
-                "failed": 0
-            },
-            "hits": {
-                "total": 33701,
-                "max_score": 7.201823,
-                "hits": [{
-                    "_index": "roster_1_1",
-                    "_type": "roster_entry",
-                    "_id": "edX/DemoX/Demo_Course|ed_xavier",
-                    "_score": 7.201823,
-                    "_source": {
-                        "username": "ed_xavier",
-                        "enrollment_mode": "honor",
-                        "problems_attempted": 43,
-                        "problems_completed": 3,
-                        "problem_attempts": 0,
-                        "course_id": "edX/DemoX/Demo_Course",
-                        "videos_viewed": 6,
-                        "name": "Edward Xavier",
-                        "segments": ["has_potential"],
-                        "email": "ed_xavier@example.com"
-                    }
-                }]
-            }
-        }
-
-    @classmethod
-    def setUpClass(cls):
-        # mock the elastic search client
-        client = Mock()
-        client.search.return_value = cls.get_fixture()
-        connections.add_connection('default', client)
+    def setUp(self):
+        super(LearnerTests, self).setUp()
+        self.create_learners({
+            "username": "ed_xavier",
+            "name": "Edward Xavier",
+            "course_id": "edX/DemoX/Demo_Course",
+            "segments": ["has_potential"],
+            "problems_attempted": 43,
+            "problems_completed": 3,
+            "videos_viewed": 6,
+            "discussions_contributed": 0
+        })
 
     def test_get_user(self):
         user_name = 'ed_xavier'
@@ -64,7 +144,6 @@ class LearnerTests(TestCaseWithAuthentication):
             "account_url": "http://lms-host/ed_xavier",
             "segments": ["has_potential"],
             "engagements": {
-                "problem_attempts": 0,
                 "problems_attempted": 43,
                 "problems_completed": 3,
                 "videos_viewed": 6,

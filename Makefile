@@ -3,11 +3,19 @@ ROOT = $(shell echo "$$PWD")
 COVERAGE = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
+ELASTICSEARCH_VERSION = 1.5.2
 
 .PHONY: requirements develop clean diff.report view.diff.report quality
 
 requirements:
 	pip install -q -r requirements/base.txt
+
+test.install_elasticsearch:
+	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip
+	unzip elasticsearch-$(ELASTICSEARCH_VERSION).zip
+
+test.run_elasticsearch:
+	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d
 
 test.requirements: requirements
 	pip install -q -r requirements/test.txt

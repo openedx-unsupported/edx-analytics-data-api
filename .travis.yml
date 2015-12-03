@@ -2,9 +2,15 @@ language: python
 python: "2.7"
 install:
     - "pip install coveralls"
+    - "make test.install_elasticsearch"
 cache: pip
 # Use docker for builds
 sudo: false
+before_script:
+    - make test.run_elasticsearch
+    # Recommended by Travis in order to make sure ElasticSearch
+    # actually starts up.  See # https://docs.travis-ci.com/user/database-setup/#ElasticSearch
+    - sleep 10
 script:
     - make validate
     - git fetch origin master:refs/remotes/origin/master # https://github.com/edx/diff-cover#troubleshooting

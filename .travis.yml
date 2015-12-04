@@ -15,9 +15,6 @@ script:
     - make validate
     - git fetch origin master:refs/remotes/origin/master # https://github.com/edx/diff-cover#troubleshooting
     - make diff.report
-branches:
-    only:
-      - master
 after_success:
     - coveralls
     - bash ./scripts/build-stats-to-datadog.sh

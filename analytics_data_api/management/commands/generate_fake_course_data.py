@@ -182,7 +182,7 @@ class Command(BaseCommand):
                                     users_at_start=users_at_start,
                                     users_at_end=random.randint(100, users_at_start))
 
-    def generate_learner_engagement_data(self, course_id, username, start_date, end_date):
+    def generate_learner_engagement_data(self, course_id, username, start_date, end_date, max_value=100):
         logger.info("Deleting learner engagement module data...")
         models.ModuleEngagement.objects.all().delete()
 
@@ -192,13 +192,32 @@ class Command(BaseCommand):
             current = current + datetime.timedelta(days=1)
             for entity_type in engagement_entity_types.INDIVIDUAL_TYPES:
                 for event in engagement_events.EVENTS[entity_type]:
-                    count = random.randint(0, 100)
+                    count = random.randint(0, max_value)
                     if count:
                         entity_id = 'an-id-{}-{}'.format(entity_type, event)
                         models.ModuleEngagement.objects.create(
                             course_id=course_id, username=username, date=current,
                             entity_type=entity_type, entity_id=entity_id, event=event, count=count)
             logger.info("Done!")
+
+    def generate_learner_engagement_range_data(self, course_id, start_date, end_date, max_value=100):
+        logger.info("Deleting engagement range data...")
+        models.ModuleEngagementMetricRanges.objects.all().delete()
+
+        logger.info("Generating engagement range data...")
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+
+                low_ceil = random.random() * max_value * 0.5
+                models.ModuleEngagementMetricRanges.objects.create(
+                    course_id=course_id, start_date=start_date, end_date=end_date, metric=metric,
+                    range_type='low', low_value=0, high_value=low_ceil)
+
+                high_floor = random.random() * max_value * 0.5 + low_ceil
+                models.ModuleEngagementMetricRanges.objects.create(
+                    course_id=course_id, start_date=start_date, end_date=end_date, metric=metric,
+                    range_type='high', low_value=high_floor, high_value=max_value)
 
     def handle(self, *args, **options):
         course_id = 'edX/DemoX/Demo_Course'
@@ -218,3 +237,4 @@ class Command(BaseCommand):
         self.generate_video_data(course_id, video_id, video_module_id)
         self.generate_video_timeline_data(video_id)
         self.generate_learner_engagement_data(course_id, 'ed_xavier', start_date, end_date)
+        self.generate_learner_engagement_range_data(course_id, start_date, end_date)

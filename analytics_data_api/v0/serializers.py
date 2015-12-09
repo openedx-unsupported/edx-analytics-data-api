@@ -388,3 +388,73 @@ class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
 
     def transform_videos_viewed(self, _obj, value):
         return self.default_if_none(value, 0)
+
+
+class DateRangeSerializer(serializers.Serializer):
+    start = serializers.DateTimeField(source='start_date', format=settings.DATE_FORMAT)
+    end = serializers.DateTimeField(source='end_date', format=settings.DATE_FORMAT)
+
+
+class EnagementRangeMetricSerializer(serializers.Serializer):
+    """
+    Serializes ModuleEngagementMetricRanges (low_range and high_range) into
+    the below_average, average, above_average ranges represented as arrays.
+    """
+    below_average = serializers.SerializerMethodField('get_below_average_range')
+    average = serializers.SerializerMethodField('get_average_range')
+    above_average = serializers.SerializerMethodField('get_above_average_range')
+
+    def get_average_range(self, obj):
+        metric_range = [
+            obj['low_range'].high_value if obj['low_range'] else None,
+            obj['high_range'].low_value if obj['high_range'] else None,
+        ]
+        return metric_range
+
+    def get_below_average_range(self, obj):
+        return self._get_range(obj['low_range'])
+
+    def get_above_average_range(self, obj):
+        return self._get_range(obj['high_range'])
+
+    def _get_range(self, metric_range):
+        return [metric_range.low_value, metric_range.high_value] if metric_range else [None, None]
+
+
+class CourseLearnerMetadataSerializer(serializers.Serializer):
+    enrollment_modes = serializers.SerializerMethodField('get_enrollment_modes')
+    segments = serializers.SerializerMethodField('get_segments')
+    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+    # cohorts = serializers.SerializerMethodField('get_cohorts')
+    engagement_ranges = serializers.SerializerMethodField('get_engagement_ranges')
+
+    def get_enrollment_modes(self, obj):
+        return obj['es_data']['enrollment_modes']
+
+    def get_segments(self, obj):
+        return obj['es_data']['segments']
+
+    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+    # def get_cohorts(self, obj):
+    #     return obj['es_data']['cohorts']
+
+    def get_engagement_ranges(self, obj):
+        query_set = obj['engagement_ranges']
+        engagement_ranges = {
+            'date_range': DateRangeSerializer(query_set[0] if len(query_set) else None).data
+        }
+
+        # go through each entity and event type combination and fill in the ranges
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+                low_range_queryset = query_set.filter(metric=metric, range_type='low')
+                high_range_queryset = query_set.filter(metric=metric, range_type='high')
+                engagement_ranges.update({
+                    metric: EnagementRangeMetricSerializer({
+                        'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
+                        'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
+                    }).data
+                })
+
+        return engagement_ranges

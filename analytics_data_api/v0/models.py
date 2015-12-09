@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Sum
 from elasticsearch_dsl import DocType, Q
 
-from analytics_data_api.constants import country, engagement_entity_types, genders
+from analytics_data_api.constants import country, engagement_entity_types, genders, learner
 
 
 class CourseActivityWeekly(models.Model):
@@ -242,8 +242,26 @@ class RosterEntry(DocType):
         the Search object.  Raises `ValueError` if both `segments` and
         `ignore_segments` are provided.
         """
+        # Error handling
         if segments and ignore_segments:
             raise ValueError('Cannot combine `segments` and `ignore_segments` parameters.')
+        for segment in (segments or list()) + (ignore_segments or list()):
+            if segment not in learner.SEGMENTS:
+                raise ValueError("segments/ignore_segments value '{segment}' must be one of: ({segments})".format(
+                    segment=segment, segments=', '.join(learner.SEGMENTS)
+                ))
+        order_by_options = (
+            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed', 'videos_viewed'
+        )
+        sort_order_options = ('asc', 'desc')
+        if order_by not in order_by_options:
+            raise ValueError("order_by value '{order_by}' must be one of: ({order_by_options})".format(
+                order_by=order_by, order_by_options=', '.join(order_by_options)
+            ))
+        if sort_order not in sort_order_options:
+            raise ValueError("sort_order value '{sort_order}' must be one of: ({sort_order_options})".format(
+                sort_order=sort_order, sort_order_options=', '.join(sort_order_options)
+            ))
 
         search = cls.search()
         search.query = Q('bool', must=[Q('term', course_id=course_id)])
@@ -263,18 +281,50 @@ class RosterEntry(DocType):
             search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
 
         # Sorting
-        order_by_options = (
-            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed', 'videos_viewed'
-        )
-        sort_order_options = ('asc', 'desc')
-        if order_by not in order_by_options:
-            raise ValueError('order_by value must be one of: {}'.format(', '.join(order_by_options)))
-        if sort_order not in sort_order_options:
-            raise ValueError('sort_order value must be one of: {}'.format(', '.join(sort_order_options)))
         sort_term = order_by if sort_order == 'asc' else '-{}'.format(order_by)
         search = search.sort(sort_term)
 
         return search
+
+    @classmethod
+    def get_course_metadata(cls, course_id):
+        """
+        Returns the number of students belonging to particular cohorts,
+        segments, and enrollment modes within a course.  Returns data in the
+        following format:
+
+        {
+            'cohorts': {
+                <cohort_name>: <learner_count>
+            },
+            'segments': {
+                <segment_name>: <learner_count>
+            },
+            'enrollment_modes': {
+                <enrollment_mode_name>: <learner_count>
+            }
+        }
+        """
+        search = cls.search()
+        search.query = Q('bool', must=[Q('term', course_id=course_id)])
+        search.aggs.bucket('enrollment_modes', 'terms', field='enrollment_mode')
+        search.aggs.bucket('segments', 'terms', field='segments')
+        # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+        # search.aggs.bucket('group_by_cohorts', 'terms', field='cohort')
+        response = search.execute()
+        # Build up the map of aggregation name to count
+        aggregations = {
+            aggregation_name: {
+                bucket.key: bucket.doc_count
+                for bucket in response.aggregations[aggregation_name].buckets
+            }
+            for aggregation_name in response.aggregations
+        }
+        # Add default values of 0 for segments with no learners
+        for segment in learner.SEGMENTS:
+            if segment not in aggregations['segments']:
+                aggregations['segments'][segment] = 0
+        return aggregations
 
 
 class ModuleEngagementTimelineManager(models.Manager):
@@ -326,3 +376,25 @@ class ModuleEngagement(models.Model):
 
     class Meta(object):
         db_table = 'module_engagement'
+
+
+class ModuleEngagementMetricRanges(models.Model):
+    """
+    Represents the low and high values for a module engagement entity and event pair,
+    known as the metric.  The range_type will either be high or low, bounded by
+    low_value and high_value.
+    """
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    start_date = models.DateTimeField()
+    # This is a left-closed interval. No data from the end_date is included in the analysis.
+    end_date = models.DateTimeField()
+    metric = models.CharField(max_length=50)
+    range_type = models.CharField(max_length=50)
+    # Also a left-closed interval, so any metric whose value is equal to the high_value
+    # is not included in this range.
+    high_value = models.FloatField()
+    low_value = models.FloatField()
+
+    class Meta(object):
+        db_table = 'module_engagement_metric_ranges'

@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from elasticsearch_dsl import DocType
+from elasticsearch_dsl import DocType, Q
 
 from analytics_data_api.constants import country, genders
 
@@ -220,3 +220,55 @@ class RosterEntry(DocType):
     def get_course_user(cls, course_id, username):
         return cls.search().query('term', course_id=course_id).query(
             'term', username=username).execute()
+
+    @classmethod
+    def get_users_in_course(
+            cls,
+            course_id,
+            segments=None,
+            ignore_segments=None,
+            # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+            # cohort=None,
+            enrollment_mode=None,
+            text_search=None,
+            order_by='username',
+            sort_order='asc'
+    ):
+        """
+        Construct a search query for all users in `course_id` and return
+        the Search object.  Raises `ValueError` if both `segments` and
+        `ignore_segments` are provided.
+        """
+        if segments and ignore_segments:
+            raise ValueError('Cannot combine `segments` and `ignore_segments` parameters.')
+
+        search = cls.search()
+        search.query = Q('bool', must=[Q('term', course_id=course_id)])
+
+        # Filtering/Search
+        if segments:
+            search.query.must.append(Q('bool', should=[Q('term', segments=segment) for segment in segments]))
+        elif ignore_segments:
+            for segment in ignore_segments:
+                search = search.query(~Q('term', segments=segment))
+        # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+        # if cohort:
+        #     search = search.query('term', cohort=cohort)
+        if enrollment_mode:
+            search = search.query('term', enrollment_mode=enrollment_mode)
+        if text_search:
+            search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
+
+        # Sorting
+        order_by_options = (
+            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed', 'videos_viewed'
+        )
+        sort_order_options = ('asc', 'desc')
+        if order_by not in order_by_options:
+            raise ValueError('order_by value must be one of: {}'.format(', '.join(order_by_options)))
+        if sort_order not in sort_order_options:
+            raise ValueError('sort_order value must be one of: {}'.format(', '.join(sort_order_options)))
+        sort_term = order_by if sort_order == 'asc' else '-{}'.format(order_by)
+        search = search.sort(sort_term)
+
+        return search

@@ -1,9 +1,8 @@
 from django.conf.urls import patterns, url
 
 from analytics_data_api.v0.views import learners as views
+from analytics_data_api.v0.urls import USERNAME_PATTERN
 
-
-USERNAME_PATTERN = r'(?P<username>.+)'
 
 urlpatterns = patterns(
     '',

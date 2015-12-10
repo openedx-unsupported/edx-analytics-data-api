@@ -9,6 +9,7 @@ from rest_framework import status
 from django.conf import settings
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from analytics_data_api.v0.tests.views import VerifyCourseIdMixin
 
 
 class LearnerAPITestMixin(object):
@@ -116,9 +117,8 @@ class LearnerAPITestMixin(object):
         self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
 
 
-class LearnerTests(LearnerAPITestMixin, TestCaseWithAuthentication):
+class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthentication):
     """Tests for the single learner endpoint."""
-
     path_template = '/api/v0/learners/{}/?course_id={}'
 
     def setUp(self):
@@ -170,25 +170,13 @@ class LearnerTests(LearnerAPITestMixin, TestCaseWithAuthentication):
 
     def test_no_course_id(self):
         base_path = '/api/v0/learners/{}'
-        path = (base_path).format('ed_xavier')
-        response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        expected = {
-            u"error_code": u"course_not_specified",
-            u"developer_message": u"Course id/key not specified."
-        }
-        self.assertDictEqual(json.loads(response.content), expected)
+        response = self.authenticated_get((base_path).format('ed_xavier'))
+        self.verify_no_course_id(response)
 
     def test_bad_course_id(self):
         path = self.path_template.format('ed_xavier', 'malformed-course-id')
         response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected = {
-            u"error_code": u"course_key_malformed",
-            u"developer_message": u"Course id/key malformed-course-id malformed."
-        }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.verify_bad_course_id(response)
 
 
 @ddt.ddt

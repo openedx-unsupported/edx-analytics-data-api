@@ -175,11 +175,14 @@ class SequentialOpenDistributionSerializer(ModelSerializerWithCreatedField):
         )
 
 
-class BaseCourseEnrollmentModelSerializer(ModelSerializerWithCreatedField):
-    date = serializers.DateField(format=settings.DATE_FORMAT)
+class DefaultIfNoneMixin(object):
 
     def default_if_none(self, value, default=0):
         return value if value is not None else default
+
+
+class BaseCourseEnrollmentModelSerializer(DefaultIfNoneMixin, ModelSerializerWithCreatedField):
+    date = serializers.DateField(format=settings.DATE_FORMAT)
 
 
 class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
@@ -339,7 +342,7 @@ class LearnerSerializer(serializers.Serializer):
         Add the engagement totals.
         """
         engagements = {}
-        for entity_type in engagement_entity_types.ALL:
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
             for event in engagement_events.EVENTS[entity_type]:
                 metric = '{0}_{1}'.format(entity_type, event)
                 engagements[metric] = getattr(obj, metric, 0)
@@ -365,3 +368,23 @@ class ElasticsearchDSLSearchSerializer(EdxPaginationSerializer):
         # elasticsearch-dsl search object.
         kwargs['instance'].object_list = kwargs['instance'].object_list.execute()
         super(ElasticsearchDSLSearchSerializer, self).__init__(*args, **kwargs)
+
+
+class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
+    date = serializers.DateField(format=settings.DATE_FORMAT)
+    problems_attempted = serializers.IntegerField(required=True, default=0)
+    problems_completed = serializers.IntegerField(required=True, default=0)
+    discussions_contributed = serializers.IntegerField(required=True, default=0)
+    videos_viewed = serializers.IntegerField(required=True, default=0)
+
+    def transform_problems_attempted(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_problems_completed(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_discussions_contributed(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_videos_viewed(self, _obj, value):
+        return self.default_if_none(value, 0)

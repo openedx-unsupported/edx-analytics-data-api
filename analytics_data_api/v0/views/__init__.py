@@ -6,13 +6,14 @@ from analytics_data_api.v0.exceptions import (CourseNotSpecifiedError, CourseKey
 
 class CourseViewMixin(object):
     """
-    Captures the course_id query arg and validates it.
+    Captures the course_id from the url and validates it.
     """
 
     course_id = None
 
     def get(self, request, *args, **kwargs):
-        self.course_id = request.QUERY_PARAMS.get('course_id', None)
+        self.course_id = self.kwargs.get('course_id', request.QUERY_PARAMS.get('course_id', None))
+
         if not self.course_id:
             raise CourseNotSpecifiedError()
         try:

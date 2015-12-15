@@ -1,15 +1,22 @@
+import copy
+import datetime
+from itertools import groupby
 import json
 from urllib import urlencode
 
 import ddt
+from django_dynamic_fixture import G
 from elasticsearch import Elasticsearch
 from mock import patch, Mock
+import pytz
 from rest_framework import status
 
 from django.conf import settings
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
-from analytics_data_api.v0.tests.views import VerifyCourseIdMixin
+from analytics_data_api.constants import engagement_entity_types, engagement_events
+from analytics_data_api.v0.models import ModuleEngagementMetricRanges
+from analytics_data_api.v0.tests.views import DemoCourseMixin, VerifyCourseIdMixin
 
 
 class LearnerAPITestMixin(object):
@@ -180,7 +187,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
 
 
 @ddt.ddt
-class LearnerListTests(LearnerAPITestMixin, TestCaseWithAuthentication):
+class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAuthentication):
     """Tests for the learner list endpoint."""
     def setUp(self):
         super(LearnerListTests, self).setUp()
@@ -253,18 +260,18 @@ class LearnerListTests(LearnerAPITestMixin, TestCaseWithAuthentication):
         }])
 
     @ddt.data(
-        ('segments', ['a'], 'segments', 'a', True),
-        ('segments', ['a', 'b'], 'segments', 'a', True),
-        ('segments', ['a', 'b'], 'segments', 'b', True),
-        ('segments', ['a', 'b'], 'segments', 'a,b', True),
-        ('segments', ['a', 'b'], 'segments', '', True),
-        ('segments', ['a', 'b'], 'segments', 'c', False),
-        ('segments', ['a'], 'ignore_segments', 'a', False),
-        ('segments', ['a', 'b'], 'ignore_segments', 'a', False),
-        ('segments', ['a', 'b'], 'ignore_segments', 'b', False),
-        ('segments', ['a', 'b'], 'ignore_segments', 'a,b', False),
-        ('segments', ['a', 'b'], 'ignore_segments', '', True),
-        ('segments', ['a', 'b'], 'ignore_segments', 'c', True),
+        ('segments', ['highly_engaged'], 'segments', 'highly_engaged', True),
+        ('segments', ['highly_engaged', 'struggling'], 'segments', 'highly_engaged', True),
+        ('segments', ['highly_engaged', 'struggling'], 'segments', 'struggling', True),
+        ('segments', ['highly_engaged', 'struggling'], 'segments', 'highly_engaged,struggling', True),
+        ('segments', ['highly_engaged', 'struggling'], 'segments', '', True),
+        ('segments', ['highly_engaged', 'struggling'], 'segments', 'disengaging', False),
+        ('segments', ['highly_engaged'], 'ignore_segments', 'highly_engaged', False),
+        ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'highly_engaged', False),
+        ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'struggling', False),
+        ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'highly_engaged,struggling', False),
+        ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', '', True),
+        ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'disengaging', True),
         # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
         # ('cohort', 'a', 'cohort', 'a', True),
         # ('cohort', 'a', 'cohort', '', True),
@@ -404,9 +411,200 @@ class LearnerListTests(LearnerAPITestMixin, TestCaseWithAuthentication):
         ({'course_id': 'edX/DemoX/Demo_Course', 'page': 'bad_value'}, 'illegal_parameter_values'),
         ({'course_id': 'edX/DemoX/Demo_Course', 'page_size': 'bad_value'}, 'illegal_parameter_values'),
         ({'course_id': 'edX/DemoX/Demo_Course', 'page_size': 101}, 'illegal_parameter_values'),
+        ({'course_id': 'edX/DemoX/Demo_Course', 'segments': 'a_non_existent_segment'}, 'illegal_parameter_values'),
+        ({'course_id': 'edX/DemoX/Demo_Course', 'ignore_segments': 'a_non_existent_segment'},
+         'illegal_parameter_values'),
     )
     @ddt.unpack
     def test_bad_request(self, parameters, expected_error_code):
         response = self.authenticated_get('/api/v0/learners/', parameters)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(json.loads(response.content)['error_code'], expected_error_code)
+
+
+@ddt.ddt
+class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
+                                 LearnerAPITestMixin, TestCaseWithAuthentication):
+    """
+    Tests for the course learner metadata endpoint.
+    """
+
+    def _get(self, course_id):
+        """Helper to send a GET request to the API."""
+        return self.authenticated_get('/api/v0/course_learner_metadata/{}/'.format(course_id))
+
+    def get_expected_json(self, segments, enrollment_modes):
+        expected_json = self._get_full_engagement_ranges()
+        expected_json['segments'] = segments
+        expected_json['enrollment_modes'] = enrollment_modes
+        return expected_json
+
+    def assert_response_matches(self, response, expected_status_code, expected_data):
+        self.assertEqual(response.status_code, expected_status_code)
+        self.assertDictEqual(json.loads(response.content), expected_data)
+
+    def test_no_course_id(self):
+        response = self.authenticated_get('/api/v0/course_learner_metadata/')
+        self.assertEqual(response.status_code, 404)
+
+    @ddt.data(
+        {},
+        {'highly_engaged': 1},
+        {'disengaging': 1},
+        {'struggling': 1},
+        {'inactive': 1},
+        {'unenrolled': 1},
+        {'highly_engaged': 3, 'disengaging': 1},
+        {'disengaging': 10, 'inactive': 12},
+        {'highly_engaged': 1, 'disengaging': 2, 'struggling': 3, 'inactive': 4, 'unenrolled': 5},
+    )
+    def test_segments_unique_learners(self, segments):
+        """
+        Tests segment counts when each learner belongs to at most one segment.
+        """
+        learners = [
+            {'username': '{}_{}'.format(segment, i), 'course_id': self.course_id, 'segments': [segment]}
+            for segment, count in segments.items()
+            for i in xrange(count)
+        ]
+        self.create_learners(learners)
+        expected_segments = {"highly_engaged": 0, "disengaging": 0, "struggling": 0, "inactive": 0, "unenrolled": 0}
+        expected_segments.update(segments)
+        expected = self.get_expected_json(
+            segments=expected_segments, enrollment_modes={'honor': len(learners)} if learners else {}
+        )
+        self.assert_response_matches(self._get(self.course_id), 200, expected)
+
+    def test_segments_same_learner(self):
+        """
+        Tests segment counts when each learner belongs to multiple segments.
+        """
+        self.create_learners([
+            {'username': 'user_1', 'course_id': self.course_id, 'segments': ['struggling', 'disengaging']},
+            {'username': 'user_2', 'course_id': self.course_id, 'segments': ['disengaging']}
+        ])
+        expected = self.get_expected_json(
+            segments={'disengaging': 2, 'struggling': 1, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
+            enrollment_modes={'honor': 2}
+        )
+        self.assert_response_matches(self._get(self.course_id), 200, expected)
+
+    @ddt.data(
+        [],
+        ['honor'],
+        ['verified'],
+        ['audit'],
+        ['nonexistent-enrollment-tracks-still-show-up'],
+        ['honor', 'verified', 'audit'],
+        ['honor', 'honor', 'verified', 'verified', 'audit', 'audit'],
+    )
+    def test_enrollment_modes(self, enrollment_modes):
+        self.create_learners([
+            {'username': 'user_{}'.format(i), 'course_id': self.course_id, 'enrollment_mode': enrollment_mode}
+            for i, enrollment_mode in enumerate(enrollment_modes)
+        ])
+        expected_enrollment_modes = {}
+        for enrollment_mode, group in groupby(enrollment_modes):
+            # can't call 'len' directly on a group object
+            count = len([mode for mode in group])
+            expected_enrollment_modes[enrollment_mode] = count
+        expected = self.get_expected_json(
+            segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
+            enrollment_modes=expected_enrollment_modes
+        )
+        self.assert_response_matches(self._get(self.course_id), 200, expected)
+
+    @property
+    def empty_engagement_ranges(self):
+        """ Returns the engagement ranges where all fields are set to None. """
+        empty_engagement_ranges = {
+            'engagement_ranges': {
+                'date_range': {
+                    'start': None,
+                    'end': None
+                }
+            }
+        }
+        empty_range = {
+            range_type: [None, None] for range_type in ['below_average', 'average', 'above_average']
+        }
+        for metric in self.engagement_metrics:
+            empty_engagement_ranges['engagement_ranges'][metric] = copy.deepcopy(empty_range)
+        return empty_engagement_ranges
+
+    @property
+    def engagement_metrics(self):
+        """ Convenience method for getting the metric types. """
+        metrics = []
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
+            for event in engagement_events.EVENTS[entity_type]:
+                metrics.append('{0}_{1}'.format(entity_type, event))
+        return metrics
+
+    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+    # def test_cohorts(self):
+    #     pass
+
+    def test_no_engagement_ranges(self):
+        response = self._get(self.course_id)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(self.empty_engagement_ranges, json.loads(response.content))
+
+    def test_one_engagement_range(self):
+        metric_type = 'problems_completed'
+        start_date = datetime.datetime(2015, 7, 1, tzinfo=pytz.utc)
+        end_date = datetime.datetime(2015, 7, 21, tzinfo=pytz.utc)
+        G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+          metric=metric_type, range_type='high', low_value=90, high_value=6120)
+        expected_ranges = self.empty_engagement_ranges
+        expected_ranges['engagement_ranges'].update({
+            'date_range': {
+                'start': '2015-07-01',
+                'end': '2015-07-21'
+            },
+            metric_type: {
+                'below_average': [None, None],
+                'average': [None, 90.0],
+                'above_average': [90.0, 6120.0]
+            }
+        })
+
+        response = self._get(self.course_id)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(expected_ranges, json.loads(response.content))
+
+    def _get_full_engagement_ranges(self):
+        """ Populates a full set of engagement ranges and returns the expected engagement ranges. """
+        start_date = datetime.datetime(2015, 7, 1, tzinfo=pytz.utc)
+        end_date = datetime.datetime(2015, 7, 21, tzinfo=pytz.utc)
+
+        expected = {
+            'engagement_ranges': {
+                'date_range': {
+                    'start': '2015-07-01',
+                    'end': '2015-07-21'
+                }
+            }
+        }
+
+        max_value = 1000.0
+        for metric_type in self.engagement_metrics:
+            low_ceil = 100.5
+            G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+              metric=metric_type, range_type='low', low_value=0, high_value=low_ceil)
+            high_floor = 800.8
+            G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+              metric=metric_type, range_type='high', low_value=high_floor, high_value=max_value)
+            expected['engagement_ranges'][metric_type] = {
+                'below_average': [0.0, low_ceil],
+                'average': [low_ceil, high_floor],
+                'above_average': [high_floor, max_value]
+            }
+
+        return expected
+
+    def test_engagement_ranges_only(self):
+        expected = self._get_full_engagement_ranges()
+        response = self._get(self.course_id)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(expected, json.loads(response.content))

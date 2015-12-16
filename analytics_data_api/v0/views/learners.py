@@ -28,7 +28,7 @@ from analytics_data_api.v0.views.utils import split_query_argument
 
 class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
     """
-    Get a particular student's data for a particular course.
+    Get a particular learner's data for a particular course.
 
     **Example Request**
 
@@ -36,18 +36,21 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
 
     **Response Values**
 
-        Returns the learner metadata and engagement data:
+        Returns metadata and engagement data for the learner.
 
             * username: User's username.
-            * enrollment_mode: Enrollment mode (e.g. "honor).
+            * enrollment_mode: Enrollment mode (for example, "verified").
             * name: User's full name.
-            * email: User's email.
-            * segments: Classification for this course based on engagement, (e.g. "has_potential").
+            * email: User's email address.
+            * segments: Classification, based on engagement, of this learner's
+              work in this course (for example, "highly_engaged" or
+              "struggling").
             * engagements: Summary of engagement events for a time span.
-                * videos_viewed: Number of times a video was played.
-                * problems_completed: Unique number of problems completed.
-                * problems_attempted: Unique number of problems attempted.
-                * discussions_contributed: Number of discussions (e.g. forum posts).
+                * videos_viewed: Number of times any course video was played.
+                * problems_completed: Number of unique problems the learner answered correctly.
+                * problems_attempted: Number of unique problems attempted. This is a count of the different problems the learner tried.
+                * discussions_contributed: Number of posts, responses, or
+                  comments the learner contributed to course discussions.
 
     **Parameters**
 
@@ -76,7 +79,7 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
 
 class LearnerListView(CourseViewMixin, generics.ListAPIView):
     """
-    Get a paginated list of student data for a particular course.
+    Get a paginated list of learner data for a particular course.
 
     **Example Request**
 
@@ -85,55 +88,61 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
     **Response Values**
 
         Returns a paginated list of learner metadata and engagement data.
-        Pagination data is returned in the top-level of the returned JSON
-        object:
+        Pagination data is returned in the top level of the returned JSON
+        object.
 
-            * count: The number of learners matching the query.
+            * count: The number of learners that match the query.
             * page: The current one-indexed page number.
             * next: A hyperlink to the next page if one exists, otherwise null.
-            * previous: A hyperlink to the previous page if one exists, otherwise null.
+            * previous: A hyperlink to the previous page if one exists,
+              otherwise null.
 
         The 'results' key in the returned JSON object maps to an array of
-        learners which contains at most a full page's worth of learners.  Each
-        learner is a JSON object containing the following keys:
+        learners that contains, at most, a full page's worth of learners. For
+        each learner there is a JSON object that contains the following keys.
 
             * username: User's username.
-            * enrollment_mode: Enrollment mode (e.g. "honor).
+            * enrollment_mode: Enrollment mode (for example, "verified").
             * name: User's full name.
             * email: User's email.
-            * segments: Classification for this course based on engagement, (e.g. "has_potential").
+            * segments: Classification, based on engagement, of each learner's
+              work in this course (for example, "highly_engaged" or
+              "struggling").
             * engagements: Summary of engagement events for a time span.
-                * videos_viewed: Number of times a video was played.
+                * videos_viewed: Number of times any course video was played.
                 * problems_completed: Unique number of problems completed.
                 * problems_attempted: Unique number of problems attempted.
-                * discussions_contributed: Number of discussions (e.g. forum posts).
+                * discussions_contributed: Number of discussion contributions
+                  (for example, posts).
 
     **Parameters**
 
-        You can filter the list of learners by course ID and other parameters
-        such as enrollment mode and text search.  You can also control the
-        page size and page number of the response, as well as sort the learners
-        in the response.
+        You can filter the list of learners by course ID and by other
+        parameters, including enrollment mode and text search. You can also
+        control the page size and page number of the response, as well as sort
+        the learners in the response.
 
-        course_id -- The course within which user data is requested.
-        page -- The page of results which should be returned.
-        page_size -- The maximum number of results which should be returned per page.
-        text_search -- A string to search over the name, username, and email of learners.
-        segments -- A comma-separated string of segments to which
-            learners should belong.  Semgents are "OR"-ed together.
-            Cannot use in combination with `ignore_segments`
-            argument.
-        ignore_segments -- A comma-separated string of segments to
-            which learners should NOT belong.  Semgents are "OR"-ed
-            together.  Cannot use in combination with `segments`
+        course_id -- The course for which user data is requested.
+        page -- The page of results that should be returned.
+        page_size -- The maximum number of results to return per page.
+        text_search -- An alphanumeric string that is used to search name,
+            username, and email values to find learners.
+        segments -- A comma-separated string of segment names that is used
+            to select only those learners who are categorized in those
+            segments. Segments are connected by OR statements. Cannot be
+            used in combination with the `ignore_segments` argument.
+        ignore_segments -- A comma-separated string of segment names that is
+            used to select only those learners who are NOT categorized
+            as belonging to those segments. Segments are connected by OR
+            statements. Cannot be used in combination with the `segments`
             argument.
         cohort -- The cohort to which all returned learners must
             belong.
         enrollment_mode -- The enrollment mode to which all returned
             learners must belong.
-        order_by -- The field for sorting the response.  Defaults to 'username'.
-        sort_order -- The sort direction.  One of 'asc' or 'desc'.
-            Defaults to 'asc'.
+        order_by -- The field for sorting the response. Defaults to 'username'.
+        sort_order -- The sort direction.  One of 'asc' (ascending) or 'desc'
+            (descending). Defaults to 'asc'.
 
     """
     serializer_class = LearnerSerializer
@@ -168,7 +177,7 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
 
     def get_queryset(self):
         """
-        Fetches the user list from elasticsearch.  Note that an
+        Fetches the user list from elasticsearch. Note that an
         elasticsearch_dsl `Search` object is returned, not an actual
         queryset.
         """
@@ -195,8 +204,8 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
 
 class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
     """
-    Get a particular learner's engagement timeline for a particular course.  Days
-    without data will not be returned.
+    Get a particular learner's engagement timeline for a particular course.
+    Days without data are not returned.
 
     **Example Request**
 
@@ -207,7 +216,7 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
         Returns the engagement timeline.
 
             * days: Array of the learner's daily engagement timeline.
-                * problems_attempted: Unique number of unique problems attempted.
+                * problems_attempted: Unique number of problems attempted. This is a count of the different problems the learner tried.
                 * problems_completed: Unique number of problems completed.
                 * discussions_contributed: Number of discussions participated in (e.g. forum posts)
                 * videos_viewed: Number of videos watched.
@@ -242,8 +251,8 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
 
 class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
     """
-    Get metadata on learners within a course. Includes data on segments,
-    cohorts, enrollment modes, and an engagement rubric.
+    Get metadata for the learners in a course. Includes data on segments,
+    cohorts, and enrollment modes, and an engagement rubric.
 
     **Example Request**
 
@@ -251,33 +260,33 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
 
     **Response Values**
 
-        Returns a JSON object with the following keys:
+        Returns a JSON object with the following keys.
 
-            * cohorts: An object mapping the names of cohorts in the course to
-              the number of students belonging to those cohorts.
-            * segments: An object mapping the names of segments in the course
-              to the number of students belonging to those segments.  The
-              current set of segments are: "highly_engaged", "disengaging",
+            * cohorts: An object that maps the names of cohorts in the course
+              to the number of learners belonging to those cohorts.
+            * segments: An object that maps the names of segments in the course
+              to the number of learners belonging to those segments. The
+              current set of segments is: "highly_engaged", "disengaging",
               "struggling", "inactive", and "unenrolled".
-            * enrollment_modes: An object mapping the names of enrollment modes
-              in the course to the number of students belonging to those
-              enrollment modes.  Examples include "honor" and "verified".
+            * enrollment_modes: An object that maps the names of enrollment
+              modes in the course to the number of learners belonging to those
+              enrollment modes. Examples include "audit" and "verified".
             * engagement_ranges: An object containing ranges of learner
-              engagement with the courseware.  Each range has 'below_average',
-              'average', and 'above_average' keys which map to two-element
-              arrays of which the first element is the lower bound (inclusive)
-              and the second element is the upper bound (exclusive).  It has
-              the following keys:
-                * date_range: The time duration for which this data applies
-                * problems_attempted: engagement ranges for the number of
+              engagement with the courseware. Each range has 'below_average',
+              'average', and 'above_average' keys. These keys map to
+              two-element arrays, in which the first element is the lower bound
+              (inclusive) and the second element is the upper bound
+              (exclusive). It has the following keys.
+                * date_range: The time period to which this data applies.
+                * problems_attempted: Engagement ranges for the number of
                   problems attempted in the date range.
-                * problems_completed: engagement ranges for the number of
+                * problems_completed: Engagement ranges for the number of
                   problems completed in the date range.
-                * problem_attempts_per_completed: engagement ranges for the
+                * problem_attempts_per_completed: Engagement ranges for the
                   number of problem attempts per completed problem in the date
                   range.
-                * discussions_contributed: engagement ranges for the number of
-                  discussions contributed in the date range.
+                * discussions_contributed: Engagement ranges for the number of
+                  times learners participated in discussions in the date range.
 
     """
     serializer_class = CourseLearnerMetadataSerializer

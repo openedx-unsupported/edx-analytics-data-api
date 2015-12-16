@@ -1,7 +1,13 @@
+from urlparse import urljoin
 from django.conf import settings
-from rest_framework import serializers
+from rest_framework import pagination, serializers
 
-from analytics_data_api.constants import enrollment_modes, genders
+from analytics_data_api.constants import (
+    engagement_entity_types,
+    engagement_events,
+    enrollment_modes,
+    genders,
+)
 from analytics_data_api.v0 import models
 
 
@@ -169,11 +175,14 @@ class SequentialOpenDistributionSerializer(ModelSerializerWithCreatedField):
         )
 
 
-class BaseCourseEnrollmentModelSerializer(ModelSerializerWithCreatedField):
-    date = serializers.DateField(format=settings.DATE_FORMAT)
+class DefaultIfNoneMixin(object):
 
     def default_if_none(self, value, default=0):
         return value if value is not None else default
+
+
+class BaseCourseEnrollmentModelSerializer(DefaultIfNoneMixin, ModelSerializerWithCreatedField):
+    date = serializers.DateField(format=settings.DATE_FORMAT)
 
 
 class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
@@ -306,3 +315,146 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
             'num_views',
             'created'
         )
+
+
+class LearnerSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    enrollment_mode = serializers.CharField()
+    name = serializers.CharField()
+    account_url = serializers.SerializerMethodField('get_account_url')
+    email = serializers.CharField()
+    segments = serializers.Field(source='segments')
+    engagements = serializers.SerializerMethodField('get_engagements')
+
+    # TODO: add these back in when the index returns them
+    # enrollment_date = serializers.DateField(format=settings.DATE_FORMAT, allow_empty=True)
+    # last_updated = serializers.DateField(format=settings.DATE_FORMAT)
+    # cohort = serializers.CharField(allow_none=True)
+
+    def get_account_url(self, obj):
+        if settings.LMS_USER_ACCOUNT_BASE_URL:
+            return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)
+        else:
+            return None
+
+    def get_engagements(self, obj):
+        """
+        Add the engagement totals.
+        """
+        engagements = {}
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+                engagements[metric] = getattr(obj, metric, 0)
+        return engagements
+
+
+class EdxPaginationSerializer(pagination.PaginationSerializer):
+    """
+    Adds values to the response according to edX REST API Conventions.
+    """
+    count = serializers.Field(source='paginator.count')
+    num_pages = serializers.Field(source='paginator.num_pages')
+
+
+class ElasticsearchDSLSearchSerializer(EdxPaginationSerializer):
+    def __init__(self, *args, **kwargs):
+        """Make sure that the elasticsearch query is executed."""
+        # Because the elasticsearch-dsl search object has a different
+        # API from the queryset object that's expected by the django
+        # Paginator object, we have to manually execute the query.
+        # Note that the `kwargs['instance']` is the Page object, and
+        # `kwargs['instance'].object_list` is actually an
+        # elasticsearch-dsl search object.
+        kwargs['instance'].object_list = kwargs['instance'].object_list.execute()
+        super(ElasticsearchDSLSearchSerializer, self).__init__(*args, **kwargs)
+
+
+class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
+    date = serializers.DateField(format=settings.DATE_FORMAT)
+    problems_attempted = serializers.IntegerField(required=True, default=0)
+    problems_completed = serializers.IntegerField(required=True, default=0)
+    discussions_contributed = serializers.IntegerField(required=True, default=0)
+    videos_viewed = serializers.IntegerField(required=True, default=0)
+
+    def transform_problems_attempted(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_problems_completed(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_discussions_contributed(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+    def transform_videos_viewed(self, _obj, value):
+        return self.default_if_none(value, 0)
+
+
+class DateRangeSerializer(serializers.Serializer):
+    start = serializers.DateTimeField(source='start_date', format=settings.DATE_FORMAT)
+    end = serializers.DateTimeField(source='end_date', format=settings.DATE_FORMAT)
+
+
+class EnagementRangeMetricSerializer(serializers.Serializer):
+    """
+    Serializes ModuleEngagementMetricRanges (low_range and high_range) into
+    the below_average, average, above_average ranges represented as arrays.
+    """
+    below_average = serializers.SerializerMethodField('get_below_average_range')
+    average = serializers.SerializerMethodField('get_average_range')
+    above_average = serializers.SerializerMethodField('get_above_average_range')
+
+    def get_average_range(self, obj):
+        metric_range = [
+            obj['low_range'].high_value if obj['low_range'] else None,
+            obj['high_range'].low_value if obj['high_range'] else None,
+        ]
+        return metric_range
+
+    def get_below_average_range(self, obj):
+        return self._get_range(obj['low_range'])
+
+    def get_above_average_range(self, obj):
+        return self._get_range(obj['high_range'])
+
+    def _get_range(self, metric_range):
+        return [metric_range.low_value, metric_range.high_value] if metric_range else [None, None]
+
+
+class CourseLearnerMetadataSerializer(serializers.Serializer):
+    enrollment_modes = serializers.SerializerMethodField('get_enrollment_modes')
+    segments = serializers.SerializerMethodField('get_segments')
+    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+    # cohorts = serializers.SerializerMethodField('get_cohorts')
+    engagement_ranges = serializers.SerializerMethodField('get_engagement_ranges')
+
+    def get_enrollment_modes(self, obj):
+        return obj['es_data']['enrollment_modes']
+
+    def get_segments(self, obj):
+        return obj['es_data']['segments']
+
+    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
+    # def get_cohorts(self, obj):
+    #     return obj['es_data']['cohorts']
+
+    def get_engagement_ranges(self, obj):
+        query_set = obj['engagement_ranges']
+        engagement_ranges = {
+            'date_range': DateRangeSerializer(query_set[0] if len(query_set) else None).data
+        }
+
+        # go through each entity and event type combination and fill in the ranges
+        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
+            for event in engagement_events.EVENTS[entity_type]:
+                metric = '{0}_{1}'.format(entity_type, event)
+                low_range_queryset = query_set.filter(metric=metric, range_type='low')
+                high_range_queryset = query_set.filter(metric=metric, range_type='high')
+                engagement_ranges.update({
+                    metric: EnagementRangeMetricSerializer({
+                        'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
+                        'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
+                    }).data
+                })
+
+        return engagement_ranges

@@ -28,7 +28,7 @@ from analytics_data_api.v0.views.utils import split_query_argument
 
 class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
     """
-    Get a particular learner's data for a particular course.
+    Get data for a particular learner in a particular course.
 
     **Example Request**
 
@@ -47,8 +47,10 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
               "struggling").
             * engagements: Summary of engagement events for a time span.
                 * videos_viewed: Number of times any course video was played.
-                * problems_completed: Number of unique problems the learner answered correctly.
-                * problems_attempted: Number of unique problems attempted. This is a count of the different problems the learner tried.
+                * problems_completed: Number of unique problems the learner
+                  answered correctly.
+                * problems_attempted: Number of unique problems attempted.
+                  This is a count of the different problems the learner tried.
                 * discussions_contributed: Number of posts, responses, or
                   comments the learner contributed to course discussions.
 
@@ -56,7 +58,7 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
 
         You can specify the course ID for which you want data.
 
-        course_id -- The course within which user data is requested.
+        course_id -- The course for which user data is requested.
 
     """
     serializer_class = LearnerSerializer
@@ -79,7 +81,7 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
 
 class LearnerListView(CourseViewMixin, generics.ListAPIView):
     """
-    Get a paginated list of learner data for a particular course.
+    Get a paginated list of data for all learners in a particular course.
 
     **Example Request**
 
@@ -110,10 +112,12 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
               "struggling").
             * engagements: Summary of engagement events for a time span.
                 * videos_viewed: Number of times any course video was played.
-                * problems_completed: Unique number of problems completed.
-                * problems_attempted: Unique number of problems attempted.
-                * discussions_contributed: Number of discussion contributions
-                  (for example, posts).
+                * problems_completed: Number of unique problems the learner
+                  answered correctly.
+                * problems_attempted: Number of unique problems attempted.
+                  This is a count of the different problems the learner tried.
+                * discussions_contributed: Number of posts, responses, or
+                  comments the learner contributed to course discussions.
 
     **Parameters**
 
@@ -216,16 +220,19 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
         Returns the engagement timeline.
 
             * days: Array of the learner's daily engagement timeline.
-                * problems_attempted: Unique number of problems attempted. This is a count of the different problems the learner tried.
-                * problems_completed: Unique number of problems completed.
-                * discussions_contributed: Number of discussions participated in (e.g. forum posts)
-                * videos_viewed: Number of videos watched.
+                * problems_attempted: Number of unique problems attempted.
+                  This is a count of the different problems the learner tried.
+                * problems_completed: Number of unique problems the learner
+                  answered correctly.
+                * discussions_contributed: Number of posts, responses, or
+                  comments the learner contributed to course discussions.
+                * videos_viewed: Number of times any course video was played.
 
     **Parameters**
 
-        You can specify course ID for which you want data.
+        You can specify the course ID for which you want data.
 
-        course_id -- The course within which user data is requested.
+        course_id -- The course for which user data is requested.
 
     """
     serializer_class = EngagementDaySerializer
@@ -266,7 +273,7 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
               to the number of learners belonging to those cohorts.
             * segments: An object that maps the names of segments in the course
               to the number of learners belonging to those segments. The
-              current set of segments is: "highly_engaged", "disengaging",
+              current set of segments is "highly_engaged", "disengaging",
               "struggling", "inactive", and "unenrolled".
             * enrollment_modes: An object that maps the names of enrollment
               modes in the course to the number of learners belonging to those
@@ -279,9 +286,9 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
               (exclusive). It has the following keys.
                 * date_range: The time period to which this data applies.
                 * problems_attempted: Engagement ranges for the number of
-                  problems attempted in the date range.
+                  unique problems attempted in the date range.
                 * problems_completed: Engagement ranges for the number of
-                  problems completed in the date range.
+                  unique problems answered correctly in the date range.
                 * problem_attempts_per_completed: Engagement ranges for the
                   number of problem attempts per completed problem in the date
                   range.

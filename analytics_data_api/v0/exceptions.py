@@ -41,7 +41,7 @@ class LearnerEngagementTimelineNotFoundError(BaseError):
 
     @property
     def message_template(self):
-        return 'Learner {username} engagmeent timeline not found for course {course_id}.'
+        return 'Learner {username} engagement timeline not found for course {course_id}.'
 
 
 class CourseNotSpecifiedError(BaseError):

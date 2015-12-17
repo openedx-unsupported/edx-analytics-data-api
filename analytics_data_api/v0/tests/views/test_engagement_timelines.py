@@ -116,7 +116,7 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
         self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
         expected = {
             u"error_code": u"no_learner_engagement_timeline",
-            u"developer_message": u"Learner {} engagmeent timeline not found for course {}.".format(
+            u"developer_message": u"Learner {} engagement timeline not found for course {}.".format(
                 self.DEFAULT_USERNAME, self.course_id)
         }
         self.assertDictEqual(json.loads(response.content), expected)

@@ -348,8 +348,7 @@ class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
             engagements[field] = self.default_if_none(getattr(obj, field, None), 0)
 
         # preserve null values for problem attempts per completed
-        no_default_field = 'problem_attempts_per_completed'
-        engagements[no_default_field] = getattr(obj, no_default_field, None)
+        engagements['problem_attempts_per_completed'] = getattr(obj, 'problem_attempts_per_completed', None)
 
         return engagements
 

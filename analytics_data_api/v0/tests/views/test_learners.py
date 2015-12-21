@@ -150,13 +150,13 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
     @ddt.data(
         ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'honor', ['has_potential'], 'Team edX',
          43, 3, 6, 0, 8.4, 2, '2015-04-24', '2015-08-05'),
-        ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'verified', None, None,
-         None, None, None, None, None, None, None, None),
+        ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'verified'),
     )
     @ddt.unpack
-    def test_get_user(self, username, name, course_id, enrollment_mode, segments, cohort, problems_attempted,
-                      problems_completed, videos_viewed, discussions_contributed, problem_attempts_per_completed,
-                      attempt_ratio_order, enrollment_date, last_updated):
+    def test_get_user(self, username, name, course_id, enrollment_mode, segments=None, cohort=None,
+                      problems_attempted=None, problems_completed=None, videos_viewed=None,
+                      discussions_contributed=None, problem_attempts_per_completed=None,
+                      attempt_ratio_order=None, enrollment_date=None, last_updated=None):
 
         self.create_learners([{
             "username": username,

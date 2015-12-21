@@ -176,9 +176,8 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
         query_params = self.request.QUERY_PARAMS
 
         # Ordering by problem_attempts_per_completed can be ambiguous because
-        # it's a ratio values could be infinite (e.g. divide by zero) if no problems
-        # were completed.  Instead, sorting by attempt_ratio_order will produce
-        # a sensible ordering
+        # values could be infinite (e.g. divide by zero) if no problems were completed.
+        # Instead, sorting by attempt_ratio_order will produce a sensible ordering
         order_by = query_params.get('order_by')
         order_by = 'attempt_ratio_order' if order_by == 'problem_attempts_per_completed' else order_by
 

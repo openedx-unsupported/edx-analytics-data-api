@@ -223,7 +223,7 @@ class RosterEntry(DocType):
     email = String()
     enrollment_mode = String()
     cohort = String()
-    segments = String(fields={'raw': String()})
+    segments = String()  # segments is an array/list of strings
     problems_attempted = Integer()
     problems_completed = Integer()
     problem_attempts_per_completed = Float()

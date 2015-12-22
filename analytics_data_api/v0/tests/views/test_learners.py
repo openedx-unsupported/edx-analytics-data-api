@@ -25,10 +25,15 @@ class LearnerAPITestMixin(object):
         """Creates the index and defines a mapping."""
         super(LearnerAPITestMixin, self).setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
-        # delete index if for some reason the index wasn't deleted in tearDown
-        if self._es.indices.exists(index=settings.ELASTICSEARCH_LEARNERS_INDEX):
-            self._es.indices.delete(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
-        self._es.indices.create(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+
+        for index in [settings.ELASTICSEARCH_LEARNERS_INDEX, settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX]:
+            # ensure the test index is deleted
+            def delete_index(to_delete):
+                if self._es.indices.exists(index=to_delete):
+                    self._es.indices.delete(index=to_delete)
+            self.addCleanup(delete_index, index)
+            self._es.indices.create(index=index)
+
         self._es.indices.put_mapping(
             index=settings.ELASTICSEARCH_LEARNERS_INDEX,
             doc_type='roster_entry',
@@ -76,17 +81,24 @@ class LearnerAPITestMixin(object):
                     'enrollment_date': {
                         'type': 'date', 'doc_values': True
                     },
-                    'last_updated': {
-                        'type': 'date', 'doc_values': True
-                    },
                 }
             }
         )
 
-    def tearDown(self):
-        """Remove the index after every test."""
-        super(LearnerAPITestMixin, self).tearDown()
-        self._es.indices.delete(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+        self._es.indices.put_mapping(
+            index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
+            doc_type='marker',
+            body={
+                'properties': {
+                    'date': {
+                        'type': 'date', 'doc_values': True
+                    },
+                    'target_index': {
+                        'type': 'string'
+                    },
+                }
+            }
+        )
 
     def _create_learner(
             self,
@@ -104,7 +116,6 @@ class LearnerAPITestMixin(object):
             attempt_ratio_order=0,
             videos_viewed=0,
             enrollment_date='2015-01-28',
-            last_updated='2015-01-28'
     ):
         """Create a single learner roster entry in the elasticsearch index."""
         self._es.create(
@@ -125,7 +136,6 @@ class LearnerAPITestMixin(object):
                 'attempt_ratio_order': attempt_ratio_order,
                 'videos_viewed': videos_viewed,
                 'enrollment_date': enrollment_date,
-                'last_updated': last_updated
             }
         )
 
@@ -140,6 +150,20 @@ class LearnerAPITestMixin(object):
         for learner in learners:
             self._create_learner(**learner)
         self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
+
+    def create_update_index(self, date=None):
+        """
+        Created an index with the date of when the learner index was updated.
+        """
+        self._es.create(
+            index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
+            doc_type='marker',
+            body={
+                'date': date,
+                'target_index': settings.ELASTICSEARCH_LEARNERS_INDEX,
+            }
+        )
+        self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX)
 
 
 @ddt.ddt
@@ -172,8 +196,8 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             "problem_attempts_per_completed": problem_attempts_per_completed,
             "attempt_ratio_order": attempt_ratio_order,
             "enrollment_date": enrollment_date,
-            "last_updated": last_updated,
         }])
+        self.create_update_index(last_updated)
 
         response = self.authenticated_get(self.path_template.format(username, course_id))
         self.assertEquals(response.status_code, 200)
@@ -227,6 +251,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
     def setUp(self):
         super(LearnerListTests, self).setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
+        self.create_update_index('2015-09-28')
 
     def _get(self, course_id, **query_params):
         """Helper to send a GET request to the API."""
@@ -291,7 +316,8 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
                 "videos_viewed": 6,
                 "discussions_contributed": 0,
                 "problem_attempts_per_completed": 23.14,
-            }
+            },
+            'last_updated': '2015-09-28',
         }])
 
     @ddt.data(

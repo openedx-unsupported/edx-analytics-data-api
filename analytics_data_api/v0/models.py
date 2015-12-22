@@ -6,7 +6,6 @@ from django.db.models import Sum
 # some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
 from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String
 
-
 from analytics_data_api.constants import country, engagement_entity_types, genders, learner
 
 
@@ -213,6 +212,20 @@ class Video(BaseVideo):
 
     class Meta(BaseVideo.Meta):
         db_table = 'video'
+
+
+class RosterUpdate(DocType):
+
+    date = Date()
+
+    # pylint: disable=old-style-class
+    class Meta:
+        index = settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX
+        doc_type = 'marker'
+
+    @classmethod
+    def get_last_updated(cls):
+        return cls.search().query('term', target_index=settings.ELASTICSEARCH_LEARNERS_INDEX).execute()
 
 
 class RosterEntry(DocType):

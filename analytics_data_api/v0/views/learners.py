@@ -1,6 +1,8 @@
 """
 API methods for module level data.
 """
+import logging
+
 from rest_framework import generics, status
 
 from analytics_data_api.constants import (
@@ -14,19 +16,38 @@ from analytics_data_api.v0.exceptions import (
 from analytics_data_api.v0.models import (
     ModuleEngagement,
     ModuleEngagementMetricRanges,
-    RosterEntry
+    RosterEntry,
+    RosterUpdate,
 )
 from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
     ElasticsearchDSLSearchSerializer,
     EngagementDaySerializer,
+    LastUpdatedSerializer,
     LearnerSerializer,
 )
 from analytics_data_api.v0.views import CourseViewMixin
 from analytics_data_api.v0.views.utils import split_query_argument
 
 
-class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
+logger = logging.getLogger(__name__)
+
+
+class LastUpdateMixin(object):
+
+    @classmethod
+    def get_last_updated(cls):
+        """ Returns the serialized RosterUpdate last_updated field. """
+        roster_update = RosterUpdate.get_last_updated()
+        last_updated = {'date': None}
+        if len(roster_update) == 1:
+            last_updated = roster_update[0]
+        else:
+            logger.warn('RosterUpdate not found.')
+        return LastUpdatedSerializer(last_updated).data
+
+
+class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
     """
     Get data for a particular learner in a particular course.
 
@@ -73,6 +94,14 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
         self.username = self.kwargs.get('username')
         return super(LearnerView, self).get(request, *args, **kwargs)
 
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Adds the last_updated field to the result.
+        """
+        response = super(LearnerView, self).retrieve(request, args, kwargs)
+        response.data.update(self.get_last_updated())
+        return response
+
     def get_queryset(self):
         return RosterEntry.get_course_user(self.course_id, self.username)
 
@@ -83,7 +112,7 @@ class LearnerView(CourseViewMixin, generics.RetrieveAPIView):
         raise LearnerNotFoundError(username=self.username, course_id=self.course_id)
 
 
-class LearnerListView(CourseViewMixin, generics.ListAPIView):
+class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
     """
     Get a paginated list of data for all learners in a course.
 
@@ -186,11 +215,20 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
                 if page_size > self.max_paginate_by or page_size < 1:
                     raise ParameterValueError('Page size must be in the range [1, {}]'.format(self.max_paginate_by))
 
+    def list(self, request, *args, **kwargs):
+        """
+        Adds the last_updated field to the results.
+        """
+        response = super(LearnerListView, self).list(request, args, kwargs)
+        last_updated = self.get_last_updated()
+        for result in response.data['results']:
+            result.update(last_updated)
+        return response
+
     def get_queryset(self):
         """
-        Fetches the user list from elasticsearch.  Note that an
-        elasticsearch_dsl `Search` object is returned, not an actual
-        queryset.
+        Fetches the user list and last updated from elasticsearch returned returned
+        as a an array of dicts with fields "learner" and "last_updated".
         """
         self._validate_query_params()
         query_params = self.request.QUERY_PARAMS

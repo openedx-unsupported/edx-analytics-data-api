@@ -382,16 +382,23 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
             'videos_viewed', 'desc', [{'username': 'b'}, {'username': 'a'}]
         ),
         (
-            [{'username': 'a', 'problem_attempts_per_completed': None, 'attempt_ratio_order': -1},
-             {'username': 'b', 'problem_attempts_per_completed': None, 'attempt_ratio_order': 0},
-             {'username': 'c', 'problem_attempts_per_completed': None, 'attempt_ratio_order': 1}],
-            'problem_attempts_per_completed', 'asc', [{'username': 'a'}, {'username': 'b'}, {'username': 'c'}]
+            [{'username': 'a', 'problem_attempts_per_completed': 1.0, 'attempt_ratio_order': 1},
+             {'username': 'b', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 10},
+             {'username': 'c', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 2},
+             {'username': 'd', 'attempt_ratio_order': 0},
+             {'username': 'e', 'attempt_ratio_order': -10}],
+            'problem_attempts_per_completed', 'asc', [
+                {'username': 'a'}, {'username': 'b'}, {'username': 'c'}, {'username': 'd'}, {'username': 'e'}
+            ]
         ),
         (
-            [{'username': 'a', 'problem_attempts_per_completed': None, 'attempt_ratio_order': -1},
-             {'username': 'b', 'problem_attempts_per_completed': 0.0, 'attempt_ratio_order': 0},
-             {'username': 'c', 'problem_attempts_per_completed': 123.64, 'attempt_ratio_order': 1}],
-            'problem_attempts_per_completed', 'desc', [{'username': 'c'}, {'username': 'b'}, {'username': 'a'}]
+            [{'username': 'a', 'problem_attempts_per_completed': 1.0, 'attempt_ratio_order': 1},
+             {'username': 'b', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 10},
+             {'username': 'c', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 2},
+             {'username': 'd', 'attempt_ratio_order': 0},
+             {'username': 'e', 'attempt_ratio_order': -10}],
+            'problem_attempts_per_completed', 'desc', [
+                {'username': 'e'}, {'username': 'd'}, {'username': 'c'}, {'username': 'b'}, {'username': 'a'}]
         ),
     )
     @ddt.unpack

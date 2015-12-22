@@ -256,14 +256,26 @@ class RosterEntry(DocType):
             cohort=None,
             enrollment_mode=None,
             text_search=None,
-            order_by='username',
-            sort_order='asc'
+            order_by_fields=None,
+            sort_order_directions=None
     ):
         """
         Construct a search query for all users in `course_id` and return
-        the Search object.  Raises `ValueError` if both `segments` and
-        `ignore_segments` are provided.
+        the Search object.
+
+        order_by_fields specifies the fields to order by with the first element of
+        the array as the primary sort.  Similarly, sort_order_directions corresponds
+        to the direction of the sort.  These arrays must be of the same size.
+
+        Raises `ValueError` if both `segments` and `ignore_segments` are provided.
         """
+
+        if order_by_fields is None:
+            order_by_fields = ['username']
+
+        if sort_order_directions is None:
+            sort_order_directions = ['asc']
+
         # Error handling
         if segments and ignore_segments:
             raise ValueError('Cannot combine `segments` and `ignore_segments` parameters.')
@@ -272,19 +284,29 @@ class RosterEntry(DocType):
                 raise ValueError("segments/ignore_segments value '{segment}' must be one of: ({segments})".format(
                     segment=segment, segments=', '.join(learner.SEGMENTS)
                 ))
+
         order_by_options = (
             'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed',
-            'attempt_ratio_order', 'videos_viewed'
+            'problem_attempts_per_completed', 'attempt_ratio_order', 'videos_viewed'
         )
-        if order_by not in order_by_options:
-            raise ValueError("order_by value '{order_by}' must be one of: ({order_by_options})".format(
-                order_by=order_by, order_by_options=', '.join(order_by_options)
-            ))
+        for order_by in order_by_fields:
+            if order_by not in order_by_options:
+                raise ValueError("order_by value '{order_by}' must be one of: ({order_by_options})".format(
+                    order_by=order_by, order_by_options=', '.join(order_by_options)
+                ))
+
         sort_order_options = ('asc', 'desc')
-        if sort_order not in sort_order_options:
-            raise ValueError("sort_order value '{sort_order}' must be one of: ({sort_order_options})".format(
-                sort_order=sort_order, sort_order_options=', '.join(sort_order_options)
-            ))
+        for sort_order in sort_order_directions:
+            if sort_order not in sort_order_options:
+                raise ValueError("sort_order value '{sort_order}' must be one of: ({sort_order_options})".format(
+                    sort_order=sort_order, sort_order_options=', '.join(sort_order_options)
+                ))
+
+        if len(order_by_fields) != len(sort_order_directions):
+            raise ValueError("The number of items in order_by_fields '{order_by_count}' must equal that of "
+                             "sort_order_directions '{sort_order_count}'".format(
+                                 order_by_count=len(order_by_fields), sort_order_count=len(sort_order_directions)
+                             ))
 
         search = cls.search()
         search.query = Q('bool', must=[Q('term', course_id=course_id)])
@@ -302,9 +324,17 @@ class RosterEntry(DocType):
         if text_search:
             search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
 
-        # Sorting
-        sort_term = order_by if sort_order == 'asc' else '-{}'.format(order_by)
-        search = search.sort(sort_term)
+        # construct the sort hierarchy
+        sort_terms = []
+        for order_by, sort_order in zip(order_by_fields, sort_order_directions):
+            term = {
+                order_by: {
+                    'order': sort_order,
+                    'missing': '_last' if sort_order == 'asc' else '_first',  # ordering of missing fields
+                }
+            }
+            sort_terms.append(term)
+        search = search.sort(*sort_terms)
 
         return search
 

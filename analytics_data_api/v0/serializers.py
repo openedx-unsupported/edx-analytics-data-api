@@ -317,17 +317,20 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
         )
 
 
+class LastUpdatedSerializer(serializers.Serializer):
+    last_updated = serializers.DateField(source='date', format=settings.DATE_FORMAT)
+
+
 class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
-    username = serializers.CharField()
-    enrollment_mode = serializers.CharField()
-    name = serializers.CharField()
+    username = serializers.CharField(source='username')
+    enrollment_mode = serializers.CharField(source='enrollment_mode')
+    name = serializers.CharField(source='name')
     account_url = serializers.SerializerMethodField('get_account_url')
-    email = serializers.CharField()
+    email = serializers.CharField(source='email')
     segments = serializers.Field(source='segments')
     engagements = serializers.SerializerMethodField('get_engagements')
-    enrollment_date = serializers.DateField(format=settings.DATE_FORMAT)
-    last_updated = serializers.DateField(format=settings.DATE_FORMAT)
-    cohort = serializers.CharField()
+    enrollment_date = serializers.DateField(source='enrollment_date', format=settings.DATE_FORMAT)
+    cohort = serializers.CharField(source='cohort')
 
     def get_account_url(self, obj):
         if settings.LMS_USER_ACCOUNT_BASE_URL:
@@ -426,19 +429,10 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
 
 
 class CourseLearnerMetadataSerializer(serializers.Serializer):
-    enrollment_modes = serializers.SerializerMethodField('get_enrollment_modes')
-    segments = serializers.SerializerMethodField('get_segments')
-    cohorts = serializers.SerializerMethodField('get_cohorts')
+    enrollment_modes = serializers.Field(source='es_data.enrollment_modes')
+    segments = serializers.Field(source='es_data.segments')
+    cohorts = serializers.Field(source='es_data.cohorts')
     engagement_ranges = serializers.SerializerMethodField('get_engagement_ranges')
-
-    def get_enrollment_modes(self, obj):
-        return obj['es_data']['enrollment_modes']
-
-    def get_segments(self, obj):
-        return obj['es_data']['segments']
-
-    def get_cohorts(self, obj):
-        return obj['es_data']['cohorts']
 
     def get_engagement_ranges(self, obj):
         query_set = obj['engagement_ranges']

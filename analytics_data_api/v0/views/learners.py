@@ -176,17 +176,20 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
         query_params = self.request.QUERY_PARAMS
 
         order_by = query_params.get('order_by')
-        order_by_fields = [order_by] if order_by else None
-
         sort_order = query_params.get('sort_order')
-        sort_order_directions = [sort_order] if sort_order else None
+        sort_policies = [{
+            'order_by': order_by,
+            'sort_order': sort_order
+        }]
 
         # Ordering by problem_attempts_per_completed can be ambiguous because
         # values could be infinite (e.g. divide by zero) if no problems were completed.
-        # Instead, secondary sorting by attempt_ratio_order will produce a sensible ordering
+        # Instead, secondary sorting by attempt_ratio_order will produce a sensible ordering.
         if order_by == 'problem_attempts_per_completed':
-            order_by_fields.append('attempt_ratio_order')
-            sort_order_directions.append('asc' if sort_order == 'desc' else 'desc')
+            sort_policies.append({
+                'order_by': 'attempt_ratio_order',
+                'sort_order': 'asc' if sort_order == 'desc' else 'desc'
+            })
 
         params = {
             'segments': split_query_argument(query_params.get('segments')),
@@ -194,8 +197,7 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
             'cohort': query_params.get('cohort'),
             'enrollment_mode': query_params.get('enrollment_mode'),
             'text_search': query_params.get('text_search'),
-            'order_by_fields': order_by_fields,
-            'sort_order_directions': sort_order_directions,
+            'sort_policies': sort_policies,
         }
         # Remove None values from `params` so that we don't overwrite default
         # parameter values in `get_users_in_course`.

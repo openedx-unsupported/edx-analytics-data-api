@@ -269,7 +269,7 @@ class RosterEntry(DocType):
         Raises `ValueError` if both `segments` and `ignore_segments` are provided.
         """
 
-        if sort_policies is None or len(sort_policies) == 0:
+        if not sort_policies:
             sort_policies = [{
                 'order_by': None,
                 'sort_order': None
@@ -320,17 +320,16 @@ class RosterEntry(DocType):
             search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
 
         # construct the sort hierarchy
-        sort_terms = []
-        for sort_policy in sort_policies:
-            sort_order = sort_policy['sort_order']
-            term = {
+        search = search.sort(*[
+            {
                 sort_policy['order_by']: {
-                    'order': sort_order,
-                    'missing': '_last' if sort_order == 'asc' else '_first',  # ordering of missing fields
+                    'order': sort_policy['sort_order'],
+                    # ordering of missing fields
+                    'missing': '_last' if sort_policy['sort_order'] == 'asc' else '_first'
                 }
             }
-            sort_terms.append(term)
-        search = search.sort(*sort_terms)
+            for sort_policy in sort_policies
+        ])
 
         return search
 

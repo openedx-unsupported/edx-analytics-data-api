@@ -317,7 +317,7 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
         )
 
 
-class LearnerSerializer(serializers.Serializer):
+class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
     username = serializers.CharField()
     enrollment_mode = serializers.CharField()
     name = serializers.CharField()
@@ -325,11 +325,9 @@ class LearnerSerializer(serializers.Serializer):
     email = serializers.CharField()
     segments = serializers.Field(source='segments')
     engagements = serializers.SerializerMethodField('get_engagements')
-
-    # TODO: add these back in when the index returns them
-    # enrollment_date = serializers.DateField(format=settings.DATE_FORMAT, allow_empty=True)
-    # last_updated = serializers.DateField(format=settings.DATE_FORMAT)
-    # cohort = serializers.CharField(allow_none=True)
+    enrollment_date = serializers.DateField(format=settings.DATE_FORMAT)
+    last_updated = serializers.DateField(format=settings.DATE_FORMAT)
+    cohort = serializers.CharField()
 
     def get_account_url(self, obj):
         if settings.LMS_USER_ACCOUNT_BASE_URL:
@@ -342,10 +340,16 @@ class LearnerSerializer(serializers.Serializer):
         Add the engagement totals.
         """
         engagements = {}
-        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
-            for event in engagement_events.EVENTS[entity_type]:
-                metric = '{0}_{1}'.format(entity_type, event)
-                engagements[metric] = getattr(obj, metric, 0)
+
+        # fill in these fields will 0 if values not returned/found
+        default_if_none_fields = ['discussions_contributed', 'problems_attempted',
+                                  'problems_completed', 'videos_viewed']
+        for field in default_if_none_fields:
+            engagements[field] = self.default_if_none(getattr(obj, field, None), 0)
+
+        # preserve null values for problem attempts per completed
+        engagements['problem_attempts_per_completed'] = getattr(obj, 'problem_attempts_per_completed', None)
+
         return engagements
 
 
@@ -424,8 +428,7 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
 class CourseLearnerMetadataSerializer(serializers.Serializer):
     enrollment_modes = serializers.SerializerMethodField('get_enrollment_modes')
     segments = serializers.SerializerMethodField('get_segments')
-    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-    # cohorts = serializers.SerializerMethodField('get_cohorts')
+    cohorts = serializers.SerializerMethodField('get_cohorts')
     engagement_ranges = serializers.SerializerMethodField('get_engagement_ranges')
 
     def get_enrollment_modes(self, obj):
@@ -434,9 +437,8 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
     def get_segments(self, obj):
         return obj['es_data']['segments']
 
-    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-    # def get_cohorts(self, obj):
-    #     return obj['es_data']['cohorts']
+    def get_cohorts(self, obj):
+        return obj['es_data']['cohorts']
 
     def get_engagement_ranges(self, obj):
         query_set = obj['engagement_ranges']

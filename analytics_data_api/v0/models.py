@@ -3,7 +3,9 @@ from itertools import groupby
 from django.conf import settings
 from django.db import models
 from django.db.models import Sum
-from elasticsearch_dsl import DocType, Q
+# some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
+from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String
+
 
 from analytics_data_api.constants import country, engagement_entity_types, genders, learner
 
@@ -214,6 +216,27 @@ class Video(BaseVideo):
 
 
 class RosterEntry(DocType):
+
+    course_id = String()
+    username = String()
+    name = String()
+    email = String()
+    enrollment_mode = String()
+    cohort = String()
+    segments = String()  # segments is an array/list of strings
+    problems_attempted = Integer()
+    problems_completed = Integer()
+    problem_attempts_per_completed = Float()
+    # Useful for ordering problem_attempts_per_completed (because results can include null, which is
+    # different from zero).  attempt_ratio_order is equal to the number of problem attempts if
+    # problem_attempts_per_completed is > 1 and set to -problem_attempts if
+    # problem_attempts_per_completed = 1.
+    attempt_ratio_order = Integer()
+    discussions_contributed = Integer()
+    videos_watched = Integer()
+    enrollment_date = Date()
+    last_updated = Date()
+
     # pylint: disable=old-style-class
     class Meta:
         index = settings.ELASTICSEARCH_LEARNERS_INDEX
@@ -230,18 +253,32 @@ class RosterEntry(DocType):
             course_id,
             segments=None,
             ignore_segments=None,
-            # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-            # cohort=None,
+            cohort=None,
             enrollment_mode=None,
             text_search=None,
-            order_by='username',
-            sort_order='asc'
+            sort_policies=None,
     ):
         """
         Construct a search query for all users in `course_id` and return
-        the Search object.  Raises `ValueError` if both `segments` and
-        `ignore_segments` are provided.
+        the Search object.
+
+        sort_policies is an array, where the first element is the primary sort.
+        Elements in the array are dicts with fields: order_by (field to sort by)
+        and sort_order (either 'asc' or 'desc').  Default to 'username' and 'asc'.
+
+        Raises `ValueError` if both `segments` and `ignore_segments` are provided.
         """
+
+        if not sort_policies:
+            sort_policies = [{
+                'order_by': None,
+                'sort_order': None
+            }]
+        # set default sort policy to 'username' and 'asc'
+        for field, default in [('order_by', 'username'), ('sort_order', 'asc')]:
+            if sort_policies[0][field] is None:
+                sort_policies[0][field] = default
+
         # Error handling
         if segments and ignore_segments:
             raise ValueError('Cannot combine `segments` and `ignore_segments` parameters.')
@@ -250,18 +287,21 @@ class RosterEntry(DocType):
                 raise ValueError("segments/ignore_segments value '{segment}' must be one of: ({segments})".format(
                     segment=segment, segments=', '.join(learner.SEGMENTS)
                 ))
+
         order_by_options = (
-            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed', 'videos_viewed'
+            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed',
+            'problem_attempts_per_completed', 'attempt_ratio_order', 'videos_viewed'
         )
         sort_order_options = ('asc', 'desc')
-        if order_by not in order_by_options:
-            raise ValueError("order_by value '{order_by}' must be one of: ({order_by_options})".format(
-                order_by=order_by, order_by_options=', '.join(order_by_options)
-            ))
-        if sort_order not in sort_order_options:
-            raise ValueError("sort_order value '{sort_order}' must be one of: ({sort_order_options})".format(
-                sort_order=sort_order, sort_order_options=', '.join(sort_order_options)
-            ))
+        for sort_policy in sort_policies:
+            if sort_policy['order_by'] not in order_by_options:
+                raise ValueError("order_by value '{order_by}' must be one of: ({order_by_options})".format(
+                    order_by=sort_policy['order_by'], order_by_options=', '.join(order_by_options)
+                ))
+            if sort_policy['sort_order'] not in sort_order_options:
+                raise ValueError("sort_order value '{sort_order}' must be one of: ({sort_order_options})".format(
+                    sort_order=sort_policy['sort_order'], sort_order_options=', '.join(sort_order_options)
+                ))
 
         search = cls.search()
         search.query = Q('bool', must=[Q('term', course_id=course_id)])
@@ -272,17 +312,24 @@ class RosterEntry(DocType):
         elif ignore_segments:
             for segment in ignore_segments:
                 search = search.query(~Q('term', segments=segment))
-        # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-        # if cohort:
-        #     search = search.query('term', cohort=cohort)
+        if cohort:
+            search = search.query('term', cohort=cohort)
         if enrollment_mode:
             search = search.query('term', enrollment_mode=enrollment_mode)
         if text_search:
             search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
 
-        # Sorting
-        sort_term = order_by if sort_order == 'asc' else '-{}'.format(order_by)
-        search = search.sort(sort_term)
+        # construct the sort hierarchy
+        search = search.sort(*[
+            {
+                sort_policy['order_by']: {
+                    'order': sort_policy['sort_order'],
+                    # ordering of missing fields
+                    'missing': '_last' if sort_policy['sort_order'] == 'asc' else '_first'
+                }
+            }
+            for sort_policy in sort_policies
+        ])
 
         return search
 
@@ -309,8 +356,7 @@ class RosterEntry(DocType):
         search.query = Q('bool', must=[Q('term', course_id=course_id)])
         search.aggs.bucket('enrollment_modes', 'terms', field='enrollment_mode')
         search.aggs.bucket('segments', 'terms', field='segments')
-        # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-        # search.aggs.bucket('group_by_cohorts', 'terms', field='cohort')
+        search.aggs.bucket('cohorts', 'terms', field='cohort')
         response = search.execute()
         # Build up the map of aggregation name to count
         aggregations = {

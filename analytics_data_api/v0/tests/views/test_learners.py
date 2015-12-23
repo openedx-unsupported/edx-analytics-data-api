@@ -25,6 +25,9 @@ class LearnerAPITestMixin(object):
         """Creates the index and defines a mapping."""
         super(LearnerAPITestMixin, self).setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
+        # delete index if for some reason the index wasn't deleted in tearDown
+        if self._es.indices.exists(index=settings.ELASTICSEARCH_LEARNERS_INDEX):
+            self._es.indices.delete(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
         self._es.indices.create(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
         self._es.indices.put_mapping(
             index=settings.ELASTICSEARCH_LEARNERS_INDEX,
@@ -61,12 +64,21 @@ class LearnerAPITestMixin(object):
                     'problems_completed': {
                         'type': 'integer', 'doc_values': True
                     },
-                    'attempts_per_problem_completed': {
+                    'problem_attempts_per_completed': {
                         'type': 'float', 'doc_values': True
+                    },
+                    'attempt_ratio_order': {
+                        'type': 'integer', 'doc_values': True
                     },
                     'videos_viewed': {
                         'type': 'integer', 'doc_values': True
-                    }
+                    },
+                    'enrollment_date': {
+                        'type': 'date', 'doc_values': True
+                    },
+                    'last_updated': {
+                        'type': 'date', 'doc_values': True
+                    },
                 }
             }
         )
@@ -84,12 +96,15 @@ class LearnerAPITestMixin(object):
             email=None,
             enrollment_mode='honor',
             segments=None,
-            cohort='',
+            cohort='Team edX',
             discussions_contributed=0,
             problems_attempted=0,
             problems_completed=0,
-            attempts_per_problem_completed=0,
-            videos_viewed=0
+            problem_attempts_per_completed=None,
+            attempt_ratio_order=0,
+            videos_viewed=0,
+            enrollment_date='2015-01-28',
+            last_updated='2015-01-28'
     ):
         """Create a single learner roster entry in the elasticsearch index."""
         self._es.create(
@@ -106,8 +121,11 @@ class LearnerAPITestMixin(object):
                 'discussions_contributed': discussions_contributed,
                 'problems_attempted': problems_attempted,
                 'problems_completed': problems_completed,
-                'attempts_per_problem_completed': attempts_per_problem_completed,
-                'videos_viewed': videos_viewed
+                'problem_attempts_per_completed': problem_attempts_per_completed,
+                'attempt_ratio_order': attempt_ratio_order,
+                'videos_viewed': videos_viewed,
+                'enrollment_date': enrollment_date,
+                'last_updated': last_updated
             }
         )
 
@@ -124,42 +142,59 @@ class LearnerAPITestMixin(object):
         self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_INDEX)
 
 
+@ddt.ddt
 class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthentication):
     """Tests for the single learner endpoint."""
     path_template = '/api/v0/learners/{}/?course_id={}'
 
-    def setUp(self):
-        super(LearnerTests, self).setUp()
+    @ddt.data(
+        ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'honor', ['has_potential'], 'Team edX',
+         43, 3, 6, 0, 8.4, 2, '2015-04-24', '2015-08-05'),
+        ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'verified'),
+    )
+    @ddt.unpack
+    def test_get_user(self, username, name, course_id, enrollment_mode, segments=None, cohort=None,
+                      problems_attempted=None, problems_completed=None, videos_viewed=None,
+                      discussions_contributed=None, problem_attempts_per_completed=None,
+                      attempt_ratio_order=None, enrollment_date=None, last_updated=None):
+
         self.create_learners([{
-            "username": "ed_xavier",
-            "name": "Edward Xavier",
-            "course_id": "edX/DemoX/Demo_Course",
-            "segments": ["has_potential"],
-            "problems_attempted": 43,
-            "problems_completed": 3,
-            "videos_viewed": 6,
-            "discussions_contributed": 0
+            "username": username,
+            "name": name,
+            "course_id": course_id,
+            "enrollment_mode": enrollment_mode,
+            "segments": segments,
+            "cohort": cohort,
+            "problems_attempted": problems_attempted,
+            "problems_completed": problems_completed,
+            "videos_viewed": videos_viewed,
+            "discussions_contributed": discussions_contributed,
+            "problem_attempts_per_completed": problem_attempts_per_completed,
+            "attempt_ratio_order": attempt_ratio_order,
+            "enrollment_date": enrollment_date,
+            "last_updated": last_updated,
         }])
 
-    def test_get_user(self):
-        user_name = 'ed_xavier'
-        course_id = 'edX/DemoX/Demo_Course'
-        response = self.authenticated_get(self.path_template.format(user_name, course_id))
+        response = self.authenticated_get(self.path_template.format(username, course_id))
         self.assertEquals(response.status_code, 200)
 
         expected = {
-            "username": "ed_xavier",
-            "enrollment_mode": "honor",
-            "name": "Edward Xavier",
-            "email": "ed_xavier@example.com",
-            "account_url": "http://lms-host/ed_xavier",
-            "segments": ["has_potential"],
+            "username": username,
+            "enrollment_mode": enrollment_mode,
+            "name": name,
+            "email": "{}@example.com".format(username),
+            "account_url": "http://lms-host/{}".format(username),
+            "segments": segments or [],
+            "cohort": cohort,
             "engagements": {
-                "problems_attempted": 43,
-                "problems_completed": 3,
-                "videos_viewed": 6,
-                "discussions_contributed": 0
+                "problems_attempted": problems_attempted or 0,
+                "problems_completed": problems_completed or 0,
+                "videos_viewed": videos_viewed or 0,
+                "discussions_contributed": discussions_contributed or 0,
+                "problem_attempts_per_completed": problem_attempts_per_completed,
             },
+            "enrollment_date": enrollment_date,
+            "last_updated": last_updated,
         }
         self.assertDictEqual(expected, response.data)
 
@@ -237,25 +272,25 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
             'course_id': self.course_id,
             'enrollment_mode': 'honor',
             'segments': ['a', 'b'],
-            # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-            # 'cohort': 'alpha',
+            'cohort': 'alpha',
             "problems_attempted": 43,
             "problems_completed": 3,
             "videos_viewed": 6,
-            "discussions_contributed": 0
+            "discussions_contributed": 0,
+            "problem_attempts_per_completed": 23.14,
         }])
         response = self._get(self.course_id)
         self.assert_learners_returned(response, [{
             'username': 'user_1',
             'enrollment_mode': 'honor',
             'segments': ['a', 'b'],
-            # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-            # 'cohort': 'alpha',
+            'cohort': 'alpha',
             "engagements": {
                 "problems_attempted": 43,
                 "problems_completed": 3,
                 "videos_viewed": 6,
-                "discussions_contributed": 0
+                "discussions_contributed": 0,
+                "problem_attempts_per_completed": 23.14,
             }
         }])
 
@@ -272,10 +307,9 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'highly_engaged,struggling', False),
         ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', '', True),
         ('segments', ['highly_engaged', 'struggling'], 'ignore_segments', 'disengaging', True),
-        # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-        # ('cohort', 'a', 'cohort', 'a', True),
-        # ('cohort', 'a', 'cohort', '', True),
-        # ('cohort', 'a', 'cohort', 'b', False),
+        ('cohort', 'a', 'cohort', 'a', True),
+        ('cohort', 'a', 'cohort', '', True),
+        ('cohort', 'a', 'cohort', 'b', False),
         ('enrollment_mode', 'a', 'enrollment_mode', 'a', True),
         ('enrollment_mode', 'a', 'enrollment_mode', '', True),
         ('enrollment_mode', 'a', 'enrollment_mode', 'b', False),
@@ -347,6 +381,25 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
             [{'username': 'a', 'videos_viewed': 0}, {'username': 'b', 'videos_viewed': 1}],
             'videos_viewed', 'desc', [{'username': 'b'}, {'username': 'a'}]
         ),
+        (
+            [{'username': 'a', 'problem_attempts_per_completed': 1.0, 'attempt_ratio_order': 1},
+             {'username': 'b', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 10},
+             {'username': 'c', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 2},
+             {'username': 'd', 'attempt_ratio_order': 0},
+             {'username': 'e', 'attempt_ratio_order': -10}],
+            'problem_attempts_per_completed', 'asc', [
+                {'username': 'a'}, {'username': 'b'}, {'username': 'c'}, {'username': 'd'}, {'username': 'e'}
+            ]
+        ),
+        (
+            [{'username': 'a', 'problem_attempts_per_completed': 1.0, 'attempt_ratio_order': 1},
+             {'username': 'b', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 10},
+             {'username': 'c', 'problem_attempts_per_completed': 2.0, 'attempt_ratio_order': 2},
+             {'username': 'd', 'attempt_ratio_order': 0},
+             {'username': 'e', 'attempt_ratio_order': -10}],
+            'problem_attempts_per_completed', 'desc', [
+                {'username': 'e'}, {'username': 'd'}, {'username': 'c'}, {'username': 'b'}, {'username': 'a'}]
+        ),
     )
     @ddt.unpack
     def test_sort(self, learners, order_by, sort_order, expected_users):
@@ -398,7 +451,6 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         self.assert_learners_returned(response, [{'username': 'e'}])
 
     # Error cases
-
     @ddt.data(
         ({}, 'course_not_specified'),
         ({'course_id': ''}, 'course_not_specified'),
@@ -433,10 +485,11 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         """Helper to send a GET request to the API."""
         return self.authenticated_get('/api/v0/course_learner_metadata/{}/'.format(course_id))
 
-    def get_expected_json(self, segments, enrollment_modes):
+    def get_expected_json(self, segments, enrollment_modes, cohorts):
         expected_json = self._get_full_engagement_ranges()
         expected_json['segments'] = segments
         expected_json['enrollment_modes'] = enrollment_modes
+        expected_json['cohorts'] = cohorts
         return expected_json
 
     def assert_response_matches(self, response, expected_status_code, expected_data):
@@ -471,7 +524,9 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         expected_segments = {"highly_engaged": 0, "disengaging": 0, "struggling": 0, "inactive": 0, "unenrolled": 0}
         expected_segments.update(segments)
         expected = self.get_expected_json(
-            segments=expected_segments, enrollment_modes={'honor': len(learners)} if learners else {}
+            segments=expected_segments,
+            enrollment_modes={'honor': len(learners)} if learners else {},
+            cohorts={'Team edX': len(learners)} if learners else {},
         )
         self.assert_response_matches(self._get(self.course_id), 200, expected)
 
@@ -485,7 +540,8 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         ])
         expected = self.get_expected_json(
             segments={'disengaging': 2, 'struggling': 1, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
-            enrollment_modes={'honor': 2}
+            enrollment_modes={'honor': 2},
+            cohorts={'Team edX': 2},
         )
         self.assert_response_matches(self._get(self.course_id), 200, expected)
 
@@ -510,7 +566,29 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             expected_enrollment_modes[enrollment_mode] = count
         expected = self.get_expected_json(
             segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
-            enrollment_modes=expected_enrollment_modes
+            enrollment_modes=expected_enrollment_modes,
+            cohorts={'Team edX': len(enrollment_modes)} if enrollment_modes else {},
+        )
+        self.assert_response_matches(self._get(self.course_id), 200, expected)
+
+    @ddt.data(
+        [],
+        ['Yellow'],
+        ['Blue'],
+        ['Red', 'Red', 'yellow team', 'yellow team', 'green'],
+    )
+    def test_cohorts(self, cohorts):
+        self.create_learners([
+            {'username': 'user_{}'.format(i), 'course_id': self.course_id, 'cohort': cohort}
+            for i, cohort in enumerate(cohorts)
+        ])
+        expected_cohorts = {
+            cohort: len([mode for mode in group]) for cohort, group in groupby(cohorts)
+        }
+        expected = self.get_expected_json(
+            segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
+            enrollment_modes={'honor': len(cohorts)} if cohorts else {},
+            cohorts=expected_cohorts,
         )
         self.assert_response_matches(self._get(self.course_id), 200, expected)
 
@@ -540,10 +618,6 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             for event in engagement_events.EVENTS[entity_type]:
                 metrics.append('{0}_{1}'.format(entity_type, event))
         return metrics
-
-    # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-    # def test_cohorts(self):
-    #     pass
 
     def test_no_engagement_ranges(self):
         response = self._get(self.course_id)

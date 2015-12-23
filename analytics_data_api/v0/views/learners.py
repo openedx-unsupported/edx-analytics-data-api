@@ -174,15 +174,30 @@ class LearnerListView(CourseViewMixin, generics.ListAPIView):
         """
         self._validate_query_params()
         query_params = self.request.QUERY_PARAMS
+
+        order_by = query_params.get('order_by')
+        sort_order = query_params.get('sort_order')
+        sort_policies = [{
+            'order_by': order_by,
+            'sort_order': sort_order
+        }]
+
+        # Ordering by problem_attempts_per_completed can be ambiguous because
+        # values could be infinite (e.g. divide by zero) if no problems were completed.
+        # Instead, secondary sorting by attempt_ratio_order will produce a sensible ordering.
+        if order_by == 'problem_attempts_per_completed':
+            sort_policies.append({
+                'order_by': 'attempt_ratio_order',
+                'sort_order': 'asc' if sort_order == 'desc' else 'desc'
+            })
+
         params = {
             'segments': split_query_argument(query_params.get('segments')),
             'ignore_segments': split_query_argument(query_params.get('ignore_segments')),
-            # TODO: enable during https://openedx.atlassian.net/browse/AN-6319
-            # 'cohort': query_params.get('cohort'),
+            'cohort': query_params.get('cohort'),
             'enrollment_mode': query_params.get('enrollment_mode'),
             'text_search': query_params.get('text_search'),
-            'order_by': query_params.get('order_by'),
-            'sort_order': query_params.get('sort_order')
+            'sort_policies': sort_policies,
         }
         # Remove None values from `params` so that we don't overwrite default
         # parameter values in `get_users_in_course`.
@@ -211,6 +226,7 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
                 * problems_completed: Unique number of problems completed.
                 * discussions_contributed: Number of discussions participated in (e.g. forum posts)
                 * videos_viewed: Number of videos watched.
+                * problem_attempts_per_completed: TBD
 
     **Parameters**
 

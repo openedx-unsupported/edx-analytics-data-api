@@ -75,7 +75,7 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
                   This is a count of the individual problems the learner
                   tried. Each problem in a course can increment this count by
                   a maximum of 1.
-                * discussions_contributed: Number of posts, responses, or
+                * discussion_contributions: Number of posts, responses, or
                   comments the learner contributed to course discussions.
 
     **Parameters**
@@ -356,7 +356,7 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
                 * problem_attempts_per_completed: Engagement ranges for the
                   number of problem attempts per completed problem in the date
                   range.
-                * discussions_contributed: Engagement ranges for the number of
+                * discussion_contributions: Engagement ranges for the number of
                   times learners participated in discussions in the date range.
 
     """

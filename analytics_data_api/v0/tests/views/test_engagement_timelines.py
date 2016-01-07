@@ -26,7 +26,7 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
           entity_id='some-type-of-id', event=engagement_events.COMPLETED, count=12)
         G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
           date=datetime.datetime(2015, 1, 2, tzinfo=pytz.utc), entity_type=engagement_entity_types.DISCUSSION,
-          entity_id='some-type-of-id', event=engagement_events.CONTRIBUTED, count=10)
+          entity_id='some-type-of-id', event=engagement_events.CONTRIBUTIONS, count=10)
         G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
           date=datetime.datetime(2015, 1, 2, tzinfo=pytz.utc), entity_type=engagement_entity_types.VIDEO,
           entity_id='some-type-of-id', event=engagement_events.VIEWED, count=44)
@@ -44,14 +44,14 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
             'days': [
                 {
                     'date': '2015-01-01',
-                    'discussions_contributed': 0,
+                    'discussion_contributions': 0,
                     'problems_attempted': 100,
                     'problems_completed': 12,
                     'videos_viewed': 0
                 },
                 {
                     'date': '2015-01-02',
-                    'discussions_contributed': 10,
+                    'discussion_contributions': 10,
                     'problems_attempted': 8,
                     'problems_completed': 0,
                     'videos_viewed': 44
@@ -71,7 +71,7 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
             'days': [
                 {
                     'date': '2015-05-28',
-                    'discussions_contributed': 0,
+                    'discussion_contributions': 0,
                     'problems_attempted': 6923,
                     'problems_completed': 0,
                     'videos_viewed': 0
@@ -94,14 +94,14 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
             'days': [
                 {
                     'date': '2015-05-26',
-                    'discussions_contributed': 0,
+                    'discussion_contributions': 0,
                     'problems_attempted': 0,
                     'problems_completed': 0,
                     'videos_viewed': 1
                 },
                 {
                     'date': '2015-05-28',
-                    'discussions_contributed': 0,
+                    'discussion_contributions': 0,
                     'problems_attempted': 6923,
                     'problems_completed': 0,
                     'videos_viewed': 0

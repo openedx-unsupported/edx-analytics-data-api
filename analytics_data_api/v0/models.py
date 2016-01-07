@@ -245,7 +245,7 @@ class RosterEntry(DocType):
     # problem_attempts_per_completed is > 1 and set to -problem_attempts if
     # problem_attempts_per_completed = 1.
     attempt_ratio_order = Integer()
-    discussions_contributed = Integer()
+    discussion_contributions = Integer()
     videos_watched = Integer()
     enrollment_date = Date()
     last_updated = Date()
@@ -302,7 +302,7 @@ class RosterEntry(DocType):
                 ))
 
         order_by_options = (
-            'username', 'email', 'discussions_contributed', 'problems_attempted', 'problems_completed',
+            'username', 'email', 'discussion_contributions', 'problems_attempted', 'problems_completed',
             'problem_attempts_per_completed', 'attempt_ratio_order', 'videos_viewed'
         )
         sort_order_options = ('asc', 'desc')
@@ -405,7 +405,8 @@ class ModuleEngagementTimelineManager(models.Manager):
                 u'date': key,
             }
             for engagement in group:
-                entity_type = engagement_entity_types.SINGULAR_TO_PLURAL[engagement['entity_type']]
+                entity_type = engagement_entity_types.SINGULAR_TO_PLURAL.get(engagement['entity_type'],
+                                                                             engagement['entity_type'])
                 engagement_type = '{}_{}'.format(entity_type, engagement['event'])
                 count = item.get(engagement_type, 0)
                 count += engagement['count']

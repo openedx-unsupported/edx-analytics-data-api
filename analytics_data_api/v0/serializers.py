@@ -345,7 +345,7 @@ class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
         engagements = {}
 
         # fill in these fields will 0 if values not returned/found
-        default_if_none_fields = ['discussions_contributed', 'problems_attempted',
+        default_if_none_fields = ['discussion_contributions', 'problems_attempted',
                                   'problems_completed', 'videos_viewed']
         for field in default_if_none_fields:
             engagements[field] = self.default_if_none(getattr(obj, field, None), 0)
@@ -381,7 +381,7 @@ class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
     problems_attempted = serializers.IntegerField(required=True, default=0)
     problems_completed = serializers.IntegerField(required=True, default=0)
-    discussions_contributed = serializers.IntegerField(required=True, default=0)
+    discussion_contributions = serializers.IntegerField(required=True, default=0)
     videos_viewed = serializers.IntegerField(required=True, default=0)
 
     def transform_problems_attempted(self, _obj, value):
@@ -390,7 +390,7 @@ class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
     def transform_problems_completed(self, _obj, value):
         return self.default_if_none(value, 0)
 
-    def transform_discussions_contributed(self, _obj, value):
+    def transform_discussion_contributions(self, _obj, value):
         return self.default_if_none(value, 0)
 
     def transform_videos_viewed(self, _obj, value):

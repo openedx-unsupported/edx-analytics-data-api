@@ -60,7 +60,7 @@ class LearnerAPITestMixin(object):
                     'cohort': {
                         'type': 'string', 'index': 'not_analyzed', 'doc_values': True
                     },
-                    'discsussions_contributed': {
+                    'discussion_contributions': {
                         'type': 'integer', 'doc_values': True
                     },
                     'problems_attempted': {
@@ -109,7 +109,7 @@ class LearnerAPITestMixin(object):
             enrollment_mode='honor',
             segments=None,
             cohort='Team edX',
-            discussions_contributed=0,
+            discussion_contributions=0,
             problems_attempted=0,
             problems_completed=0,
             problem_attempts_per_completed=None,
@@ -129,7 +129,7 @@ class LearnerAPITestMixin(object):
                 'enrollment_mode': enrollment_mode,
                 'segments': segments if segments is not None else list(),
                 'cohort': cohort,
-                'discussions_contributed': discussions_contributed,
+                'discussion_contributions': discussion_contributions,
                 'problems_attempted': problems_attempted,
                 'problems_completed': problems_completed,
                 'problem_attempts_per_completed': problem_attempts_per_completed,
@@ -179,7 +179,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
     @ddt.unpack
     def test_get_user(self, username, name, course_id, enrollment_mode, segments=None, cohort=None,
                       problems_attempted=None, problems_completed=None, videos_viewed=None,
-                      discussions_contributed=None, problem_attempts_per_completed=None,
+                      discussion_contributions=None, problem_attempts_per_completed=None,
                       attempt_ratio_order=None, enrollment_date=None, last_updated=None):
 
         self.create_learners([{
@@ -192,7 +192,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             "problems_attempted": problems_attempted,
             "problems_completed": problems_completed,
             "videos_viewed": videos_viewed,
-            "discussions_contributed": discussions_contributed,
+            "discussion_contributions": discussion_contributions,
             "problem_attempts_per_completed": problem_attempts_per_completed,
             "attempt_ratio_order": attempt_ratio_order,
             "enrollment_date": enrollment_date,
@@ -214,7 +214,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
                 "problems_attempted": problems_attempted or 0,
                 "problems_completed": problems_completed or 0,
                 "videos_viewed": videos_viewed or 0,
-                "discussions_contributed": discussions_contributed or 0,
+                "discussion_contributions": discussion_contributions or 0,
                 "problem_attempts_per_completed": problem_attempts_per_completed,
             },
             "enrollment_date": enrollment_date,
@@ -301,7 +301,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
             "problems_attempted": 43,
             "problems_completed": 3,
             "videos_viewed": 6,
-            "discussions_contributed": 0,
+            "discussion_contributions": 0,
             "problem_attempts_per_completed": 23.14,
         }])
         response = self._get(self.course_id)
@@ -314,7 +314,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
                 "problems_attempted": 43,
                 "problems_completed": 3,
                 "videos_viewed": 6,
-                "discussions_contributed": 0,
+                "discussion_contributions": 0,
                 "problem_attempts_per_completed": 23.14,
             },
             'last_updated': '2015-09-28',
@@ -376,12 +376,12 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         ([{'username': 'a'}, {'username': 'b'}], 'email', 'asc', [{'username': 'a'}, {'username': 'b'}]),
         ([{'username': 'a'}, {'username': 'b'}], 'email', 'desc', [{'username': 'b'}, {'username': 'a'}]),
         (
-            [{'username': 'a', 'discussions_contributed': 0}, {'username': 'b', 'discussions_contributed': 1}],
-            'discussions_contributed', 'asc', [{'username': 'a'}, {'username': 'b'}]
+            [{'username': 'a', 'discussion_contributions': 0}, {'username': 'b', 'discussion_contributions': 1}],
+            'discussion_contributions', 'asc', [{'username': 'a'}, {'username': 'b'}]
         ),
         (
-            [{'username': 'a', 'discussions_contributed': 0}, {'username': 'b', 'discussions_contributed': 1}],
-            'discussions_contributed', 'desc', [{'username': 'b'}, {'username': 'a'}]
+            [{'username': 'a', 'discussion_contributions': 0}, {'username': 'b', 'discussion_contributions': 1}],
+            'discussion_contributions', 'desc', [{'username': 'b'}, {'username': 'a'}]
         ),
         (
             [{'username': 'a', 'problems_attempted': 0}, {'username': 'b', 'problems_attempted': 1}],

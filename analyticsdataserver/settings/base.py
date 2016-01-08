@@ -55,6 +55,16 @@ DATABASES = {
 ELASTICSEARCH_LEARNERS_HOST = environ.get('ELASTICSEARCH_LEARNERS_HOST', None)
 ELASTICSEARCH_LEARNERS_INDEX = environ.get('ELASTICSEARCH_LEARNERS_INDEX', None)
 ELASTICSEARCH_LEARNERS_UPDATE_INDEX = environ.get('ELASTICSEARCH_LEARNERS_UPDATE_INDEX', None)
+
+# access credentials for signing requests to AWS.
+# For more information see http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
+ELASTICSEARCH_AWS_ACCESS_KEY_ID = None
+ELASTICSEARCH_AWS_SECRET_ACCESS_KEY = None
+# override the default elasticsearch connection class and useful for signing certificates
+# e.g. 'analytics_data_api.v0.connections.BotoHttpConnection'
+ELASTICSEARCH_CONNECTION_CLASS = None
+# only needed with BotoHttpConnection, e.g. 'us-east-1'
+ELASTICSEARCH_CONNECTION_DEFAULT_REGION = None
 ########## END ELASTICSEARCH CONFIGURATION
 
 ########## GENERAL CONFIGURATION

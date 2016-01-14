@@ -118,25 +118,32 @@ class LearnerAPITestMixin(object):
             enrollment_date='2015-01-28',
     ):
         """Create a single learner roster entry in the elasticsearch index."""
+        body = {
+            'username': username,
+            'course_id': course_id,
+            'name': name if name is not None else username,
+            'email': email if email is not None else '{}@example.com'.format(username),
+            'enrollment_mode': enrollment_mode,
+            'discussion_contributions': discussion_contributions,
+            'problems_attempted': problems_attempted,
+            'problems_completed': problems_completed,
+            'attempt_ratio_order': attempt_ratio_order,
+            'videos_viewed': videos_viewed,
+            'enrollment_date': enrollment_date,
+        }
+
+        # leave null fields from being stored in the index.  Otherwise, they will have
+        # an explicit null value and we want to test for the case when they're not returned
+        optional_fields = [('segments', segments), ('cohort', cohort),
+                           ('problem_attempts_per_completed', problem_attempts_per_completed)]
+        for optional_field in optional_fields:
+            if optional_field[1]:
+                body[optional_field[0]] = optional_field[1]
+
         self._es.create(
             index=settings.ELASTICSEARCH_LEARNERS_INDEX,
             doc_type='roster_entry',
-            body={
-                'username': username,
-                'course_id': course_id,
-                'name': name if name is not None else username,
-                'email': email if email is not None else '{}@example.com'.format(username),
-                'enrollment_mode': enrollment_mode,
-                'segments': segments if segments is not None else list(),
-                'cohort': cohort,
-                'discussion_contributions': discussion_contributions,
-                'problems_attempted': problems_attempted,
-                'problems_completed': problems_completed,
-                'problem_attempts_per_completed': problem_attempts_per_completed,
-                'attempt_ratio_order': attempt_ratio_order,
-                'videos_viewed': videos_viewed,
-                'enrollment_date': enrollment_date,
-            }
+            body=body
         )
 
     def create_learners(self, learners):

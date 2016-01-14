@@ -332,6 +332,14 @@ class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
     enrollment_date = serializers.DateField(source='enrollment_date', format=settings.DATE_FORMAT)
     cohort = serializers.CharField(source='cohort')
 
+    def transform_segments(self, _obj, value):
+        # returns null instead of empty strings
+        return value or []
+
+    def transform_cohort(self, _obj, value):
+        # returns null instead of empty strings
+        return value or None
+
     def get_account_url(self, obj):
         if settings.LMS_USER_ACCOUNT_BASE_URL:
             return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)

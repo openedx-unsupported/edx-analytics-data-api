@@ -1,9 +1,7 @@
-from collections import defaultdict
+from importlib import import_module
 
 from django.db.models import Q
 from rest_framework.authtoken.models import Token
-
-from analytics_data_api.v0.models import ProblemResponseAnswerDistribution
 
 
 def delete_user_auth_token(username):
@@ -47,49 +45,6 @@ def matching_tuple(answer):
     )
 
 
-def consolidate_answers(problem):
-    """ Attempt to consolidate erroneously randomized answers. """
-    answer_sets = defaultdict(list)
-    match_tuple_sets = defaultdict(set)
-
-    for answer in problem:
-        answer.consolidated_variant = False
-
-        answer_sets[answer.value_id].append(answer)
-        match_tuple_sets[answer.value_id].add(matching_tuple(answer))
-
-    # If a part has more than one unique tuple of matching fields, do not consolidate.
-    for _, match_tuple_set in match_tuple_sets.iteritems():
-        if len(match_tuple_set) > 1:
-            return problem
-
-    consolidated_answers = []
-
-    for _, answers in answer_sets.iteritems():
-        consolidated_answer = None
-
-        if len(answers) == 1:
-            consolidated_answers.append(answers[0])
-            continue
-
-        for answer in answers:
-            if consolidated_answer:
-                if isinstance(consolidated_answer, ProblemResponseAnswerDistribution):
-                    consolidated_answer.count += answer.count
-                else:
-                    consolidated_answer.first_response_count += answer.first_response_count
-                    consolidated_answer.last_response_count += answer.last_response_count
-            else:
-                consolidated_answer = answer
-
-                consolidated_answer.variant = None
-                consolidated_answer.consolidated_variant = True
-
-        consolidated_answers.append(consolidated_answer)
-
-    return consolidated_answers
-
-
 def dictfetchall(cursor):
     """Returns all rows from a cursor as a dict"""
 
@@ -98,3 +53,10 @@ def dictfetchall(cursor):
         dict(zip([col[0] for col in desc], row))
         for row in cursor.fetchall()
     ]
+
+
+def load_fully_qualified_definition(definition):
+    """ Returns the class given the full definition. """
+    module_name, class_name = definition.rsplit('.', 1)
+    module = import_module(module_name)
+    return getattr(module, class_name)

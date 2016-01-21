@@ -12,6 +12,7 @@ import pytz
 from rest_framework import status
 
 from django.conf import settings
+from django.core import management
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
 from analytics_data_api.constants import engagement_entity_types, engagement_events
@@ -25,80 +26,8 @@ class LearnerAPITestMixin(object):
         """Creates the index and defines a mapping."""
         super(LearnerAPITestMixin, self).setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
-
-        for index in [settings.ELASTICSEARCH_LEARNERS_INDEX, settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX]:
-            # ensure the test index is deleted
-            def delete_index(to_delete):
-                if self._es.indices.exists(index=to_delete):
-                    self._es.indices.delete(index=to_delete)
-            self.addCleanup(delete_index, index)
-            self._es.indices.create(index=index)
-
-        self._es.indices.put_mapping(
-            index=settings.ELASTICSEARCH_LEARNERS_INDEX,
-            doc_type='roster_entry',
-            body={
-                'properties': {
-                    'name': {
-                        'type': 'string'
-                    },
-                    'username': {
-                        'type': 'string', 'index': 'not_analyzed'
-                    },
-                    'email': {
-                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                    },
-                    'course_id': {
-                        'type': 'string', 'index': 'not_analyzed'
-                    },
-                    'enrollment_mode': {
-                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                    },
-                    'segments': {
-                        'type': 'string'
-                    },
-                    'cohort': {
-                        'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                    },
-                    'discussion_contributions': {
-                        'type': 'integer', 'doc_values': True
-                    },
-                    'problems_attempted': {
-                        'type': 'integer', 'doc_values': True
-                    },
-                    'problems_completed': {
-                        'type': 'integer', 'doc_values': True
-                    },
-                    'problem_attempts_per_completed': {
-                        'type': 'float', 'doc_values': True
-                    },
-                    'attempt_ratio_order': {
-                        'type': 'integer', 'doc_values': True
-                    },
-                    'videos_viewed': {
-                        'type': 'integer', 'doc_values': True
-                    },
-                    'enrollment_date': {
-                        'type': 'date', 'doc_values': True
-                    },
-                }
-            }
-        )
-
-        self._es.indices.put_mapping(
-            index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
-            doc_type='marker',
-            body={
-                'properties': {
-                    'date': {
-                        'type': 'date', 'doc_values': True
-                    },
-                    'target_index': {
-                        'type': 'string'
-                    },
-                }
-            }
-        )
+        management.call_command('create_elasticsearch_learners_indices')
+        self.addCleanup(lambda: management.call_command('delete_elasticsearch_learners_indices'))
 
     def _create_learner(
             self,

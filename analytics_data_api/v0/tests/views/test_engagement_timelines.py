@@ -1,80 +1,108 @@
 import datetime
 import json
 
+import ddt
+
 from django.utils.http import urlquote
 from django_dynamic_fixture import G
 import pytz
 from rest_framework import status
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
-from analytics_data_api.constants import engagement_entity_types, engagement_events
+from analytics_data_api.constants.engagement_entity_types import DISCUSSION, PROBLEM, VIDEO
+from analytics_data_api.constants.engagement_events import ATTEMPTED, COMPLETED, CONTRIBUTED, VIEWED
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.views import DemoCourseMixin, VerifyCourseIdMixin
 
 
+@ddt.ddt
 class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWithAuthentication):
     DEFAULT_USERNAME = 'ed_xavier'
     path_template = '/api/v0/engagement_timelines/{}/?course_id={}'
 
-    def _create_engagement(self):
-        """ Create module engagement data for testing. """
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 1, 1, tzinfo=pytz.utc), entity_type=engagement_entity_types.PROBLEM,
-          entity_id='some-type-of-id', event=engagement_events.ATTEMPTED, count=100)
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 1, 1, tzinfo=pytz.utc), entity_type=engagement_entity_types.PROBLEM,
-          entity_id='some-type-of-id', event=engagement_events.COMPLETED, count=12)
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 1, 2, tzinfo=pytz.utc), entity_type=engagement_entity_types.DISCUSSION,
-          entity_id='some-type-of-id', event=engagement_events.CONTRIBUTIONS, count=10)
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 1, 2, tzinfo=pytz.utc), entity_type=engagement_entity_types.VIDEO,
-          entity_id='some-type-of-id', event=engagement_events.VIEWED, count=44)
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 1, 2, tzinfo=pytz.utc), entity_type=engagement_entity_types.PROBLEM,
-          entity_id='some-type-of-id', event=engagement_events.ATTEMPTED, count=8)
+    def create_engagement(self, entity_type, event_type, entity_id, count, date=None):
+        """Create a ModuleEngagement model"""
+        if date is None:
+            date = datetime.datetime(2015, 1, 1, tzinfo=pytz.utc)
+        G(
+            models.ModuleEngagement,
+            course_id=self.course_id,
+            username=self.DEFAULT_USERNAME,
+            date=date,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            event=event_type,
+            count=count,
+        )
 
-    def test_timeline(self):
-        path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))
-        self._create_engagement()
-        response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, 200)
-
-        expected = {
+    @ddt.data(
+        (PROBLEM, ATTEMPTED, 'problems_attempted', True),
+        (PROBLEM, COMPLETED, 'problems_completed', True),
+        (VIDEO, VIEWED, 'videos_viewed', True),
+        (DISCUSSION, CONTRIBUTED, 'discussion_contributions', False),
+    )
+    @ddt.unpack
+    def test_metric_aggregation(self, entity_type, event_type, metric_display_name, expect_id_aggregation):
+        """
+        Verify that some metrics are counted by unique ID, while some are
+        counted by total interactions.
+        """
+        self.create_engagement(entity_type, event_type, 'entity-id', count=5)
+        self.create_engagement(entity_type, event_type, 'entity-id', count=5)
+        expected_data = {
             'days': [
                 {
                     'date': '2015-01-01',
                     'discussion_contributions': 0,
-                    'problems_attempted': 100,
-                    'problems_completed': 12,
+                    'problems_attempted': 0,
+                    'problems_completed': 0,
+                    'videos_viewed': 0,
+                }
+            ]
+        }
+        if expect_id_aggregation:
+            expected_data['days'][0][metric_display_name] = 2
+        else:
+            expected_data['days'][0][metric_display_name] = 10
+        path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))
+        response = self.authenticated_get(path)
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(
+            response.data,
+            expected_data
+        )
+
+    def test_timeline(self):
+        """
+        Smoke test the learner engagement timeline.
+        """
+        path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))
+        day_one = datetime.datetime(2015, 1, 1, tzinfo=pytz.utc)
+        day_two = datetime.datetime(2015, 1, 2, tzinfo=pytz.utc)
+        self.create_engagement(PROBLEM, ATTEMPTED, 'id-1', count=100, date=day_one)
+        self.create_engagement(PROBLEM, COMPLETED, 'id-2', count=12, date=day_one)
+        self.create_engagement(DISCUSSION, CONTRIBUTED, 'id-3', count=6, date=day_one)
+        self.create_engagement(DISCUSSION, CONTRIBUTED, 'id-4', count=10, date=day_two)
+        self.create_engagement(VIDEO, VIEWED, 'id-5', count=44, date=day_two)
+        self.create_engagement(PROBLEM, ATTEMPTED, 'id-6', count=8, date=day_two)
+        self.create_engagement(PROBLEM, ATTEMPTED, 'id-7', count=4, date=day_two)
+        response = self.authenticated_get(path)
+        self.assertEquals(response.status_code, 200)
+        expected = {
+            'days': [
+                {
+                    'date': '2015-01-01',
+                    'discussion_contributions': 6,
+                    'problems_attempted': 1,
+                    'problems_completed': 1,
                     'videos_viewed': 0
                 },
                 {
                     'date': '2015-01-02',
                     'discussion_contributions': 10,
-                    'problems_attempted': 8,
+                    'problems_attempted': 2,
                     'problems_completed': 0,
-                    'videos_viewed': 44
-                },
-            ]
-        }
-        self.assertEquals(response.data, expected)
-
-    def test_one(self):
-        path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 5, 28, tzinfo=pytz.utc), entity_type=engagement_entity_types.PROBLEM,
-          entity_id='some-type-of-id', event=engagement_events.ATTEMPTED, count=6923)
-        response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, 200)
-        expected = {
-            'days': [
-                {
-                    'date': '2015-05-28',
-                    'discussion_contributions': 0,
-                    'problems_attempted': 6923,
-                    'problems_completed': 0,
-                    'videos_viewed': 0
+                    'videos_viewed': 1
                 },
             ]
         }
@@ -82,12 +110,10 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
 
     def test_day_gap(self):
         path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 5, 26, tzinfo=pytz.utc), entity_type=engagement_entity_types.VIDEO,
-          entity_id='some-type-of-id', event=engagement_events.VIEWED, count=1)
-        G(models.ModuleEngagement, course_id=self.course_id, username=self.DEFAULT_USERNAME,
-          date=datetime.datetime(2015, 5, 28, tzinfo=pytz.utc), entity_type=engagement_entity_types.PROBLEM,
-          entity_id='some-type-of-id', event=engagement_events.ATTEMPTED, count=6923)
+        first_day = datetime.datetime(2015, 5, 26, tzinfo=pytz.utc)
+        last_day = datetime.datetime(2015, 5, 28, tzinfo=pytz.utc)
+        self.create_engagement(VIDEO, VIEWED, 'id-1', count=1, date=first_day)
+        self.create_engagement(PROBLEM, ATTEMPTED, entity_id='id-2', count=1, date=last_day)
         response = self.authenticated_get(path)
         self.assertEquals(response.status_code, 200)
         expected = {
@@ -102,7 +128,7 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
                 {
                     'date': '2015-05-28',
                     'discussion_contributions': 0,
-                    'problems_attempted': 6923,
+                    'problems_attempted': 1,
                     'problems_completed': 0,
                     'videos_viewed': 0
                 },

@@ -286,8 +286,9 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
                   a maximum of 1.
                 * problems_completed: Number of unique problems the learner
                   answered correctly.
-                * discussions_contributed: Number of posts, responses, or
-                  comments the learner contributed to course discussions.
+                * discussion_contributions: Number of times the learner
+                  contributed to course discussions through posts, responses,
+                  or comments.
                 * videos_viewed: Number of times any course video was played.
                 * problem_attempts_per_completed: Number of attempts per
                   correctly answered problem.  If no problems were answered

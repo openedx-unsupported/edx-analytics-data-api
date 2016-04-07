@@ -317,7 +317,7 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
         return super(EngagementTimelineView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = ModuleEngagement.objects.get_timelines(self.course_id, self.username)
+        queryset = ModuleEngagement.objects.get_timeline(self.course_id, self.username)
         if len(queryset) == 0:
             raise LearnerEngagementTimelineNotFoundError(username=self.username, course_id=self.course_id)
         return queryset

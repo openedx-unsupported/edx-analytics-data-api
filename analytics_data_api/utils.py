@@ -1,3 +1,4 @@
+import datetime
 from importlib import import_module
 
 from django.db.models import Q
@@ -60,3 +61,26 @@ def load_fully_qualified_definition(definition):
     module_name, class_name = definition.rsplit('.', 1)
     module = import_module(module_name)
     return getattr(module, class_name)
+
+
+def date_range(start_date, end_date, delta=datetime.timedelta(days=1)):
+    """
+    Returns a generator that iterates over the date range [start_date, end_date)
+    (start_date inclusive, end_date exclusive).  Each date in the range is
+    offset from the previous date by a change of `delta`, which defaults
+    to one day.
+
+    Arguments:
+        start_date (datetime.datetime): The start date of the range, inclusive
+        end_date (datetime.datetime): The end date of the range, exclusive
+        delta (datetime.timedelta): The change in time between dates in the
+            range.
+
+    Returns:
+        Generator: A generator which iterates over all dates in the specified
+        range.
+    """
+    cur_date = start_date
+    while cur_date < end_date:
+        yield cur_date
+        cur_date += delta

@@ -2,11 +2,12 @@ from itertools import groupby
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Count, Sum
 # some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
-from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String
+from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String  # pylint: disable=no-name-in-module
 
-from analytics_data_api.constants import country, engagement_entity_types, genders, learner
+from analytics_data_api.constants import country, genders, learner
+from analytics_data_api.constants.engagement_types import EngagementType
 
 
 class CourseActivityWeekly(models.Model):
@@ -394,24 +395,28 @@ class ModuleEngagementTimelineManager(models.Manager):
     def get_timelines(self, course_id, username):
         queryset = ModuleEngagement.objects.all().filter(course_id=course_id, username=username) \
             .values('date', 'entity_type', 'event') \
-            .annotate(count=Sum('count')) \
+            .annotate(total_count=Sum('count')) \
+            .annotate(distinct_entity_count=Count('entity_id')) \
             .order_by('date')
 
         timelines = []
 
-        for key, group in groupby(queryset, lambda x: (x['date'])):
-            # Iterate over groups and create a single item with engagement data
-            item = {
-                u'date': key,
+        for date, engagements in groupby(queryset, lambda x: (x['date'])):
+            # Iterate over engagements for this day and create a single day with
+            # engagement data.
+            day = {
+                u'date': date,
             }
-            for engagement in group:
-                entity_type = engagement_entity_types.SINGULAR_TO_PLURAL.get(engagement['entity_type'],
-                                                                             engagement['entity_type'])
-                engagement_type = '{}_{}'.format(entity_type, engagement['event'])
-                count = item.get(engagement_type, 0)
-                count += engagement['count']
-                item[engagement_type] = count
-            timelines.append(item)
+            for engagement in engagements:
+                engagement_type = EngagementType(engagement['entity_type'], engagement['event'])
+
+                if engagement_type.is_counted_by_entity:
+                    count_delta = engagement['distinct_entity_count']
+                else:
+                    count_delta = engagement['total_count']
+
+                day[engagement_type.name] = day.get(engagement_type.name, 0) + count_delta
+            timelines.append(day)
 
         return timelines
 
@@ -422,7 +427,7 @@ class ModuleEngagement(models.Model):
     course_id = models.CharField(db_index=True, max_length=255)
     username = models.CharField(max_length=255)
     date = models.DateTimeField()
-    # This will be one of "problem", "video" or "forum"
+    # This will be one of "problem", "video" or "discussion"
     entity_type = models.CharField(max_length=255)
     # For problems this will be the usage key, for videos it will be the html encoded module ID,
     # for forums it will be the commentable_id

@@ -1,3 +1,4 @@
+import datetime
 from itertools import groupby
 
 from django.conf import settings
@@ -8,6 +9,7 @@ from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String  # pylint
 
 from analytics_data_api.constants import country, genders, learner
 from analytics_data_api.constants.engagement_types import EngagementType
+from analytics_data_api.utils import date_range
 
 
 class CourseActivityWeekly(models.Model):
@@ -392,7 +394,7 @@ class ModuleEngagementTimelineManager(models.Manager):
     Modifies the ModuleEngagement queryset to aggregate engagement data for
     the learner engagement timeline.
     """
-    def get_timelines(self, course_id, username):
+    def get_timeline(self, course_id, username):
         queryset = ModuleEngagement.objects.all().filter(course_id=course_id, username=username) \
             .values('date', 'entity_type', 'event') \
             .annotate(total_count=Sum('count')) \
@@ -418,7 +420,24 @@ class ModuleEngagementTimelineManager(models.Manager):
                 day[engagement_type.name] = day.get(engagement_type.name, 0) + count_delta
             timelines.append(day)
 
-        return timelines
+        # Fill in dates that may be missing, since the result store doesn't
+        # store empty engagement entries.
+        full_timeline = []
+        default_timeline_entry = {engagement_type: 0 for engagement_type in EngagementType.ALL_TYPES}
+        for index, current_date in enumerate(timelines):
+            full_timeline.append(current_date)
+            try:
+                next_date = timelines[index + 1]
+            except IndexError:
+                continue
+            one_day = datetime.timedelta(days=1)
+            if next_date['date'] > current_date['date'] + one_day:
+                full_timeline += [
+                    dict(date=date, **default_timeline_entry)
+                    for date in date_range(current_date['date'] + one_day, next_date['date'])
+                ]
+
+        return full_timeline
 
 
 class ModuleEngagement(models.Model):

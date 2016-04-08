@@ -126,6 +126,13 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
                     'videos_viewed': 1
                 },
                 {
+                    'date': '2015-05-27',
+                    'discussion_contributions': 0,
+                    'problems_attempted': 0,
+                    'problems_completed': 0,
+                    'videos_viewed': 0
+                },
+                {
                     'date': '2015-05-28',
                     'discussion_contributions': 0,
                     'problems_attempted': 1,

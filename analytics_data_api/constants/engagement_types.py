@@ -9,6 +9,15 @@ class EngagementType(object):
         - The internal question of whether the metric should be counted in terms
           of the entity type or the raw number of events.
     """
+    # Defines the current canonical set of engagement types used in the Learner
+    # Analytics API.
+    ALL_TYPES = (
+        'problems_attempted',
+        'problems_completed',
+        'videos_viewed',
+        'discussion_contributions',
+    )
+
     def __init__(self, entity_type, event_type):
         """
         Initializes an EngagementType for a particular entity and event type.

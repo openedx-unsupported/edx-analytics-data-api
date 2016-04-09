@@ -469,7 +469,9 @@ class ModuleEngagementMetricRanges(models.Model):
     low_value and high_value.
     """
 
-    course_id = models.CharField(db_index=True, max_length=255)
+    # primary key is actually course_id, metric, and range_type, but only one
+    # primary is allowed in django
+    course_id = models.CharField(primary_key=True, db_index=True, max_length=255)
     start_date = models.DateTimeField()
     # This is a left-closed interval. No data from the end_date is included in the analysis.
     end_date = models.DateTimeField()
@@ -482,3 +484,4 @@ class ModuleEngagementMetricRanges(models.Model):
 
     class Meta(object):
         db_table = 'module_engagement_metric_ranges'
+        unique_together = [('course_id', 'metric', 'range_type',)]

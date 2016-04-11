@@ -29,6 +29,23 @@ Getting Started
        $ ./manage.py migrate --noinput
        $ ./manage.py migrate --noinput --database=analytics
 
+   The learner API endpoints require elasticsearch with a mapping
+   defined on this `wiki page <https://openedx.atlassian.net/wiki/display/AN/Learner+Analytics#LearnerAnalytics-ElasticSearch>`_.
+   The connection to elasticsearch can be configured by the
+   ``ELASTICSEARCH_LEARNERS_HOST`` and
+   ``ELASTICSEARCH_LEARNERS_INDEX`` django settings.  For testing, you
+   can install elasticsearch locally:
+
+   ::
+
+      $ make test.install_elasticsearch
+
+   To run the cluster for testing:
+
+   ::
+
+      $ make test.run_elasticsearch
+
 3. Create a user and authentication token. Note that the user will be
    created if one does not exist.
 

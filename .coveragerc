@@ -2,6 +2,8 @@
 omit = analyticsdataserver/settings*
        *wsgi.py
        analytics_data_api/management/commands/generate_fake_course_data.py
+source = analyticsdataserver, analytics_data_api
+branch = True
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -10,3 +12,9 @@ exclude_lines =
     pragma: no cover
 
     raise NotImplementedError
+
+[html]
+directory = ${COVERAGE_DIR}/html/
+
+[xml]
+output = ${COVERAGE_DIR}/coverage.xml

@@ -1,9 +1,13 @@
+boto==2.22.1                        # MIT
 Django==1.7.5 						# BSD License
-Markdown==2.6    					# BSD
 django-model-utils==2.2 			# BSD
 djangorestframework==2.4.4			# BSD
-ipython==2.4.1						# BSD
 django-rest-swagger==0.2.8  		# BSD
 djangorestframework-csv==1.3.3		# BSD
 django-countries==3.2               # MIT
+elasticsearch-dsl==0.0.9            # Apache 2.0
+
+# markdown is used by swagger for rendering the api docs
+Markdown==2.6    					# BSD
+
 -e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys

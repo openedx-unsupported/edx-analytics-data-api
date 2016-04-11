@@ -34,9 +34,9 @@ class Command(BaseCommand):
         make_option('-n', '--num-weeks', action='store', type="int", dest='num_weeks',
                     help='Number of weeks worth of data to generate.'),
         make_option('-c', '--course_id', action='store', type='string', dest='course_id',
-                    help='Course ID for which to generate fake data'),
+                    default='edX/DemoX/Demo_Course', help='Course ID for which to generate fake data'),
         make_option('-u', '--username', action='store', type='string', dest='username',
-                    help='Username for which to generate fake data'),
+                    default='ed_xavier', help='Username for which to generate fake data'),
     )
 
     def generate_daily_data(self, course_id, start_date, end_date):
@@ -226,8 +226,8 @@ class Command(BaseCommand):
                     range_type='high', low_value=high_floor, high_value=max_value)
 
     def handle(self, *args, **options):
-        course_id = options.get('course_id', 'edX/DemoX/Demo_Course')
-        username = options.get('username', 'ed_xavier')
+        course_id = options['course_id']
+        username = options['username']
         video_id = '0fac49ba'
         video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
         start_date = datetime.datetime(year=2015, month=1, day=1, tzinfo=timezone.utc)

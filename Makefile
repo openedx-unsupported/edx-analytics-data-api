@@ -1,9 +1,9 @@
-
 ROOT = $(shell echo "$$PWD")
-COVERAGE = $(ROOT)/build/coverage
+COVERAGE_DIR = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
+TEST_SETTINGS = analyticsdataserver.settings.test
 
 .PHONY: requirements develop clean diff.report view.diff.report quality
 
@@ -28,22 +28,22 @@ clean:
 	coverage erase
 
 test: clean
-	. ./.test_env && ./manage.py test --settings=analyticsdataserver.settings.test --with-ignore-docstrings \
-		--exclude-dir=analyticsdataserver/settings --with-coverage --cover-inclusive --cover-branches \
-		--cover-html --cover-html-dir=$(COVERAGE)/html/ \
-		--cover-xml --cover-xml-file=$(COVERAGE)/coverage.xml \
-		$(foreach package,$(PACKAGES),--cover-package=$(package)) \
+	coverage run ./manage.py test --settings=$(TEST_SETTINGS) \
+		--with-ignore-docstrings --exclude-dir=analyticsdataserver/settings \
 		$(PACKAGES)
+	export COVERAGE_DIR=$(COVERAGE_DIR) && \
+		coverage html && \
+		coverage xml
 
 diff.report:
-	diff-cover $(COVERAGE)/coverage.xml --html-report $(COVERAGE)/diff_cover.html
-	diff-quality --violations=pep8 --html-report $(COVERAGE)/diff_quality_pep8.html
-	diff-quality --violations=pylint --html-report $(COVERAGE)/diff_quality_pylint.html
+	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
+	diff-quality --violations=pep8 --html-report $(COVERAGE_DIR)/diff_quality_pep8.html
+	diff-quality --violations=pylint --html-report $(COVERAGE_DIR)/diff_quality_pylint.html
 
 view.diff.report:
-	xdg-open file:///$(COVERAGE)/diff_cover.html
-	xdg-open file:///$(COVERAGE)/diff_quality_pep8.html
-	xdg-open file:///$(COVERAGE)/diff_quality_pylint.html
+	xdg-open file:///$(COVERAGE_DIR)/diff_cover.html
+	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pep8.html
+	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pylint.html
 
 quality:
 	pep8 $(PACKAGES)

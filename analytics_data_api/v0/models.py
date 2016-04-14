@@ -336,7 +336,7 @@ class RosterEntry(DocType):
             search.query.must.append(Q('multi_match', query=text_search, fields=['name', 'username', 'email']))
 
         # construct the sort hierarchy
-        search = search.sort(*[
+        search_request = search.sort(*[
             {
                 sort_policy['order_by']: {
                     'order': sort_policy['sort_order'],
@@ -347,7 +347,7 @@ class RosterEntry(DocType):
             for sort_policy in sort_policies
         ])
 
-        return search
+        return search_request
 
     @classmethod
     def get_course_metadata(cls, course_id):

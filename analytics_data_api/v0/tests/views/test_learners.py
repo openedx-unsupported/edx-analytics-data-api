@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import copy
 import datetime
 from itertools import groupby
@@ -272,6 +274,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         ('cohort', 'a', 'cohort', 'a', True),
         ('cohort', 'a', 'cohort', '', True),
         ('cohort', 'a', 'cohort', 'b', False),
+        ('cohort', u'Ich möchte Brot zu essen.', 'cohort', u'Ich möchte Brot zu essen.', True),
         ('enrollment_mode', 'a', 'enrollment_mode', 'a', True),
         ('enrollment_mode', 'a', 'enrollment_mode', '', True),
         ('enrollment_mode', 'a', 'enrollment_mode', 'b', False),

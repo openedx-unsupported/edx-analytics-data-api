@@ -57,6 +57,18 @@ class ProblemSerializer(serializers.Serializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
+class ProblemsAndTagsSerializer(serializers.Serializer):
+    """
+    Serializer for problems and tags.
+    """
+
+    module_id = serializers.CharField(required=True)
+    total_submissions = serializers.IntegerField(default=0)
+    correct_submissions = serializers.IntegerField(default=0)
+    tags = serializers.CharField()
+    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+
+
 class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the Answer Distribution table, without id.

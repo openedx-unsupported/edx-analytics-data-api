@@ -131,6 +131,21 @@ class ProblemResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
     count = models.IntegerField()
 
 
+class ProblemsAndTags(models.Model):
+    """ Model for the tags_distribution table """
+
+    class Meta(object):
+        db_table = 'tags_distribution'
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    module_id = models.CharField(db_index=True, max_length=255)
+    tag_name = models.CharField(max_length=255)
+    tag_value = models.CharField(max_length=255)
+    total_submissions = models.IntegerField(default=0)
+    correct_submissions = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class ProblemFirstLastResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
     """ Updated model for answer_distribution table with counts of first and last attempts at problems. """
 

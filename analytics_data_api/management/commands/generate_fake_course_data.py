@@ -225,6 +225,34 @@ class Command(BaseCommand):
                     course_id=course_id, start_date=start_date, end_date=end_date, metric=metric,
                     range_type='high', low_value=high_floor, high_value=max_value)
 
+    def generate_tags_distribution_data(self, course_id):
+        logger.info("Deleting existed tags distribution data...")
+        models.ProblemsAndTags.objects.all().delete()
+
+        module_id_tpl = 'i4x://test/problem/%d'
+        difficulty_tag = ['Easy', 'Medium', 'Hard']
+        learning_outcome_tag = ['Learned nothing', 'Learned a few things', 'Learned everything']
+        problems_num = 50
+        chance_difficulty = 5
+
+        logger.info("Generating new tags distribution data...")
+        for i in xrange(problems_num):
+            module_id = module_id_tpl % i
+            total_submissions = random.randint(0, 100)
+            correct_submissions = random.randint(0, total_submissions)
+
+            models.ProblemsAndTags.objects.create(
+                course_id=course_id, module_id=module_id,
+                tag_name='learning_outcome', tag_value=random.choice(learning_outcome_tag),
+                total_submissions=total_submissions, correct_submissions=correct_submissions
+            )
+            if random.randint(0, chance_difficulty) != chance_difficulty:
+                models.ProblemsAndTags.objects.create(
+                    course_id=course_id, module_id=module_id,
+                    tag_name='difficulty', tag_value=random.choice(difficulty_tag),
+                    total_submissions=total_submissions, correct_submissions=correct_submissions
+                )
+
     def handle(self, *args, **options):
         course_id = options['course_id']
         username = options['username']
@@ -245,3 +273,4 @@ class Command(BaseCommand):
         self.generate_video_timeline_data(video_id)
         self.generate_learner_engagement_data(course_id, username, start_date, end_date)
         self.generate_learner_engagement_range_data(course_id, start_date, end_date)
+        self.generate_tags_distribution_data(course_id)

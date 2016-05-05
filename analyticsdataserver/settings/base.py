@@ -234,6 +234,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'stream': stderr,
         },
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler'
+        }
     },
     'loggers': {
         'django': {
@@ -246,6 +250,21 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True
         },
+        # See https://elasticutils.readthedocs.io/en/latest/debugging.html
+        # INFO-level logs tell us when nodes fail and are resurrected.
+        'elasticsearch': {
+            'handlers': ['console'],
+            'level': 'WARNING'
+        },
+        # elasticsearch.trace logs are fired for every single request
+        # with an INFO or DEBUG level.  They're noisy and not terribly
+        # userful for debugging, so we'll just propagate them to the
+        # 'elasticsearch' log bucket which only accepts 'WARNING'
+        # level logs.
+        'elasticsearch.trace': {
+            'handlers': ['null'],
+            'propagate': False
+        }
     },
 }
 ########## END LOGGING CONFIGURATION

@@ -14,6 +14,9 @@ DATABASES = {
     },
 }
 
+# Silence elasticsearch during tests
+LOGGING['loggers']['elasticsearch']['handlers'] = ['null']
+
 INSTALLED_APPS += (
     'django_nose',
 )

@@ -21,6 +21,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
+        super(AnswerDistributionTests, cls).setUpClass()
         cls.course_id = "org/num/run"
         cls.module_id1 = "i4x://org/num/run/problem/RANDOMNUMBER"
         cls.module_id2 = "i4x://org/num/run/problem/OTHERRANDOM"
@@ -141,6 +142,7 @@ class GradeDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
+        super(GradeDistributionTests, cls).setUpClass()
         cls.course_id = "org/class/test"
         cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
         cls.ad1 = G(
@@ -169,6 +171,7 @@ class SequentialOpenDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
+        super(SequentialOpenDistributionTests, cls).setUpClass()
         cls.course_id = "org/class/test"
         cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
         cls.ad1 = G(

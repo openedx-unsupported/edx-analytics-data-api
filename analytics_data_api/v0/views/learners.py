@@ -60,6 +60,7 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
         Returns metadata and engagement data for the learner in JSON format.
 
             * username: The username of the enrolled learner.
+            * account_url:  URL to learner's account api endpoint.
             * enrollment_mode: The learner's selected learning track (for
               example, "audit" or "verified").
             * name: The learner's full name.

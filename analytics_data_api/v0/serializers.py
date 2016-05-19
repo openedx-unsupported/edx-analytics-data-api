@@ -412,28 +412,26 @@ class DateRangeSerializer(serializers.Serializer):
 
 class EnagementRangeMetricSerializer(serializers.Serializer):
     """
-    Serializes ModuleEngagementMetricRanges (low_range and high_range) into
-    the below_average, average, above_average ranges represented as arrays.
+    Serializes ModuleEngagementMetricRanges ('low', 'normal', and 'high') into
+    the below_average, average, and above_average ranges represented as arrays.
+    If any one of the ranges is not defined, it is not included in the
+    serialized output.
     """
     below_average = serializers.SerializerMethodField('get_below_average_range')
     average = serializers.SerializerMethodField('get_average_range')
     above_average = serializers.SerializerMethodField('get_above_average_range')
 
     def get_average_range(self, obj):
-        metric_range = [
-            obj['low_range'].high_value if obj['low_range'] else None,
-            obj['high_range'].low_value if obj['high_range'] else None,
-        ]
-        return metric_range
+        return self._transform_range(obj['normal_range'])
 
     def get_below_average_range(self, obj):
-        return self._get_range(obj['low_range'])
+        return self._transform_range(obj['low_range'])
 
     def get_above_average_range(self, obj):
-        return self._get_range(obj['high_range'])
+        return self._transform_range(obj['high_range'])
 
-    def _get_range(self, metric_range):
-        return [metric_range.low_value, metric_range.high_value] if metric_range else [None, None]
+    def _transform_range(self, metric_range):
+        return [metric_range.low_value, metric_range.high_value] if metric_range else None
 
 
 class CourseLearnerMetadataSerializer(serializers.Serializer):
@@ -452,11 +450,17 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
         for entity_type in engagement_entity_types.AGGREGATE_TYPES:
             for event in engagement_events.EVENTS[entity_type]:
                 metric = '{0}_{1}'.format(entity_type, event)
+                # It's assumed that there may be any combination of low, normal,
+                # and high ranges in the database for the given course.  Some
+                # edge cases result from a lack of available data; in such
+                # cases, only some ranges may be returned.
                 low_range_queryset = query_set.filter(metric=metric, range_type='low')
+                normal_range_queryset = query_set.filter(metric=metric, range_type='normal')
                 high_range_queryset = query_set.filter(metric=metric, range_type='high')
                 engagement_ranges.update({
                     metric: EnagementRangeMetricSerializer({
                         'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
+                        'normal_range': normal_range_queryset[0] if len(normal_range_queryset) else None,
                         'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
                     }).data
                 })

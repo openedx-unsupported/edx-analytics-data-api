@@ -464,9 +464,9 @@ class ModuleEngagement(models.Model):
 
 class ModuleEngagementMetricRanges(models.Model):
     """
-    Represents the low and high values for a module engagement entity and event pair,
-    known as the metric.  The range_type will either be high or low, bounded by
-    low_value and high_value.
+    Represents the low and high values for a module engagement entity and event
+    pair, known as the metric.  The range_type will either be low, normal, or
+    high, bounded by low_value and high_value.
     """
 
     course_id = models.CharField(db_index=True, max_length=255)

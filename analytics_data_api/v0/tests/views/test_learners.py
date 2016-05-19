@@ -569,7 +569,7 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             }
         }
         empty_range = {
-            range_type: [None, None] for range_type in ['below_average', 'average', 'above_average']
+            range_type: None for range_type in ['below_average', 'average', 'above_average']
         }
         for metric in self.engagement_metrics:
             empty_engagement_ranges['engagement_ranges'][metric] = copy.deepcopy(empty_range)
@@ -594,7 +594,7 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         start_date = datetime.datetime(2015, 7, 1, tzinfo=pytz.utc)
         end_date = datetime.datetime(2015, 7, 21, tzinfo=pytz.utc)
         G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
-          metric=metric_type, range_type='high', low_value=90, high_value=6120)
+          metric=metric_type, range_type='normal', low_value=90, high_value=6120)
         expected_ranges = self.empty_engagement_ranges
         expected_ranges['engagement_ranges'].update({
             'date_range': {
@@ -602,9 +602,9 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
                 'end': '2015-07-21'
             },
             metric_type: {
-                'below_average': [None, None],
-                'average': [None, 90.0],
-                'above_average': [90.0, 6120.0]
+                'below_average': None,
+                'average': [90.0, 6120.0],
+                'above_average': None
             }
         })
 
@@ -631,13 +631,13 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             low_ceil = 100.5
             G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
               metric=metric_type, range_type='low', low_value=0, high_value=low_ceil)
-            high_floor = 800.8
+            normal_floor = 800.8
             G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
-              metric=metric_type, range_type='high', low_value=high_floor, high_value=max_value)
+              metric=metric_type, range_type='normal', low_value=normal_floor, high_value=max_value)
             expected['engagement_ranges'][metric_type] = {
                 'below_average': [0.0, low_ceil],
-                'average': [low_ceil, high_floor],
-                'above_average': [high_floor, max_value]
+                'average': [normal_floor, max_value],
+                'above_average': None
             }
 
         return expected

@@ -157,8 +157,23 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'country_code')]
 
 
+class CourseGradeBreakdown(models.Model):
+    """ The number of students who have a given letter grade for a given course and date """
+
+    class Meta(object):
+        db_table = 'grade_breakdown'
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    date = models.DateField(null=False)
+    letter_grade = models.CharField(max_length=64, null=True)
+    num_students = models.IntegerField(null=False)
+    percent_students = models.FloatField()
+    is_passing = models.BooleanField(null=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+
 class GradeDistribution(models.Model):
-    """ Each row stores the count of a particular grade on a module for a given course. """
+    """ Each row stores the count of a particular score on a module for a given course. """
 
     class Meta(object):
         db_table = 'grade_distribution'
@@ -168,6 +183,20 @@ class GradeDistribution(models.Model):
     grade = models.IntegerField()
     max_grade = models.IntegerField()
     count = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+
+
+class StudentGrade(models.Model):
+    """ Stores the current grade of each student in a given course """
+
+    class Meta(object):
+        db_table = 'grades'
+
+    course_id = models.CharField(db_index=True, max_length=255)
+    user_id = models.IntegerField(db_index=True)
+    letter_grade = models.CharField(max_length=64, null=True)
+    percent_grade = models.FloatField()
+    is_passing = models.BooleanField(null=False)
     created = models.DateTimeField(auto_now_add=True)
 
 

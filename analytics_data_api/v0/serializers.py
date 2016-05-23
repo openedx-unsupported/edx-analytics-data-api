@@ -143,6 +143,13 @@ class ConsolidatedFirstLastAnswerDistributionSerializer(ProblemFirstLastResponse
         return distribution
 
 
+class CoursePassingGradeBreakdownSerializer(serializers.Serializer):
+    """ Serialize the aggregate query results that count passing students per day """
+    date = serializers.DateField(format=settings.DATE_FORMAT)
+    num_students = serializers.IntegerField()
+    percent_students = serializers.FloatField()
+
+
 class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the grade_distribution table without id

@@ -650,6 +650,75 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
+class CourseTypologyViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+    def _get_data(self, course_id=None):
+        """
+        Retrieve typology data for a specified course.
+        """
+        course_id = course_id or self.course_id
+        url = '/api/v0/courses/{}/typology/'.format(course_id)
+        return self.authenticated_get(url)
+
+    def test_get(self):
+        NONE, SOME, ALL = 0, 1, 2
+        created = datetime.datetime.utcnow()
+
+        # add a row for a random course, which shouldn't be included in results
+        G(
+            models.TypologyEntry, created=created, course_id="other", chapter_id="c1",
+            video_type=NONE, problem_type=ALL, num_users=5432,
+        )
+
+        def add_mock_data(**kwargs):
+            """ Add a row of typology data for the demo course """
+            G(models.TypologyEntry, course_id=self.course_id, created=created, **kwargs)
+
+        add_mock_data(chapter_id='week1', video_type=NONE, problem_type=SOME, num_users=400)
+        add_mock_data(chapter_id='week1', video_type=SOME, problem_type=ALL, num_users=256)
+
+        add_mock_data(chapter_id='week2', video_type=ALL, problem_type=ALL, num_users=333)
+        add_mock_data(chapter_id='week2', video_type=SOME, problem_type=ALL, num_users=543)
+
+        expected = [
+            {
+                "chapter_id": "week1",
+                "video_type": NONE,
+                "problem_type": SOME,
+                "num_users": 400,
+                "created": created.strftime(settings.DATETIME_FORMAT)
+            },
+            {
+                "chapter_id": "week1",
+                "video_type": SOME,
+                "problem_type": ALL,
+                "num_users": 256,
+                "created": created.strftime(settings.DATETIME_FORMAT)
+            },
+            {
+                "chapter_id": "week2",
+                "video_type": ALL,
+                "problem_type": ALL,
+                "num_users": 333,
+                "created": created.strftime(settings.DATETIME_FORMAT)
+            },
+            {
+                "chapter_id": "week2",
+                "video_type": SOME,
+                "problem_type": ALL,
+                "num_users": 543,
+                "created": created.strftime(settings.DATETIME_FORMAT)
+            },
+        ]
+
+        response = self._get_data(self.course_id)
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected)
+
+    def test_get_404(self):
+        response = self._get_data('foo/bar/course')
+        self.assertEquals(response.status_code, 404)
+
+
 class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
     def _get_data(self, course_id=None):
         """

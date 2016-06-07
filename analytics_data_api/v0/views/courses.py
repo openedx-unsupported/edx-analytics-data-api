@@ -628,9 +628,9 @@ class ProblemsListView(BaseCourseView):
         Returns a collection of submission counts and part IDs for each problem. Each collection contains:
 
             * module_id: The ID of the problem.
-            * total_submissions: Total number of submissions
+            * total_submissions: Total number of submissions.
             * correct_submissions: Total number of *correct* submissions.
-            * part_ids: List of problem part IDs
+            * part_ids: List of problem part IDs.
     """
     serializer_class = serializers.ProblemSerializer
     allow_empty = False
@@ -687,6 +687,53 @@ GROUP BY module_id;
                 row['created'] = datetime.datetime.strptime(created, '%Y-%m-%d %H:%M:%S')
 
         return rows
+
+
+# pylint: disable=abstract-method
+class ProblemsAndTagsListView(BaseCourseView):
+    """
+    Get the problems with the connected tags.
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/problems_and_tags/
+
+    **Response Values**
+
+        Returns a collection of submission counts and tags for each problem. Each collection contains:
+
+            * module_id: The ID of the problem.
+            * total_submissions: Total number of submissions.
+            * correct_submissions: Total number of *correct* submissions.
+            * tags: Dictionary that contains pairs "tag key: tag value".
+    """
+    serializer_class = serializers.ProblemsAndTagsSerializer
+    allow_empty = False
+    model = models.ProblemsAndTags
+
+    def get_queryset(self):
+        queryset = self.model.objects.filter(course_id=self.course_id)
+        items = queryset.all()
+
+        result = {}
+
+        for v in items:
+            if v.module_id in result:
+                result[v.module_id]['tags'][v.tag_name] = v.tag_value
+                if result[v.module_id]['created'] < v.created:
+                    result[v.module_id]['created'] = v.created
+            else:
+                result[v.module_id] = {
+                    'module_id': v.module_id,
+                    'total_submissions': v.total_submissions,
+                    'correct_submissions': v.correct_submissions,
+                    'tags': {
+                        v.tag_name: v.tag_value
+                    },
+                    'created': v.created
+                }
+
+        return result.values()
 
 
 class VideosListView(BaseCourseView):

@@ -647,3 +647,14 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         response = self._get(self.course_id)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(expected, json.loads(response.content))
+
+    def test_engagement_ranges_fields(self):
+        actual_entity_types = engagement_entity_types.INDIVIDUAL_TYPES
+        expected_entity_types = ['discussion', 'problem', 'video']
+        self.assertEqual(actual_entity_types, expected_entity_types)
+        actual_events = []
+        for entity_type in actual_entity_types:
+            for event in engagement_events.EVENTS[entity_type]:
+                actual_events.append(event)
+        expected_events = ['contributed', 'attempted', 'attempts_per_completed', 'completed', 'viewed']
+        self.assertEqual(actual_events, expected_events)

@@ -497,3 +497,14 @@ class ModuleEngagementMetricRanges(models.Model):
 
     class Meta(object):
         db_table = 'module_engagement_metric_ranges'
+
+
+class ViewDistribution(models.Model):
+    course_id = models.CharField(db_index=True, max_length=255)
+    section = models.CharField(db_index=True, max_length=255)
+    subsection = models.CharField(db_index=True, max_length=255)
+    unique_user_views = models.IntegerField()
+    total_views = models.IntegerField()
+
+    class Meta(object):
+        db_table = 'content_views'

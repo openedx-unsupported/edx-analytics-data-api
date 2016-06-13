@@ -478,3 +478,9 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
                 })
 
         return engagement_ranges
+
+
+class ViewDistributionSerializer(ModelSerializerWithCreatedField):
+
+    class Meta(object):
+        model = models.ViewDistribution

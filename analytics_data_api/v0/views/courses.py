@@ -765,3 +765,12 @@ class VideosListView(BaseCourseView):
     def apply_date_filtering(self, queryset):
         # no date filtering for videos -- just return the queryset
         return queryset
+
+
+class ViewDistributionView(BaseCourseView):
+    slug = 'view-distribution'
+    serializer_class = serializers.ViewDistributionSerializer
+    model = models.ViewDistribution
+
+    def apply_date_filtering(self, queryset):
+        return queryset

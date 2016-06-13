@@ -505,6 +505,7 @@ class ViewDistribution(models.Model):
     subsection = models.CharField(db_index=True, max_length=255)
     unique_user_views = models.IntegerField()
     total_views = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):
         db_table = 'content_views'

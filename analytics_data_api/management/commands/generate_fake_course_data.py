@@ -253,6 +253,18 @@ class Command(BaseCommand):
                     total_submissions=total_submissions, correct_submissions=correct_submissions
                 )
 
+    def generate_video_module_data(self, course_id, section_num, subsection_num):
+        unique_user_views = random.randint(1, 100)
+        total_views = unique_user_views + random.randint(1, 100)
+
+
+        models.ViewDistribution.objects.create(course_id=course_id,
+                                       section='section_{}'.format(section_num),
+                                       subsection='subsection_{}'.format(section_num),
+                                       unique_user_views=unique_user_views,
+                                       total_views=total_views)
+
+
     def handle(self, *args, **options):
         course_id = options['course_id']
         username = options['username']
@@ -274,3 +286,7 @@ class Command(BaseCommand):
         self.generate_learner_engagement_data(course_id, username, start_date, end_date)
         self.generate_learner_engagement_range_data(course_id, start_date, end_date)
         self.generate_tags_distribution_data(course_id)
+
+        for i in range(10):
+            for j in range(10):
+                self.generate_video_module_data(course_id, i, j)

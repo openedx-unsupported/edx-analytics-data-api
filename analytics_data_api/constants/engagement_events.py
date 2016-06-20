@@ -1,16 +1,27 @@
-from analytics_data_api.constants import engagement_entity_types
-
 ATTEMPTED = 'attempted'
 ATTEMPTS_PER_COMPLETED = 'attempts_per_completed'
 COMPLETED = 'completed'
 CONTRIBUTED = 'contributed'
 VIEWED = 'viewed'
 
-# map entity types to events
-EVENTS = {
-    engagement_entity_types.DISCUSSION: [CONTRIBUTED],
-    engagement_entity_types.PROBLEM: [ATTEMPTED, ATTEMPTS_PER_COMPLETED, COMPLETED],
-    engagement_entity_types.PROBLEMS: [ATTEMPTED, COMPLETED],
-    engagement_entity_types.VIDEO: [VIEWED],
-    engagement_entity_types.VIDEOS: [VIEWED],
-}
+DISCUSSION = 'discussion'
+PROBLEM = 'problem'
+VIDEO = 'video'
+PROBLEMS = 'problems'
+VIDEOS = 'videos'
+
+INDIVIDUAL_EVENTS = [
+    'problem_attempts_per_completed',
+    'problem_attempted',
+    'problem_completed',
+    'discussion_contributed',
+    'video_viewed'
+]
+
+EVENTS = [
+    'problem_attempts_per_completed',
+    'problems_attempted',
+    'problems_completed',
+    'discussion_contributions',
+    'videos_viewed'
+]

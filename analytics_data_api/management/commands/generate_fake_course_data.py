@@ -8,7 +8,7 @@ import random
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from analytics_data_api.v0 import models
-from analytics_data_api.constants import engagement_entity_types, engagement_events
+from analytics_data_api.constants import engagement_events
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -194,16 +194,17 @@ class Command(BaseCommand):
         current = start_date
         while current < end_date:
             current = current + datetime.timedelta(days=1)
-            for entity_type in engagement_entity_types.INDIVIDUAL_TYPES:
-                for event in engagement_events.EVENTS[entity_type]:
-                    num_events = random.randint(0, max_value)
-                    if num_events:
-                        for _ in xrange(num_events):
-                            count = random.randint(0, max_value / 20)
-                            entity_id = 'an-id-{}-{}'.format(entity_type, event)
-                            models.ModuleEngagement.objects.create(
-                                course_id=course_id, username=username, date=current,
-                                entity_type=entity_type, entity_id=entity_id, event=event, count=count)
+            for metric in engagement_events.INDIVIDUAL_EVENTS:
+                num_events = random.randint(0, max_value)
+                if num_events:
+                    for _ in xrange(num_events):
+                        count = random.randint(0, max_value / 20)
+                        entity_type = metric.split('_', 1)[0]
+                        event = metric.split('_', 1)[1]
+                        entity_id = 'an-id-{}-{}'.format(entity_type, event)
+                        models.ModuleEngagement.objects.create(
+                            course_id=course_id, username=username, date=current,
+                            entity_type=entity_type, entity_id=entity_id, event=event, count=count)
             logger.info("Done!")
 
     def generate_learner_engagement_range_data(self, course_id, start_date, end_date, max_value=100):
@@ -211,19 +212,15 @@ class Command(BaseCommand):
         models.ModuleEngagementMetricRanges.objects.all().delete()
 
         logger.info("Generating engagement range data...")
-        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
-            for event in engagement_events.EVENTS[entity_type]:
-                metric = '{0}_{1}'.format(entity_type, event)
-
-                low_ceil = random.random() * max_value * 0.5
-                models.ModuleEngagementMetricRanges.objects.create(
-                    course_id=course_id, start_date=start_date, end_date=end_date, metric=metric,
-                    range_type='low', low_value=0, high_value=low_ceil)
-
-                high_floor = random.random() * max_value * 0.5 + low_ceil
-                models.ModuleEngagementMetricRanges.objects.create(
-                    course_id=course_id, start_date=start_date, end_date=end_date, metric=metric,
-                    range_type='high', low_value=high_floor, high_value=max_value)
+        for event in engagement_events.EVENTS:
+            low_ceil = random.random() * max_value * 0.5
+            models.ModuleEngagementMetricRanges.objects.create(
+                course_id=course_id, start_date=start_date, end_date=end_date, metric=event,
+                range_type='low', low_value=0, high_value=low_ceil)
+            high_floor = random.random() * max_value * 0.5 + low_ceil
+            models.ModuleEngagementMetricRanges.objects.create(
+                course_id=course_id, start_date=start_date, end_date=end_date, metric=event,
+                range_type='high', low_value=high_floor, high_value=max_value)
 
     def handle(self, *args, **options):
         course_id = options['course_id']

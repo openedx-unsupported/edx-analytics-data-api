@@ -1,5 +1,5 @@
-from analytics_data_api.constants.engagement_entity_types import DISCUSSION, PROBLEM, VIDEO
-from analytics_data_api.constants.engagement_events import ATTEMPTED, COMPLETED, CONTRIBUTED, VIEWED
+from analytics_data_api.constants.engagement_events import (ATTEMPTED, ATTEMPTS_PER_COMPLETED, COMPLETED,
+                                                            CONTRIBUTED, DISCUSSION, PROBLEM, VIDEO, VIEWED)
 
 
 class EngagementType(object):
@@ -12,6 +12,7 @@ class EngagementType(object):
     # Defines the current canonical set of engagement types used in the Learner
     # Analytics API.
     ALL_TYPES = (
+        'problem_attempts_per_completed',
         'problems_attempted',
         'problems_completed',
         'videos_viewed',
@@ -29,6 +30,9 @@ class EngagementType(object):
         if entity_type == PROBLEM:
             if event_type == ATTEMPTED:
                 self.name = 'problems_attempted'
+                self.is_counted_by_entity = True
+            if event_type == ATTEMPTS_PER_COMPLETED:
+                self.name = 'problem_attempts_per_completed'
                 self.is_counted_by_entity = True
             if event_type == COMPLETED:
                 self.name = 'problems_completed'

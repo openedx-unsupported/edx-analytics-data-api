@@ -9,8 +9,8 @@ import pytz
 from rest_framework import status
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
-from analytics_data_api.constants.engagement_entity_types import DISCUSSION, PROBLEM, VIDEO
-from analytics_data_api.constants.engagement_events import ATTEMPTED, COMPLETED, CONTRIBUTED, VIEWED
+from analytics_data_api.constants.engagement_events import (ATTEMPTED, COMPLETED, CONTRIBUTED, DISCUSSION,
+                                                            PROBLEM, VIDEO, VIEWED)
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.views import DemoCourseMixin, VerifyCourseIdMixin
 

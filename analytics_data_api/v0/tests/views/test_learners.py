@@ -17,7 +17,7 @@ from django.conf import settings
 from django.core import management
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
-from analytics_data_api.constants import engagement_entity_types, engagement_events
+from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
 from analytics_data_api.v0.tests.views import DemoCourseMixin, VerifyCourseIdMixin
 
@@ -571,18 +571,9 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         empty_range = {
             range_type: None for range_type in ['below_average', 'average', 'above_average']
         }
-        for metric in self.engagement_metrics:
+        for metric in engagement_events.EVENTS:
             empty_engagement_ranges['engagement_ranges'][metric] = copy.deepcopy(empty_range)
         return empty_engagement_ranges
-
-    @property
-    def engagement_metrics(self):
-        """ Convenience method for getting the metric types. """
-        metrics = []
-        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
-            for event in engagement_events.EVENTS[entity_type]:
-                metrics.append('{0}_{1}'.format(entity_type, event))
-        return metrics
 
     def test_no_engagement_ranges(self):
         response = self._get(self.course_id)
@@ -627,7 +618,7 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         }
 
         max_value = 1000.0
-        for metric_type in self.engagement_metrics:
+        for metric_type in engagement_events.EVENTS:
             low_ceil = 100.5
             G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
               metric=metric_type, range_type='low', low_value=0, high_value=low_ceil)
@@ -649,12 +640,8 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         self.assertDictContainsSubset(expected, json.loads(response.content))
 
     def test_engagement_ranges_fields(self):
-        actual_entity_types = engagement_entity_types.INDIVIDUAL_TYPES
-        expected_entity_types = ['discussion', 'problem', 'video']
-        self.assertEqual(actual_entity_types, expected_entity_types)
-        actual_events = []
-        for entity_type in actual_entity_types:
-            for event in engagement_events.EVENTS[entity_type]:
-                actual_events.append(event)
-        expected_events = ['contributed', 'attempted', 'attempts_per_completed', 'completed', 'viewed']
-        self.assertEqual(actual_events, expected_events)
+        expected_events = engagement_events.EVENTS
+        response = json.loads(self._get(self.course_id).content)
+        self.assertTrue('engagement_ranges' in response)
+        for event in expected_events:
+            self.assertTrue(event in response['engagement_ranges'])

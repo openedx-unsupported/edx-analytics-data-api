@@ -3,7 +3,6 @@ from django.conf import settings
 from rest_framework import pagination, serializers
 
 from analytics_data_api.constants import (
-    engagement_entity_types,
     engagement_events,
     enrollment_modes,
     genders,
@@ -458,23 +457,16 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
             'date_range': DateRangeSerializer(query_set[0] if len(query_set) else None).data
         }
 
-        # go through each entity and event type combination and fill in the ranges
-        for entity_type in engagement_entity_types.AGGREGATE_TYPES:
-            for event in engagement_events.EVENTS[entity_type]:
-                metric = '{0}_{1}'.format(entity_type, event)
-                # It's assumed that there may be any combination of low, normal,
-                # and high ranges in the database for the given course.  Some
-                # edge cases result from a lack of available data; in such
-                # cases, only some ranges may be returned.
-                low_range_queryset = query_set.filter(metric=metric, range_type='low')
-                normal_range_queryset = query_set.filter(metric=metric, range_type='normal')
-                high_range_queryset = query_set.filter(metric=metric, range_type='high')
-                engagement_ranges.update({
-                    metric: EnagementRangeMetricSerializer({
-                        'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
-                        'normal_range': normal_range_queryset[0] if len(normal_range_queryset) else None,
-                        'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
-                    }).data
-                })
+        for metric in engagement_events.EVENTS:
+            low_range_queryset = query_set.filter(metric=metric, range_type='low')
+            normal_range_queryset = query_set.filter(metric=metric, range_type='normal')
+            high_range_queryset = query_set.filter(metric=metric, range_type='high')
+            engagement_ranges.update({
+                metric: EnagementRangeMetricSerializer({
+                    'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
+                    'normal_range': normal_range_queryset[0] if len(normal_range_queryset) else None,
+                    'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
+                }).data
+            })
 
         return engagement_ranges

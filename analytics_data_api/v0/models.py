@@ -413,7 +413,7 @@ class ModuleEngagementTimelineManager(models.Manager):
         queryset = ModuleEngagement.objects.all().filter(course_id=course_id, username=username) \
             .values('date', 'entity_type', 'event') \
             .annotate(total_count=Sum('count')) \
-            .annotate(distinct_entity_count=Count('entity_id')) \
+            .annotate(distinct_entity_count=Count('entity_id', distinct=True)) \
             .order_by('date')
 
         timelines = []

@@ -61,7 +61,7 @@ class EngagementTimelineTests(DemoCourseMixin, VerifyCourseIdMixin, TestCaseWith
             ]
         }
         if expect_id_aggregation:
-            expected_data['days'][0][metric_display_name] = 2
+            expected_data['days'][0][metric_display_name] = 1
         else:
             expected_data['days'][0][metric_display_name] = 10
         path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(self.course_id))

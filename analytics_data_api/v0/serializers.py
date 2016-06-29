@@ -10,7 +10,7 @@ from analytics_data_api.constants import (
 from analytics_data_api.v0 import models
 
 
-# Below are the enrollment modes supported by this API. The audit and honor enrollment modes are merged into honor.
+# Below are the enrollment modes supported by this API.
 ENROLLMENT_MODES = [enrollment_modes.AUDIT, enrollment_modes.CREDIT, enrollment_modes.HONOR,
                     enrollment_modes.PROFESSIONAL, enrollment_modes.VERIFIED]
 

@@ -17,7 +17,7 @@ test.install_elasticsearch:
 	echo "http.port: $(ELASTICSEARCH_PORT)" >> elasticsearch-$(ELASTICSEARCH_VERSION)/config/elasticsearch.yml
 
 test.run_elasticsearch:
-	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d
+	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d --http.port=$(ELASTICSEARCH_PORT)
 
 test.requirements: requirements
 	pip install -q -r requirements/test.txt

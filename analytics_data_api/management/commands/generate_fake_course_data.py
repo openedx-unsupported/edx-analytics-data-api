@@ -70,9 +70,10 @@ class Command(BaseCommand):
 
         enrollment_mode_ratios = {
             'audit': 0.15,
-            'honor': 0.35,
+            'credit': 0.15,
+            'honor': 0.25,
             'professional': 0.10,
-            'verified': 0.40
+            'verified': 0.35
         }
 
         # Generate birth year ratios
@@ -255,7 +256,7 @@ class Command(BaseCommand):
         username = options['username']
         video_id = '0fac49ba'
         video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
-        start_date = datetime.datetime(year=2015, month=1, day=1, tzinfo=timezone.utc)
+        start_date = datetime.datetime(year=2016, month=1, day=1, tzinfo=timezone.utc)
 
         num_weeks = options['num_weeks']
         if num_weeks:

@@ -13,6 +13,7 @@ requirements:
 test.install_elasticsearch:
 	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip
 	unzip elasticsearch-$(ELASTICSEARCH_VERSION).zip
+	echo "http.port: 9201" >> elasticsearch-$(ELASTICSEARCH_VERSION)/config/elasticsearch.yml
 
 test.run_elasticsearch:
 	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d

@@ -3,6 +3,7 @@ COVERAGE_DIR = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
+ELASTICSEARCH_PORT = 9223
 TEST_SETTINGS = analyticsdataserver.settings.test
 
 .PHONY: requirements develop clean diff.report view.diff.report quality
@@ -13,9 +14,10 @@ requirements:
 test.install_elasticsearch:
 	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip
 	unzip elasticsearch-$(ELASTICSEARCH_VERSION).zip
+	echo "http.port: $(ELASTICSEARCH_PORT)" >> elasticsearch-$(ELASTICSEARCH_VERSION)/config/elasticsearch.yml
 
 test.run_elasticsearch:
-	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d
+	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d --http.port=$(ELASTICSEARCH_PORT)
 
 test.requirements: requirements
 	pip install -q -r requirements/test.txt

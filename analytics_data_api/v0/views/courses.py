@@ -29,24 +29,19 @@ class BaseCourseView(generics.ListAPIView):
         end_date = request.QUERY_PARAMS.get('end_date')
         timezone = utc
 
-        if start_date:
-            try:
-                start_date = datetime.datetime.strptime(start_date, settings.DATETIME_FORMAT)
-            except ValueError:
-                start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
-            start_date = make_aware(start_date, timezone)
-
-        if end_date:
-            try:
-                end_date = datetime.datetime.strptime(end_date, settings.DATETIME_FORMAT)
-            except ValueError:
-                end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
-            end_date = make_aware(end_date, timezone)
-
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date = self.parse_date(start_date, timezone)
+        self.end_date = self.parse_date(end_date, timezone)
 
         return super(BaseCourseView, self).get(request, *args, **kwargs)
+
+    def parse_date(self, date, timezone):
+        if date:
+            try:
+                date = datetime.datetime.strptime(date, settings.DATETIME_FORMAT)
+            except ValueError:
+                date = datetime.datetime.strptime(date, settings.DATE_FORMAT)
+            date = make_aware(date, timezone)
+        return date
 
     def apply_date_filtering(self, queryset):
         raise NotImplementedError

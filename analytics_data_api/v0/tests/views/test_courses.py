@@ -142,10 +142,18 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
         self.assertEquals(response.status_code, 404)
 
         # If data falls in date range, data should be returned
-        start_date = start_date.strftime(settings.DATETIME_FORMAT)
-        end_date = end_date.strftime(settings.DATETIME_FORMAT)
+        start = start_date.strftime(settings.DATETIME_FORMAT)
+        end = end_date.strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
-            self.api_root_path, self.course_id, self.path, start_date, end_date))
+            self.api_root_path, self.course_id, self.path, start, end))
+        self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected_response)
+
+        # Passing dates in DATE_FORMAT still works
+        start = start_date.strftime(settings.DATE_FORMAT)
+        end = end_date.strftime(settings.DATE_FORMAT)
+        response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
+            self.api_root_path, self.course_id, self.path, start, end))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 

@@ -30,11 +30,17 @@ class BaseCourseView(generics.ListAPIView):
         timezone = utc
 
         if start_date:
-            start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
+            try:
+                start_date = datetime.datetime.strptime(start_date, settings.DATETIME_FORMAT)
+            except ValueError:
+                start_date = datetime.datetime.strptime(start_date, settings.DATE_FORMAT)
             start_date = make_aware(start_date, timezone)
 
         if end_date:
-            end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
+            try:
+                end_date = datetime.datetime.strptime(end_date, settings.DATETIME_FORMAT)
+            except ValueError:
+                end_date = datetime.datetime.strptime(end_date, settings.DATE_FORMAT)
             end_date = make_aware(end_date, timezone)
 
         self.start_date = start_date

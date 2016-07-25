@@ -130,20 +130,20 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
 
     def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
         # If start date is after date of existing data, return a 404
-        date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
+        date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?start_date=%s' % (self.api_root_path, self.course_id, self.path, date))
         self.assertEquals(response.status_code, 404)
 
         # If end date is before date of existing data, return a 404
-        date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATE_FORMAT)
+        date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?end_date=%s' % (self.api_root_path, self.course_id, self.path, date))
         self.assertEquals(response.status_code, 404)
 
         # If data falls in date range, data should be returned
-        start_date = start_date.strftime(settings.DATE_FORMAT)
-        end_date = end_date.strftime(settings.DATE_FORMAT)
+        start_date = start_date.strftime(settings.DATETIME_FORMAT)
+        end_date = end_date.strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
             self.api_root_path, self.course_id, self.path, start_date, end_date))
         self.assertEquals(response.status_code, 200)

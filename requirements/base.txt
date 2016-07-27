@@ -7,6 +7,7 @@ djangorestframework-csv==1.4.1		# BSD
 django-countries==4.0               # MIT
 edx-django-release-util==0.1.0
 elasticsearch-dsl==0.0.11           # Apache 2.0
+ordered-set==2.0.1                  # MIT
 
 # markdown is used by swagger for rendering the api docs
 Markdown==2.6.6    					# BSD

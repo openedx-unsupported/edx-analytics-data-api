@@ -23,7 +23,7 @@ from analytics_data_api.v0.serializers import (
     LastUpdatedSerializer,
     LearnerSerializer,
 )
-from analytics_data_api.v0.views import CourseViewMixin
+from analytics_data_api.v0.views import CourseViewMixin, PaginatedHeadersMixin, CsvViewMixin
 from analytics_data_api.v0.views.utils import split_query_argument
 
 
@@ -37,7 +37,7 @@ class LastUpdateMixin(object):
         """ Returns the serialized RosterUpdate last_updated field. """
         roster_update = RosterUpdate.get_last_updated()
         last_updated = {'date': None}
-        if len(roster_update) == 1:
+        if len(roster_update) >= 1:
             last_updated = roster_update[0]
         else:
             logger.warn('RosterUpdate not found.')
@@ -120,7 +120,7 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
         raise LearnerNotFoundError(username=self.username, course_id=self.course_id)
 
 
-class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
+class LearnerListView(LastUpdateMixin, CourseViewMixin, PaginatedHeadersMixin, CsvViewMixin, generics.ListAPIView):
     """
     Get a paginated list of data for all learners in a course.
 
@@ -131,18 +131,12 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
     **Response Values**
 
         Returns a paginated list of learner metadata and engagement data.
-        Pagination data is returned in the top level of the returned JSON
-        object.
 
-            * count: The number of learners that match the query.
-            * page: The current one-indexed page number.
-            * next: A hyperlink to the next page if one exists, otherwise null.
-            * previous: A hyperlink to the previous page if one exists,
-              otherwise null.
+        Pagination links, if applicable, are returned in the response's header.
+        e.g.
+            Link: <next_url>; rel="next", <previous_url>; rel="prev";
 
-        The 'results' key in the returned object maps to an array of
-        learners that contains, at most, a full page's worth of learners. For
-        each learner there is an object that contains the following keys.
+        Returned results may contain the following fields:
 
             * username: The username of an enrolled learner.
             * enrollment_mode: The learner's selected learning track (for
@@ -159,9 +153,9 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
             * city: The learner's reported city.
             * country: The learner's reported country.
             * goals: The learner's reported goals.
-            * segments: Classification, based on engagement, of each learner's
-              work in this course (for example, "highly_engaged" or
-              "struggling").
+            * segments: list of classifications, based on engagement, of each
+              learner's work in this course (for example, ["highly_engaged"] or
+              ["struggling"]).
             * engagements: Summary of engagement events for a time span.
                 * videos_viewed: Number of times any course video was played.
                 * problems_completed: Number of unique problems the learner
@@ -173,12 +167,56 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
                 * discussions_contributed: Number of posts, responses, or
                   comments the learner contributed to course discussions.
 
+        JSON:
+
+            The default format is JSON, with pagination data in the top level,
+            e.g.:
+            {
+                "count": 123,               // The number of learners that match the query.
+                "page":  2,                 // The current one-indexed page number.
+                "next":  "http://...",      // A hyperlink to the next page
+                                            //  if one exists, otherwise null.
+                "previous": "http://...",   // A hyperlink to the previous page
+                                            //  if one exists, otherwise null.
+                "results": [                // One results object per learner
+                    {
+                        "username": "user1",
+                        "name": "name1",
+                        ...
+                    },
+                    ...
+                ]
+            }
+
+        CSV:
+
+            If the request Accept header is 'text/csv', then the returned
+            results will be in CSV format.  Field names will be on the first
+            line as column headings, with one learner per row, e.g.:
+
+                username,name,email,segments.0,engagements.videos_viewed,...
+                user1,name1,user1@example.com,"highly engaged",0,...
+                user2,name2,user2@example.com,struggling,1,...
+
+            Use the 'fields' parameter to control the list of fields returned,
+            and the order they appear in.
+
+            Fields containing "list" values, like 'segments', are flattened and
+            returned in order, e.g., segments.0,segments.1,segments.2,...
+
+            Fields containing "dict" values, like 'engagements', are flattened
+            and use the fully-qualified field name in the heading, e.g.,
+            engagements.videos_viewed,engagements.problems_completed,...
+
+            Note that pagination data is not included in the main response body;
+            see above for details on pagination links in the response header.
+
     **Parameters**
 
         You can filter the list of learners by course ID and by other
         parameters, including enrollment mode and text search. You can also
-        control the page size and page number of the response, as well as sort
-        the learners in the response.
+        control the page size and page number of the response, the list of
+        returned fields, and sort the learners in the response.
 
         course_id -- The course identifier for which user data is requested.
             For example, edX/DemoX/Demo_Course.
@@ -201,35 +239,13 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
         order_by -- The field for sorting the response. Defaults to 'username'.
         sort_order -- The sort direction.  One of 'asc' (ascending) or 'desc'
             (descending). Defaults to 'asc'.
-
+        fields -- The list of fields, and their sort order, to return when
+            viewing CSV data.  Defaults to the full list of available fields,
+            in alphabetical order.
     """
     serializer_class = LearnerSerializer
     pagination_class = EdxPaginationSerializer
-    max_paginate_by = 100  # TODO -- tweak during load testing
-
-    def _validate_query_params(self):
-        """Validates various querystring parameters."""
-        query_params = self.request.query_params
-        page = query_params.get('page')
-        if page:
-            try:
-                page = int(page)
-            except ValueError:
-                raise ParameterValueError('Page must be an integer')
-            finally:
-                if page < 1:
-                    raise ParameterValueError(
-                        'Page numbers are one-indexed, therefore the page value must be greater than 0'
-                    )
-        page_size = query_params.get('page_size')
-        if page_size:
-            try:
-                page_size = int(page_size)
-            except ValueError:
-                raise ParameterValueError('Page size must be an integer')
-            finally:
-                if page_size > self.max_paginate_by or page_size < 1:
-                    raise ParameterValueError('Page size must be in the range [1, {}]'.format(self.max_paginate_by))
+    filename_slug = 'learners'
 
     def list(self, request, *args, **kwargs):
         """
@@ -247,7 +263,6 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
         Fetches the user list and last updated from elasticsearch returned returned
         as a an array of dicts with fields "learner" and "last_updated".
         """
-        self._validate_query_params()
         query_params = self.request.query_params
 
         order_by = query_params.get('order_by')

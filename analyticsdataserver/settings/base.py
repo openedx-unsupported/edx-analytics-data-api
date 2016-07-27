@@ -284,7 +284,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
-        'rest_framework_csv.renderers.CSVRenderer',
+        'analytics_data_api.renderers.PaginatedCsvRenderer',
     )
 }
 ########## END REST FRAMEWORK CONFIGURATION
@@ -306,6 +306,10 @@ MEDIA_ROOT = normpath(join(SITE_ROOT, 'static', 'reports'))
 MEDIA_URL = 'http://localhost:8100/static/reports/'
 COURSE_REPORT_FILE_LOCATION_TEMPLATE = '{course_id}_{report_name}.csv'
 ENABLED_REPORT_IDENTIFIERS = ('problem_response',)
+
+# Warning: using 0 or None for these can alter the structure of the REST response.
+DEFAULT_PAGE_SIZE = 25
+MAX_PAGE_SIZE = 100
 
 ########## END ANALYTICS DATA API CONFIGURATION
 

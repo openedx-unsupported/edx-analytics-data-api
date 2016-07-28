@@ -62,6 +62,16 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
               example, "audit" or "verified").
             * name: The learner's full name.
             * email: The learner's email address.
+            * user_id: The learner's numeric user ID.
+            * language: The learner's preferred language.
+            * location: The learner's reported location.
+            * year_of_birth: The learner's reported year of birth.
+            * level_of_education: The learner's reported level of education.
+            * gender: The learner's reported gender.
+            * mailing_address: The learner's reported mailing address.
+            * city: The learner's reported city.
+            * country: The learner's reported country.
+            * goals: The learner's reported goals.
             * segments: Classification, based on engagement, of this learner's
               work in this course (for example, "highly_engaged" or
               "struggling").
@@ -139,6 +149,16 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
               example, "audit" or "verified").
             * name: The learner's full name.
             * email: The learner's email address.
+            * user_id: The learner's numeric user ID.
+            * language: The learner's preferred language.
+            * location: The learner's reported location.
+            * year_of_birth: The learner's reported year of birth.
+            * level_of_education: The learner's reported level of education.
+            * gender: The learner's reported gender.
+            * mailing_address: The learner's reported mailing address.
+            * city: The learner's reported city.
+            * country: The learner's reported country.
+            * goals: The learner's reported goals.
             * segments: Classification, based on engagement, of each learner's
               work in this course (for example, "highly_engaged" or
               "struggling").

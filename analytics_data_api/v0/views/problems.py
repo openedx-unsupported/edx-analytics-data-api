@@ -22,6 +22,8 @@ from analytics_data_api.v0.serializers import (
 )
 from analytics_data_api.utils import matching_tuple
 
+from utils import raise_404_if_none
+
 
 class ProblemResponseAnswerDistributionView(generics.ListAPIView):
     """
@@ -98,6 +100,7 @@ class ProblemResponseAnswerDistributionView(generics.ListAPIView):
 
         return consolidated_answers
 
+    @raise_404_if_none
     def get_queryset(self):
         """Select all the answer distribution response having to do with this usage of the problem."""
         problem_id = self.kwargs.get('problem_id')
@@ -142,6 +145,7 @@ class GradeDistributionView(generics.ListAPIView):
     serializer_class = GradeDistributionSerializer
     allow_empty = False
 
+    @raise_404_if_none
     def get_queryset(self):
         """Select all grade distributions for a particular module"""
         problem_id = self.kwargs.get('problem_id')
@@ -170,6 +174,7 @@ class SequentialOpenDistributionView(generics.ListAPIView):
     serializer_class = SequentialOpenDistributionSerializer
     allow_empty = False
 
+    @raise_404_if_none
     def get_queryset(self):
         """Select the view count for a specific module"""
         module_id = self.kwargs.get('module_id')

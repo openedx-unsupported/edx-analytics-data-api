@@ -12,7 +12,7 @@ class CourseViewMixin(object):
     course_id = None
 
     def get(self, request, *args, **kwargs):
-        self.course_id = self.kwargs.get('course_id', request.QUERY_PARAMS.get('course_id', None))
+        self.course_id = self.kwargs.get('course_id', request.query_params.get('course_id', None))
 
         if not self.course_id:
             raise CourseNotSpecifiedError()

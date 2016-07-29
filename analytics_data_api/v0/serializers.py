@@ -1,11 +1,13 @@
+from collections import OrderedDict
 from urlparse import urljoin
 from django.conf import settings
 from rest_framework import pagination, serializers
+from rest_framework.response import Response
 
 from analytics_data_api.constants import (
     engagement_events,
     enrollment_modes,
-    genders,
+    learner,
 )
 from analytics_data_api.v0 import models
 
@@ -23,7 +25,7 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
 
-    activity_type = serializers.SerializerMethodField('get_activity_type')
+    activity_type = serializers.SerializerMethodField()
 
     def get_activity_type(self, obj):
         """
@@ -187,13 +189,7 @@ class SequentialOpenDistributionSerializer(ModelSerializerWithCreatedField):
         )
 
 
-class DefaultIfNoneMixin(object):
-
-    def default_if_none(self, value, default=0):
-        return value if value is not None else default
-
-
-class BaseCourseEnrollmentModelSerializer(DefaultIfNoneMixin, ModelSerializerWithCreatedField):
+class BaseCourseEnrollmentModelSerializer(ModelSerializerWithCreatedField):
     date = serializers.DateField(format=settings.DATE_FORMAT)
 
 
@@ -207,27 +203,29 @@ class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
 
 class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
     """ Representation of course enrollment, broken down by mode, for a single day and course. """
+    audit = serializers.SerializerMethodField()
+    credit = serializers.SerializerMethodField()
+    honor = serializers.SerializerMethodField()
+    professional = serializers.SerializerMethodField()
+    verified = serializers.SerializerMethodField()
 
-    def get_default_fields(self):
-        # pylint: disable=super-on-old-class
-        fields = super(CourseEnrollmentModeDailySerializer, self).get_default_fields()
+    def get_audit(self, obj):
+        return obj.get('audit', 0)
 
-        # Create a field for each enrollment mode
-        for mode in ENROLLMENT_MODES:
-            fields[mode] = serializers.IntegerField(required=True, default=0)
+    def get_honor(self, obj):
+        return obj.get('honor', 0)
 
-            # Create a transform method for each field
-            setattr(self, 'transform_%s' % mode, self._transform_mode)
+    def get_credit(self, obj):
+        return obj.get('credit', 0)
 
-        fields['cumulative_count'] = serializers.IntegerField(required=True, default=0)
+    def get_professional(self, obj):
+        return obj.get('professional', 0)
 
-        return fields
-
-    def _transform_mode(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_verified(self, obj):
+        return obj.get('verified', 0)
 
     class Meta(object):
-        model = models.CourseEnrollmentDaily
+        model = models.CourseEnrollmentModeDaily
 
         # Declare the dynamically-created fields here as well so that they will be picked up by Swagger.
         fields = ['course_id', 'date', 'count', 'cumulative_count', 'created'] + ENROLLMENT_MODES
@@ -256,21 +254,23 @@ class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
 
 
 class CourseEnrollmentByGenderSerializer(BaseCourseEnrollmentModelSerializer):
-    def get_default_fields(self):
-        # pylint: disable=super-on-old-class
-        fields = super(CourseEnrollmentByGenderSerializer, self).get_default_fields()
 
-        # Create a field for each gender
-        for gender in genders.ALL:
-            fields[gender] = serializers.IntegerField(required=True, default=0)
+    female = serializers.ReadOnlyField()
+    male = serializers.ReadOnlyField()
+    other = serializers.ReadOnlyField()
+    unknown = serializers.ReadOnlyField()
 
-            # Create a transform method for each field
-            setattr(self, 'transform_%s' % gender, self._transform_gender)
+    def get_female(self, obj):
+        return obj.get('female', None)
 
-        return fields
+    def get_male(self, obj):
+        return obj.get('male', None)
 
-    def _transform_gender(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_other(self, obj):
+        return obj.get('other', None)
+
+    def get_unknown(self, obj):
+        return obj.get('unknown', None)
 
     class Meta(object):
         model = models.CourseEnrollmentByGender
@@ -330,33 +330,43 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
 
 
 class LastUpdatedSerializer(serializers.Serializer):
-    last_updated = serializers.DateField(source='date', format=settings.DATE_FORMAT)
+    last_updated = serializers.DateTimeField(source='date', format=settings.DATE_FORMAT)
 
 
-class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
-    username = serializers.CharField(source='username')
-    enrollment_mode = serializers.CharField(source='enrollment_mode')
-    name = serializers.CharField(source='name')
-    account_url = serializers.SerializerMethodField('get_account_url')
-    email = serializers.CharField(source='email')
-    segments = serializers.Field(source='segments')
-    engagements = serializers.SerializerMethodField('get_engagements')
-    enrollment_date = serializers.DateField(source='enrollment_date', format=settings.DATE_FORMAT)
-    cohort = serializers.CharField(source='cohort')
+class LearnerSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    enrollment_mode = serializers.CharField()
+    name = serializers.CharField()
+    account_url = serializers.SerializerMethodField()
+    email = serializers.CharField()
+    segments = serializers.SerializerMethodField()
+    engagements = serializers.SerializerMethodField()
+    enrollment_date = serializers.DateTimeField(format=settings.DATE_FORMAT)
+    cohort = serializers.SerializerMethodField()
 
-    def transform_segments(self, _obj, value):
-        # returns null instead of empty strings
-        return value or []
+    def get_segments(self, obj):
+        # using hasattr() instead because DocType.get() is overloaded and makes a request
+        if hasattr(obj, 'segments'):
+            # json parsing will fail unless in unicode
+            return [unicode(segment) for segment in obj.segments]
+        else:
+            return []
 
-    def transform_cohort(self, _obj, value):
-        # returns null instead of empty strings
-        return value or None
+    def get_cohort(self, obj):
+        # using hasattr() instead because DocType.get() is overloaded and makes a request
+        if hasattr(obj, 'cohort') and len(obj.cohort) > 0:
+            return obj.cohort
+        else:
+            return None
 
     def get_account_url(self, obj):
         if settings.LMS_USER_ACCOUNT_BASE_URL:
             return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)
         else:
             return None
+
+    def default_if_none(self, value, default=0):
+        return value if value is not None else default
 
     def get_engagements(self, obj):
         """
@@ -376,45 +386,45 @@ class LearnerSerializer(serializers.Serializer, DefaultIfNoneMixin):
         return engagements
 
 
-class EdxPaginationSerializer(pagination.PaginationSerializer):
+class EdxPaginationSerializer(pagination.PageNumberPagination):
     """
     Adds values to the response according to edX REST API Conventions.
     """
-    count = serializers.Field(source='paginator.count')
-    num_pages = serializers.Field(source='paginator.num_pages')
+    page_size_query_param = 'page_size'
+    page_size = learner.LEARNER_API_DEFAULT_LIST_PAGE_SIZE
+    max_page_size = 100  # TODO -- tweak during load testing
+
+    def get_paginated_response(self, data):
+        # The output is more readable with num_pages included not at the end, but
+        # inefficient to insert into an OrderedDict, so the response is copied from
+        # rest_framework.pagination with the addition of "num_pages".
+        return Response(OrderedDict([
+            ('count', self.page.paginator.count),
+            ('num_pages', self.page.paginator.num_pages),
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('results', data)
+        ]))
 
 
-class ElasticsearchDSLSearchSerializer(EdxPaginationSerializer):
-    def __init__(self, *args, **kwargs):
-        """Make sure that the elasticsearch query is executed."""
-        # Because the elasticsearch-dsl search object has a different
-        # API from the queryset object that's expected by the django
-        # Paginator object, we have to manually execute the query.
-        # Note that the `kwargs['instance']` is the Page object, and
-        # `kwargs['instance'].object_list` is actually an
-        # elasticsearch-dsl search object.
-        kwargs['instance'].object_list = kwargs['instance'].object_list.execute()
-        super(ElasticsearchDSLSearchSerializer, self).__init__(*args, **kwargs)
-
-
-class EngagementDaySerializer(DefaultIfNoneMixin, serializers.Serializer):
+class EngagementDaySerializer(serializers.Serializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
-    problems_attempted = serializers.IntegerField(required=True, default=0)
-    problems_completed = serializers.IntegerField(required=True, default=0)
-    discussion_contributions = serializers.IntegerField(required=True, default=0)
-    videos_viewed = serializers.IntegerField(required=True, default=0)
+    problems_attempted = serializers.SerializerMethodField()
+    problems_completed = serializers.SerializerMethodField()
+    discussion_contributions = serializers.SerializerMethodField()
+    videos_viewed = serializers.SerializerMethodField()
 
-    def transform_problems_attempted(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_problems_attempted(self, obj):
+        return obj.get('problems_attempted', 0)
 
-    def transform_problems_completed(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_problems_completed(self, obj):
+        return obj.get('problems_completed', 0)
 
-    def transform_discussion_contributions(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_discussion_contributions(self, obj):
+        return obj.get('discussion_contributions', 0)
 
-    def transform_videos_viewed(self, _obj, value):
-        return self.default_if_none(value, 0)
+    def get_videos_viewed(self, obj):
+        return obj.get('videos_viewed', 0)
 
 
 class DateRangeSerializer(serializers.Serializer):
@@ -429,9 +439,9 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
     represented as arrays. If any one of the ranges is not defined, it is not
     included in the serialized output.
     """
-    class_rank_bottom = serializers.SerializerMethodField('get_class_rank_bottom')
-    class_rank_average = serializers.SerializerMethodField('get_class_rank_average')
-    class_rank_top = serializers.SerializerMethodField('get_class_rank_top')
+    class_rank_bottom = serializers.SerializerMethodField()
+    class_rank_average = serializers.SerializerMethodField()
+    class_rank_top = serializers.SerializerMethodField()
 
     def get_class_rank_average(self, obj):
         return self._transform_range(obj['average'])
@@ -447,10 +457,10 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
 
 
 class CourseLearnerMetadataSerializer(serializers.Serializer):
-    enrollment_modes = serializers.Field(source='es_data.enrollment_modes')
-    segments = serializers.Field(source='es_data.segments')
-    cohorts = serializers.Field(source='es_data.cohorts')
-    engagement_ranges = serializers.SerializerMethodField('get_engagement_ranges')
+    enrollment_modes = serializers.ReadOnlyField(source='es_data.enrollment_modes')
+    segments = serializers.ReadOnlyField(source='es_data.segments')
+    cohorts = serializers.ReadOnlyField(source='es_data.cohorts')
+    engagement_ranges = serializers.SerializerMethodField()
 
     def get_engagement_ranges(self, obj):
         query_set = obj['engagement_ranges']

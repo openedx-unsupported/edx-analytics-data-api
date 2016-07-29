@@ -5,9 +5,6 @@ import logging
 
 from rest_framework import generics, status
 
-from analytics_data_api.constants import (
-    learner
-)
 from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
@@ -21,7 +18,7 @@ from analytics_data_api.v0.models import (
 )
 from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
-    ElasticsearchDSLSearchSerializer,
+    EdxPaginationSerializer,
     EngagementDaySerializer,
     LastUpdatedSerializer,
     LearnerSerializer,
@@ -187,14 +184,12 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
 
     """
     serializer_class = LearnerSerializer
-    pagination_serializer_class = ElasticsearchDSLSearchSerializer
-    paginate_by_param = 'page_size'
-    paginate_by = learner.LEARNER_API_DEFAULT_LIST_PAGE_SIZE
+    pagination_class = EdxPaginationSerializer
     max_paginate_by = 100  # TODO -- tweak during load testing
 
     def _validate_query_params(self):
         """Validates various querystring parameters."""
-        query_params = self.request.QUERY_PARAMS
+        query_params = self.request.query_params
         page = query_params.get('page')
         if page:
             try:
@@ -222,8 +217,9 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
         """
         response = super(LearnerListView, self).list(request, args, kwargs)
         last_updated = self.get_last_updated()
-        for result in response.data['results']:
-            result.update(last_updated)
+        if response.data['results'] is not None:
+            for result in response.data['results']:
+                result.update(last_updated)
         return response
 
     def get_queryset(self):
@@ -232,7 +228,7 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, generics.ListAPIView):
         as a an array of dicts with fields "learner" and "last_updated".
         """
         self._validate_query_params()
-        query_params = self.request.QUERY_PARAMS
+        query_params = self.request.query_params
 
         order_by = query_params.get('order_by')
         sort_order = query_params.get('sort_order')

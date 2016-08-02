@@ -9,11 +9,14 @@ from django.db.models import Max
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.constants import enrollment_modes
-from analytics_data_api.utils import dictfetchall
+from analytics_data_api.utils import dictfetchall, get_course_report_download_details
 from analytics_data_api.v0 import models, serializers
+from analytics_data_api.v0.exceptions import ReportFileNotFoundError
 
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
@@ -772,3 +775,37 @@ class VideosListView(BaseCourseView):
     def apply_date_filtering(self, queryset):
         # no date filtering for videos -- just return the queryset
         return queryset
+
+
+class ReportDownloadView(APIView):
+    """
+    Get information needed to download a CSV report
+
+    **Example request**
+
+        GET /api/v0/courses/{course_id}/reports/{report_name}/
+
+    **Response Values**
+
+        Returns a single object with data about the report, with the following data:
+
+            * course_id: The ID of the course
+            * report_name: The name of the report
+            * download_url: The Internet location from which the report can be downloaded
+
+        The object may also return these items, if supported by the storage backend:
+
+            * last_modified: The date the report was last updated
+            * expiration_date: The date through which the link will be valid
+            * file_size: The size in bytes of the CSV download
+    """
+    enabled_reports = (
+        'problem_response'
+    )
+
+    def get(self, _request, course_id, report_name):
+        if report_name in self.enabled_reports:
+            response = get_course_report_download_details(course_id, report_name)
+            return Response(response)
+        else:
+            raise ReportFileNotFoundError(course_id=course_id, report_name=report_name)

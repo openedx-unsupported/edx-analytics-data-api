@@ -3,7 +3,10 @@ import json
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import status
 
+from analytics_data_api.utils import get_filename_safe_course_id
+
 DEMO_COURSE_ID = u'course-v1:edX+DemoX+Demo_2014'
+SANITIZED_DEMO_COURSE_ID = get_filename_safe_course_id(DEMO_COURSE_ID)
 
 
 class DemoCourseMixin(object):

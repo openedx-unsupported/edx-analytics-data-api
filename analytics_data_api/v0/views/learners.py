@@ -347,8 +347,8 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
               tracks in the course to the number of learners belonging to those
               tracks. Examples include "audit" and "verified".
             * engagement_ranges: An object containing ranges of learner
-              engagement with the courseware. Each range has 'below_average',
-              'average', and 'above_average' keys. These keys map to
+              engagement with the courseware. Each range has 'class_rank_bottom',
+              'class_rank_average', and 'class_rank_top' keys. These keys map to
               two-element arrays, in which the first element is the lower bound
               (inclusive) and the second element is the upper bound
               (exclusive). It has the following keys.

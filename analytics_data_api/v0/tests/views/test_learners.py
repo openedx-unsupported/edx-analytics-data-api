@@ -569,7 +569,7 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             }
         }
         empty_range = {
-            range_type: None for range_type in ['below_average', 'average', 'above_average']
+            range_type: None for range_type in ['class_rank_bottom', 'class_rank_average', 'class_rank_top']
         }
         for metric in engagement_events.EVENTS:
             empty_engagement_ranges['engagement_ranges'][metric] = copy.deepcopy(empty_range)
@@ -593,9 +593,9 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
                 'end': '2015-07-21'
             },
             metric_type: {
-                'below_average': None,
-                'average': [90.0, 6120.0],
-                'above_average': None
+                'class_rank_bottom': None,
+                'class_rank_average': [90.0, 6120.0],
+                'class_rank_top': None
             }
         })
 
@@ -625,11 +625,20 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             normal_floor = 800.8
             G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
               metric=metric_type, range_type='normal', low_value=normal_floor, high_value=max_value)
+
             expected['engagement_ranges'][metric_type] = {
-                'below_average': [0.0, low_ceil],
-                'average': [normal_floor, max_value],
-                'above_average': None
+                'class_rank_average': [normal_floor, max_value],
             }
+            if metric_type == 'problem_attempts_per_completed':
+                expected['engagement_ranges'][metric_type].update({
+                    'class_rank_top': [0.0, low_ceil],
+                    'class_rank_bottom': None
+                })
+            else:
+                expected['engagement_ranges'][metric_type].update({
+                    'class_rank_bottom': [0.0, low_ceil],
+                    'class_rank_top': None
+                })
 
         return expected
 

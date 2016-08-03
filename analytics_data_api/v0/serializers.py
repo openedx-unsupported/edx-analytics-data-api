@@ -424,23 +424,23 @@ class DateRangeSerializer(serializers.Serializer):
 
 class EnagementRangeMetricSerializer(serializers.Serializer):
     """
-    Serializes ModuleEngagementMetricRanges ('low', 'normal', and 'high') into
-    the below_average, average, and above_average ranges represented as arrays.
-    If any one of the ranges is not defined, it is not included in the
-    serialized output.
+    Serializes ModuleEngagementMetricRanges ('bottom', 'average', and 'top') into
+    the class_rank_bottom, class_rank_average, and class_rank_top ranges
+    represented as arrays. If any one of the ranges is not defined, it is not
+    included in the serialized output.
     """
-    below_average = serializers.SerializerMethodField('get_below_average_range')
-    average = serializers.SerializerMethodField('get_average_range')
-    above_average = serializers.SerializerMethodField('get_above_average_range')
+    class_rank_bottom = serializers.SerializerMethodField('get_class_rank_bottom')
+    class_rank_average = serializers.SerializerMethodField('get_class_rank_average')
+    class_rank_top = serializers.SerializerMethodField('get_class_rank_top')
 
-    def get_average_range(self, obj):
-        return self._transform_range(obj['normal_range'])
+    def get_class_rank_average(self, obj):
+        return self._transform_range(obj['average'])
 
-    def get_below_average_range(self, obj):
-        return self._transform_range(obj['low_range'])
+    def get_class_rank_bottom(self, obj):
+        return self._transform_range(obj['bottom'])
 
-    def get_above_average_range(self, obj):
-        return self._transform_range(obj['high_range'])
+    def get_class_rank_top(self, obj):
+        return self._transform_range(obj['top'])
 
     def _transform_range(self, metric_range):
         return [metric_range.low_value, metric_range.high_value] if metric_range else None
@@ -459,15 +459,20 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
         }
 
         for metric in engagement_events.EVENTS:
-            low_range_queryset = query_set.filter(metric=metric, range_type='low')
-            normal_range_queryset = query_set.filter(metric=metric, range_type='normal')
-            high_range_queryset = query_set.filter(metric=metric, range_type='high')
+            # construct the range type to class rank pairs
+            ranges_ranks = [('normal', 'average')]
+            if metric == 'problem_attempts_per_completed':
+                ranges_ranks.extend([('low', 'top'), ('high', 'bottom')])
+            else:
+                ranges_ranks.extend([('high', 'top'), ('low', 'bottom')])
+
+            # put together data to be serialized
+            serializer_kwargs = {}
+            for range_type, class_rank_type in ranges_ranks:
+                range_queryset = query_set.filter(metric=metric, range_type=range_type)
+                serializer_kwargs[class_rank_type] = range_queryset[0] if len(range_queryset) else None
             engagement_ranges.update({
-                metric: EnagementRangeMetricSerializer({
-                    'low_range': low_range_queryset[0] if len(low_range_queryset) else None,
-                    'normal_range': normal_range_queryset[0] if len(normal_range_queryset) else None,
-                    'high_range': high_range_queryset[0] if len(high_range_queryset) else None,
-                }).data
+                metric: EnagementRangeMetricSerializer(serializer_kwargs).data
             })
 
         return engagement_ranges

@@ -5,7 +5,7 @@ djangorestframework==2.4.4			# BSD
 django-rest-swagger==0.2.8  		# BSD
 djangorestframework-csv==1.3.3		# BSD
 django-countries==3.2               # MIT
-edx-django-release-util==0.0.3      # AGPLv3
+edx-django-release-util==0.1.0
 elasticsearch-dsl==0.0.11           # Apache 2.0
 
 # markdown is used by swagger for rendering the api docs

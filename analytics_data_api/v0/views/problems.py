@@ -22,7 +22,7 @@ from analytics_data_api.v0.serializers import (
 )
 from analytics_data_api.utils import matching_tuple
 
-from utils import raise_404_if_none
+from analytics_data_api.v0.views.utils import raise_404_if_none
 
 
 class ProblemResponseAnswerDistributionView(generics.ListAPIView):

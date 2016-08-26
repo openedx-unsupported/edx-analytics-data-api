@@ -47,6 +47,7 @@ class ModelSerializerWithCreatedField(serializers.ModelSerializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
+# pylint: disable=abstract-method
 class ProblemSerializer(serializers.Serializer):
     """
     Serializer for problems.
@@ -59,6 +60,7 @@ class ProblemSerializer(serializers.Serializer):
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
+# pylint: disable=abstract-method
 class ProblemsAndTagsSerializer(serializers.Serializer):
     """
     Serializer for problems and tags.
@@ -231,6 +233,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
         fields = ['course_id', 'date', 'count', 'cumulative_count', 'created'] + ENROLLMENT_MODES
 
 
+# pylint: disable=abstract-method
 class CountrySerializer(serializers.Serializer):
     """
     Serialize country to an object with fields for the complete country name
@@ -329,10 +332,12 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
         )
 
 
+# pylint: disable=abstract-method
 class LastUpdatedSerializer(serializers.Serializer):
     last_updated = serializers.DateTimeField(source='date', format=settings.DATE_FORMAT)
 
 
+# pylint: disable=abstract-method
 class LearnerSerializer(serializers.Serializer):
     username = serializers.CharField()
     enrollment_mode = serializers.CharField()
@@ -407,6 +412,7 @@ class EdxPaginationSerializer(pagination.PageNumberPagination):
         ]))
 
 
+# pylint: disable=abstract-method
 class EngagementDaySerializer(serializers.Serializer):
     date = serializers.DateField(format=settings.DATE_FORMAT)
     problems_attempted = serializers.SerializerMethodField()
@@ -427,11 +433,13 @@ class EngagementDaySerializer(serializers.Serializer):
         return obj.get('videos_viewed', 0)
 
 
+# pylint: disable=abstract-method
 class DateRangeSerializer(serializers.Serializer):
     start = serializers.DateTimeField(source='start_date', format=settings.DATE_FORMAT)
     end = serializers.DateTimeField(source='end_date', format=settings.DATE_FORMAT)
 
 
+# pylint: disable=abstract-method
 class EnagementRangeMetricSerializer(serializers.Serializer):
     """
     Serializes ModuleEngagementMetricRanges ('bottom', 'average', and 'top') into
@@ -456,6 +464,7 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
         return [metric_range.low_value, metric_range.high_value] if metric_range else None
 
 
+# pylint: disable=abstract-method
 class CourseLearnerMetadataSerializer(serializers.Serializer):
     enrollment_modes = serializers.ReadOnlyField(source='es_data.enrollment_modes')
     segments = serializers.ReadOnlyField(source='es_data.segments')

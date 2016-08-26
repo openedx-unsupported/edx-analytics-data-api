@@ -12,6 +12,7 @@ def split_query_argument(argument):
     else:
         return None
 
+
 def raise_404_if_none(func):
     """
     Decorator for raiseing Http404 if function evaulation is falsey (e.g. empty queryset).

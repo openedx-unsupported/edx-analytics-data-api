@@ -103,7 +103,7 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
     def get_queryset(self):
         return RosterEntry.get_course_user(self.course_id, self.username)
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         queryset = self.get_queryset()
         if len(queryset) == 1:
             return queryset[0]
@@ -362,7 +362,7 @@ class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):
     """
     serializer_class = CourseLearnerMetadataSerializer
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         # Because we're serializing data from both Elasticsearch and MySQL into
         # the same JSON object, we have to pass both sources of data in a dict
         # to our custom course metadata serializer.

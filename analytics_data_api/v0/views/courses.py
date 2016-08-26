@@ -15,7 +15,7 @@ from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.utils import dictfetchall
 from analytics_data_api.v0 import models, serializers
 
-from utils import raise_404_if_none
+from analytics_data_api.v0.views.utils import raise_404_if_none
 
 
 class BaseCourseView(generics.ListAPIView):
@@ -242,7 +242,7 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
 
         return activity_type
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         """Select the activity report for the given course and activity type."""
 
         warnings.warn('CourseActivityMostRecentWeekView has been deprecated! Use CourseActivityWeeklyView instead.',
@@ -403,7 +403,11 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
             item = {
                 u'course_id': key[0],
                 u'date': key[1],
-                u'created': None
+                u'created': None,
+                u'male': 0,
+                u'female': 0,
+                u'other': 0,
+                u'unknown': 0
             }
 
             for enrollment in group:

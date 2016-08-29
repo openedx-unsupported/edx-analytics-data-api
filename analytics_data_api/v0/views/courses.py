@@ -15,6 +15,8 @@ from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.utils import dictfetchall
 from analytics_data_api.v0 import models, serializers
 
+from analytics_data_api.v0.views.utils import raise_404_if_none
+
 
 class BaseCourseView(generics.ListAPIView):
     start_date = None
@@ -25,8 +27,8 @@ class BaseCourseView(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         self.course_id = self.kwargs.get('course_id')
-        start_date = request.QUERY_PARAMS.get('start_date')
-        end_date = request.QUERY_PARAMS.get('end_date')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
         timezone = utc
 
         self.start_date = self.parse_date(start_date, timezone)
@@ -46,6 +48,7 @@ class BaseCourseView(generics.ListAPIView):
     def apply_date_filtering(self, queryset):
         raise NotImplementedError
 
+    @raise_404_if_none
     def get_queryset(self):
         queryset = self.model.objects.filter(course_id=self.course_id)
         queryset = self.apply_date_filtering(queryset)
@@ -232,14 +235,14 @@ class CourseActivityMostRecentWeekView(generics.RetrieveAPIView):
         """ Retrieve the activity type from the query string. """
 
         # Support the old label param
-        activity_type = self.request.QUERY_PARAMS.get('label', None)
+        activity_type = self.request.query_params.get('label', None)
 
-        activity_type = activity_type or self.request.QUERY_PARAMS.get('activity_type', self.DEFAULT_ACTIVITY_TYPE)
+        activity_type = activity_type or self.request.query_params.get('activity_type', self.DEFAULT_ACTIVITY_TYPE)
         activity_type = self._format_activity_type(activity_type)
 
         return activity_type
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         """Select the activity report for the given course and activity type."""
 
         warnings.warn('CourseActivityMostRecentWeekView has been deprecated! Use CourseActivityWeeklyView instead.',
@@ -400,7 +403,11 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
             item = {
                 u'course_id': key[0],
                 u'date': key[1],
-                u'created': None
+                u'created': None,
+                u'male': 0,
+                u'female': 0,
+                u'other': 0,
+                u'unknown': 0
             }
 
             for enrollment in group:
@@ -633,6 +640,7 @@ class ProblemsListView(BaseCourseView):
     serializer_class = serializers.ProblemSerializer
     allow_empty = False
 
+    @raise_404_if_none
     def get_queryset(self):
         # last_response_count is the number of submissions for the problem part and must
         # be divided by the number of problem parts to get the problem submission rather
@@ -709,6 +717,7 @@ class ProblemsAndTagsListView(BaseCourseView):
     allow_empty = False
     model = models.ProblemsAndTags
 
+    @raise_404_if_none
     def get_queryset(self):
         queryset = self.model.objects.filter(course_id=self.course_id)
         items = queryset.all()

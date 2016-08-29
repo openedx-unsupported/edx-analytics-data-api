@@ -7,6 +7,8 @@ from rest_framework import generics
 from analytics_data_api.v0.models import VideoTimeline
 from analytics_data_api.v0.serializers import VideoTimelineSerializer
 
+from analytics_data_api.v0.views.utils import raise_404_if_none
+
 
 class VideoTimelineView(generics.ListAPIView):
     """
@@ -30,6 +32,7 @@ class VideoTimelineView(generics.ListAPIView):
     serializer_class = VideoTimelineSerializer
     allow_empty = False
 
+    @raise_404_if_none
     def get_queryset(self):
         """Select the view count for a specific module"""
         video_id = self.kwargs.get('video_id')

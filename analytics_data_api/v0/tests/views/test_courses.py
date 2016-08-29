@@ -210,10 +210,11 @@ class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
 
     @staticmethod
     def get_activity_record(**kwargs):
+        datetime_format = "%Y-%m-%dT%H:%M:%SZ"
         default = {
             'course_id': DEMO_COURSE_ID,
-            'interval_start': datetime.datetime(2014, 1, 1, 0, 0, tzinfo=pytz.utc),
-            'interval_end': datetime.datetime(2014, 1, 8, 0, 0, tzinfo=pytz.utc),
+            'interval_start': datetime.datetime(2014, 1, 1, 0, 0, tzinfo=pytz.utc).strftime(datetime_format),
+            'interval_end': datetime.datetime(2014, 1, 8, 0, 0, tzinfo=pytz.utc).strftime(datetime_format),
             'activity_type': 'any',
             'count': 300,
         }
@@ -338,6 +339,9 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
     def setUp(self):
         super(CourseEnrollmentByGenderViewTests, self).setUp()
         self.generate_data()
+
+    def tearDown(self):
+        self.destroy_data()
 
     def serialize_enrollment(self, enrollment):
         return {
@@ -606,8 +610,8 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
 
         # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
         # natural order and ensure the view properly sorts the objects before grouping.
-        module_id = 'i4x://test/problem/1'
-        alt_module_id = 'i4x://test/problem/2'
+        module_id = u'i4x://test/problem/1'
+        alt_module_id = u'i4x://test/problem/2'
         created = datetime.datetime.utcnow()
         alt_created = created + datetime.timedelta(seconds=2)
         date_time_format = '%Y-%m-%d %H:%M:%S'
@@ -624,21 +628,21 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
                 'module_id': module_id,
                 'total_submissions': 150,
                 'correct_submissions': 50,
-                'part_ids': [o1.part_id, o3.part_id],
+                'part_ids': unicode([o1.part_id, o3.part_id]),
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 100,
                 'correct_submissions': 100,
-                'part_ids': [o2.part_id],
-                'created': created.strftime(settings.DATETIME_FORMAT)
+                'part_ids': unicode([o2.part_id]),
+                'created': unicode(created.strftime(settings.DATETIME_FORMAT))
             }
         ]
 
         response = self._get_data(self.course_id)
         self.assertEquals(response.status_code, 200)
-        self.assertListEqual(response.data, expected)
+        self.assertListEqual([dict(d) for d in response.data], expected)
 
     def test_get_404(self):
         """
@@ -669,8 +673,8 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
 
         # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
         # natural order and ensure the view properly sorts the objects before grouping.
-        module_id = 'i4x://test/problem/1'
-        alt_module_id = 'i4x://test/problem/2'
+        module_id = u'i4x://test/problem/1'
+        alt_module_id = u'i4x://test/problem/2'
 
         tags = {
             'difficulty': ['Easy', 'Medium', 'Hard'],
@@ -695,26 +699,26 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
                 'module_id': module_id,
                 'total_submissions': 11,
                 'correct_submissions': 4,
-                'tags': {
-                    'difficulty': 'Easy',
-                    'learning_outcome': 'Learned a few things',
-                },
+                'tags': unicode({
+                    u'difficulty': u'Easy',
+                    u'learning_outcome': u'Learned a few things',
+                }),
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 4,
                 'correct_submissions': 0,
-                'tags': {
-                    'learning_outcome': 'Learned everything',
-                },
+                'tags': unicode({
+                    u'learning_outcome': u'Learned everything',
+                }),
                 'created': created.strftime(settings.DATETIME_FORMAT)
             }
         ]
 
         response = self._get_data(self.course_id)
         self.assertEquals(response.status_code, 200)
-        self.assertListEqual(sorted(response.data), sorted(expected))
+        self.assertListEqual(sorted([dict(d) for d in response.data]), sorted(expected))
 
     def test_get_404(self):
         """

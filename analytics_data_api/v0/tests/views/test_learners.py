@@ -205,8 +205,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         returned.
         """
         self.assertEqual(response.status_code, 200)
-        payload = json.loads(response.content)
-        returned_learners = payload['results']
+        returned_learners = json.loads(response.content)['results']
         if expected_learners is None:
             self.assertEqual(returned_learners, list())
         else:

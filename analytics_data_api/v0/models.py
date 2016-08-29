@@ -234,7 +234,7 @@ class Video(BaseVideo):
 
 class RosterUpdate(DocType):
 
-    date = Date()
+    date = Date(format=settings.DATE_FORMAT)
 
     # pylint: disable=old-style-class
     class Meta:
@@ -265,8 +265,8 @@ class RosterEntry(DocType):
     attempt_ratio_order = Integer()
     discussion_contributions = Integer()
     videos_watched = Integer()
-    enrollment_date = Date()
-    last_updated = Date()
+    enrollment_date = Date(format=settings.DATE_FORMAT)
+    last_updated = Date(format=settings.DATE_FORMAT)
 
     # pylint: disable=old-style-class
     class Meta:
@@ -460,7 +460,7 @@ class ModuleEngagement(models.Model):
 
     course_id = models.CharField(db_index=True, max_length=255)
     username = models.CharField(max_length=255)
-    date = models.DateTimeField()
+    date = models.DateField()
     # This will be one of "problem", "video" or "discussion"
     entity_type = models.CharField(max_length=255)
     # For problems this will be the usage key, for videos it will be the html encoded module ID,

@@ -3,13 +3,14 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 from analyticsdataserver import views
+from rest_framework.authtoken.views import obtain_auth_token
 
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/docs')),  # pylint: disable=no-value-for-parameter
 
     url(r'^api-auth/', include('rest_framework.urls', 'rest_framework')),
-    url(r'^api-token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
+    url(r'^api-token-auth/', obtain_auth_token),
 
     url(r'^api/', include('analytics_data_api.urls', 'api')),
     url(r'^docs/', include('rest_framework_swagger.urls')),

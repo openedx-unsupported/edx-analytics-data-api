@@ -56,7 +56,7 @@ class ProblemSerializer(serializers.Serializer):
     module_id = serializers.CharField(required=True)
     total_submissions = serializers.IntegerField(default=0)
     correct_submissions = serializers.IntegerField(default=0)
-    part_ids = serializers.CharField()
+    part_ids = serializers.ListField(child=serializers.CharField())
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
 
@@ -69,8 +69,11 @@ class ProblemsAndTagsSerializer(serializers.Serializer):
     module_id = serializers.CharField(required=True)
     total_submissions = serializers.IntegerField(default=0)
     correct_submissions = serializers.IntegerField(default=0)
-    tags = serializers.CharField()
+    tags = serializers.SerializerMethodField()
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+
+    def get_tags(self, obj):
+        return obj.get('tags', None)
 
 
 class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):

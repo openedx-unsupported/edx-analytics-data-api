@@ -628,14 +628,14 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
                 'module_id': module_id,
                 'total_submissions': 150,
                 'correct_submissions': 50,
-                'part_ids': unicode([o1.part_id, o3.part_id]),
+                'part_ids': [unicode(o1.part_id), unicode(o3.part_id)],
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 100,
                 'correct_submissions': 100,
-                'part_ids': unicode([o2.part_id]),
+                'part_ids': [unicode(o2.part_id)],
                 'created': unicode(created.strftime(settings.DATETIME_FORMAT))
             }
         ]
@@ -699,19 +699,19 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
                 'module_id': module_id,
                 'total_submissions': 11,
                 'correct_submissions': 4,
-                'tags': unicode({
+                'tags': {
                     u'difficulty': u'Easy',
                     u'learning_outcome': u'Learned a few things',
-                }),
+                },
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 4,
                 'correct_submissions': 0,
-                'tags': unicode({
+                'tags': {
                     u'learning_outcome': u'Learned everything',
-                }),
+                },
                 'created': created.strftime(settings.DATETIME_FORMAT)
             }
         ]

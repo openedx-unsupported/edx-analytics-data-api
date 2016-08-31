@@ -2,14 +2,14 @@ from django.apps import AppConfig
 from django.conf import settings
 from elasticsearch_dsl import connections
 
-from analytics_data_api.utils import load_fully_qualified_definition
-
 
 class ApiAppConfig(AppConfig):
 
     name = 'analytics_data_api.v0'
 
     def ready(self):
+        from analytics_data_api.utils import load_fully_qualified_definition
+
         super(ApiAppConfig, self).ready()
         if settings.ELASTICSEARCH_LEARNERS_HOST:
             connection_params = {'hosts': [settings.ELASTICSEARCH_LEARNERS_HOST]}

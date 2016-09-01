@@ -33,7 +33,7 @@ class ESConnectionTests(TestCase):
         self.assertTrue('my_access_key' in auth_header)
 
     def test_timeout(self):
-        def fake_connection(_address):
+        def fake_connection(*args):  # pylint: disable=unused-argument
             raise socket.timeout('fake error')
         socket.create_connection = fake_connection
         connection = ESConnection('mockservice.cc-zone-1.amazonaws.com',

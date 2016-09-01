@@ -57,7 +57,7 @@ quality:
 validate: test.requirements test quality
 
 migrate:
-	$(foreach db_name,$(DATABASES),./manage.py migrate --noinput --database=$(db_name);)
+	$(foreach db_name,$(DATABASES),./manage.py migrate --noinput --run-syncdb --database=$(db_name);)
 
 loaddata: migrate
 	python manage.py loaddata problem_response_answer_distribution --database=analytics

@@ -47,6 +47,16 @@ class LearnerAPITestMixin(object):
             attempt_ratio_order=0,
             videos_viewed=0,
             enrollment_date='2015-01-28',
+            user_id=None,
+            language=None,
+            location=None,
+            year_of_birth=None,
+            level_of_education=None,
+            gender=None,
+            mailing_address=None,
+            city=None,
+            country=None,
+            goals=None,
     ):
         """Create a single learner roster entry in the elasticsearch index."""
         body = {
@@ -61,6 +71,16 @@ class LearnerAPITestMixin(object):
             'attempt_ratio_order': attempt_ratio_order,
             'videos_viewed': videos_viewed,
             'enrollment_date': enrollment_date,
+            "user_id": user_id,
+            "language": language,
+            "location": location,
+            "year_of_birth": year_of_birth,
+            "level_of_education": level_of_education,
+            "gender": gender,
+            "mailing_address": mailing_address,
+            "city": city,
+            "country": country,
+            "goals": goals,
         }
 
         # leave null fields from being stored in the index.  Otherwise, they will have
@@ -112,13 +132,20 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
     @ddt.data(
         ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'honor', ['has_potential'], 'Team edX',
          43, 3, 6, 0, 8.4, 2, '2015-04-24', '2015-08-05'),
+        ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'honor', ['has_potential'], 'Team edX',
+         43, 3, 6, 0, 8.4, 2, '2015-04-24', '2015-08-05',
+         10, 'French', 'Berlin', 1976, 'Bachelors', 'Male', '123 Sesame St', 'Springfield', 'France',
+         'I\'ve always wanted to play the piano.'),
         ('ed_xavier', 'Edward Xavier', 'edX/DemoX/Demo_Course', 'verified'),
     )
     @ddt.unpack
     def test_get_user(self, username, name, course_id, enrollment_mode, segments=None, cohort=None,
                       problems_attempted=None, problems_completed=None, videos_viewed=None,
                       discussion_contributions=None, problem_attempts_per_completed=None,
-                      attempt_ratio_order=None, enrollment_date=None, last_updated=None):
+                      attempt_ratio_order=None, enrollment_date=None, last_updated=None,
+                      user_id=None, language=None, location=None,
+                      year_of_birth=None, level_of_education=None, gender=None,
+                      mailing_address=None, city=None, country=None, goals=None):
 
         self.create_learners([{
             "username": username,
@@ -134,6 +161,16 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             "problem_attempts_per_completed": problem_attempts_per_completed,
             "attempt_ratio_order": attempt_ratio_order,
             "enrollment_date": enrollment_date,
+            "user_id": user_id,
+            "language": language,
+            "location": location,
+            "year_of_birth": year_of_birth,
+            "level_of_education": level_of_education,
+            "gender": gender,
+            "mailing_address": mailing_address,
+            "city": city,
+            "country": country,
+            "goals": goals,
         }])
         self.create_update_index(last_updated)
 
@@ -157,6 +194,16 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             },
             "enrollment_date": enrollment_date,
             "last_updated": last_updated,
+            "user_id": user_id,
+            "language": language,
+            "location": location,
+            "year_of_birth": year_of_birth,
+            "level_of_education": level_of_education,
+            "gender": gender,
+            "mailing_address": mailing_address,
+            "city": city,
+            "country": country,
+            "goals": goals,
         }
         self.assertDictEqual(expected, response.data)
 

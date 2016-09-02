@@ -342,11 +342,21 @@ class LastUpdatedSerializer(serializers.Serializer):
 
 # pylint: disable=abstract-method
 class LearnerSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
     username = serializers.CharField()
     enrollment_mode = serializers.CharField()
     name = serializers.CharField()
     account_url = serializers.SerializerMethodField()
     email = serializers.CharField()
+    language = serializers.CharField()
+    location = serializers.CharField()
+    year_of_birth = serializers.IntegerField()
+    level_of_education = serializers.CharField()
+    gender = serializers.CharField()
+    mailing_address = serializers.CharField()
+    city = serializers.CharField()
+    country = serializers.CharField()
+    goals = serializers.CharField()
     segments = serializers.SerializerMethodField()
     engagements = serializers.SerializerMethodField()
     enrollment_date = serializers.DateTimeField(format=settings.DATE_FORMAT)

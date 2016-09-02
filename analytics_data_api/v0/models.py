@@ -249,9 +249,19 @@ class RosterUpdate(DocType):
 class RosterEntry(DocType):
 
     course_id = String()
+    user_id = Integer()
     username = String()
     name = String()
     email = String()
+    language = String()
+    location = String()
+    year_of_birth = Integer()
+    level_of_education = String()
+    gender = String()
+    mailing_address = String()
+    city = String()
+    country = String()
+    goals = String()
     enrollment_mode = String()
     cohort = String()
     segments = String()  # segments is an array/list of strings

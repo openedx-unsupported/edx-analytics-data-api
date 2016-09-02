@@ -29,6 +29,9 @@ class Command(BaseCommand):
                                 'name': {
                                     'type': 'string'
                                 },
+                                'user_id': {
+                                    'type': 'integer', 'index': 'not_analyzed'
+                                },
                                 'username': {
                                     'type': 'string', 'index': 'not_analyzed'
                                 },
@@ -40,6 +43,33 @@ class Command(BaseCommand):
                                 },
                                 'enrollment_mode': {
                                     'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                                },
+                                'language': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'location': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'year_of_birth': {
+                                    'type': 'integer', 'index': 'not_analyzed'
+                                },
+                                'level_of_education': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'gender': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'mailing_address': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'city': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'country': {
+                                    'type': 'string', 'index': 'not_analyzed'
+                                },
+                                'goals': {
+                                    'type': 'string', 'index': 'not_analyzed'
                                 },
                                 'segments': {
                                     'type': 'string'

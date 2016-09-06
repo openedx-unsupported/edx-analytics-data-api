@@ -85,15 +85,6 @@ USE_TZ = True
 ########## END GENERAL CONFIGURATION
 
 
-########## MEDIA CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = normpath(join(SITE_ROOT, 'media'))
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
-MEDIA_URL = '/media/'
-########## END MEDIA CONFIGURATION
-
-
 ########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = normpath(join(SITE_ROOT, 'assets'))
@@ -177,6 +168,8 @@ MIDDLEWARE_CLASSES = (
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',
     'analytics_data_api.v0.middleware.ParameterValueErrorMiddleware',
+    'analytics_data_api.v0.middleware.ReportFileNotFoundErrorMiddleware',
+    'analytics_data_api.v0.middleware.CannotCreateDownloadLinkErrorMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -204,6 +197,7 @@ THIRD_PARTY_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_countries',
+    'storages'
 )
 
 LOCAL_APPS = (
@@ -305,6 +299,13 @@ ENABLE_ADMIN_SITE = False
 
 # base url to generate link to user api
 LMS_USER_ACCOUNT_BASE_URL = None
+
+# settings for report downloads
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_ROOT = normpath(join(SITE_ROOT, 'static', 'reports'))
+MEDIA_URL = 'http://localhost:8100/static/reports/'
+COURSE_REPORT_FILE_LOCATION_TEMPLATE = '{course_id}_{report_name}.csv'
+ENABLED_REPORT_IDENTIFIERS = ('problem_response',)
 
 ########## END ANALYTICS DATA API CONFIGURATION
 

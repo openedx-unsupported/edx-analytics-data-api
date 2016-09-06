@@ -12,13 +12,14 @@ import urllib
 from django.conf import settings
 from django_dynamic_fixture import G
 import pytz
+from mock import patch, Mock
 
 from analytics_data_api.constants.country import get_country
 from analytics_data_api.v0 import models
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.v0.models import CourseActivityWeekly
 from analytics_data_api.v0.tests.utils import flatten
-from analytics_data_api.v0.tests.views import DemoCourseMixin, DEMO_COURSE_ID
+from analytics_data_api.v0.tests.views import DemoCourseMixin, DEMO_COURSE_ID, SANITIZED_DEMO_COURSE_ID
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -785,3 +786,119 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
     def test_get_404(self):
         response = self._get_data('foo/bar/course')
         self.assertEquals(response.status_code, 404)
+
+
+class CourseReportDownloadViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+
+    path = '/api/v0/courses/{course_id}/reports/{report_name}'
+
+    @patch('django.core.files.storage.default_storage.exists', Mock(return_value=False))
+    def test_report_file_not_found(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='problem_response'
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_report_not_supported(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='fake_problem_that_we_dont_support'
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    @patch('analytics_data_api.utils.default_storage', object())
+    def test_incompatible_storage_provider(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='problem_response'
+            )
+        )
+        self.assertEqual(response.status_code, 501)
+
+    @patch('django.core.files.storage.default_storage.exists', Mock(return_value=True))
+    @patch('django.core.files.storage.default_storage.url', Mock(return_value='http://fake'))
+    @patch(
+        'django.core.files.storage.default_storage.modified_time',
+        Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
+    )
+    @patch('django.core.files.storage.default_storage.size', Mock(return_value=1000))
+    @patch(
+        'analytics_data_api.utils.get_expiration_date',
+        Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
+    )
+    def test_make_working_link(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='problem_response'
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        expected = {
+            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'report_name': 'problem_response',
+            'download_url': 'http://fake',
+            'last_modified': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
+            'expiration_date': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
+            'file_size': 1000
+        }
+        self.assertEqual(response.data, expected)
+
+    @patch('django.core.files.storage.default_storage.exists', Mock(return_value=True))
+    @patch('django.core.files.storage.default_storage.url', Mock(return_value='http://fake'))
+    @patch(
+        'django.core.files.storage.default_storage.modified_time',
+        Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
+    )
+    @patch('django.core.files.storage.default_storage.size', Mock(side_effect=NotImplementedError()))
+    @patch(
+        'analytics_data_api.utils.get_expiration_date',
+        Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
+    )
+    def test_make_working_link_with_missing_size(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='problem_response'
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        expected = {
+            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'report_name': 'problem_response',
+            'download_url': 'http://fake',
+            'last_modified': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
+            'expiration_date': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT)
+        }
+        self.assertEqual(response.data, expected)
+
+    @patch('django.core.files.storage.default_storage.exists', Mock(return_value=True))
+    @patch('django.core.files.storage.default_storage.url', Mock(return_value='http://fake'))
+    @patch('django.core.files.storage.default_storage.modified_time', Mock(side_effect=NotImplementedError()))
+    @patch('django.core.files.storage.default_storage.size', Mock(return_value=1000))
+    @patch(
+        'analytics_data_api.utils.get_expiration_date',
+        Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
+    )
+    def test_make_working_link_with_missing_last_modified_date(self):
+        response = self.authenticated_get(
+            self.path.format(
+                course_id=DEMO_COURSE_ID,
+                report_name='problem_response'
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        expected = {
+            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'report_name': 'problem_response',
+            'download_url': 'http://fake',
+            'file_size': 1000,
+            'expiration_date': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT)
+        }
+        self.assertEqual(response.data, expected)

@@ -12,3 +12,4 @@ elasticsearch-dsl==0.0.11           # Apache 2.0
 Markdown==2.6.6    					# BSD
 
 -e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys
+django-storages==1.4.1              # BSD

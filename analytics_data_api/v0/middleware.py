@@ -8,6 +8,8 @@ from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
     ParameterValueError,
+    ReportFileNotFoundError,
+    CannotCreateReportDownloadLinkError,
 )
 
 
@@ -129,3 +131,39 @@ class ParameterValueErrorMiddleware(BaseProcessErrorMiddleware):
     @property
     def status_code(self):
         return status.HTTP_400_BAD_REQUEST
+
+
+class ReportFileNotFoundErrorMiddleware(BaseProcessErrorMiddleware):
+    """
+    Raise 404 if the report file isn't present
+    """
+
+    @property
+    def error(self):
+        return ReportFileNotFoundError
+
+    @property
+    def error_code(self):
+        return 'report_file_not_found'
+
+    @property
+    def status_code(self):
+        return status.HTTP_404_NOT_FOUND
+
+
+class CannotCreateDownloadLinkErrorMiddleware(BaseProcessErrorMiddleware):
+    """
+    Raise 501 if the filesystem doesn't support creating download links
+    """
+
+    @property
+    def error(self):
+        return CannotCreateReportDownloadLinkError
+
+    @property
+    def error_code(self):
+        return 'cannot_create_report_download_link'
+
+    @property
+    def status_code(self):
+        return status.HTTP_501_NOT_IMPLEMENTED

@@ -14,7 +14,8 @@ COURSE_URLS = [
     ('enrollment/location', views.CourseEnrollmentByLocationView, 'enrollment_by_location'),
     ('problems', views.ProblemsListView, 'problems'),
     ('problems_and_tags', views.ProblemsAndTagsListView, 'problems_and_tags'),
-    ('videos', views.VideosListView, 'videos')
+    ('videos', views.VideosListView, 'videos'),
+    ('reports/(?P<report_name>[a-zA-Z0-9_]+)', views.ReportDownloadView, 'reports'),
 ]
 
 urlpatterns = []

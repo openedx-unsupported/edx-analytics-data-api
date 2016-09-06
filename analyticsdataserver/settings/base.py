@@ -85,15 +85,6 @@ USE_TZ = True
 ########## END GENERAL CONFIGURATION
 
 
-########## MEDIA CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = normpath(join(SITE_ROOT, 'media'))
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#media-url
-MEDIA_URL = '/media/'
-########## END MEDIA CONFIGURATION
-
-
 ########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = normpath(join(SITE_ROOT, 'assets'))
@@ -309,11 +300,12 @@ ENABLE_ADMIN_SITE = False
 # base url to generate link to user api
 LMS_USER_ACCOUNT_BASE_URL = None
 
-# storage settings for report downloads
+# settings for report downloads
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-MEDIA_ROOT = '/edx/app/analytics_api/analytics_api/static/reports'
+MEDIA_ROOT = normpath(join(SITE_ROOT, 'static', 'reports'))
 MEDIA_URL = 'http://localhost:8100/static/reports/'
 COURSE_REPORT_FILE_LOCATION_TEMPLATE = '{course_id}_{report_name}.csv'
+ENABLED_REPORT_IDENTIFIERS = ('problem_response',)
 
 ########## END ANALYTICS DATA API CONFIGURATION
 

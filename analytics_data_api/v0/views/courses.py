@@ -799,9 +799,7 @@ class ReportDownloadView(APIView):
             * expiration_date: The date through which the link will be valid
             * file_size: The size in bytes of the CSV download
     """
-    enabled_reports = (
-        'problem_response'
-    )
+    enabled_reports = settings.ENABLED_REPORT_IDENTIFIERS
 
     def get(self, _request, course_id, report_name):
         if report_name in self.enabled_reports:

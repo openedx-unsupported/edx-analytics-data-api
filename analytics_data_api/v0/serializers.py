@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from analytics_data_api.constants import (
     engagement_events,
     enrollment_modes,
-    learner,
 )
 from analytics_data_api.v0 import models
 
@@ -409,8 +408,8 @@ class EdxPaginationSerializer(pagination.PageNumberPagination):
     Adds values to the response according to edX REST API Conventions.
     """
     page_size_query_param = 'page_size'
-    page_size = learner.LEARNER_API_DEFAULT_LIST_PAGE_SIZE
-    max_page_size = 100  # TODO -- tweak during load testing
+    page_size = getattr(settings, 'DEFAULT_PAGE_SIZE', 25)
+    max_page_size = getattr(settings, 'MAX_PAGE_SIZE', 100)  # TODO -- tweak during load testing
 
     def get_paginated_response(self, data):
         # The output is more readable with num_pages included not at the end, but

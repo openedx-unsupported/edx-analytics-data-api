@@ -19,10 +19,15 @@ from django.core import management
 from analyticsdataserver.tests import TestCaseWithAuthentication
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
-from analytics_data_api.v0.tests.views import DemoCourseMixin, VerifyCourseIdMixin
+from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
+from analytics_data_api.v0.tests.views import (
+    DemoCourseMixin, VerifyCourseIdMixin, VerifyCsvResponseMixin,
+)
 
 
-class LearnerAPITestMixin(object):
+class LearnerAPITestMixin(CsvViewMixin):
+    filename_slug = 'learners'
+
     """Manages an elasticsearch index for testing the learner API."""
     def setUp(self):
         """Creates the index and defines a mapping."""
@@ -122,6 +127,20 @@ class LearnerAPITestMixin(object):
             }
         )
         self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX)
+
+    def expected_page_url(self, course_id, page, page_size):
+        """
+        Returns a paginated URL for the given parameters.
+        As with PageNumberPagination, if page=1, it's omitted from the query string.
+        """
+        if page is None:
+            return None
+        course_q = urlencode({'course_id': course_id})
+        page_q = '&page={}'.format(page) if page and page > 1 else ''
+        page_size_q = '&page_size={}'.format(page_size) if page_size > 0 else ''
+        return 'http://testserver/api/v0/learners/?{course_q}{page_q}{page_size_q}'.format(
+            course_q=course_q, page_q=page_q, page_size_q=page_size_q,
+        )
 
 
 @ddt.ddt
@@ -427,8 +446,6 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
 
     def test_pagination(self):
         usernames = ['a', 'b', 'c', 'd', 'e']
-        expected_page_url_template = 'http://testserver/api/v0/learners/?' \
-            '{course_query}&page={page}&page_size={page_size}'
         self.create_learners([{'username': username, 'course_id': self.course_id} for username in usernames])
 
         response = self._get(self.course_id, page_size=2)
@@ -437,9 +454,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
             {
                 'count': len(usernames),
                 'previous': None,
-                'next': expected_page_url_template.format(
-                    course_query=urlencode({'course_id': self.course_id}), page=2, page_size=2
-                ),
+                'next': self.expected_page_url(self.course_id, page=2, page_size=2),
                 'num_pages': 3
             },
             payload
@@ -451,9 +466,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         self.assertDictContainsSubset(
             {
                 'count': len(usernames),
-                'previous': expected_page_url_template.format(
-                    course_query=urlencode({'course_id': self.course_id}), page=2, page_size=2
-                ),
+                'previous': self.expected_page_url(self.course_id, page=2, page_size=2),
                 'next': None,
                 'num_pages': 3
             },
@@ -469,20 +482,163 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         ({'course_id': 'edX/DemoX/Demo_Course', 'segments': 'a', 'ignore_segments': 'b'}, 'illegal_parameter_values'),
         ({'course_id': 'edX/DemoX/Demo_Course', 'order_by': 'a_non_existent_field'}, 'illegal_parameter_values'),
         ({'course_id': 'edX/DemoX/Demo_Course', 'sort_order': 'bad_value'}, 'illegal_parameter_values'),
-        ({'course_id': 'edX/DemoX/Demo_Course', 'page': -1}, 'illegal_parameter_values'),
-        ({'course_id': 'edX/DemoX/Demo_Course', 'page': 0}, 'illegal_parameter_values'),
-        ({'course_id': 'edX/DemoX/Demo_Course', 'page': 'bad_value'}, 'illegal_parameter_values'),
-        ({'course_id': 'edX/DemoX/Demo_Course', 'page_size': 'bad_value'}, 'illegal_parameter_values'),
-        ({'course_id': 'edX/DemoX/Demo_Course', 'page_size': 101}, 'illegal_parameter_values'),
+        ({'course_id': 'edX/DemoX/Demo_Course', 'page': -1}, 'Invalid page.', 404),
+        ({'course_id': 'edX/DemoX/Demo_Course', 'page': 0}, 'Invalid page.', 404),
+        ({'course_id': 'edX/DemoX/Demo_Course', 'page': 'bad_value'}, 'Invalid page.', 404),
         ({'course_id': 'edX/DemoX/Demo_Course', 'segments': 'a_non_existent_segment'}, 'illegal_parameter_values'),
         ({'course_id': 'edX/DemoX/Demo_Course', 'ignore_segments': 'a_non_existent_segment'},
          'illegal_parameter_values'),
     )
     @ddt.unpack
-    def test_bad_request(self, parameters, expected_error_code):
+    def test_bad_request(self, parameters, expected_error_code, expected_status_code=400):
         response = self.authenticated_get('/api/v0/learners/', parameters)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(json.loads(response.content)['error_code'], expected_error_code)
+        self.assertEqual(response.status_code, expected_status_code)
+        response_json = json.loads(response.content)
+        self.assertEqual(response_json.get('error_code', response_json.get('detail')), expected_error_code)
+
+
+@ddt.ddt
+class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
+                          VerifyCsvResponseMixin, TestCaseWithAuthentication):
+    """Tests for the learner list CSV endpoint."""
+    def setUp(self):
+        super(LearnerCsvListTests, self).setUp()
+        self.course_id = 'edX/DemoX/Demo_Course'
+        self.create_update_index('2015-09-28')
+        self.path = '/api/v0/learners/'
+
+    def test_empty_csv(self):
+        """ Verify the endpoint returns data that has been properly converted to CSV. """
+        response = self.authenticated_get(
+            self.path,
+            dict(course_id=self.course_id),
+            True,
+            HTTP_ACCEPT='text/csv'
+        )
+        self.assertCsvResponseIsValid(response, self.get_csv_filename(), [], {'Link': None})
+
+    def test_csv_pagination(self):
+        """ Verify the endpoint returns properly paginated CSV data"""
+
+        # Create learners, using a cohort name with a comma, to test escaping.
+        usernames = ['victor', 'olga', 'gabe', ]
+        commaCohort = 'Lions, Tigers, & Bears'
+        self.create_learners([{'username': username, 'course_id': self.course_id, 'cohort': commaCohort}
+                              for username in usernames])
+
+        # Set last_updated index date
+        last_updated = '2015-09-28'
+        self.create_update_index(last_updated)
+
+        # Render CSV with one learner per page
+        page_size = 1
+        prev_page = None
+
+        for idx, username in enumerate(sorted(usernames)):
+            page = idx + 1
+            response = self.authenticated_get(
+                self.path,
+                dict(course_id=self.course_id, page=page, page_size=page_size),
+                True,
+                HTTP_ACCEPT='text/csv'
+            )
+
+            # Construct expected content data
+            expected_data = [{
+                "username": username,
+                "enrollment_mode": 'honor',
+                "name": username,
+                "email": "{}@example.com".format(username),
+                "account_url": "http://lms-host/{}".format(username),
+                "cohort": commaCohort,
+                "engagements.problems_attempted": 0,
+                "engagements.problems_completed": 0,
+                "engagements.videos_viewed": 0,
+                "engagements.discussion_contributions": 0,
+                "engagements.problem_attempts_per_completed": None,
+                "enrollment_date": '2015-01-28',
+                "last_updated": last_updated,
+                "segments": None,
+                "user_id": None,
+                "language": None,
+                "location": None,
+                "year_of_birth": None,
+                "level_of_education": None,
+                "gender": None,
+                "mailing_address": None,
+                "city": None,
+                "country": None,
+                "goals": None,
+            }]
+
+            # Construct expected links header from pagination data
+            prev_url = self.expected_page_url(self.course_id, prev_page, page_size)
+            next_page = page + 1
+            next_url = None
+            if next_page <= len(usernames):
+                next_url = self.expected_page_url(self.course_id, next_page, page_size)
+            expected_links = PaginatedHeadersMixin.get_paginated_links(dict(next=next_url, previous=prev_url))
+
+            self.assertCsvResponseIsValid(response, self.get_csv_filename(), expected_data, {'Link': expected_links})
+            prev_page = page
+
+    @ddt.data(
+        # fields deliberately out of alphabetical order
+        (['username', 'cohort', 'last_updated', 'email'],
+         ['username', 'cohort', 'last_updated', 'email']),
+        # valid fields interpersed with invalid fields
+        (['foo', 'username', 'bar', 'email', 'name', 'baz'],
+         ['username', 'email', 'name']),
+        # list fields are returned concatenated as one field,
+        # and dict fields are listed separately
+        (['segments', 'username', 'engagements.videos_viewed', 'engagements.problems_attempted'],
+         ['segments', 'username', 'engagements.videos_viewed', 'engagements.problems_attempted']),
+        # empty fields list returns all the fields, in alphabetical order.
+        ([],
+         ['account_url',
+          'city',
+          'cohort',
+          'country',
+          'email',
+          'engagements.discussion_contributions',
+          'engagements.problem_attempts_per_completed',
+          'engagements.problems_attempted',
+          'engagements.problems_completed',
+          'engagements.videos_viewed',
+          'enrollment_date',
+          'enrollment_mode',
+          'gender',
+          'goals',
+          'language',
+          'last_updated',
+          'level_of_education',
+          'location',
+          'mailing_address',
+          'name',
+          'segments',
+          'user_id',
+          'username',
+          'year_of_birth']),
+    )
+    @ddt.unpack
+    def test_csv_fields(self, fields, valid_fields):
+
+        # Create learners, using a cohort name with a comma, to test escaping.
+        usernames = ['victor', 'olga', 'gabe', ]
+        commaCohort = 'Lions, Tigers, & Bears'
+        self.create_learners([{'username': username, 'course_id': self.course_id, 'cohort': commaCohort}
+                              for username in usernames])
+
+        # Render CSV with given fields list
+        response = self.authenticated_get(
+            self.path,
+            dict(course_id=self.course_id, fields=','.join(fields)),
+            True,
+            HTTP_ACCEPT='text/csv'
+        )
+
+        # Check that response contains the valid fields, in the expected order
+        self.assertResponseFields(response, valid_fields)
 
 
 @ddt.ddt

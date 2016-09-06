@@ -3,8 +3,6 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-import StringIO
-import csv
 import datetime
 from itertools import groupby
 import urllib
@@ -18,8 +16,9 @@ from analytics_data_api.constants.country import get_country
 from analytics_data_api.v0 import models
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.v0.models import CourseActivityWeekly
-from analytics_data_api.v0.tests.utils import flatten
-from analytics_data_api.v0.tests.views import DemoCourseMixin, DEMO_COURSE_ID, SANITIZED_DEMO_COURSE_ID
+from analytics_data_api.v0.tests.views import (
+    DemoCourseMixin, VerifyCsvResponseMixin, DEMO_COURSE_ID, SANITIZED_DEMO_COURSE_ID,
+)
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -38,7 +37,7 @@ class DefaultFillTestMixin(object):
 
 
 # pylint: disable=no-member
-class CourseViewTestCaseMixin(DemoCourseMixin):
+class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
     model = None
     api_root_path = '/api/v0/'
     path = None
@@ -66,7 +65,8 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
         """
         raise NotImplementedError
 
-    def get_csv_filename(self):
+    @property
+    def csv_filename(self):
         return u'edX-DemoX-Demo_2014--{0}.csv'.format(self.csv_filename_slug)
 
     def test_get_not_found(self):
@@ -93,28 +93,12 @@ class CourseViewTestCaseMixin(DemoCourseMixin):
         csv_content_type = 'text/csv'
         response = self.authenticated_get(path, HTTP_ACCEPT=csv_content_type)
 
-        # Validate the basic response status, content type, and filename
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response['Content-Type'].split(';')[0], csv_content_type)
-        self.assertEquals(response['Content-Disposition'], u'attachment; filename={}'.format(filename))
-
-        # Validate the actual data
         data = self.format_as_response(*self.get_latest_data(course_id=course_id))
-        data = map(flatten, data)
-
-        # The CSV renderer sorts the headers alphabetically
-        fieldnames = sorted(data[0].keys())
-
-        # Generate the expected CSV output
-        expected = StringIO.StringIO()
-        writer = csv.DictWriter(expected, fieldnames)
-        writer.writeheader()
-        writer.writerows(data)
-        self.assertEqual(response.content, expected.getvalue())
+        self.assertCsvResponseIsValid(response, filename, data)
 
     def test_get_csv(self):
         """ Verify the endpoint returns data that has been properly converted to CSV. """
-        self.assertCSVIsValid(self.course_id, self.get_csv_filename())
+        self.assertCSVIsValid(self.course_id, self.csv_filename)
 
     def test_get_csv_with_deprecated_key(self):
         """

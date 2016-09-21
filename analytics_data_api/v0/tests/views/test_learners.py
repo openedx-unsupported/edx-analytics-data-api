@@ -10,7 +10,6 @@ import ddt
 from django_dynamic_fixture import G
 from elasticsearch import Elasticsearch
 from mock import patch, Mock
-import pytz
 from rest_framework import status
 
 from django.conf import settings
@@ -784,8 +783,8 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
 
     def test_one_engagement_range(self):
         metric_type = 'problems_completed'
-        start_date = datetime.datetime(2015, 7, 1, tzinfo=pytz.utc)
-        end_date = datetime.datetime(2015, 7, 21, tzinfo=pytz.utc)
+        start_date = datetime.date(2015, 7, 1)
+        end_date = datetime.date(2015, 7, 21)
         G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
           metric=metric_type, range_type='normal', low_value=90, high_value=6120)
         expected_ranges = self.empty_engagement_ranges
@@ -807,8 +806,8 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
 
     def _get_full_engagement_ranges(self):
         """ Populates a full set of engagement ranges and returns the expected engagement ranges. """
-        start_date = datetime.datetime(2015, 7, 1, tzinfo=pytz.utc)
-        end_date = datetime.datetime(2015, 7, 21, tzinfo=pytz.utc)
+        start_date = datetime.date(2015, 7, 1)
+        end_date = datetime.date(2015, 7, 21)
 
         expected = {
             'engagement_ranges': {

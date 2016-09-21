@@ -447,8 +447,8 @@ class EngagementDaySerializer(serializers.Serializer):
 
 # pylint: disable=abstract-method
 class DateRangeSerializer(serializers.Serializer):
-    start = serializers.DateTimeField(source='start_date', format=settings.DATE_FORMAT)
-    end = serializers.DateTimeField(source='end_date', format=settings.DATE_FORMAT)
+    start = serializers.DateField(source='start_date', format=settings.DATE_FORMAT)
+    end = serializers.DateField(source='end_date', format=settings.DATE_FORMAT)
 
 
 # pylint: disable=abstract-method

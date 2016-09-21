@@ -495,9 +495,9 @@ class ModuleEngagementMetricRanges(models.Model):
     """
 
     course_id = models.CharField(db_index=True, max_length=255)
-    start_date = models.DateTimeField()
+    start_date = models.DateField()
     # This is a left-closed interval. No data from the end_date is included in the analysis.
-    end_date = models.DateTimeField()
+    end_date = models.DateField()
     metric = models.CharField(max_length=50)
     range_type = models.CharField(max_length=50)
     # Also a left-closed interval, so any metric whose value is equal to the high_value

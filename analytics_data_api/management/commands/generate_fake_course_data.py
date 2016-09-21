@@ -270,5 +270,5 @@ class Command(BaseCommand):
         self.generate_video_data(course_id, video_id, video_module_id)
         self.generate_video_timeline_data(video_id)
         self.generate_learner_engagement_data(course_id, username, start_date, end_date)
-        self.generate_learner_engagement_range_data(course_id, start_date, end_date)
+        self.generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date())
         self.generate_tags_distribution_data(course_id)

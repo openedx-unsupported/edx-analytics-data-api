@@ -165,9 +165,9 @@ class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
         course_id = course_id or self.course_id
         interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
         interval_end = interval_start + datetime.timedelta(weeks=1)
-        # G(models.CourseActivityWeekly, course_id=course_id, interval_start=interval_start,
-        # interval_end=interval_end,
-        # activity_type='POSTED_FORUM', count=100)
+        G(models.CourseActivityWeekly, course_id=course_id, interval_start=interval_start,
+        interval_end=interval_end,
+        activity_type='POSTED_FORUM', count=100)
         G(models.CourseActivityWeekly, course_id=course_id, interval_start=interval_start,
           interval_end=interval_end,
           activity_type='ATTEMPTED_PROBLEM', count=200)

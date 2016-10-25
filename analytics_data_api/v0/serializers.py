@@ -300,13 +300,13 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
     any = serializers.IntegerField(required=False)
     attempted_problem = serializers.IntegerField(required=False)
     played_video = serializers.IntegerField(required=False)
-    # posted_forum = serializers.IntegerField(required=False)
+    posted_forum = serializers.IntegerField(required=False)
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
     class Meta(object):
         model = models.CourseActivityWeekly
-        # TODO: Add 'posted_forum' here to restore forum data
-        fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video', 'created')
+        fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video',
+                  'posted_forum', 'created')
 
 
 class VideoSerializer(ModelSerializerWithCreatedField):

@@ -1,10 +1,8 @@
-from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 
 from django.utils import timezone
-from rest_framework.response import Response
-from analytics_data_api.v0.exceptions import (CourseNotSpecifiedError, CourseKeyMalformedError)
-
+from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
+import analytics_data_api.utils as utils
 
 class CourseViewMixin(object):
     """
@@ -18,10 +16,7 @@ class CourseViewMixin(object):
 
         if not self.course_id:
             raise CourseNotSpecifiedError()
-        try:
-            CourseKey.from_string(self.course_id)
-        except InvalidKeyError:
-            raise CourseKeyMalformedError(course_id=self.course_id)
+        utils.validate_course_id(self.course_id)
         return super(CourseViewMixin, self).get(request, *args, **kwargs)
 
 

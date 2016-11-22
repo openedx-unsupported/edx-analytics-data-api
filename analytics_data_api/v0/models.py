@@ -12,21 +12,27 @@ from analytics_data_api.constants.engagement_types import EngagementType
 from analytics_data_api.utils import date_range
 
 
-class CourseActivityWeekly(models.Model):
-    """A count of unique users who performed a particular action during a week."""
+class BaseCourseModel(models.Model):
+    course_id = models.CharField(db_index=True, max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):
+        abstract = True
+
+
+class CourseActivityWeekly(BaseCourseModel):
+    """A count of unique users who performed a particular action during a week."""
+
+    class Meta(BaseCourseModel.Meta):
         db_table = 'course_activity'
         index_together = [['course_id', 'activity_type']]
         ordering = ('interval_end', 'interval_start', 'course_id')
         get_latest_by = 'interval_end'
 
-    course_id = models.CharField(db_index=True, max_length=255)
     interval_start = models.DateTimeField()
     interval_end = models.DateTimeField(db_index=True)
     activity_type = models.CharField(db_index=True, max_length=255, db_column='label')
     count = models.IntegerField()
-    created = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def get_most_recent(cls, course_id, activity_type):
@@ -34,13 +40,11 @@ class CourseActivityWeekly(models.Model):
         return cls.objects.filter(course_id=course_id, activity_type=activity_type).latest('interval_end')
 
 
-class BaseCourseEnrollment(models.Model):
-    course_id = models.CharField(max_length=255)
+class BaseCourseEnrollment(BaseCourseModel):
     date = models.DateField(null=False, db_index=True)
     count = models.IntegerField(null=False)
-    created = models.DateTimeField(auto_now_add=True)
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         abstract = True
         get_latest_by = 'date'
         index_together = [('course_id', 'date',)]
@@ -61,6 +65,23 @@ class CourseEnrollmentModeDaily(BaseCourseEnrollment):
         db_table = 'course_enrollment_mode_daily'
         ordering = ('date', 'course_id', 'mode')
         unique_together = [('course_id', 'date', 'mode')]
+
+
+class CourseMetaSummaryEnrollment(BaseCourseModel):
+    catalog_course_title = models.CharField(db_index=True, max_length=255)
+    catalog_course = models.CharField(db_index=True, max_length=255)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    pacing_type = models.CharField(db_index=True, max_length=255)
+    availability = models.CharField(db_index=True, max_length=255)
+    mode = models.CharField(max_length=255)
+    cumulative_count = models.IntegerField(null=False)
+    count_change_7_days = models.IntegerField(default=0)
+
+    class Meta(BaseCourseModel.Meta):
+        db_table = 'course_meta_summary_enrollment'
+        ordering = ('course_id',)
+        unique_together = [('course_id', 'mode',)]
 
 
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
@@ -103,14 +124,13 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'gender')]
 
 
-class BaseProblemResponseAnswerDistribution(models.Model):
+class BaseProblemResponseAnswerDistribution(BaseCourseModel):
     """ Base model for the answer_distribution table. """
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'answer_distribution'
         abstract = True
 
-    course_id = models.CharField(db_index=True, max_length=255)
     module_id = models.CharField(db_index=True, max_length=255)
     part_id = models.CharField(db_index=True, max_length=255)
     correct = models.NullBooleanField()
@@ -119,7 +139,6 @@ class BaseProblemResponseAnswerDistribution(models.Model):
     variant = models.IntegerField(null=True)
     problem_display_name = models.TextField(null=True)
     question_text = models.TextField(null=True)
-    created = models.DateTimeField(auto_now_add=True)
 
 
 class ProblemResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
@@ -131,19 +150,17 @@ class ProblemResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
     count = models.IntegerField()
 
 
-class ProblemsAndTags(models.Model):
+class ProblemsAndTags(BaseCourseModel):
     """ Model for the tags_distribution table """
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'tags_distribution'
 
-    course_id = models.CharField(db_index=True, max_length=255)
     module_id = models.CharField(db_index=True, max_length=255)
     tag_name = models.CharField(max_length=255)
     tag_value = models.CharField(max_length=255)
     total_submissions = models.IntegerField(default=0)
     correct_submissions = models.IntegerField(default=0)
-    created = models.DateTimeField(auto_now_add=True)
 
 
 class ProblemFirstLastResponseAnswerDistribution(BaseProblemResponseAnswerDistribution):
@@ -172,30 +189,26 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
         unique_together = [('course_id', 'date', 'country_code')]
 
 
-class GradeDistribution(models.Model):
+class GradeDistribution(BaseCourseModel):
     """ Each row stores the count of a particular grade on a module for a given course. """
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'grade_distribution'
 
     module_id = models.CharField(db_index=True, max_length=255)
-    course_id = models.CharField(db_index=True, max_length=255)
     grade = models.IntegerField()
     max_grade = models.IntegerField()
     count = models.IntegerField()
-    created = models.DateTimeField(auto_now_add=True)
 
 
-class SequentialOpenDistribution(models.Model):
+class SequentialOpenDistribution(BaseCourseModel):
     """ Each row stores the count of views a particular module has had in a given course. """
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'sequential_open_distribution'
 
     module_id = models.CharField(db_index=True, max_length=255)
-    course_id = models.CharField(db_index=True, max_length=255)
     count = models.IntegerField()
-    created = models.DateTimeField(auto_now_add=True)
 
 
 class BaseVideo(models.Model):
@@ -465,10 +478,9 @@ class ModuleEngagementTimelineManager(models.Manager):
         return full_timeline
 
 
-class ModuleEngagement(models.Model):
+class ModuleEngagement(BaseCourseModel):
     """User interactions with entities within the courseware."""
 
-    course_id = models.CharField(db_index=True, max_length=255)
     username = models.CharField(max_length=255)
     date = models.DateField()
     # This will be one of "problem", "video" or "discussion"
@@ -483,18 +495,17 @@ class ModuleEngagement(models.Model):
 
     objects = ModuleEngagementTimelineManager()
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'module_engagement'
 
 
-class ModuleEngagementMetricRanges(models.Model):
+class ModuleEngagementMetricRanges(BaseCourseModel):
     """
     Represents the low and high values for a module engagement entity and event
     pair, known as the metric.  The range_type will either be low, normal, or
     high, bounded by low_value and high_value.
     """
 
-    course_id = models.CharField(db_index=True, max_length=255)
     start_date = models.DateField()
     # This is a left-closed interval. No data from the end_date is included in the analysis.
     end_date = models.DateField()
@@ -505,5 +516,5 @@ class ModuleEngagementMetricRanges(models.Model):
     high_value = models.FloatField()
     low_value = models.FloatField()
 
-    class Meta(object):
+    class Meta(BaseCourseModel.Meta):
         db_table = 'module_engagement_metric_ranges'

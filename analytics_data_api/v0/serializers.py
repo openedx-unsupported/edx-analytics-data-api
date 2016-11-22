@@ -507,3 +507,22 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
             })
 
         return engagement_ranges
+
+
+class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField):
+    """
+    Serializer for problems.
+    """
+    course_id = serializers.CharField()
+    catalog_course_title = serializers.CharField()
+    catalog_course = serializers.CharField()
+    start_date = serializers.DateTimeField()
+    end_date = serializers.DateTimeField()
+    pacing_type = serializers.CharField()
+    availability = serializers.CharField()
+    mode = serializers.CharField()
+    cumulative_count = serializers.IntegerField(default=0)
+    count_change_7_days = serializers.IntegerField(default=0)  # TODO: 0 as default?
+
+    class Meta(object):
+        model = models.CourseMetaSummaryEnrollment

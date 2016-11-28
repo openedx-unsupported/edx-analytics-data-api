@@ -13,4 +13,6 @@ ordered-set==2.0.1                  # MIT
 Markdown==2.6.6    					# BSD
 
 -e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys
+# custom opaque-key implementations for ccx
+git+https://github.com/jazkarta/ccx-keys.git@e6b03704b1bb97c1d2f31301ecb4e3a687c536ea#egg=ccx-keys
 django-storages==1.4.1              # BSD

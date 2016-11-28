@@ -20,7 +20,7 @@ from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.tests.views import (
-    DemoCourseMixin, VerifyCourseIdMixin, VerifyCsvResponseMixin,
+    VerifyCourseIdMixin, VerifyCsvResponseMixin,
 )
 
 
@@ -641,11 +641,15 @@ class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
 
 
 @ddt.ddt
-class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
-                                 LearnerAPITestMixin, TestCaseWithAuthentication):
+class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthentication,):
     """
     Tests for the course learner metadata endpoint.
     """
+
+    @classmethod
+    def setUpClass(cls):
+        super(CourseLearnerMetadataTests, cls).setUpClass()
+        cls.course_id = 'edX/DemoX/Demo_Course'
 
     def _get(self, course_id):
         """Helper to send a GET request to the API."""

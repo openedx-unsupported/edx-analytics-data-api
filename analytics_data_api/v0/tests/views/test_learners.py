@@ -34,6 +34,7 @@ class LearnerAPITestMixin(CsvViewMixin):
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         management.call_command('create_elasticsearch_learners_indices')
         # ensure that the index is ready
+        # pylint: disable=unexpected-keyword-arg
         self._es.cluster.health(index=settings.ELASTICSEARCH_LEARNERS_INDEX, wait_for_status='yellow')
         self.addCleanup(lambda: management.call_command('delete_elasticsearch_learners_indices'))
 

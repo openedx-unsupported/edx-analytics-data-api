@@ -521,8 +521,10 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField):
     pacing_type = serializers.CharField()
     availability = serializers.CharField()
     mode = serializers.CharField()
+    count = serializers.IntegerField(default=0)
     cumulative_count = serializers.IntegerField(default=0)
     count_change_7_days = serializers.IntegerField(default=0)  # TODO: 0 as default?
 
     class Meta(object):
         model = models.CourseMetaSummaryEnrollment
+        exclude = ('id',)

@@ -75,6 +75,7 @@ class CourseMetaSummaryEnrollment(BaseCourseModel):
     pacing_type = models.CharField(db_index=True, max_length=255)
     availability = models.CharField(db_index=True, max_length=255)
     mode = models.CharField(max_length=255)
+    count = models.IntegerField(null=False)
     cumulative_count = models.IntegerField(null=False)
     count_change_7_days = models.IntegerField(default=0)
 

@@ -16,7 +16,7 @@ from mock import patch, Mock
 
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
-from analytics_data_api.v0 import models
+from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
 from analytics_data_api.utils import get_filename_safe_course_id
 from analyticsdataserver.tests import TestCaseWithAuthentication
@@ -889,3 +889,31 @@ class CourseReportDownloadViewTests(TestCaseWithAuthentication):
             'expiration_date': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT)
         }
         self.assertEqual(response.data, expected)
+
+
+class CourseSummariesViewTests(TestCaseWithAuthentication):
+    model = models.CourseMetaSummaryEnrollment
+    serializer = serializers.CourseMetaSummaryEnrollmentSerializer
+    path = '/course_summaries'
+    expected_summaries = []
+    fake_course_ids = ['edX/DemoX/Demo_Course', 'edX/DemoX/2', 'edX/DemoX/3', 'edX/DemoX/4']
+    #  csv_filename_slug = u'course_summaries'
+
+    def setUp(self):
+        super(CourseSummariesViewTests, self).setUp()
+        self.generate_data()
+
+    def generate_data(self):
+        for course_id in self.fake_course_ids:
+            self.expected_summaries.append(self.serializer(
+                G(self.model, course_id=course_id, count=10, cumulative_count=15)).data)
+
+    def test_get(self):
+        response = self.authenticated_get(u'/api/v0/course_summaries/?course_ids=%s' % ','.join(self.fake_course_ids))
+        self.assertEquals(response.status_code, 200)
+        self.assertItemsEqual(response.data, self.expected_summaries)
+
+    def test_no_summaries(self):
+        self.model.objects.all().delete()
+        response = self.authenticated_get(u'/api/v0/course_summaries/?course_ids=%s' % ','.join(self.fake_course_ids))
+        self.assertEquals(response.status_code, 404)

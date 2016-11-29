@@ -1,2 +1,3 @@
 # Local development dependencies go here
 -r base.txt
+tqdm==4.10.0                        # MIT

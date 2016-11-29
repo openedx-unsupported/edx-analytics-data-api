@@ -33,6 +33,8 @@ class LearnerAPITestMixin(CsvViewMixin):
         super(LearnerAPITestMixin, self).setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         management.call_command('create_elasticsearch_learners_indices')
+        # ensure that the index is ready
+        self._es.cluster.health(index=settings.ELASTICSEARCH_LEARNERS_INDEX, wait_for_status='yellow')
         self.addCleanup(lambda: management.call_command('delete_elasticsearch_learners_indices'))
 
     def _create_learner(

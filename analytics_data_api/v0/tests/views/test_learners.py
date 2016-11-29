@@ -745,8 +745,8 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
 
     @ddt.data(
         (CourseSamples.course_ids[0], []),
-        (CourseSamples.course_ids[0], ['Yellow']),
-        (CourseSamples.course_ids[0], ['Blue']),
+        (CourseSamples.course_ids[1], ['Yellow']),
+        (CourseSamples.course_ids[2], ['Blue']),
         (CourseSamples.course_ids[0], ['Red', 'Red', 'yellow team', 'yellow team', 'green']),
     )
     @ddt.unpack

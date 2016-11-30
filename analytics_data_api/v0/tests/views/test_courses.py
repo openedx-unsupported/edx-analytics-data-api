@@ -7,21 +7,22 @@ import datetime
 from itertools import groupby
 import urllib
 
+import ddt
 from django.conf import settings
 from django_dynamic_fixture import G
 import pytz
+from opaque_keys.edx.keys import CourseKey
 from mock import patch, Mock
 
+from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
 from analytics_data_api.v0 import models
-from analytics_data_api.constants import country, enrollment_modes, genders
-from analytics_data_api.v0.models import CourseActivityWeekly
-from analytics_data_api.v0.tests.views import (
-    DemoCourseMixin, VerifyCsvResponseMixin, DEMO_COURSE_ID, SANITIZED_DEMO_COURSE_ID,
-)
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
+from analytics_data_api.utils import get_filename_safe_course_id
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
+@ddt.ddt
 class DefaultFillTestMixin(object):
     """
     Test that the view fills in missing data with a default value.
@@ -32,19 +33,21 @@ class DefaultFillTestMixin(object):
     def destroy_data(self):
         self.model.objects.all().delete()
 
-    def test_default_fill(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_default_fill(self, course_id):
         raise NotImplementedError
 
 
 # pylint: disable=no-member
-class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
+@ddt.ddt
+class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
     model = None
     api_root_path = '/api/v0/'
     path = None
     order_by = []
     csv_filename_slug = None
 
-    def generate_data(self, course_id=None):
+    def generate_data(self, course_id):
         raise NotImplementedError
 
     def format_as_response(self, *args):
@@ -56,7 +59,7 @@ class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
         """
         raise NotImplementedError
 
-    def get_latest_data(self, course_id=None):
+    def get_latest_data(self, course_id):
         """
         Return the latest row/rows that would be returned if a user made a call
         to the endpoint with no date filtering.
@@ -65,9 +68,10 @@ class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
         """
         raise NotImplementedError
 
-    @property
-    def csv_filename(self):
-        return u'edX-DemoX-Demo_2014--{0}.csv'.format(self.csv_filename_slug)
+    def csv_filename(self, course_id):
+        course_key = CourseKey.from_string(course_id)
+        safe_course_id = u'-'.join([course_key.org, course_key.course, course_key.run])
+        return u'{0}--{1}.csv'.format(safe_course_id, self.csv_filename_slug)
 
     def test_get_not_found(self):
         """ Requests made against non-existent courses should return a 404 """
@@ -75,62 +79,58 @@ class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
         response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
         self.assertEquals(response.status_code, 404)
 
-    def assertViewReturnsExpectedData(self, expected):
+    def assertViewReturnsExpectedData(self, expected, course_id):
         # Validate the basic response status
-        response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, self.course_id, self.path))
+        response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
         self.assertEquals(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
         self.assertEquals(response.data, expected)
 
-    def test_get(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
         """ Verify the endpoint returns an HTTP 200 status and the correct data. """
-        expected = self.format_as_response(*self.get_latest_data())
-        self.assertViewReturnsExpectedData(expected)
+        self.generate_data(course_id)
+        expected = self.format_as_response(*self.get_latest_data(course_id))
+        self.assertViewReturnsExpectedData(expected, course_id)
 
     def assertCSVIsValid(self, course_id, filename):
         path = u'{0}courses/{1}{2}'.format(self.api_root_path, course_id, self.path)
         csv_content_type = 'text/csv'
         response = self.authenticated_get(path, HTTP_ACCEPT=csv_content_type)
 
-        data = self.format_as_response(*self.get_latest_data(course_id=course_id))
+        data = self.format_as_response(*self.get_latest_data(course_id))
         self.assertCsvResponseIsValid(response, filename, data)
 
-    def test_get_csv(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get_csv(self, course_id):
         """ Verify the endpoint returns data that has been properly converted to CSV. """
-        self.assertCSVIsValid(self.course_id, self.csv_filename)
-
-    def test_get_csv_with_deprecated_key(self):
-        """
-        Verify the endpoint returns data that has been properly converted to CSV even if the course ID is deprecated.
-        """
-        course_id = u'edX/DemoX/Demo_Course'
         self.generate_data(course_id)
-        filename = u'{0}--{1}.csv'.format(u'edX-DemoX-Demo_Course', self.csv_filename_slug)
-        self.assertCSVIsValid(course_id, filename)
+        self.assertCSVIsValid(course_id, self.csv_filename(course_id))
 
-    def test_get_with_intervals(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get_with_intervals(self, course_id):
         """ Verify the endpoint returns multiple data points when supplied with an interval of dates. """
         raise NotImplementedError
 
-    def assertIntervalFilteringWorks(self, expected_response, start_date, end_date):
+    def assertIntervalFilteringWorks(self, expected_response, course_id, start_date, end_date):
         # If start date is after date of existing data, return a 404
         date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
-            '%scourses/%s%s?start_date=%s' % (self.api_root_path, self.course_id, self.path, date))
+            '%scourses/%s%s?start_date=%s' % (self.api_root_path, course_id, self.path, date))
         self.assertEquals(response.status_code, 404)
 
         # If end date is before date of existing data, return a 404
         date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
-            '%scourses/%s%s?end_date=%s' % (self.api_root_path, self.course_id, self.path, date))
+            '%scourses/%s%s?end_date=%s' % (self.api_root_path, course_id, self.path, date))
         self.assertEquals(response.status_code, 404)
 
         # If data falls in date range, data should be returned
         start = start_date.strftime(settings.DATETIME_FORMAT)
         end = end_date.strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
-            self.api_root_path, self.course_id, self.path, start, end))
+            self.api_root_path, course_id, self.path, start, end))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
@@ -138,31 +138,34 @@ class CourseViewTestCaseMixin(DemoCourseMixin, VerifyCsvResponseMixin):
         start = start_date.strftime(settings.DATE_FORMAT)
         end = end_date.strftime(settings.DATE_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
-            self.api_root_path, self.course_id, self.path, start, end))
+            self.api_root_path, course_id, self.path, start, end))
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
 
 # pylint: disable=abstract-method
+@ddt.ddt
 class CourseEnrollmentViewTestCaseMixin(CourseViewTestCaseMixin):
     date = None
 
-    def setUp(self):
-        super(CourseEnrollmentViewTestCaseMixin, self).setUp()
-        self.date = datetime.date(2014, 1, 1)
+    @classmethod
+    def setUpClass(cls):
+        super(CourseEnrollmentViewTestCaseMixin, cls).setUpClass()
+        cls.date = datetime.date(2014, 1, 1)
 
-    def get_latest_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def get_latest_data(self, course_id):
         return self.model.objects.filter(course_id=course_id, date=self.date).order_by('date', *self.order_by)
 
-    def test_get_with_intervals(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get_with_intervals(self, course_id):
+        self.generate_data(course_id)
         expected = self.format_as_response(*self.model.objects.filter(date=self.date))
-        self.assertIntervalFilteringWorks(expected, self.date, self.date + datetime.timedelta(days=1))
+        self.assertIntervalFilteringWorks(expected, course_id, self.date, self.date + datetime.timedelta(days=1))
 
 
-class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+@ddt.ddt
+class CourseActivityLastWeekTest(TestCaseWithAuthentication):
+    def generate_data(self, course_id):
         interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
         interval_end = interval_start + datetime.timedelta(weeks=1)
         G(models.CourseActivityWeekly, course_id=course_id, interval_start=interval_start,
@@ -177,26 +180,25 @@ class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
           interval_end=interval_end,
           activity_type='PLAYED_VIDEO', count=400)
 
-    def setUp(self):
-        super(CourseActivityLastWeekTest, self).setUp()
-        self.generate_data()
-
-    def test_activity(self):
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format(self.course_id))
+    @ddt.data(*CourseSamples.course_ids)
+    def test_activity(self, course_id):
+        self.generate_data(course_id)
+        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format(course_id))
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record())
+        self.assertEquals(response.data, self.get_activity_record(course_id=course_id))
 
-    def assertValidActivityResponse(self, activity_type, count):
+    def assertValidActivityResponse(self, course_id, activity_type, count):
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
-            self.course_id, activity_type))
+            course_id, activity_type))
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=count))
+        self.assertEquals(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
+                                                                  count=count))
 
     @staticmethod
     def get_activity_record(**kwargs):
         datetime_format = "%Y-%m-%dT%H:%M:%SZ"
         default = {
-            'course_id': DEMO_COURSE_ID,
+            'course_id': kwargs['course_id'],
             'interval_start': datetime.datetime(2014, 1, 1, 0, 0, tzinfo=pytz.utc).strftime(datetime_format),
             'interval_end': datetime.datetime(2014, 1, 8, 0, 0, tzinfo=pytz.utc).strftime(datetime_format),
             'activity_type': 'any',
@@ -206,27 +208,37 @@ class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
         default['activity_type'] = default['activity_type'].lower()
         return default
 
-    def test_activity_auth(self):
-        response = self.client.get(u'/api/v0/courses/{0}/recent_activity'.format(self.course_id), follow=True)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_activity_auth(self, course_id):
+        self.generate_data(course_id)
+        response = self.client.get(u'/api/v0/courses/{0}/recent_activity'.format(course_id), follow=True)
         self.assertEquals(response.status_code, 401)
 
-    def test_url_encoded_course_id(self):
-        url_encoded_course_id = urllib.quote_plus(self.course_id)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_url_encoded_course_id(self, course_id):
+        self.generate_data(course_id)
+        url_encoded_course_id = urllib.quote_plus(course_id)
         response = self.authenticated_get(u'/api/v0/courses/{}/recent_activity'.format(url_encoded_course_id))
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record())
+        self.assertEquals(response.data, self.get_activity_record(course_id=course_id))
 
-    def test_any_activity(self):
-        self.assertValidActivityResponse('ANY', 300)
-        self.assertValidActivityResponse('any', 300)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_any_activity(self, course_id):
+        self.generate_data(course_id)
+        self.assertValidActivityResponse(course_id, 'ANY', 300)
+        self.assertValidActivityResponse(course_id, 'any', 300)
 
-    def test_video_activity(self):
-        self.assertValidActivityResponse('played_video', 400)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_video_activity(self, course_id):
+        self.generate_data(course_id)
+        self.assertValidActivityResponse(course_id, 'played_video', 400)
 
-    def test_unknown_activity(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_unknown_activity(self, course_id):
+        self.generate_data(course_id)
         activity_type = 'missing_activity_type'
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
-            self.course_id, activity_type))
+            course_id, activity_type))
         self.assertEquals(response.status_code, 404)
 
     def test_unknown_course_id(self):
@@ -237,38 +249,39 @@ class CourseActivityLastWeekTest(DemoCourseMixin, TestCaseWithAuthentication):
         response = self.authenticated_get(u'/api/v0/courses/recent_activity')
         self.assertEquals(response.status_code, 404)
 
-    def test_label_parameter(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_label_parameter(self, course_id):
+        self.generate_data(course_id)
         activity_type = 'played_video'
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?label={1}'.format(
-            self.course_id, activity_type))
+            course_id, activity_type))
         self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(activity_type=activity_type, count=400))
+        self.assertEquals(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
+                                                                  count=400))
 
 
+@ddt.ddt
 class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/enrollment/birth_year'
     model = models.CourseEnrollmentByBirthYear
     order_by = ['birth_year']
     csv_filename_slug = u'enrollment-age'
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, birth_year=1956)
         G(self.model, course_id=course_id, date=self.date, birth_year=1986)
         G(self.model, course_id=course_id, date=self.date - datetime.timedelta(days=10), birth_year=1956)
         G(self.model, course_id=course_id, date=self.date - datetime.timedelta(days=10), birth_year=1986)
-
-    def setUp(self):
-        super(CourseEnrollmentByBirthYearViewTests, self).setUp()
-        self.generate_data()
 
     def format_as_response(self, *args):
         return [
             {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
              'birth_year': ce.birth_year, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
 
-    def test_get(self):
-        response = self.authenticated_get('/api/v0/courses/%s%s' % (self.course_id, self.path,))
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
+        self.generate_data(course_id)
+        response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path,))
         self.assertEquals(response.status_code, 200)
 
         expected = self.format_as_response(*self.model.objects.filter(date=self.date))
@@ -281,17 +294,16 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
     order_by = ['education_level']
     csv_filename_slug = u'enrollment-education'
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, education_level=self.el1)
         G(self.model, course_id=course_id, date=self.date, education_level=self.el2)
         G(self.model, course_id=course_id, date=self.date - datetime.timedelta(days=2), education_level=self.el2)
 
-    def setUp(self):
-        super(CourseEnrollmentByEducationViewTests, self).setUp()
-        self.el1 = 'doctorate'
-        self.el2 = 'top_secret'
-        self.generate_data()
+    @classmethod
+    def setUpClass(cls):
+        super(CourseEnrollmentByEducationViewTests, cls).setUpClass()
+        cls.el1 = 'doctorate'
+        cls.el2 = 'top_secret'
 
     def format_as_response(self, *args):
         return [
@@ -300,6 +312,7 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
             ce in args]
 
 
+@ddt.ddt
 class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
                                         TestCaseWithAuthentication):
     path = '/enrollment/gender/'
@@ -307,8 +320,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
     order_by = ['gender']
     csv_filename_slug = u'enrollment-gender'
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def generate_data(self, course_id):
         _genders = ['f', 'm', 'o', None]
         days = 2
 
@@ -319,10 +331,6 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
                   date=self.date - datetime.timedelta(days=day),
                   gender=gender,
                   count=100 + day)
-
-    def setUp(self):
-        super(CourseEnrollmentByGenderViewTests, self).setUp()
-        self.generate_data()
 
     def tearDown(self):
         self.destroy_data()
@@ -350,11 +358,10 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
 
         return response
 
-    def test_default_fill(self):
-        self.destroy_data()
-
+    @ddt.data(*CourseSamples.course_ids)
+    def test_default_fill(self, course_id):
         # Create a single entry for a single gender
-        enrollment = G(self.model, course_id=self.course_id, date=self.date, gender='f', count=1)
+        enrollment = G(self.model, course_id=course_id, date=self.date, gender='f', count=1)
 
         # Create the expected data
         _genders = list(genders.ALL)
@@ -365,7 +372,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
         for gender in _genders:
             expected[gender] = 0
 
-        self.assertViewReturnsExpectedData([expected])
+        self.assertViewReturnsExpectedData([expected], course_id)
 
 
 class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
@@ -373,14 +380,9 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
     path = '/enrollment'
     csv_filename_slug = u'enrollment'
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, count=203)
         G(self.model, course_id=course_id, date=self.date - datetime.timedelta(days=5), count=203)
-
-    def setUp(self):
-        super(CourseEnrollmentViewTests, self).setUp()
-        self.generate_data()
 
     def format_as_response(self, *args):
         return [
@@ -389,19 +391,14 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
             for ce in args]
 
 
+@ddt.ddt
 class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
                                     TestCaseWithAuthentication):
     model = models.CourseEnrollmentModeDaily
     path = '/enrollment/mode'
     csv_filename_slug = u'enrollment_mode'
 
-    def setUp(self):
-        super(CourseEnrollmentModeViewTests, self).setUp()
-        self.generate_data()
-
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
-
+    def generate_data(self, course_id):
         for mode in enrollment_modes.ALL:
             G(self.model, course_id=course_id, date=self.date, mode=mode)
 
@@ -432,11 +429,12 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
 
         return [response]
 
-    def test_default_fill(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_default_fill(self, course_id):
         self.destroy_data()
 
         # Create a single entry for a single enrollment mode
-        enrollment = G(self.model, course_id=self.course_id, date=self.date, mode=enrollment_modes.AUDIT,
+        enrollment = G(self.model, course_id=course_id, date=self.date, mode=enrollment_modes.AUDIT,
                        count=1, cumulative_count=100)
 
         # Create the expected data
@@ -451,7 +449,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         expected[u'count'] = 1
         expected[u'cumulative_count'] = 100
 
-        self.assertViewReturnsExpectedData([expected])
+        self.assertViewReturnsExpectedData([expected], course_id)
 
 
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
@@ -482,8 +480,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
         return response
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def generate_data(self, course_id):
         G(self.model, course_id=course_id, country_code='US', count=455, date=self.date)
         G(self.model, course_id=course_id, country_code='CA', count=356, date=self.date)
         G(self.model, course_id=course_id, country_code='IN', count=12, date=self.date - datetime.timedelta(days=29))
@@ -494,40 +491,37 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
         G(self.model, course_id=course_id, country_code='EU', count=4, date=self.date)
         G(self.model, course_id=course_id, country_code='O1', count=7, date=self.date)
 
-    def setUp(self):
-        super(CourseEnrollmentByLocationViewTests, self).setUp()
-        self.country = get_country('US')
-        self.generate_data()
+    @classmethod
+    def setUpClass(cls):
+        super(CourseEnrollmentByLocationViewTests, cls).setUpClass()
+        cls.country = get_country('US')
 
 
+@ddt.ddt
 class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/activity/'
     default_order_by = 'interval_end'
-    model = CourseActivityWeekly
+    model = models.CourseActivityWeekly
     # activity_types = ['ACTIVE', 'ATTEMPTED_PROBLEM', 'PLAYED_VIDEO', 'POSTED_FORUM']
     activity_types = ['ACTIVE', 'ATTEMPTED_PROBLEM', 'PLAYED_VIDEO']
     csv_filename_slug = u'engagement-activity'
 
-    def generate_data(self, course_id=None):
-        course_id = course_id or self.course_id
-
+    def generate_data(self, course_id):
         for activity_type in self.activity_types:
-            G(CourseActivityWeekly,
+            G(models.CourseActivityWeekly,
               course_id=course_id,
               interval_start=self.interval_start,
               interval_end=self.interval_end,
               activity_type=activity_type,
               count=100)
 
-    def setUp(self):
-        super(CourseActivityWeeklyViewTests, self).setUp()
-        self.interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
-        self.interval_end = self.interval_start + datetime.timedelta(weeks=1)
+    @classmethod
+    def setUpClass(cls):
+        super(CourseActivityWeeklyViewTests, cls).setUpClass()
+        cls.interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
+        cls.interval_end = cls.interval_start + datetime.timedelta(weeks=1)
 
-        self.generate_data()
-
-    def get_latest_data(self, course_id=None):
-        course_id = course_id or self.course_id
+    def get_latest_data(self, course_id):
         return self.model.objects.filter(course_id=course_id, interval_end=self.interval_end)
 
     def format_as_response(self, *args):
@@ -555,15 +549,16 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
 
         return response
 
-    def test_get_with_intervals(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get_with_intervals(self, course_id):
         """ Verify the endpoint returns multiple data points when supplied with an interval of dates. """
-        # Create additional data
+        self.generate_data(course_id)
         interval_start = self.interval_start + datetime.timedelta(weeks=1)
         interval_end = self.interval_end + datetime.timedelta(weeks=1)
 
         for activity_type in self.activity_types:
-            G(CourseActivityWeekly,
-              course_id=self.course_id,
+            G(models.CourseActivityWeekly,
+              course_id=course_id,
               interval_start=interval_start,
               interval_end=interval_end,
               activity_type=activity_type,
@@ -571,20 +566,21 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
 
         expected = self.format_as_response(*self.model.objects.all())
         self.assertEqual(len(expected), 2)
-        self.assertIntervalFilteringWorks(expected, self.interval_start, interval_end + datetime.timedelta(days=1))
+        self.assertIntervalFilteringWorks(expected, course_id, self.interval_start,
+                                          interval_end + datetime.timedelta(days=1))
 
 
-class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
-    def _get_data(self, course_id=None):
+@ddt.ddt
+class CourseProblemsListViewTests(TestCaseWithAuthentication):
+    def _get_data(self, course_id):
         """
         Retrieve data for the specified course.
         """
-
-        course_id = course_id or self.course_id
         url = '/api/v0/courses/{}/problems/'.format(course_id)
         return self.authenticated_get(url)
 
-    def test_get(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
         """
         The view should return data when data exists for the course.
         """
@@ -600,11 +596,11 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         alt_created = created + datetime.timedelta(seconds=2)
         date_time_format = '%Y-%m-%d %H:%M:%S'
 
-        o1 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=module_id,
+        o1 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=module_id,
                correct=True, last_response_count=100, created=created.strftime(date_time_format))
-        o2 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=alt_module_id,
+        o2 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=alt_module_id,
                correct=True, last_response_count=100, created=created.strftime(date_time_format))
-        o3 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=self.course_id, module_id=module_id,
+        o3 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=module_id,
                correct=False, last_response_count=200, created=alt_created.strftime(date_time_format))
 
         expected = [
@@ -624,7 +620,7 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
             }
         ]
 
-        response = self._get_data(self.course_id)
+        response = self._get_data(course_id)
         self.assertEquals(response.status_code, 200)
         self.assertListEqual([dict(d) for d in response.data], expected)
 
@@ -637,17 +633,17 @@ class CourseProblemsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
-class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
-    def _get_data(self, course_id=None):
+@ddt.ddt
+class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
+    def _get_data(self, course_id):
         """
         Retrieve data for the specified course.
         """
-
-        course_id = course_id or self.course_id
         url = '/api/v0/courses/{}/problems_and_tags/'.format(course_id)
         return self.authenticated_get(url)
 
-    def test_get(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
         """
         The view should return data when data exists for the course.
         """
@@ -668,13 +664,13 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
         created = datetime.datetime.utcnow()
         alt_created = created + datetime.timedelta(seconds=2)
 
-        G(models.ProblemsAndTags, course_id=self.course_id, module_id=module_id,
+        G(models.ProblemsAndTags, course_id=course_id, module_id=module_id,
           tag_name='difficulty', tag_value=tags['difficulty'][0],
           total_submissions=11, correct_submissions=4, created=created)
-        G(models.ProblemsAndTags, course_id=self.course_id, module_id=module_id,
+        G(models.ProblemsAndTags, course_id=course_id, module_id=module_id,
           tag_name='learning_outcome', tag_value=tags['learning_outcome'][1],
           total_submissions=11, correct_submissions=4, created=alt_created)
-        G(models.ProblemsAndTags, course_id=self.course_id, module_id=alt_module_id,
+        G(models.ProblemsAndTags, course_id=course_id, module_id=alt_module_id,
           tag_name='learning_outcome', tag_value=tags['learning_outcome'][2],
           total_submissions=4, correct_submissions=0, created=created)
 
@@ -700,7 +696,7 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
             }
         ]
 
-        response = self._get_data(self.course_id)
+        response = self._get_data(course_id)
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(sorted([dict(d) for d in response.data]), sorted(expected))
 
@@ -713,16 +709,17 @@ class CourseProblemsAndTagsListViewTests(DemoCourseMixin, TestCaseWithAuthentica
         self.assertEquals(response.status_code, 404)
 
 
-class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
-    def _get_data(self, course_id=None):
+@ddt.ddt
+class CourseVideosListViewTests(TestCaseWithAuthentication):
+    def _get_data(self, course_id):
         """
         Retrieve videos for a specified course.
         """
-        course_id = course_id or self.course_id
         url = '/api/v0/courses/{}/videos/'.format(course_id)
         return self.authenticated_get(url)
 
-    def test_get(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
         # add a blank row, which shouldn't be included in results
         G(models.Video)
 
@@ -730,14 +727,14 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         video_id = 'v1d30'
         created = datetime.datetime.utcnow()
         date_time_format = '%Y-%m-%d %H:%M:%S'
-        G(models.Video, course_id=self.course_id, encoded_module_id=module_id,
+        G(models.Video, course_id=course_id, encoded_module_id=module_id,
           pipeline_video_id=video_id, duration=100, segment_length=1, users_at_start=50, users_at_end=10,
           created=created.strftime(date_time_format))
 
         alt_module_id = 'i4x-test-video-2'
         alt_video_id = 'a1d30'
         alt_created = created + datetime.timedelta(seconds=10)
-        G(models.Video, course_id=self.course_id, encoded_module_id=alt_module_id,
+        G(models.Video, course_id=course_id, encoded_module_id=alt_module_id,
           pipeline_video_id=alt_video_id, duration=200, segment_length=5, users_at_start=1050, users_at_end=50,
           created=alt_created.strftime(date_time_format))
 
@@ -762,7 +759,7 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
             }
         ]
 
-        response = self._get_data(self.course_id)
+        response = self._get_data(course_id)
         self.assertEquals(response.status_code, 200)
         self.assertListEqual(response.data, expected)
 
@@ -771,34 +768,38 @@ class CourseVideosListViewTests(DemoCourseMixin, TestCaseWithAuthentication):
         self.assertEquals(response.status_code, 404)
 
 
-class CourseReportDownloadViewTests(DemoCourseMixin, TestCaseWithAuthentication):
+@ddt.ddt
+class CourseReportDownloadViewTests(TestCaseWithAuthentication):
 
     path = '/api/v0/courses/{course_id}/reports/{report_name}'
 
     @patch('django.core.files.storage.default_storage.exists', Mock(return_value=False))
-    def test_report_file_not_found(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_report_file_not_found(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='problem_response'
             )
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_report_not_supported(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_report_not_supported(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='fake_problem_that_we_dont_support'
             )
         )
         self.assertEqual(response.status_code, 404)
 
     @patch('analytics_data_api.utils.default_storage', object())
-    def test_incompatible_storage_provider(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_incompatible_storage_provider(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='problem_response'
             )
         )
@@ -815,16 +816,17 @@ class CourseReportDownloadViewTests(DemoCourseMixin, TestCaseWithAuthentication)
         'analytics_data_api.utils.get_expiration_date',
         Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
     )
-    def test_make_working_link(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_make_working_link(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='problem_response'
             )
         )
         self.assertEqual(response.status_code, 200)
         expected = {
-            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'course_id': get_filename_safe_course_id(course_id),
             'report_name': 'problem_response',
             'download_url': 'http://fake',
             'last_modified': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
@@ -844,16 +846,17 @@ class CourseReportDownloadViewTests(DemoCourseMixin, TestCaseWithAuthentication)
         'analytics_data_api.utils.get_expiration_date',
         Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
     )
-    def test_make_working_link_with_missing_size(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_make_working_link_with_missing_size(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='problem_response'
             )
         )
         self.assertEqual(response.status_code, 200)
         expected = {
-            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'course_id': get_filename_safe_course_id(course_id),
             'report_name': 'problem_response',
             'download_url': 'http://fake',
             'last_modified': datetime.datetime(2014, 1, 1, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
@@ -869,16 +872,17 @@ class CourseReportDownloadViewTests(DemoCourseMixin, TestCaseWithAuthentication)
         'analytics_data_api.utils.get_expiration_date',
         Mock(return_value=datetime.datetime(2014, 1, 1, tzinfo=pytz.utc))
     )
-    def test_make_working_link_with_missing_last_modified_date(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_make_working_link_with_missing_last_modified_date(self, course_id):
         response = self.authenticated_get(
             self.path.format(
-                course_id=DEMO_COURSE_ID,
+                course_id=course_id,
                 report_name='problem_response'
             )
         )
         self.assertEqual(response.status_code, 200)
         expected = {
-            'course_id': SANITIZED_DEMO_COURSE_ID,
+            'course_id': get_filename_safe_course_id(course_id),
             'report_name': 'problem_response',
             'download_url': 'http://fake',
             'file_size': 1000,

@@ -1,16 +1,17 @@
 boto==2.42.0                        # MIT
 Django==1.9.9 						# BSD License
+django-countries==4.0               # MIT
 django-model-utils==2.5.2 			# BSD
 djangorestframework==3.4.6			# BSD
 django-rest-swagger==0.3.8  		# BSD
 djangorestframework-csv==1.4.1		# BSD
-django-countries==4.0               # MIT
-edx-django-release-util==0.1.2
+django-storages==1.4.1              # BSD
 elasticsearch-dsl==0.0.11           # Apache 2.0
 ordered-set==2.0.1                  # MIT
 
 # markdown is used by swagger for rendering the api docs
 Markdown==2.6.6    					# BSD
 
--e git+https://github.com/edx/opaque-keys.git@d45d0bd8d64c69531be69178b9505b5d38806ce0#egg=opaque-keys
-django-storages==1.4.1              # BSD
+edx-ccx-keys==0.2.1
+edx-django-release-util==0.1.2
+edx-opaque-keys==0.4.0

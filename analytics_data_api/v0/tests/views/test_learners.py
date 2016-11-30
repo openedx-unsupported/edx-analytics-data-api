@@ -20,7 +20,7 @@ from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.tests.views import (
-    DemoCourseMixin, VerifyCourseIdMixin, VerifyCsvResponseMixin,
+    CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin,
 )
 
 
@@ -33,6 +33,9 @@ class LearnerAPITestMixin(CsvViewMixin):
         super(LearnerAPITestMixin, self).setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         management.call_command('create_elasticsearch_learners_indices')
+        # ensure that the index is ready
+        # pylint: disable=unexpected-keyword-arg
+        self._es.cluster.health(index=settings.ELASTICSEARCH_LEARNERS_INDEX, wait_for_status='yellow')
         self.addCleanup(lambda: management.call_command('delete_elasticsearch_learners_indices'))
 
     def _create_learner(
@@ -641,8 +644,7 @@ class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
 
 
 @ddt.ddt
-class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
-                                 LearnerAPITestMixin, TestCaseWithAuthentication):
+class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthentication,):
     """
     Tests for the course learner metadata endpoint.
     """
@@ -651,8 +653,8 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         """Helper to send a GET request to the API."""
         return self.authenticated_get('/api/v0/course_learner_metadata/{}/'.format(course_id))
 
-    def get_expected_json(self, segments, enrollment_modes, cohorts):
-        expected_json = self._get_full_engagement_ranges()
+    def get_expected_json(self, course_id, segments, enrollment_modes, cohorts):
+        expected_json = self._get_full_engagement_ranges(course_id)
         expected_json['segments'] = segments
         expected_json['enrollment_modes'] = enrollment_modes
         expected_json['cohorts'] = cohorts
@@ -667,22 +669,24 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         self.assertEqual(response.status_code, 404)
 
     @ddt.data(
-        {},
-        {'highly_engaged': 1},
-        {'disengaging': 1},
-        {'struggling': 1},
-        {'inactive': 1},
-        {'unenrolled': 1},
-        {'highly_engaged': 3, 'disengaging': 1},
-        {'disengaging': 10, 'inactive': 12},
-        {'highly_engaged': 1, 'disengaging': 2, 'struggling': 3, 'inactive': 4, 'unenrolled': 5},
+        (CourseSamples.course_ids[0], {}),
+        (CourseSamples.course_ids[1], {'highly_engaged': 1}),
+        (CourseSamples.course_ids[2], {'disengaging': 1}),
+        (CourseSamples.course_ids[0], {'struggling': 1}),
+        (CourseSamples.course_ids[1], {'inactive': 1}),
+        (CourseSamples.course_ids[2], {'unenrolled': 1}),
+        (CourseSamples.course_ids[0], {'highly_engaged': 3, 'disengaging': 1}),
+        (CourseSamples.course_ids[1], {'disengaging': 10, 'inactive': 12}),
+        (CourseSamples.course_ids[2], {'highly_engaged': 1, 'disengaging': 2, 'struggling': 3,
+                                       'inactive': 4, 'unenrolled': 5}),
     )
-    def test_segments_unique_learners(self, segments):
+    @ddt.unpack
+    def test_segments_unique_learners(self, course_id, segments):
         """
         Tests segment counts when each learner belongs to at most one segment.
         """
         learners = [
-            {'username': '{}_{}'.format(segment, i), 'course_id': self.course_id, 'segments': [segment]}
+            {'username': '{}_{}'.format(segment, i), 'course_id': course_id, 'segments': [segment]}
             for segment, count in segments.items()
             for i in xrange(count)
         ]
@@ -690,39 +694,43 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         expected_segments = {"highly_engaged": 0, "disengaging": 0, "struggling": 0, "inactive": 0, "unenrolled": 0}
         expected_segments.update(segments)
         expected = self.get_expected_json(
+            course_id=course_id,
             segments=expected_segments,
             enrollment_modes={'honor': len(learners)} if learners else {},
             cohorts={'Team edX': len(learners)} if learners else {},
         )
-        self.assert_response_matches(self._get(self.course_id), 200, expected)
+        self.assert_response_matches(self._get(course_id), 200, expected)
 
-    def test_segments_same_learner(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_segments_same_learner(self, course_id):
         """
         Tests segment counts when each learner belongs to multiple segments.
         """
         self.create_learners([
-            {'username': 'user_1', 'course_id': self.course_id, 'segments': ['struggling', 'disengaging']},
-            {'username': 'user_2', 'course_id': self.course_id, 'segments': ['disengaging']}
+            {'username': 'user_1', 'course_id': course_id, 'segments': ['struggling', 'disengaging']},
+            {'username': 'user_2', 'course_id': course_id, 'segments': ['disengaging']}
         ])
         expected = self.get_expected_json(
+            course_id=course_id,
             segments={'disengaging': 2, 'struggling': 1, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
             enrollment_modes={'honor': 2},
             cohorts={'Team edX': 2},
         )
-        self.assert_response_matches(self._get(self.course_id), 200, expected)
+        self.assert_response_matches(self._get(course_id), 200, expected)
 
     @ddt.data(
-        [],
-        ['honor'],
-        ['verified'],
-        ['audit'],
-        ['nonexistent-enrollment-tracks-still-show-up'],
-        ['honor', 'verified', 'audit'],
-        ['honor', 'honor', 'verified', 'verified', 'audit', 'audit'],
+        (CourseSamples.course_ids[0], []),
+        (CourseSamples.course_ids[1], ['honor']),
+        (CourseSamples.course_ids[2], ['verified']),
+        (CourseSamples.course_ids[0], ['audit']),
+        (CourseSamples.course_ids[1], ['nonexistent-enrollment-tracks-still-show-up']),
+        (CourseSamples.course_ids[2], ['honor', 'verified', 'audit']),
+        (CourseSamples.course_ids[0], ['honor', 'honor', 'verified', 'verified', 'audit', 'audit']),
     )
-    def test_enrollment_modes(self, enrollment_modes):
+    @ddt.unpack
+    def test_enrollment_modes(self, course_id, enrollment_modes):
         self.create_learners([
-            {'username': 'user_{}'.format(i), 'course_id': self.course_id, 'enrollment_mode': enrollment_mode}
+            {'username': 'user_{}'.format(i), 'course_id': course_id, 'enrollment_mode': enrollment_mode}
             for i, enrollment_mode in enumerate(enrollment_modes)
         ])
         expected_enrollment_modes = {}
@@ -731,32 +739,35 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             count = len([mode for mode in group])
             expected_enrollment_modes[enrollment_mode] = count
         expected = self.get_expected_json(
+            course_id=course_id,
             segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
             enrollment_modes=expected_enrollment_modes,
             cohorts={'Team edX': len(enrollment_modes)} if enrollment_modes else {},
         )
-        self.assert_response_matches(self._get(self.course_id), 200, expected)
+        self.assert_response_matches(self._get(course_id), 200, expected)
 
     @ddt.data(
-        [],
-        ['Yellow'],
-        ['Blue'],
-        ['Red', 'Red', 'yellow team', 'yellow team', 'green'],
+        (CourseSamples.course_ids[0], []),
+        (CourseSamples.course_ids[1], ['Yellow']),
+        (CourseSamples.course_ids[2], ['Blue']),
+        (CourseSamples.course_ids[0], ['Red', 'Red', 'yellow team', 'yellow team', 'green']),
     )
-    def test_cohorts(self, cohorts):
+    @ddt.unpack
+    def test_cohorts(self, course_id, cohorts):
         self.create_learners([
-            {'username': 'user_{}'.format(i), 'course_id': self.course_id, 'cohort': cohort}
+            {'username': 'user_{}'.format(i), 'course_id': course_id, 'cohort': cohort}
             for i, cohort in enumerate(cohorts)
         ])
         expected_cohorts = {
             cohort: len([mode for mode in group]) for cohort, group in groupby(cohorts)
         }
         expected = self.get_expected_json(
+            course_id=course_id,
             segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
             enrollment_modes={'honor': len(cohorts)} if cohorts else {},
             cohorts=expected_cohorts,
         )
-        self.assert_response_matches(self._get(self.course_id), 200, expected)
+        self.assert_response_matches(self._get(course_id), 200, expected)
 
     @property
     def empty_engagement_ranges(self):
@@ -776,16 +787,18 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             empty_engagement_ranges['engagement_ranges'][metric] = copy.deepcopy(empty_range)
         return empty_engagement_ranges
 
-    def test_no_engagement_ranges(self):
-        response = self._get(self.course_id)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_no_engagement_ranges(self, course_id):
+        response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(self.empty_engagement_ranges, json.loads(response.content))
 
-    def test_one_engagement_range(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_one_engagement_range(self, course_id):
         metric_type = 'problems_completed'
         start_date = datetime.date(2015, 7, 1)
         end_date = datetime.date(2015, 7, 21)
-        G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+        G(ModuleEngagementMetricRanges, course_id=course_id, start_date=start_date, end_date=end_date,
           metric=metric_type, range_type='normal', low_value=90, high_value=6120)
         expected_ranges = self.empty_engagement_ranges
         expected_ranges['engagement_ranges'].update({
@@ -800,11 +813,11 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
             }
         })
 
-        response = self._get(self.course_id)
+        response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(expected_ranges, json.loads(response.content))
 
-    def _get_full_engagement_ranges(self):
+    def _get_full_engagement_ranges(self, course_id):
         """ Populates a full set of engagement ranges and returns the expected engagement ranges. """
         start_date = datetime.date(2015, 7, 1)
         end_date = datetime.date(2015, 7, 21)
@@ -821,10 +834,10 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
         max_value = 1000.0
         for metric_type in engagement_events.EVENTS:
             low_ceil = 100.5
-            G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+            G(ModuleEngagementMetricRanges, course_id=course_id, start_date=start_date, end_date=end_date,
               metric=metric_type, range_type='low', low_value=0, high_value=low_ceil)
             normal_floor = 800.8
-            G(ModuleEngagementMetricRanges, course_id=self.course_id, start_date=start_date, end_date=end_date,
+            G(ModuleEngagementMetricRanges, course_id=course_id, start_date=start_date, end_date=end_date,
               metric=metric_type, range_type='normal', low_value=normal_floor, high_value=max_value)
 
             expected['engagement_ranges'][metric_type] = {
@@ -843,15 +856,17 @@ class CourseLearnerMetadataTests(DemoCourseMixin, VerifyCourseIdMixin,
 
         return expected
 
-    def test_engagement_ranges_only(self):
-        expected = self._get_full_engagement_ranges()
-        response = self._get(self.course_id)
+    @ddt.data(*CourseSamples.course_ids)
+    def test_engagement_ranges_only(self, course_id):
+        expected = self._get_full_engagement_ranges(course_id)
+        response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(expected, json.loads(response.content))
 
-    def test_engagement_ranges_fields(self):
+    @ddt.data(*CourseSamples.course_ids)
+    def test_engagement_ranges_fields(self, course_id):
         expected_events = engagement_events.EVENTS
-        response = json.loads(self._get(self.course_id).content)
+        response = json.loads(self._get(course_id).content)
         self.assertTrue('engagement_ranges' in response)
         for event in expected_events:
             self.assertTrue(event in response['engagement_ranges'])

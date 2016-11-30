@@ -509,22 +509,48 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
         return engagement_ranges
 
 
-class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField):
+class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
-    Serializer for problems.
+    A ModelSerializer that takes an additional `fields` argument that controls which
+    fields should be displayed.
+
+    Blatantly taken from http://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Don't pass the 'fields' arg up to the superclass
+        fields = kwargs.pop('fields', None)
+
+        # Instantiate the superclass normally
+        super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
+
+        if fields is not None:
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, DynamicFieldsModelSerializer):
+    """
+    Serializer for course and enrollment counts per mode.
     """
     course_id = serializers.CharField()
     catalog_course_title = serializers.CharField()
     catalog_course = serializers.CharField()
-    start_date = serializers.DateTimeField()
-    end_date = serializers.DateTimeField()
+    start_date = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+    end_date = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
     pacing_type = serializers.CharField()
     availability = serializers.CharField()
-    mode = serializers.CharField()
     count = serializers.IntegerField(default=0)
     cumulative_count = serializers.IntegerField(default=0)
-    count_change_7_days = serializers.IntegerField(default=0)  # TODO: 0 as default?
+    count_change_7_days = serializers.IntegerField(default=0)
+    modes = serializers.SerializerMethodField()
+
+    def get_modes(self, obj):
+        return obj.get('modes', None)
 
     class Meta(object):
         model = models.CourseMetaSummaryEnrollment
-        exclude = ('id',)
+        exclude = ('id', 'mode')

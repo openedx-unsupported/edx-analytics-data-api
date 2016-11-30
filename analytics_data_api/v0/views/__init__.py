@@ -4,6 +4,7 @@ from django.utils import timezone
 from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
 import analytics_data_api.utils as utils
 
+
 class CourseViewMixin(object):
     """
     Captures the course_id from the url and validates it.

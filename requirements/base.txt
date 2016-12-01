@@ -13,5 +13,5 @@ ordered-set==2.0.1                  # MIT
 Markdown==2.6.6    					# BSD
 
 edx-ccx-keys==0.2.1
-edx-django-release-util==0.1.2
+edx-django-release-util==0.2.0
 edx-opaque-keys==0.4.0

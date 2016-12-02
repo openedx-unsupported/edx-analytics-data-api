@@ -2,8 +2,10 @@
 
 import datetime
 import logging
-from optparse import make_option
+import math
 import random
+from optparse import make_option
+from tqdm import tqdm
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -87,7 +89,8 @@ class Command(BaseCommand):
                       models.CourseEnrollmentByGender,
                       models.CourseEnrollmentByEducation,
                       models.CourseEnrollmentByBirthYear,
-                      models.CourseEnrollmentByCountry]:
+                      models.CourseEnrollmentByCountry,
+                      models.CourseMetaSummaryEnrollment]:
             model.objects.all().delete()
 
         logger.info("Deleted all daily course enrollment data.")
@@ -98,6 +101,7 @@ class Command(BaseCommand):
         date = start_date
         cumulative_count = 0
 
+        progress = tqdm(total=(end_date - date).days + 2)
         while date <= end_date:
             daily_total = get_count(daily_total)
             models.CourseEnrollmentDaily.objects.create(course_id=course_id, date=date, count=daily_total)
@@ -128,8 +132,21 @@ class Command(BaseCommand):
                 models.CourseEnrollmentByBirthYear.objects.create(course_id=course_id, date=date, count=count,
                                                                   birth_year=birth_year)
 
+            progress.update(1)
             date = date + datetime.timedelta(days=1)
 
+        for mode, ratio in enrollment_mode_ratios.iteritems():
+            count = int(ratio * daily_total)
+            cumulative_count = count + random.randint(0, 100)
+            models.CourseMetaSummaryEnrollment.objects.create(
+                course_id=course_id, catalog_course_title='Demo Course', catalog_course='Demo_Course',
+                start_date=timezone.now() - datetime.timedelta(weeks=6),
+                end_date=timezone.now() + datetime.timedelta(weeks=10),
+                pacing_type='self_paced', availability='Current', mode=mode, count=count,
+                cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50))
+
+        progress.update(1)
+        progress.close()
         logger.info("Done!")
 
     def generate_weekly_data(self, course_id, start_date, end_date):
@@ -144,6 +161,7 @@ class Command(BaseCommand):
 
         logger.info("Generating new weekly course activity data...")
 
+        progress = tqdm(total=math.ceil((end_date - start).days / 7.0) + 1)
         while start < end_date:
             active_students = random.randint(100, 4000)
             # End date should occur on Saturday at 23:59:59
@@ -159,8 +177,10 @@ class Command(BaseCommand):
                                                        count=active_students,
                                                        interval_start=start, interval_end=end)
 
+            progress.update(1)
             start = end
 
+        progress.close()
         logger.info("Done!")
 
     def generate_video_timeline_data(self, video_id):
@@ -193,6 +213,7 @@ class Command(BaseCommand):
 
         logger.info("Generating learner engagement module data...")
         current = start_date
+        progress = tqdm(total=(end_date - start_date).days + 1)
         while current < end_date:
             current = current + datetime.timedelta(days=1)
             for metric in engagement_events.INDIVIDUAL_EVENTS:
@@ -206,7 +227,9 @@ class Command(BaseCommand):
                         models.ModuleEngagement.objects.create(
                             course_id=course_id, username=username, date=current,
                             entity_type=entity_type, entity_id=entity_id, event=event, count=count)
-            logger.info("Done!")
+            progress.update(1)
+        progress.close()
+        logger.info("Done!")
 
     def generate_learner_engagement_range_data(self, course_id, start_date, end_date, max_value=100):
         logger.info("Deleting engagement range data...")
@@ -256,7 +279,7 @@ class Command(BaseCommand):
         username = options['username']
         video_id = '0fac49ba'
         video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
-        start_date = datetime.datetime(year=2016, month=1, day=1, tzinfo=timezone.utc)
+        start_date = timezone.now() - datetime.timedelta(weeks=10)
 
         num_weeks = options['num_weeks']
         if num_weeks:

@@ -539,18 +539,19 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, Dyn
     course_id = serializers.CharField()
     catalog_course_title = serializers.CharField()
     catalog_course = serializers.CharField()
-    start_date = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
-    end_date = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+    start_date = serializers.DateTimeField(source='start_time', format=settings.DATETIME_FORMAT)
+    end_date = serializers.DateTimeField(source='end_time', format=settings.DATETIME_FORMAT)
     pacing_type = serializers.CharField()
     availability = serializers.CharField()
     count = serializers.IntegerField(default=0)
     cumulative_count = serializers.IntegerField(default=0)
     count_change_7_days = serializers.IntegerField(default=0)
-    modes = serializers.SerializerMethodField()
+    enrollment_modes = serializers.SerializerMethodField()
 
-    def get_modes(self, obj):
-        return obj.get('modes', None)
+    def get_enrollment_modes(self, obj):
+        return obj.get('enrollment_modes', None)
 
     class Meta(object):
         model = models.CourseMetaSummaryEnrollment
-        exclude = ('id', 'mode')
+        # start_date and end_date used instead of start_time and end_time
+        exclude = ('id', 'start_time', 'end_time', 'enrollment_mode')

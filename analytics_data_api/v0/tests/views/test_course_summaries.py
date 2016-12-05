@@ -45,9 +45,9 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         for course_id in course_ids:
             for mode in modes:
                 G(self.model, course_id=course_id, catalog_course_title='Title', catalog_course='Catalog',
-                  start_date=datetime.datetime(2016, 10, 11, tzinfo=pytz.utc),
-                  end_date=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
-                  pacing_type='instructor', availability='current', mode=mode,
+                  start_time=datetime.datetime(2016, 10, 11, tzinfo=pytz.utc),
+                  end_time=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
+                  pacing_type='instructor', availability='current', enrollment_mode=mode,
                   count=5, cumulative_count=10, count_change_7_days=1, create=self.now,)
 
     def expected_summary(self, course_id, modes=None):
@@ -67,28 +67,28 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
             'end_date': datetime.datetime(2016, 12, 18, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
             'pacing_type': 'instructor',
             'availability': 'current',
-            'modes': {},
+            'enrollment_modes': {},
             'count': count_factor * num_modes,
             'cumulative_count': cumulative_count_factor * num_modes,
             'count_change_7_days': count_change_factor * num_modes,
             'created': self.now.strftime(settings.DATETIME_FORMAT),
         }
-        summary['modes'].update({
+        summary['enrollment_modes'].update({
             mode: {
                 'count': count_factor,
                 'cumulative_count': cumulative_count_factor,
                 'count_change_7_days': count_change_factor,
             } for mode in modes
         })
-        summary['modes'].update({
+        summary['enrollment_modes'].update({
             mode: {
                 'count': 0,
                 'cumulative_count': 0,
                 'count_change_7_days': 0,
             } for mode in set(enrollment_modes.ALL) - set(modes)
         })
-        no_prof = summary['modes'].pop(enrollment_modes.PROFESSIONAL_NO_ID)
-        prof = summary['modes'].get(enrollment_modes.PROFESSIONAL)
+        no_prof = summary['enrollment_modes'].pop(enrollment_modes.PROFESSIONAL_NO_ID)
+        prof = summary['enrollment_modes'].get(enrollment_modes.PROFESSIONAL)
         prof.update({
             'count': prof['count'] + no_prof['count'],
             'cumulative_count': prof['cumulative_count'] + no_prof['cumulative_count'],
@@ -121,7 +121,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
 
     @ddt.data(
         ['availability'],
-        ['modes', 'course_id'],
+        ['enrollment_mode', 'course_id'],
     )
     def test_fields(self, fields):
         self.generate_data()

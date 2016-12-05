@@ -70,11 +70,11 @@ class CourseEnrollmentModeDaily(BaseCourseEnrollment):
 class CourseMetaSummaryEnrollment(BaseCourseModel):
     catalog_course_title = models.CharField(db_index=True, max_length=255)
     catalog_course = models.CharField(db_index=True, max_length=255)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     pacing_type = models.CharField(db_index=True, max_length=255)
     availability = models.CharField(db_index=True, max_length=255)
-    mode = models.CharField(max_length=255)
+    enrollment_mode = models.CharField(max_length=255)
     count = models.IntegerField(null=False)
     cumulative_count = models.IntegerField(null=False)
     count_change_7_days = models.IntegerField(default=0)
@@ -82,7 +82,7 @@ class CourseMetaSummaryEnrollment(BaseCourseModel):
     class Meta(BaseCourseModel.Meta):
         db_table = 'course_meta_summary_enrollment'
         ordering = ('course_id',)
-        unique_together = [('course_id', 'mode',)]
+        unique_together = [('course_id', 'enrollment_mode',)]
 
 
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):

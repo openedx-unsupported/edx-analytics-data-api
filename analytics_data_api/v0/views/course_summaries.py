@@ -35,7 +35,7 @@ class CourseSummariesView(generics.ListAPIView):
             * count: The total count of currently enrolled learners across modes.
             * cumulative_count: The total cumulative total of all users ever enrolled across modes.
             * count_change_7_days: Total difference in enrollment counts over the past 7 days across modes.
-            * modes: For each enrollment mode, the count, cumulative_count, and count_change_7_days.
+            * enrollment_modes: For each enrollment mode, the count, cumulative_count, and count_change_7_days.
             * created: The date the counts were computed.
 
     **Parameters**
@@ -78,10 +78,10 @@ class CourseSummariesView(generics.ListAPIView):
         summary = {
             'course_id': course_id,
             'created': None,
-            'modes': {},
+            'enrollment_modes': {},
         }
         summary.update({field: 0 for field in count_fields})
-        summary['modes'].update({
+        summary['enrollment_modes'].update({
             mode: {
                 count_field: 0 for count_field in count_fields
             } for mode in enrollment_modes.ALL
@@ -97,11 +97,11 @@ class CourseSummariesView(generics.ListAPIView):
 
             # aggregate the enrollment counts for each mode
             for summary in summaries:
-                summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_date', 'end_date',
+                summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                                        'pacing_type', 'availability']
                 item.update({field: getattr(summary, field) for field in summary_meta_fields})
-                item['modes'].update({
-                    summary.mode: {field: getattr(summary, field) for field in count_fields}
+                item['enrollment_modes'].update({
+                    summary.enrollment_mode: {field: getattr(summary, field) for field in count_fields}
                 })
 
                 # treat the most recent as the authoritative created date -- should be all the same
@@ -111,7 +111,7 @@ class CourseSummariesView(generics.ListAPIView):
                 item.update({field: item[field] + getattr(summary, field) for field in count_fields})
 
             # Merge professional with non verified professional
-            modes = item['modes']
+            modes = item['enrollment_modes']
             prof_no_id_mode = modes.pop(enrollment_modes.PROFESSIONAL_NO_ID, {})
             prof_mode = modes[enrollment_modes.PROFESSIONAL]
             for count_key in count_fields:

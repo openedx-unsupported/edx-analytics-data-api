@@ -140,9 +140,9 @@ class Command(BaseCommand):
             cumulative_count = count + random.randint(0, 100)
             models.CourseMetaSummaryEnrollment.objects.create(
                 course_id=course_id, catalog_course_title='Demo Course', catalog_course='Demo_Course',
-                start_date=timezone.now() - datetime.timedelta(weeks=6),
-                end_date=timezone.now() + datetime.timedelta(weeks=10),
-                pacing_type='self_paced', availability='Current', mode=mode, count=count,
+                start_time=timezone.now() - datetime.timedelta(weeks=6),
+                end_time=timezone.now() + datetime.timedelta(weeks=10),
+                pacing_type='self_paced', availability='Current', enrollment_mode=mode, count=count,
                 cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50))
 
         progress.update(1)

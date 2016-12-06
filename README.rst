@@ -91,5 +91,5 @@ will make your contribution more likely to be accepted.
 
 .. |build-status| image:: https://travis-ci.org/edx/edx-analytics-data-api.svg?branch=master
    :target: https://travis-ci.org/edx/edx-analytics-data-api
-.. |coverage-status| image:: https://coveralls.io/repos/edx/edx-analytics-data-api/badge.png?branch=master
-   :target: https://coveralls.io/r/edx/edx-analytics-data-api?branch=master
+.. |coverage-status| image:: https://img.shields.io/codecov/c/github/edx/edx-analytics-data-api/master.svg
+   :target: https://codecov.io/gh/edx/edx-analytics-data-api

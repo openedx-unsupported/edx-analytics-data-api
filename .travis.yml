@@ -1,20 +1,18 @@
 language: python
-python: "2.7"
-install:
-    - "pip install coveralls"
-    - "make test.install_elasticsearch"
-cache: pip
-# Use docker for builds
-sudo: false
-before_script:
-    - make test.run_elasticsearch
-    # Recommended by Travis in order to make sure ElasticSearch
-    # actually starts up.  See # https://docs.travis-ci.com/user/database-setup/#ElasticSearch
-    - sleep 10
+python:
+  - "2.7"
+
+services:
+  - docker
+sudo: required
+
+before_install:
+  - docker-compose -f .travis/docker-compose-travis.yml up -d
+
 script:
-    - make validate
-    - git fetch origin master:refs/remotes/origin/master # https://github.com/edx/diff-cover#troubleshooting
-    - make diff.report
+  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_tests.sh
+
 after_success:
-    - coveralls
-    - bash ./scripts/build-stats-to-datadog.sh
+  - pip install -U codecov
+  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
+  - codecov

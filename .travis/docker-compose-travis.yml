@@ -1,0 +1,20 @@
+version: "2"
+
+services:
+  analytics_api:
+    image: edxops/analytics_api:latest
+    container_name: analytics_api_testing
+    volumes:
+      - ..:/edx/app/analytics_api/analytics_api
+    command: tail -f /dev/null
+    environment:
+      ELASTICSEARCH_LEARNERS_HOST: 'http://es:9200/'
+      # Pull these from the host environment.
+      TRAVIS_BRANCH:
+      TRAVIS_PULL_REQUEST:
+      DATADOG_API_KEY:
+    depends_on:
+      - "es"
+  es:
+    image: elasticsearch:1.5.2
+    container_name: es

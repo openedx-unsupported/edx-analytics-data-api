@@ -26,7 +26,7 @@ LMS_USER_ACCOUNT_BASE_URL = 'http://lms-host'
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # Default elasticsearch port when running locally
-ELASTICSEARCH_LEARNERS_HOST = 'http://localhost:9223/'
+ELASTICSEARCH_LEARNERS_HOST = environ.get("ELASTICSEARCH_LEARNERS_HOST", 'http://localhost:9223/')
 ELASTICSEARCH_LEARNERS_INDEX = 'roster_test'
 ELASTICSEARCH_LEARNERS_UPDATE_INDEX = 'index_update_test'
 

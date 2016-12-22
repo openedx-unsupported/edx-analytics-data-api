@@ -6,6 +6,7 @@ COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+[/+][^/+]+[/+][^/]+)'
 
 urlpatterns = [
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', 'courses')),
+    url(r'^orgs/', include('analytics_data_api.v0.urls.orgs', namespace='orgs')),
     url(r'^problems/', include('analytics_data_api.v0.urls.problems', 'problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', 'videos')),
     url('^', include('analytics_data_api.v0.urls.learners', 'learners')),

@@ -157,6 +157,7 @@ class ProblemsAndTags(BaseCourseModel):
     class Meta(BaseCourseModel.Meta):
         db_table = 'tags_distribution'
 
+    org_id = models.CharField(db_index=True, max_length=255)
     module_id = models.CharField(db_index=True, max_length=255)
     tag_name = models.CharField(max_length=255)
     tag_value = models.CharField(max_length=255)

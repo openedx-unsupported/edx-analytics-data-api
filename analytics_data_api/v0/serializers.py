@@ -75,6 +75,13 @@ class ProblemsAndTagsSerializer(serializers.Serializer):
         return obj.get('tags', None)
 
 
+class CoursesProblemsAndTagsSerializer(ProblemsAndTagsSerializer):
+    """
+    Serializer for problems and tags.
+    """
+    course_id = serializers.CharField(required=True)
+
+
 class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedField):
     """
     Representation of the Answer Distribution table, without id.

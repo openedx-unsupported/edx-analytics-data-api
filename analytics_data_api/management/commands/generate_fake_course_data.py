@@ -4,12 +4,16 @@ import datetime
 import logging
 import math
 import random
+
 from tqdm import tqdm
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from analytics_data_api.v0 import models
+
 from analytics_data_api.constants import engagement_events
+from analytics_data_api.v0 import models
+from analyticsdataserver.clients import CourseBlocksApiClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,7 +48,7 @@ class Command(BaseCommand):
             '--course_id',
             action='store',
             dest='course_id',
-            default='edX/DemoX/Demo_Course',
+            default='course-v1:edX+DemoX+Demo_Courset',
             help='Course ID for which to generate fake data',
         )
         parser.add_argument(
@@ -175,7 +179,7 @@ class Command(BaseCommand):
 
         logger.info("Generating new weekly course activity data...")
 
-        progress = tqdm(total=math.ceil((end_date - start).days / 7.0) + 1)
+        progress = tqdm(total=math.ceil((end_date - start).days / 7.0))
         while start < end_date:
             active_students = random.randint(100, 4000)
             # End date should occur on Saturday at 23:59:59
@@ -198,23 +202,13 @@ class Command(BaseCommand):
         logger.info("Done!")
 
     def generate_video_timeline_data(self, video_id):
-        logger.info("Deleting video timeline data...")
-        models.VideoTimeline.objects.all().delete()
-
-        logger.info("Generating new video timeline...")
         for segment in range(100):
             active_students = random.randint(100, 4000)
             counts = constrained_sum_sample_pos(2, active_students)
             models.VideoTimeline.objects.create(pipeline_video_id=video_id, segment=segment,
                                                 num_users=counts[0], num_views=counts[1])
 
-        logger.info("Done!")
-
     def generate_video_data(self, course_id, video_id, module_id):
-        logger.info("Deleting course video data...")
-        models.Video.objects.all().delete()
-
-        logger.info("Generating new course videos...")
         users_at_start = 1234
         models.Video.objects.create(course_id=course_id, pipeline_video_id=video_id,
                                     encoded_module_id=module_id, duration=500, segment_length=5,
@@ -288,11 +282,44 @@ class Command(BaseCommand):
                     total_submissions=total_submissions, correct_submissions=correct_submissions
                 )
 
+    def fetch_videos_from_course_blocks(self, course_id):
+        logger.info("Fetching video ids from Course Blocks API...")
+        try:
+            api_base_url = settings.LMS_BASE_URL + 'api/courses/v1/'
+        except AttributeError:
+            logger.warning("LMS_BASE_URL is not configured! Cannot get video ids.")
+            return None
+        logger.info("Assuming the Course Blocks API is hosted at: %s", api_base_url)
+
+        blocks_api = CourseBlocksApiClient(api_base_url, settings.COURSE_BLOCK_API_AUTH_TOKEN, timeout=5)
+        return blocks_api.all_videos(course_id)
+
+    def generate_all_video_data(self, course_id, videos):
+        logger.info("Deleting course video data...")
+        models.Video.objects.all().delete()
+
+        logger.info("Deleting video timeline data...")
+        models.VideoTimeline.objects.all().delete()
+
+        logger.info("Generating new course videos and video timeline data...")
+        for video in tqdm(videos):
+            self.generate_video_data(course_id, video['video_id'], video['video_module_id'])
+            self.generate_video_timeline_data(video['video_id'])
+
+        logger.info("Done!")
+
     def handle(self, *args, **options):
         course_id = options['course_id']
         username = options['username']
-        video_id = '0fac49ba'
-        video_module_id = 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
+        video_ids = self.fetch_videos_from_course_blocks(course_id)
+        if not video_ids:
+            logger.warning("Falling back to fake video id due to Course Blocks API failure...")
+            video_ids = [
+                {
+                    'video_id': '0fac49ba',
+                    'video_module_id': 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
+                }
+            ]
         start_date = timezone.now() - datetime.timedelta(weeks=10)
 
         num_weeks = options['num_weeks']
@@ -304,8 +331,7 @@ class Command(BaseCommand):
         logger.info("Generating data for %s...", course_id)
         self.generate_weekly_data(course_id, start_date, end_date)
         self.generate_daily_data(course_id, start_date, end_date)
-        self.generate_video_data(course_id, video_id, video_module_id)
-        self.generate_video_timeline_data(video_id)
+        self.generate_all_video_data(course_id, video_ids)
         self.generate_learner_engagement_data(course_id, username, start_date, end_date)
         self.generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date())
         self.generate_tags_distribution_data(course_id)

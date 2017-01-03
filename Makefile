@@ -66,7 +66,8 @@ loaddata: migrate
 demo: clean requirements loaddata
 	python manage.py set_api_key edx edx
 
-travis: clean requirements migrate
+# Target used by edx-analytics-dashboard during its testing.
+travis: clean test.requirements migrate
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=1

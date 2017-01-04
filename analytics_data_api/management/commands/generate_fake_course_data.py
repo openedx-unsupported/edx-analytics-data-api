@@ -4,7 +4,6 @@ import datetime
 import logging
 import math
 import random
-from optparse import make_option
 from tqdm import tqdm
 
 from django.core.management.base import BaseCommand
@@ -32,14 +31,29 @@ def get_count(start):
 
 class Command(BaseCommand):
     help = 'Generate fake data'
-    option_list = BaseCommand.option_list + (
-        make_option('-n', '--num-weeks', action='store', type="int", dest='num_weeks',
-                    help='Number of weeks worth of data to generate.'),
-        make_option('-c', '--course_id', action='store', type='string', dest='course_id',
-                    default='edX/DemoX/Demo_Course', help='Course ID for which to generate fake data'),
-        make_option('-u', '--username', action='store', type='string', dest='username',
-                    default='ed_xavier', help='Username for which to generate fake data'),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--num-weeks',
+            action='store',
+            type=int,
+            dest='num_weeks',
+            help='Number of weeks worth of data to generate.',
+        )
+        parser.add_argument(
+            '--course_id',
+            action='store',
+            dest='course_id',
+            default='edX/DemoX/Demo_Course',
+            help='Course ID for which to generate fake data',
+        )
+        parser.add_argument(
+            '--username',
+            action='store',
+            dest='username',
+            default='ed_xavier',
+            help='Username for which to generate fake data',
+        )
 
     def generate_daily_data(self, course_id, start_date, end_date):
         # Use the preset ratios below to generate data in the specified demographics

@@ -13,3 +13,4 @@ pep257==0.7.0
 pep8==1.7.0
 pylint==1.6.4
 pytz==2016.6.1
+responses==0.5.1

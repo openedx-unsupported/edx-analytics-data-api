@@ -56,10 +56,15 @@ CACHES = {
 ANALYTICS_DATABASE = 'analytics'
 ENABLE_ADMIN_SITE = True
 
-########## END ANALYTICS DATA API CONFIGURATION
-
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 SWAGGER_SETTINGS = {
     'api_key': 'edx'
 }
+
+# These two settings are used in generate_fake_course_data.py.
+# Replace with correct values to generate local fake video data.
+LMS_BASE_URL = 'http://localhost:8000/'  # the base URL for your running local LMS instance
+COURSE_BLOCK_API_AUTH_TOKEN = 'paste auth token here'  # see README for instructions on how to configure this value
+
+########## END ANALYTICS DATA API CONFIGURATION

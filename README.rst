@@ -71,6 +71,83 @@ database.
 
         $ make loaddata
 
+Loading Video Data
+~~~~~~~~~~~~~~~~~~
+
+The above command should work fine on its own, but you may see warnings about
+video ids:
+
+::
+
+        WARNING:analyticsdataserver.clients:Course Blocks API failed to return
+        video ids (401). See README for instructions on how to authenticate the
+        API with your local LMS.
+
+In order to generate video data, the API has to be authenticated with
+your local LMS so that it can access the video ids for each course. Instead of
+adding a whole OAuth client to the API for this one procedure, we will piggyback
+off of the Insights OAuth client by taking the OAuth token it generates and
+using it here.
+
+1. Start your local LMS server. (e.g. in devstack, run `paver devstack --fast lms`).
+
+2. If your local LMS server is running on any address other than the default of
+   `http://localhost:8000/`, make sure to add this setting to
+   `analyticsdataserver/settings/local.py` with the correct URL. (you will
+   likely not need to do this):
+
+   ::
+
+      # Don't forget to add the trailing forward slash
+      LMS_BASE_URL = 'http://example.com:8000/'
+
+3. Sign into your local Insights server making sure to use your local LMS for
+   authentication. This will generate a new OAuth access token if you do not
+   already have one that isn't expired.
+
+   The user you sign in with must have staff access to the courses for which you
+   want generated video data.
+
+4. Visit your local LMS server's admin site (by default, this is at
+   `http://localhost:8000/admin`).
+
+5. Sign in with a superuser account. Don't have one? Make one with this command
+   in your devstack as the `edxapp` user:
+
+   ::
+   
+      $ edxapp@precise64:~/edx-platform$ ./manage.py lms createsuperuser
+   
+   Enter a username and password that you will remember.
+
+6. On the admin site, find the "Oauth2" section and click the link "Access
+   tokens". The breadcrumbs should show "Home > Oauth2 > Access tokens".
+
+   Copy the string in the "Token" column for the first row in the table. Also,
+   make sure the "User" of the first row is the same user that you signed in
+   with in step 3.
+
+7. Paste the string as a new setting in `analyticsdataserver/settings/local.py`:
+
+   ::
+
+      COURSE_BLOCK_API_AUTH_TOKEN = '<paste access token here>'
+
+8. Run `make loaddata` again and ensure that you see the following log message
+   in the output:
+
+   ::
+
+      INFO:analyticsdataserver.clients:Successfully authenticated with the
+      Course Blocks API.
+
+9. Check if you now have video data in the API. Either by querying the API in
+   the swagger docs at `/docs/#!/api/Videos_List_GET`, or visiting the Insights
+   `engagement/videos/` page for a course.
+   
+Note: the access tokens expire in one year so you should only have to follow the
+above steps once a year.
+
 Running Tests
 -------------
 

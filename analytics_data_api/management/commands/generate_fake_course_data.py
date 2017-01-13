@@ -48,7 +48,7 @@ class Command(BaseCommand):
             '--course_id',
             action='store',
             dest='course_id',
-            default='course-v1:edX+DemoX+Demo_Courset',
+            default='course-v1:edX+DemoX+Demo_Course',
             help='Course ID for which to generate fake data',
         )
         parser.add_argument(

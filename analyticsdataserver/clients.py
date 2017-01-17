@@ -1,5 +1,7 @@
 import logging
 
+from requests.exceptions import RequestException
+
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpClientError
 from opaque_keys.edx.keys import UsageKey
@@ -39,6 +41,9 @@ class CourseBlocksApiClient(EdxRestApiClient):
                                e.response.status_code)
             else:
                 logger.warning("Course Blocks API failed to return video ids (%s).", e.response.status_code)
+            return None
+        except RequestException as e:
+            logger.warning("Course Blocks API request failed. Is the LMS running?: " + str(e))
             return None
 
         # Setup a terrible hack to silence mysterious flood of ImportErrors from stevedore inside edx-opaque-keys.

@@ -11,6 +11,7 @@ from django.db.utils import ConnectionHandler, DatabaseError
 from django.test import TestCase
 from django.test.utils import override_settings
 from rest_framework.authtoken.models import Token
+from requests.exceptions import ConnectionError
 
 from analytics_data_api.v0.models import CourseEnrollmentDaily, CourseEnrollmentByBirthYear
 from analyticsdataserver.clients import CourseBlocksApiClient
@@ -174,6 +175,15 @@ class ClientTests(TestCase):
         responses.add(responses.GET, 'http://example.com/blocks/', status=418, content_type='application/json')
         videos = self.client.all_videos('course_id')
         logger.warning.assert_called_with('Course Blocks API failed to return video ids (%s).', 418)
+        self.assertEqual(videos, None)
+
+    @responses.activate
+    @mock.patch('analyticsdataserver.clients.logger')
+    def test_all_videos_connection_error(self, logger):
+        exception = ConnectionError('LMS is dead')
+        responses.add(responses.GET, 'http://example.com/blocks/', body=exception)
+        videos = self.client.all_videos('course_id')
+        logger.warning.assert_called_with('Course Blocks API request failed. Is the LMS running?: ' + str(exception))
         self.assertEqual(videos, None)
 
     @responses.activate

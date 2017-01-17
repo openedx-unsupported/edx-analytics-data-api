@@ -45,7 +45,7 @@ class Command(BaseCommand):
             help='Number of weeks worth of data to generate.',
         )
         parser.add_argument(
-            '--course_id',
+            '--course-id',
             action='store',
             dest='course_id',
             default='course-v1:edX+DemoX+Demo_Course',

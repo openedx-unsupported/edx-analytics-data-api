@@ -58,6 +58,13 @@ class Command(BaseCommand):
             default='ed_xavier',
             help='Username for which to generate fake data',
         )
+        parser.add_argument(
+            '--no-videos',
+            action='store_false',
+            dest='videos',
+            default=True,
+            help='Disables pulling video ids from the LMS server to generate fake video data and instead uses fake ids.'
+        )
 
     def generate_daily_data(self, course_id, start_date, end_date):
         # Use the preset ratios below to generate data in the specified demographics
@@ -308,18 +315,26 @@ class Command(BaseCommand):
 
         logger.info("Done!")
 
+    def fake_video_ids_fallback(self):
+        return [
+            {
+                'video_id': '0fac49ba',
+                'video_module_id': 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
+            }
+        ]
+
     def handle(self, *args, **options):
         course_id = options['course_id']
         username = options['username']
-        video_ids = self.fetch_videos_from_course_blocks(course_id)
-        if not video_ids:
-            logger.warning("Falling back to fake video id due to Course Blocks API failure...")
-            video_ids = [
-                {
-                    'video_id': '0fac49ba',
-                    'video_module_id': 'i4x-edX-DemoX-video-5c90cffecd9b48b188cbfea176bf7fe9'
-                }
-            ]
+        videos = options['videos']
+        if videos:
+            video_ids = self.fetch_videos_from_course_blocks(course_id)
+            if not video_ids:
+                logger.warning("Falling back to fake video id due to Course Blocks API failure...")
+                video_ids = self.fake_video_ids_fallback()
+        else:
+            logger.info("Option to generate videos with ids pulled from the LMS is disabled, using fake video ids...")
+            video_ids = self.fake_video_ids_fallback()
         start_date = timezone.now() - datetime.timedelta(weeks=10)
 
         num_weeks = options['num_weeks']

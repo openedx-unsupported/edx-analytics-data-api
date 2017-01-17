@@ -70,4 +70,4 @@ demo: clean requirements loaddata
 travis: clean test.requirements migrate
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_course_data --num-weeks=1
+	python manage.py generate_fake_course_data --num-weeks=1 --no-videos

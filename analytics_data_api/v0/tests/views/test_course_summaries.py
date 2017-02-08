@@ -34,7 +34,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         query_string = '?{}'.format(urlencode(query_params))
         return '/api/v0/course_summaries/{}'.format(query_string)
 
-    def generate_data(self, course_ids=None, modes=None):
+    def generate_data(self, course_ids=None, modes=None, availability='Current'):
         """Generate course summary data for """
         if course_ids is None:
             course_ids = CourseSamples.course_ids
@@ -47,10 +47,10 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
                 G(self.model, course_id=course_id, catalog_course_title='Title', catalog_course='Catalog',
                   start_time=datetime.datetime(2016, 10, 11, tzinfo=pytz.utc),
                   end_time=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
-                  pacing_type='instructor', availability='current', enrollment_mode=mode,
+                  pacing_type='instructor', availability=availability, enrollment_mode=mode,
                   count=5, cumulative_count=10, count_change_7_days=1, create=self.now,)
 
-    def expected_summary(self, course_id, modes=None):
+    def expected_summary(self, course_id, modes=None, availability='Current'):
         """Expected summary information for a course and modes to populate with data."""
         if modes is None:
             modes = enrollment_modes.ALL
@@ -66,7 +66,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
             'start_date': datetime.datetime(2016, 10, 11, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
             'end_date': datetime.datetime(2016, 12, 18, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
             'pacing_type': 'instructor',
-            'availability': 'current',
+            'availability': availability,
             'enrollment_modes': {},
             'count': count_factor * num_modes,
             'cumulative_count': cumulative_count_factor * num_modes,
@@ -96,10 +96,10 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         })
         return summary
 
-    def all_expected_summaries(self, modes=None):
+    def all_expected_summaries(self, modes=None, availability='Current'):
         if modes is None:
             modes = enrollment_modes.ALL
-        return [self.expected_summary(course_id, modes) for course_id in CourseSamples.course_ids]
+        return [self.expected_summary(course_id, modes, availability) for course_id in CourseSamples.course_ids]
 
     @ddt.data(
         None,
@@ -162,3 +162,11 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     def test_bad_course_id(self, course_ids):
         response = self.authenticated_get(self.path(course_ids=course_ids))
         self.verify_bad_course_id(response)
+
+    def test_collapse_upcoming(self):
+        self.generate_data(availability='Starting Soon')
+        response = self.authenticated_get(self.path())
+        self.assertEquals(response.status_code, 200)
+
+        expected_summaries = self.all_expected_summaries(availability='Upcoming')
+        self.assertItemsEqual(response.data, expected_summaries)

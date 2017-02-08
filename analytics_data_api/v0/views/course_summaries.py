@@ -117,6 +117,10 @@ class CourseSummariesView(generics.ListAPIView):
             for count_key in count_fields:
                 prof_mode[count_key] = prof_mode.get(count_key, 0) + prof_no_id_mode.pop(count_key, 0)
 
+            # AN-8236 replace "Starting Soon" to "Upcoming" availability to collapse the two into one value
+            if item['availability'] == 'Starting Soon':
+                item['availability'] = 'Upcoming'
+
             formatted_data.append(item)
 
         return formatted_data

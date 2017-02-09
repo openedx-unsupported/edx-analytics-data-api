@@ -22,6 +22,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     def setUp(self):
         super(CourseSummariesViewTests, self).setUp()
         self.now = datetime.datetime.utcnow()
+        self.maxDiff = None
 
     def tearDown(self):
         self.model.objects.all().delete()
@@ -96,10 +97,14 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         })
         return summary
 
-    def all_expected_summaries(self, modes=None, availability='Current'):
+    def all_expected_summaries(self, modes=None, course_ids=None, availability='Current'):
+        if course_ids is None:
+            course_ids = CourseSamples.course_ids
+
         if modes is None:
             modes = enrollment_modes.ALL
-        return [self.expected_summary(course_id, modes, availability) for course_id in CourseSamples.course_ids]
+
+        return [self.expected_summary(course_id, modes, availability) for course_id in course_ids]
 
     @ddt.data(
         None,
@@ -165,8 +170,12 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
 
     def test_collapse_upcoming(self):
         self.generate_data(availability='Starting Soon')
+        self.generate_data(course_ids=['foo/bar/baz'], availability='Upcoming')
         response = self.authenticated_get(self.path())
         self.assertEquals(response.status_code, 200)
 
         expected_summaries = self.all_expected_summaries(availability='Upcoming')
+        expected_summaries.extend(self.all_expected_summaries(course_ids=['foo/bar/baz'],
+                                                              availability='Upcoming'))
+
         self.assertItemsEqual(response.data, expected_summaries)

@@ -6,6 +6,7 @@ from rest_framework import generics
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
+from analytics_data_api.v0.views import CsvViewMixin
 from analytics_data_api.v0.views.utils import (
     raise_404_if_none,
     split_query_argument,
@@ -13,7 +14,7 @@ from analytics_data_api.v0.views.utils import (
 )
 
 
-class CourseSummariesView(generics.ListAPIView):
+class CourseSummariesView(generics.ListAPIView, CsvViewMixin):
     """
     Returns summary information for courses.
 

@@ -51,7 +51,43 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
                   pacing_type='instructor', availability=availability, enrollment_mode=mode,
                   count=5, cumulative_count=10, count_change_7_days=1, create=self.now,)
 
-    def expected_summary(self, course_id, modes=None, availability='Current'):
+    def collapse_nested_dict(self, nested_dict, dot_separated_key):
+        """Recursively flatten dictionary to a list of tuples with dot-separated keys and only atomic values.
+
+        For example:
+        self.collapse_nested_dict({
+            'audit': {
+                'count': 5,
+                'count_change_7_days': 1,
+                ...
+            },
+            'credit': {
+                'count': 10,
+                ...
+            },
+            ...
+        }, ['enrollment_modes'])
+
+        Should return:
+        [
+            ('enrollment_modes.audit.count', 5),
+            ('enrollment_modes.audit.count_change_7_days', 1),
+            ...
+            ('enrollment_modes.credit.count', 10),
+            ...
+        ]
+
+        This function is used in this TestCase to help convert the expected JSON response into a CSV response.
+        """
+        nested_key_val_pairs = []
+        for key, val in nested_dict.items():
+            if isinstance(val, dict):
+                nested_key_val_pairs.extend(self.collapse_nested_dict(val, dot_separated_key + [key]))
+            else:
+                nested_key_val_pairs.append(('.'.join(dot_separated_key + [key]), val))
+        return nested_key_val_pairs
+
+    def expected_summary(self, course_id, modes=None, availability='Current', output_format='json'):
         """Expected summary information for a course and modes to populate with data."""
         if modes is None:
             modes = enrollment_modes.ALL
@@ -95,6 +131,24 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
             'cumulative_count': prof['cumulative_count'] + no_prof['cumulative_count'],
             'count_change_7_days': prof['count_change_7_days'] + no_prof['count_change_7_days'],
         })
+        if output_format == 'csv':
+            # If the desired output is CSV, convert the dict constructed above into a list of two-element lists where
+            # the first element is the column header title and the second element is the value for the specified
+            # course.
+            summary_csv = []
+            for key, val in summary.items():
+                if isinstance(val, dict):
+                    # Flatten nested dicts to a list of dot-separated keys and atomic values and add them to
+                    # summary_csv
+                    for nested_key, nested_val in self.collapse_nested_dict(val, [key]):
+                        summary_csv.append([nested_key, nested_val])
+                else:
+                    summary_csv.append([key, val])
+            # The CsvViewMixin response sorts the columns alphabetically by their titles, while summary_csv is made
+            # from an unordered dict. Sort summary_csv by the titles so the columns will match in a string comparison.
+            summary_csv = sorted(summary_csv, key=lambda x: x[0])
+            # Convert the list of columns into a string: the expected CSV response
+            return '\n'.join([','.join(str(col[i]) for col in summary_csv) for i in range(len(summary_csv[0]))])
         return summary
 
     def all_expected_summaries(self, modes=None, course_ids=None, availability='Current'):
@@ -179,3 +233,11 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
                                                               availability='Upcoming'))
 
         self.assertItemsEqual(response.data, expected_summaries)
+
+    def test_csv_download(self):
+        self.generate_data(course_ids=['edX/DemoX/Demo_Course'])
+        response = self.authenticated_get(self.path(), HTTP_ACCEPT='text/csv')
+
+        expected_summary = self.expected_summary('edX/DemoX/Demo_Course', output_format='csv')
+        # Strip off trailing new line from response and normalize remaining new lines to '\n'
+        self.assertEqual(response.content[:-2].replace('\r\n', '\n'), expected_summary)

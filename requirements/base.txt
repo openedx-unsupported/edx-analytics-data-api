@@ -13,6 +13,6 @@ tqdm==4.10.0                        # MIT
 Markdown==2.6.6    					# BSD
 
 edx-ccx-keys==0.2.1
-edx-django-release-util==0.2.0
+edx-django-release-util==0.2.1
 edx-opaque-keys==0.4.0
 edx-rest-api-client==1.4.0          # Apache 2.0

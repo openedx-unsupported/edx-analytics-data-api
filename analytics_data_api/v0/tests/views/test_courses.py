@@ -668,6 +668,9 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
           tag_name='difficulty', tag_value=tags['difficulty'][0],
           total_submissions=11, correct_submissions=4, created=created)
         G(models.ProblemsAndTags, course_id=course_id, module_id=module_id,
+          tag_name='difficulty', tag_value=tags['difficulty'][1],
+          total_submissions=11, correct_submissions=4, created=created)
+        G(models.ProblemsAndTags, course_id=course_id, module_id=module_id,
           tag_name='learning_outcome', tag_value=tags['learning_outcome'][1],
           total_submissions=11, correct_submissions=4, created=alt_created)
         G(models.ProblemsAndTags, course_id=course_id, module_id=alt_module_id,
@@ -680,8 +683,8 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
                 'total_submissions': 11,
                 'correct_submissions': 4,
                 'tags': {
-                    u'difficulty': u'Easy',
-                    u'learning_outcome': u'Learned a few things',
+                    u'difficulty': [u'Easy', u'Medium'],
+                    u'learning_outcome': [u'Learned a few things'],
                 },
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
@@ -690,7 +693,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
                 'total_submissions': 4,
                 'correct_submissions': 0,
                 'tags': {
-                    u'learning_outcome': u'Learned everything',
+                    u'learning_outcome': [u'Learned everything'],
                 },
                 'created': created.strftime(settings.DATETIME_FORMAT)
             }

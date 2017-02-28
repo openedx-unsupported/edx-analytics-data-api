@@ -310,6 +310,7 @@ ENABLED_REPORT_IDENTIFIERS = ('problem_response',)
 # Warning: using 0 or None for these can alter the structure of the REST response.
 DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
+AGGREGATE_PAGE_SIZE = 10
 
 ########## END ANALYTICS DATA API CONFIGURATION
 

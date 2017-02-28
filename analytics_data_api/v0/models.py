@@ -407,11 +407,14 @@ class RosterEntry(DocType):
             }
         }
         """
+        # Use the configured default page size to set the number of aggregate search results.
+        page_size = getattr(settings, 'AGGREGATE_PAGE_SIZE', 10)
+
         search = cls.search()
         search.query = Q('bool', must=[Q('term', course_id=course_id)])
-        search.aggs.bucket('enrollment_modes', 'terms', field='enrollment_mode')
-        search.aggs.bucket('segments', 'terms', field='segments')
-        search.aggs.bucket('cohorts', 'terms', field='cohort')
+        search.aggs.bucket('enrollment_modes', 'terms', field='enrollment_mode', size=page_size)
+        search.aggs.bucket('segments', 'terms', field='segments', size=page_size)
+        search.aggs.bucket('cohorts', 'terms', field='cohort', size=page_size)
         response = search.execute()
         # Build up the map of aggregation name to count
         aggregations = {

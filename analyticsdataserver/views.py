@@ -12,7 +12,7 @@ def handle_internal_server_error(_request):
     return _handle_error(500)
 
 
-def handle_missing_resource_error(_request):
+def handle_missing_resource_error(_request, exception=None):  # pylint: disable=unused-argument
     """Notify the client that the requested resource could not be found."""
     return _handle_error(404)
 

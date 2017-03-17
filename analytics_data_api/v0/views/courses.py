@@ -714,7 +714,7 @@ class ProblemsAndTagsListView(BaseCourseView):
             * module_id: The ID of the problem.
             * total_submissions: Total number of submissions.
             * correct_submissions: Total number of *correct* submissions.
-            * tags: Dictionary that contains pairs "tag key: tag value".
+            * tags: Dictionary that contains pairs "tag key: [tag value 1, tag value 2, ..., tag value N]".
     """
     serializer_class = serializers.ProblemsAndTagsSerializer
     allow_empty = False
@@ -729,7 +729,10 @@ class ProblemsAndTagsListView(BaseCourseView):
 
         for v in items:
             if v.module_id in result:
-                result[v.module_id]['tags'][v.tag_name] = v.tag_value
+                if v.tag_name not in result[v.module_id]['tags']:
+                    result[v.module_id]['tags'][v.tag_name] = []
+                result[v.module_id]['tags'][v.tag_name].append(v.tag_value)
+                result[v.module_id]['tags'][v.tag_name].sort()
                 if result[v.module_id]['created'] < v.created:
                     result[v.module_id]['created'] = v.created
             else:
@@ -738,7 +741,7 @@ class ProblemsAndTagsListView(BaseCourseView):
                     'total_submissions': v.total_submissions,
                     'correct_submissions': v.correct_submissions,
                     'tags': {
-                        v.tag_name: v.tag_value
+                        v.tag_name: [v.tag_value]
                     },
                     'created': v.created
                 }

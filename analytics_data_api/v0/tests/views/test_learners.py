@@ -14,6 +14,7 @@ from rest_framework import status
 
 from django.conf import settings
 from django.core import management
+from django.test import override_settings
 
 from analyticsdataserver.tests import TestCaseWithAuthentication
 from analytics_data_api.constants import engagement_events
@@ -761,6 +762,29 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         expected_cohorts = {
             cohort: len([mode for mode in group]) for cohort, group in groupby(cohorts)
         }
+        expected = self.get_expected_json(
+            course_id=course_id,
+            segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},
+            enrollment_modes={'honor': len(cohorts)} if cohorts else {},
+            cohorts=expected_cohorts,
+        )
+        self.assert_response_matches(self._get(course_id), 200, expected)
+
+    @ddt.data(
+        (CourseSamples.course_ids[0], [], {}),
+        (CourseSamples.course_ids[1], ['Yellow'], {'Yellow': 1}),
+        (CourseSamples.course_ids[1], ['Yellow', 'Green'], {'Yellow': 1, 'Green': 1}),
+        (CourseSamples.course_ids[0], ['Red', 'Red', 'yellow team', 'green'], {'Red': 2, 'green': 1}),
+    )
+    @ddt.unpack
+    @override_settings(AGGREGATE_PAGE_SIZE=2)
+    def test_cohorts_page_size(self, course_id, cohorts, expected_cohorts):
+        """ Ensure that the AGGREGATE_PAGE_SIZE sets the max number of cohorts returned."""
+
+        self.create_learners([
+            {'username': 'user_{}'.format(i), 'course_id': course_id, 'cohort': cohort}
+            for i, cohort in enumerate(cohorts)
+        ])
         expected = self.get_expected_json(
             course_id=course_id,
             segments={'disengaging': 0, 'struggling': 0, 'highly_engaged': 0, 'inactive': 0, 'unenrolled': 0},

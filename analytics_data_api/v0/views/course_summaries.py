@@ -23,7 +23,7 @@ class CourseSummariesView(generics.ListAPIView):
 
     **Response Values**
 
-        Returns the count of each gender specified by users:
+        Returns enrollment counts and other metadata for each course:
 
             * course_id: The ID of the course for which data is returned.
             * catalog_course_title: The name of the course.
@@ -37,6 +37,7 @@ class CourseSummariesView(generics.ListAPIView):
             * count_change_7_days: Total difference in enrollment counts over the past 7 days across modes.
             * enrollment_modes: For each enrollment mode, the count, cumulative_count, and count_change_7_days.
             * created: The date the counts were computed.
+            * programs: List of program IDs that this course is a part of.
 
     **Parameters**
 
@@ -44,17 +45,16 @@ class CourseSummariesView(generics.ListAPIView):
 
         course_ids -- The comma-separated course identifiers for which summaries are requested.
             For example, 'edX/DemoX/Demo_Course,course-v1:edX+DemoX+Demo_2016'.  Default is to
-            return call courses.
+            return all courses.
         fields -- The comma-separated fields to return in the response.
-            For example, 'course_id,created_mode'.  Default is to return all fields.
-
-        fields -- Fields to include in response.  Default is all.
+            For example, 'course_id,created'.  Default is to return all fields.
     """
-
     course_ids = None
     fields = None
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
+    programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
+    programs_model = models.CourseProgramMetadata
 
     def get_serializer(self, *args, **kwargs):
         kwargs.update({
@@ -125,6 +125,16 @@ class CourseSummariesView(generics.ListAPIView):
 
         return formatted_data
 
+    def add_programs(self, summaries):
+        """Query for programs attached to each course and include them in each course summary"""
+        for summary in summaries:
+            summary['programs'] = []
+            queryset = self.programs_model.objects.filter(course_id=summary['course_id'])
+            for program in queryset:
+                program = self.programs_serializer_class(program)
+                summary['programs'].append(program.data['program_id'])
+        return summaries
+
     @raise_404_if_none
     def get_queryset(self):
         if self.course_ids:
@@ -134,4 +144,6 @@ class CourseSummariesView(generics.ListAPIView):
         else:
             queryset = self.model.objects.all()
 
-        return self.group_by_mode(queryset)
+        summaries = self.group_by_mode(queryset)
+        summaries = self.add_programs(summaries)
+        return summaries

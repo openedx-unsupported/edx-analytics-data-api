@@ -85,6 +85,17 @@ class CourseMetaSummaryEnrollment(BaseCourseModel):
         unique_together = [('course_id', 'enrollment_mode',)]
 
 
+class CourseProgramMetadata(BaseCourseModel):
+    program_id = models.CharField(db_index=True, max_length=255)
+    program_type = models.CharField(db_index=True, max_length=255)
+    program_title = models.CharField(max_length=255)
+
+    class Meta(BaseCourseModel.Meta):
+        db_table = 'course_program_metadata'
+        ordering = ('course_id',)
+        unique_together = [('course_id', 'program_id',)]
+
+
 class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
     birth_year = models.IntegerField(null=False)
 

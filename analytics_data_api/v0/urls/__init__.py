@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', 'videos')),
     url('^', include('analytics_data_api.v0.urls.learners', 'learners')),
     url('^', include('analytics_data_api.v0.urls.course_summaries', 'course_summaries')),
+    url('^', include('analytics_data_api.v0.urls.programs', 'programs')),
 
     # pylint: disable=no-value-for-parameter
     url(r'^authenticated/$', RedirectView.as_view(url=reverse_lazy('authenticated')), name='authenticated'),

@@ -555,3 +555,19 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, Dyn
         model = models.CourseMetaSummaryEnrollment
         # start_date and end_date used instead of start_time and end_time
         exclude = ('id', 'start_time', 'end_time', 'enrollment_mode')
+
+
+class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFieldsModelSerializer):
+    """
+    Serializer for course and the programs it is under.
+    """
+    course_id = serializers.CharField()
+    program_id = serializers.CharField()
+    program_type = serializers.CharField()
+    program_title = serializers.CharField()
+
+    class Meta(object):
+        model = models.CourseProgramMetadata
+        # excluding course-related fields because the serialized output will be embedded in a course object
+        # with thsoe fields already defined
+        exclude = ('id', 'created')

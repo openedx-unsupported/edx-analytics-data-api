@@ -51,6 +51,7 @@ class CourseSummariesView(generics.ListAPIView):
     """
     course_ids = None
     fields = None
+    exclude = ('programs',)
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
@@ -60,6 +61,7 @@ class CourseSummariesView(generics.ListAPIView):
         kwargs.update({
             'context': self.get_serializer_context(),
             'fields': self.fields,
+            'exclude': self.exclude
         })
         return self.get_serializer_class()(*args, **kwargs)
 
@@ -145,5 +147,9 @@ class CourseSummariesView(generics.ListAPIView):
             queryset = self.model.objects.all()
 
         summaries = self.group_by_mode(queryset)
-        summaries = self.add_programs(summaries)
+
+        if self.exclude and 'programs' not in self.exclude:
+            # don't do expensive looping for programs if we are just going to throw it away
+            summaries = self.add_programs(summaries)
+
         return summaries

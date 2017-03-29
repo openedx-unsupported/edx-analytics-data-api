@@ -27,9 +27,9 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     def tearDown(self):
         self.model.objects.all().delete()
 
-    def path(self, course_ids=None, fields=None):
+    def path(self, course_ids=None, fields=None, exclude=None):
         query_params = {}
-        for query_arg, data in zip(['course_ids', 'fields'], [course_ids, fields]):
+        for query_arg, data in zip(['course_ids', 'fields', 'exclude'], [course_ids, fields, exclude]):
             if data:
                 query_params[query_arg] = ','.join(data)
         query_string = '?{}'.format(urlencode(query_params))
@@ -113,14 +113,14 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     )
     def test_all_courses(self, course_ids):
         self.generate_data()
-        response = self.authenticated_get(self.path(course_ids=course_ids))
+        response = self.authenticated_get(self.path(course_ids=course_ids, exclude=('programs',)))
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, self.all_expected_summaries())
 
     @ddt.data(*CourseSamples.course_ids)
     def test_one_course(self, course_id):
         self.generate_data()
-        response = self.authenticated_get(self.path(course_ids=[course_id]))
+        response = self.authenticated_get(self.path(course_ids=[course_id], exclude=('programs',)))
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, [self.expected_summary(course_id)])
 
@@ -147,7 +147,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     )
     def test_empty_modes(self, modes):
         self.generate_data(modes=modes)
-        response = self.authenticated_get(self.path())
+        response = self.authenticated_get(self.path(exclude=('programs',)))
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, self.all_expected_summaries(modes))
 
@@ -171,7 +171,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     def test_collapse_upcoming(self):
         self.generate_data(availability='Starting Soon')
         self.generate_data(course_ids=['foo/bar/baz'], availability='Upcoming')
-        response = self.authenticated_get(self.path())
+        response = self.authenticated_get(self.path(exclude=('programs',)))
         self.assertEquals(response.status_code, 200)
 
         expected_summaries = self.all_expected_summaries(availability='Upcoming')

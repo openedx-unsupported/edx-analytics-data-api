@@ -68,6 +68,7 @@ class CourseSummariesView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         query_params = self.request.query_params
         self.fields = split_query_argument(query_params.get('fields'))
+        self.exclude = split_query_argument(query_params.get('exclude'))
         self.course_ids = split_query_argument(query_params.get('course_ids'))
         if self.course_ids is not None:
             for course_id in self.course_ids:

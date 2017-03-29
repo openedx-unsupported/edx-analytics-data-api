@@ -15,6 +15,12 @@ class CourseSamples(object):
         'ccx-v1:edx+1.005x-CCX+rerun+ccx@15'
     ]
 
+    program_ids = [
+        '482dee71-e4b9-4b42-a47b-3e16bb69e8f2',
+        '71c14f59-35d5-41f2-a017-e108d2d9f127',
+        'cfc6b5ee-6aa1-4c82-8421-20418c492618'
+    ]
+
 
 class VerifyCourseIdMixin(object):
 

@@ -2,16 +2,14 @@ from itertools import groupby
 
 from django.db.models import Q
 
-from rest_framework import generics
-
 from analytics_data_api.v0 import models, serializers
+from analytics_data_api.v0.views import APIListView
 from analytics_data_api.v0.views.utils import (
-    raise_404_if_none,
     split_query_argument,
 )
 
 
-class ProgramsView(generics.ListAPIView):
+class ProgramsView(APIListView):
     """
     Returns metadata information for programs.
 
@@ -36,35 +34,19 @@ class ProgramsView(generics.ListAPIView):
             Default is to return all programs.
         fields -- The comma-separated fields to return in the response.
             For example, 'program_id,created'.  Default is to return all fields.
+        exclude -- The comma-separated fields to exclude in the response.
+            For example, 'course_id,created'.  Default is to not exclude any fields.
     """
-    program_ids = None
     always_exclude = ['course_id']  # original model has course_id, but the serializer does not (after aggregation)
-    fields = None
-    exclude = None
     serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseProgramMetadata
+    model_id = 'program_id'
+    program_meta_fields = ['program_type', 'program_title']
 
-    def get_serializer(self, *args, **kwargs):
-        kwargs.update({
-            'context': self.get_serializer_context(),
-            'fields': self.fields,
-            'exclude': self.exclude
-        })
-        return self.get_serializer_class()(*args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        query_params = self.request.query_params
-        self.fields = split_query_argument(query_params.get('fields'))
-        exclude = split_query_argument(query_params.get('exclude'))
-        self.exclude = self.always_exclude + (exclude if exclude else [])
-        self.program_ids = split_query_argument(query_params.get('program_ids'))
-
-        return super(ProgramsView, self).get(request, *args, **kwargs)
-
-    def default_program(self, program_id):
+    def default_result(self, id):
         """Default program with id, empty metadata, and empty courses array."""
         program = {
-            'program_id': program_id,
+            'program_id': id,
             'program_type': '',
             'program_title': '',
             'created': None,
@@ -72,32 +54,15 @@ class ProgramsView(generics.ListAPIView):
         }
         return program
 
-    def group_by_program(self, queryset):
-        """Return enrollment counts for nested in each mode and top-level enrollment counts."""
-        formatted_data = []
-        for program_id, programs in groupby(queryset, lambda x: (x.program_id)):
-            item = self.default_program(program_id)
+    def get_result_from_model(self, model, base_result=None):
+        result = super(ProgramsView, self).get_result_from_model(model, base_result=base_result,
+                                                                 field_list=self.program_meta_fields)
+        result['courses'].append(model.course_id)
 
-            # aggregate the program/course pairs to one program item with course_ids array
-            for program in programs:
-                program_meta_fields = ['program_type', 'program_title']
-                item.update({field: getattr(program, field) for field in program_meta_fields})
-                item['courses'].append(program.course_id)
+        # treat the most recent as the authoritative created date -- should be all the same
+        result['created'] = max(model.created, result['created']) if result['created'] else model.created
 
-                # treat the most recent as the authoritative created date -- should be all the same
-                item['created'] = max(program.created, item['created']) if item['created'] else program.created
+        return result
 
-            formatted_data.append(item)
-        return formatted_data
-
-    @raise_404_if_none
-    def get_queryset(self):
-        if self.program_ids:
-            # create an OR query for course IDs that match
-            query = reduce(lambda q, program_id: q | Q(program_id=program_id), self.program_ids, Q())
-            queryset = self.model.objects.filter(query)
-        else:
-            queryset = self.model.objects.all()
-
-        programs = self.group_by_program(queryset)
-        return programs
+    def get_query(self):
+        return reduce(lambda q, id: q | Q(program_id=id), self.ids, Q())

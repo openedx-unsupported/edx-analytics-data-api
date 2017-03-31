@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import datetime
 from urllib import urlencode
 
@@ -29,7 +30,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
 
     def path(self, course_ids=None, fields=None, exclude=None):
         query_params = {}
-        for query_arg, data in zip(['course_ids', 'fields', 'exclude'], [course_ids, fields, exclude]):
+        for query_arg, data in zip(['ids', 'fields', 'exclude'], [course_ids, fields, exclude]):
             if data:
                 query_params[query_arg] = ','.join(data)
         query_string = '?{}'.format(urlencode(query_params))
@@ -60,20 +61,20 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         count_factor = 5
         cumulative_count_factor = 10
         count_change_factor = 1
-        summary = {
-            'course_id': course_id,
-            'catalog_course_title': 'Title',
-            'catalog_course': 'Catalog',
-            'start_date': datetime.datetime(2016, 10, 11, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
-            'end_date': datetime.datetime(2016, 12, 18, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT),
-            'pacing_type': 'instructor',
-            'availability': availability,
-            'enrollment_modes': {},
-            'count': count_factor * num_modes,
-            'cumulative_count': cumulative_count_factor * num_modes,
-            'count_change_7_days': count_change_factor * num_modes,
-            'created': self.now.strftime(settings.DATETIME_FORMAT),
-        }
+        summary = OrderedDict([
+            ('created', self.now.strftime(settings.DATETIME_FORMAT)),
+            ('course_id', course_id),
+            ('catalog_course_title', 'Title'),
+            ('catalog_course', 'Catalog'),
+            ('start_date', datetime.datetime(2016, 10, 11, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT)),
+            ('end_date', datetime.datetime(2016, 12, 18, tzinfo=pytz.utc).strftime(settings.DATETIME_FORMAT)),
+            ('pacing_type', 'instructor'),
+            ('availability', availability),
+            ('count', count_factor * num_modes),
+            ('cumulative_count', cumulative_count_factor * num_modes),
+            ('count_change_7_days', count_change_factor * num_modes),
+            ('enrollment_modes', {}),
+        ])
         summary['enrollment_modes'].update({
             mode: {
                 'count': count_factor,
@@ -115,7 +116,9 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         self.generate_data()
         response = self.authenticated_get(self.path(course_ids=course_ids, exclude=('programs',)))
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_summaries())
+        expected = sorted(self.all_expected_summaries(course_ids=course_ids), key=lambda x: x['course_id'])
+        actual = sorted(response.data, key=lambda x: x['course_id'])
+        self.assertListEqual(actual, expected)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_one_course(self, course_id):

@@ -27,7 +27,7 @@ class ProgramsViewTests(TestCaseWithAuthentication):
 
     def path(self, program_ids=None, fields=None, exclude=None):
         query_params = {}
-        for query_arg, data in zip(['program_ids', 'fields', 'exclude'], [program_ids, fields, exclude]):
+        for query_arg, data in zip(['ids', 'fields', 'exclude'], [program_ids, fields, exclude]):
             if data:
                 query_params[query_arg] = ','.join(data)
         query_string = '?{}'.format(urlencode(query_params))
@@ -65,7 +65,9 @@ class ProgramsViewTests(TestCaseWithAuthentication):
         self.generate_data()
         response = self.authenticated_get(self.path(program_ids=program_ids, exclude=('created',)))
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_programs())
+        expected = sorted(self.all_expected_programs(program_ids=program_ids), key=lambda x: x['program_id'])
+        actual = sorted(response.data, key=lambda x: x['program_id'])
+        self.assertListEqual(actual, expected)
 
     @ddt.data(*CourseSamples.program_ids)
     def test_one_course(self, program_id):

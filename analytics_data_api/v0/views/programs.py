@@ -1,12 +1,7 @@
-from itertools import groupby
-
 from django.db.models import Q
 
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.views import APIListView
-from analytics_data_api.v0.views.utils import (
-    split_query_argument,
-)
 
 
 class ProgramsView(APIListView):
@@ -43,10 +38,10 @@ class ProgramsView(APIListView):
     model_id = 'program_id'
     program_meta_fields = ['program_type', 'program_title']
 
-    def default_result(self, id):
+    def default_result(self, item_id):
         """Default program with id, empty metadata, and empty courses array."""
         program = {
-            'program_id': id,
+            'program_id': item_id,
             'program_type': '',
             'program_title': '',
             'created': None,
@@ -54,7 +49,7 @@ class ProgramsView(APIListView):
         }
         return program
 
-    def get_result_from_model(self, model, base_result=None):
+    def get_result_from_model(self, model, base_result=None, field_list=None):
         result = super(ProgramsView, self).get_result_from_model(model, base_result=base_result,
                                                                  field_list=self.program_meta_fields)
         result['courses'].append(model.course_id)
@@ -65,4 +60,4 @@ class ProgramsView(APIListView):
         return result
 
     def get_query(self):
-        return reduce(lambda q, id: q | Q(program_id=id), self.ids, Q())
+        return reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())

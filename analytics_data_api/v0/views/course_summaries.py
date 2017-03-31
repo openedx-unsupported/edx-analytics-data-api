@@ -58,12 +58,12 @@ class CourseSummariesView(APIListView):
 
     def verify_ids(self):
         if self.ids is not None:
-            for id in self.ids:
-                validate_course_id(id)
+            for item_id in self.ids:
+                validate_course_id(item_id)
 
-    def default_result(self, id):
+    def default_result(self, item_id):
         """Default summary with fields populated to default levels."""
-        summary = super(CourseSummariesView, self).default_result(id)
+        summary = super(CourseSummariesView, self).default_result(item_id)
         summary.update({
             'created': None,
             'enrollment_modes': {},
@@ -76,7 +76,7 @@ class CourseSummariesView(APIListView):
         })
         return summary
 
-    def get_result_from_model(self, model, base_result=None):
+    def get_result_from_model(self, model, base_result=None, field_list=None):
         result = super(CourseSummariesView, self).get_result_from_model(model, base_result=base_result,
                                                                         field_list=self.summary_meta_fields)
         result['enrollment_modes'].update({
@@ -119,4 +119,4 @@ class CourseSummariesView(APIListView):
         return result
 
     def get_query(self):
-        return reduce(lambda q, id: q | Q(course_id=id), self.ids, Q())
+        return reduce(lambda q, item_id: q | Q(course_id=item_id), self.ids, Q())

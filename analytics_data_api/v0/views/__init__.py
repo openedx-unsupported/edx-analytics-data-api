@@ -179,15 +179,17 @@ class APIListView(generics.ListAPIView):
     def verify_ids(self):
         pass  # to be implemented in subclasses
 
-    def default_result(self, id):
+    def default_result(self, item_id):
         """Default result with fields pre-populated to default values."""
         result = {
-            self.model_id: id,
+            self.model_id: item_id,
         }
         return result
 
     def get_result_from_model(self, model, base_result=None, field_list=None):
+        # pylint: disable=protected-access,locally-enabled
         field_list = field_list if field_list else [f.name for f in self.model._meta.get_fields()]
+        # pylint: enable=protected-access,locally-enabled
         result = base_result if base_result else {}
         result.update({field: getattr(model, field) for field in field_list})
         return result
@@ -199,8 +201,8 @@ class APIListView(generics.ListAPIView):
     def group_by_id(self, queryset):
         """Return results aggregated by a distinct ID."""
         formatted_results = []
-        for id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id))):
-            result = self.default_result(id)
+        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id))):
+            result = self.default_result(item_id)
 
             for model in model_group:
                 result = self.get_result_from_model(model, base_result=result)
@@ -211,7 +213,7 @@ class APIListView(generics.ListAPIView):
         return formatted_results
 
     def get_query(self):
-        return reduce(lambda q, id: q | Q(id=id), self.ids, Q())
+        return reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
 
     @raise_404_if_none
     def get_queryset(self):

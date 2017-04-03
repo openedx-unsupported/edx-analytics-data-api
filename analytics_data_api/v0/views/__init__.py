@@ -12,8 +12,8 @@ from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
 from analytics_data_api.v0.views.utils import (
     raise_404_if_none,
     split_query_argument,
+    validate_course_id
 )
-import analytics_data_api.utils as utils
 
 
 class CourseViewMixin(object):
@@ -28,7 +28,7 @@ class CourseViewMixin(object):
 
         if not self.course_id:
             raise CourseNotSpecifiedError()
-        utils.validate_course_id(self.course_id)
+        validate_course_id(self.course_id)
         return super(CourseViewMixin, self).get(request, *args, **kwargs)
 
 

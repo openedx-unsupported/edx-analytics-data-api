@@ -181,4 +181,6 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         expected_summaries.extend(self.all_expected_summaries(course_ids=['foo/bar/baz'],
                                                               availability='Upcoming'))
 
-        self.assertItemsEqual(response.data, expected_summaries)
+        expected = sorted(expected_summaries, key=lambda x: x['course_id'])
+        actual = sorted(response.data, key=lambda x: x['course_id'])
+        self.assertListEqual(actual, expected)

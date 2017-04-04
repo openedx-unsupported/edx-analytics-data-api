@@ -1,7 +1,10 @@
+import csv
 import json
 import StringIO
-import csv
+from collections import OrderedDict
+from urllib import urlencode
 
+from django_dynamic_fixture import G
 from rest_framework import status
 
 from analytics_data_api.v0.tests.utils import flatten
@@ -86,3 +89,78 @@ class VerifyCsvResponseMixin(object):
         # Just check the header row
         self.assertGreater(len(rows), 1)
         self.assertEqual(rows[0], fields)
+
+
+class APIListViewTestMixin(object):
+    model = None
+    model_id = 'id'
+    serializer = None
+    expected_results = []
+    list_name = 'list'
+    default_ids = []
+    always_exclude = ['created']
+
+    def path(self, ids=None, fields=None, exclude=None):
+        query_params = {}
+        for query_arg, data in zip(['ids', 'fields', 'exclude'], [ids, fields, exclude]):
+            if data:
+                query_params[query_arg] = ','.join(data)
+        query_string = '?{}'.format(urlencode(query_params))
+        return '/api/v0/{}/{}'.format(self.list_name, query_string)
+
+    def create_model(self, model_id, **kwargs):
+        G(self.model, id=model_id, **kwargs)
+
+    def generate_data(self, ids=None, **kwargs):
+        """Generate list data"""
+        if ids is None:
+            ids = self.default_ids
+
+        for item_id in ids:
+            self.create_model(item_id, **kwargs)
+
+    def expected_result(self, item_id):
+        result = OrderedDict([
+            (self.model_id, item_id),
+        ])
+        return result
+
+    def all_expected_results(self, ids=None, **kwargs):
+        if ids is None:
+            ids = self.default_ids
+
+        return [self.expected_result(item_id, **kwargs) for item_id in ids]
+
+    def _test_all_items(self, ids):
+        self.generate_data()
+        response = self.authenticated_get(self.path(ids=ids, exclude=self.always_exclude))
+        self.assertEquals(response.status_code, 200)
+        self.assertItemsEqual(response.data, self.all_expected_results(ids=ids))
+
+    def _test_one_item(self, item_id):
+        self.generate_data()
+        response = self.authenticated_get(self.path(ids=[item_id], exclude=self.always_exclude))
+        self.assertEquals(response.status_code, 200)
+        self.assertItemsEqual(response.data, [self.expected_result(item_id)])
+
+    def _test_fields(self, fields):
+        self.generate_data()
+        response = self.authenticated_get(self.path(fields=fields))
+        self.assertEquals(response.status_code, 200)
+
+        # remove fields not requested from expected results
+        expected_results = self.all_expected_results()
+        for expected_result in expected_results:
+            for field_to_remove in set(expected_result.keys()) - set(fields):
+                expected_result.pop(field_to_remove)
+
+        self.assertItemsEqual(response.data, expected_results)
+
+    def test_no_items(self):
+        response = self.authenticated_get(self.path())
+        self.assertEquals(response.status_code, 404)
+
+    def test_no_matching_items(self):
+        self.generate_data()
+        response = self.authenticated_get(self.path(ids=['no/items/found']))
+        self.assertEquals(response.status_code, 404)

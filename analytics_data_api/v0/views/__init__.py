@@ -187,9 +187,8 @@ class APIListView(generics.ListAPIView):
         return result
 
     def get_result_from_model(self, model, base_result=None, field_list=None):
-        # pylint: disable=protected-access,locally-enabled
-        field_list = field_list if field_list else [f.name for f in self.model._meta.get_fields()]
-        # pylint: enable=protected-access,locally-enabled
+        field_list = (field_list if field_list else
+                      [f.name for f in self.model._meta.get_fields()])  # pylint: disable=protected-access
         result = base_result if base_result else {}
         result.update({field: getattr(model, field) for field in field_list})
         return result

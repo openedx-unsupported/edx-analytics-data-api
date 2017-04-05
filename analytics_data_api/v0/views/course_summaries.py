@@ -46,6 +46,8 @@ class CourseSummariesView(APIListView):
             For example, 'course_id,created'.  Default is to return all fields.
         exclude -- The comma-separated fields to exclude in the response.
             For example, 'course_id,created'.  Default is to exclude the programs array.
+        programs -- If included in the query parameters, will find each courses' program IDs
+            and include them in the response.
     """
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer

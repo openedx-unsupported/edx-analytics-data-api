@@ -584,6 +584,10 @@ class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFi
     program_id = serializers.CharField()
     program_type = serializers.CharField()
     program_title = serializers.CharField()
+    courses = serializers.SerializerMethodField()
+
+    def get_courses(self, obj):
+        return obj.get('courses', None)
 
     class Meta(object):
         model = models.CourseProgramMetadata

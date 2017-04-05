@@ -4,6 +4,7 @@ from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.views import APIListView
 from analytics_data_api.v0.views.utils import (
+    split_query_argument,
     validate_course_id,
 )
 
@@ -46,7 +47,6 @@ class CourseSummariesView(APIListView):
         exclude -- The comma-separated fields to exclude in the response.
             For example, 'course_id,created'.  Default is to exclude the programs array.
     """
-    exclude = ('programs',)
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
@@ -55,6 +55,14 @@ class CourseSummariesView(APIListView):
     count_fields = ('count', 'cumulative_count', 'count_change_7_days')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                            'pacing_type', 'availability']  # fields to extract from summary model
+
+    def get(self, request, *args, **kwargs):
+        query_params = self.request.query_params
+        programs = split_query_argument(query_params.get('programs'))
+        if not programs:
+            self.always_exclude = ['programs']
+        response = super(CourseSummariesView, self).get(request, *args, **kwargs)
+        return response
 
     def verify_ids(self):
         if self.ids is not None:
@@ -103,7 +111,7 @@ class CourseSummariesView(APIListView):
         if result['availability'] == 'Starting Soon':
             result['availability'] = 'Upcoming'
 
-        if self.exclude and 'programs' not in self.exclude:
+        if self.exclude == [] or (self.exclude and 'programs' not in self.exclude):
             # don't do expensive looping for programs if we are just going to throw it away
             result = self.add_programs(result)
 
@@ -114,7 +122,7 @@ class CourseSummariesView(APIListView):
         result['programs'] = []
         queryset = self.programs_model.objects.filter(course_id=result['course_id'])
         for program in queryset:
-            program = self.programs_serializer_class(program)
+            program = self.programs_serializer_class(program.__dict__)
             result['programs'].append(program.data['program_id'])
         return result
 

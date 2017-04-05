@@ -37,6 +37,10 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
               end_time=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
               pacing_type='instructor', availability=kwargs['availability'], enrollment_mode=mode,
               count=5, cumulative_count=10, count_change_7_days=1, create=self.now,)
+        if 'programs' in kwargs and kwargs['programs']:
+            # Create a link from this course to a program
+            G(models.CourseProgramMetadata, course_id=model_id, program_id=CourseSamples.program_ids[0],
+              program_type='Demo', program_title='Test')
 
     def generate_data(self, ids=None, modes=None, availability='Current', **kwargs):
         """Generate course summary data"""
@@ -45,7 +49,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
         super(CourseSummariesViewTests, self).generate_data(ids=ids, modes=modes, availability=availability, **kwargs)
 
-    def expected_result(self, item_id, modes=None, availability='Current'):  # pylint: disable=arguments-differ
+    def expected_result(self, item_id, modes=None, availability='Current', programs=False):  # pylint: disable=arguments-differ
         """Expected summary information for a course and modes to populate with data."""
         summary = super(CourseSummariesViewTests, self).expected_result(item_id)
 
@@ -89,14 +93,17 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
             'cumulative_count': prof['cumulative_count'] + no_prof['cumulative_count'],
             'count_change_7_days': prof['count_change_7_days'] + no_prof['count_change_7_days'],
         })
+        if programs:
+            summary['programs'] = [CourseSamples.program_ids[0]]
         return summary
 
-    def all_expected_results(self, ids=None, modes=None, availability='Current'):  # pylint: disable=arguments-differ
+    def all_expected_results(self, ids=None, modes=None, availability='Current', programs=False):  # pylint: disable=arguments-differ
         if modes is None:
             modes = enrollment_modes.ALL
 
         return super(CourseSummariesViewTests, self).all_expected_results(ids=ids, modes=modes,
-                                                                          availability=availability)
+                                                                          availability=availability,
+                                                                          programs=programs)
 
     @ddt.data(
         None,
@@ -146,3 +153,9 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
                                                             availability='Upcoming'))
 
         self.assertItemsEqual(response.data, expected_summaries)
+
+    def test_programs(self):
+        self.generate_data(programs=True)
+        response = self.authenticated_get(self.path(exclude=self.always_exclude[:1], programs=['True']))
+        self.assertEquals(response.status_code, 200)
+        self.assertItemsEqual(response.data, self.all_expected_results(programs=True))

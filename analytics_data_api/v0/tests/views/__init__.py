@@ -100,16 +100,16 @@ class APIListViewTestMixin(object):
     default_ids = []
     always_exclude = ['created']
 
-    def path(self, ids=None, fields=None, exclude=None):
+    def path(self, ids=None, fields=None, exclude=None, **kwargs):
         query_params = {}
-        for query_arg, data in zip(['ids', 'fields', 'exclude'], [ids, fields, exclude]):
+        for query_arg, data in zip(['ids', 'fields', 'exclude'], [ids, fields, exclude]) + kwargs.items():
             if data:
                 query_params[query_arg] = ','.join(data)
         query_string = '?{}'.format(urlencode(query_params))
         return '/api/v0/{}/{}'.format(self.list_name, query_string)
 
     def create_model(self, model_id, **kwargs):
-        G(self.model, id=model_id, **kwargs)
+        pass  # implement in subclass
 
     def generate_data(self, ids=None, **kwargs):
         """Generate list data"""

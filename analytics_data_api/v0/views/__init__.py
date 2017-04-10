@@ -154,9 +154,7 @@ class APIListView(generics.ListAPIView):
     fields = None
     exclude = None
     always_exclude = []
-    serializer_class = serializers.ModelSerializer
-    model = models.Model
-    model_id = 'id'
+    model_id_field = 'id'
 
     def get_serializer(self, *args, **kwargs):
         kwargs.update({
@@ -172,44 +170,40 @@ class APIListView(generics.ListAPIView):
         exclude = split_query_argument(query_params.get('exclude'))
         self.exclude = self.always_exclude + (exclude if exclude else [])
         self.ids = split_query_argument(query_params.get('ids'))
-        self.verify_ids()
 
         return super(APIListView, self).get(request, *args, **kwargs)
 
-    def verify_ids(self):
-        pass  # to be implemented in subclasses
-
-    def default_result(self, item_id):
+    def base_field_dict(self, item_id):
         """Default result with fields pre-populated to default values."""
-        result = {
-            self.model_id: item_id,
+        field_dict = {
+            self.model_id_field: item_id,
         }
-        return result
+        return field_dict
 
-    def get_result_from_model(self, model, base_result=None, field_list=None):
+    def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
         field_list = (field_list if field_list else
                       [f.name for f in self.model._meta.get_fields()])  # pylint: disable=protected-access
-        result = base_result if base_result else {}
-        result.update({field: getattr(model, field) for field in field_list})
-        return result
+        field_dict = base_field_dict if base_field_dict else {}
+        field_dict.update({field: getattr(model, field) for field in field_list})
+        return field_dict
 
-    def postprocess_result(self, result):
+    def postprocess_field_dict(self, field_dict):
         """Applies some business logic to final result without access to any data from the original model."""
-        return result
+        return field_dict
 
     def group_by_id(self, queryset):
         """Return results aggregated by a distinct ID."""
-        formatted_results = []
-        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id))):
-            result = self.default_result(item_id)
+        aggregate_field_dict = []
+        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
+            field_dict = self.base_field_dict(item_id)
 
             for model in model_group:
-                result = self.get_result_from_model(model, base_result=result)
+                field_dict = self.update_field_dict_from_model(model, base_field_dict=field_dict)
 
-            result = self.postprocess_result(result)
-            formatted_results.append(result)
+            field_dict = self.postprocess_field_dict(field_dict)
+            aggregate_field_dict.append(field_dict)
 
-        return formatted_results
+        return aggregate_field_dict
 
     def get_query(self):
         return reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
@@ -221,6 +215,7 @@ class APIListView(generics.ListAPIView):
         else:
             queryset = self.model.objects.all()
 
-        results = self.group_by_id(queryset)
+        field_dict = self.group_by_id(queryset)
 
-        return results
+        # Django-rest-framework will serialize this dictionary to a JSON response
+        return field_dict

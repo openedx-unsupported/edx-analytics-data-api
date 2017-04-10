@@ -34,7 +34,7 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         program.update([
             ('program_type', 'Demo'),
             ('program_title', 'Test'),
-            ('courses', [CourseSamples.course_ids[0]])
+            ('course_ids', [self.course_id])
         ])
         return program
 

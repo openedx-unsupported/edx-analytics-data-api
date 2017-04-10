@@ -580,17 +580,16 @@ class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFi
     """
     Serializer for course and the programs it is under.
     """
-    course_id = serializers.CharField()
     program_id = serializers.CharField()
     program_type = serializers.CharField()
     program_title = serializers.CharField()
-    courses = serializers.SerializerMethodField()
+    course_ids = serializers.SerializerMethodField()
 
-    def get_courses(self, obj):
-        return obj.get('courses', None)
+    def get_course_ids(self, obj):
+        return obj.get('course_ids', None)
 
     class Meta(object):
         model = models.CourseProgramMetadata
         # excluding course-related fields because the serialized output will be embedded in a course object
-        # with thsoe fields already defined
-        exclude = ('id', 'created')
+        # with those fields already defined
+        exclude = ('id', 'created', 'course_id')

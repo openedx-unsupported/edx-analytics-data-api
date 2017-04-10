@@ -19,45 +19,44 @@ class ProgramsView(APIListView):
             * program_id: The ID of the program for which data is returned.
             * program_type: The type of the program
             * program_title: The title of the program
-            * created: The date the counts were computed.
+            * created: The date the metadata was computed.
 
     **Parameters**
 
-        Results can be filed to the course IDs specified or limited to the fields.
+        Results can be filtered to the program IDs specified or limited to the fields.
 
         program_ids -- The comma-separated program identifiers for which metadata is requested.
             Default is to return all programs.
         fields -- The comma-separated fields to return in the response.
             For example, 'program_id,created'.  Default is to return all fields.
         exclude -- The comma-separated fields to exclude in the response.
-            For example, 'course_id,created'.  Default is to not exclude any fields.
+            For example, 'program_id,created'.  Default is to not exclude any fields.
     """
-    always_exclude = ['course_id']  # original model has course_id, but the serializer does not (after aggregation)
     serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseProgramMetadata
-    model_id = 'program_id'
+    model_id_field = 'program_id'
     program_meta_fields = ['program_type', 'program_title']
 
-    def default_result(self, item_id):
+    def base_field_dict(self, program_id):
         """Default program with id, empty metadata, and empty courses array."""
-        program = {
-            'program_id': item_id,
+        program = super(ProgramsView, self).base_field_dict(program_id)
+        program.update({
             'program_type': '',
             'program_title': '',
             'created': None,
-            'courses': [],
-        }
+            'course_ids': [],
+        })
         return program
 
-    def get_result_from_model(self, model, base_result=None, field_list=None):
-        result = super(ProgramsView, self).get_result_from_model(model, base_result=base_result,
-                                                                 field_list=self.program_meta_fields)
-        result['courses'].append(model.course_id)
+    def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
+        field_dict = super(ProgramsView, self).update_field_dict_from_model(model, base_field_dict=base_field_dict,
+                                                                            field_list=self.program_meta_fields)
+        field_dict['course_ids'].append(model.course_id)
 
         # treat the most recent as the authoritative created date -- should be all the same
-        result['created'] = max(model.created, result['created']) if result['created'] else model.created
+        field_dict['created'] = max(model.created, field_dict['created']) if field_dict['created'] else model.created
 
-        return result
+        return field_dict
 
     def get_query(self):
         return reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())

@@ -52,7 +52,7 @@ class CourseSummariesView(APIListView):
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
-    model_id = 'course_id'
+    model_id_field = 'course_id'
     programs_model = models.CourseProgramMetadata
     count_fields = ('count', 'cumulative_count', 'count_change_7_days')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
@@ -62,7 +62,9 @@ class CourseSummariesView(APIListView):
         query_params = self.request.query_params
         programs = split_query_argument(query_params.get('programs'))
         if not programs:
-            self.always_exclude = ['programs']
+            self.always_exclude = self.always_exclude + ['programs']
+        self.ids = split_query_argument(query_params.get('ids'))
+        self.verify_ids()
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
 
@@ -71,9 +73,9 @@ class CourseSummariesView(APIListView):
             for item_id in self.ids:
                 validate_course_id(item_id)
 
-    def default_result(self, item_id):
+    def base_field_dict(self, course_id):
         """Default summary with fields populated to default levels."""
-        summary = super(CourseSummariesView, self).default_result(item_id)
+        summary = super(CourseSummariesView, self).base_field_dict(course_id)
         summary.update({
             'created': None,
             'enrollment_modes': {},
@@ -86,47 +88,48 @@ class CourseSummariesView(APIListView):
         })
         return summary
 
-    def get_result_from_model(self, model, base_result=None, field_list=None):
-        result = super(CourseSummariesView, self).get_result_from_model(model, base_result=base_result,
-                                                                        field_list=self.summary_meta_fields)
-        result['enrollment_modes'].update({
+    def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
+        field_dict = super(CourseSummariesView, self).update_field_dict_from_model(model,
+                                                                                   base_field_dict=base_field_dict,
+                                                                                   field_list=self.summary_meta_fields)
+        field_dict['enrollment_modes'].update({
             model.enrollment_mode: {field: getattr(model, field) for field in self.count_fields}
         })
 
         # treat the most recent as the authoritative created date -- should be all the same
-        result['created'] = max(model.created, result['created']) if result['created'] else model.created
+        field_dict['created'] = max(model.created, field_dict['created']) if field_dict['created'] else model.created
 
         # update totals for all counts
-        result.update({field: result[field] + getattr(model, field) for field in self.count_fields})
+        field_dict.update({field: field_dict[field] + getattr(model, field) for field in self.count_fields})
 
-        return result
+        return field_dict
 
-    def postprocess_result(self, result):
+    def postprocess_field_dict(self, field_dict):
         # Merge professional with non verified professional
-        modes = result['enrollment_modes']
+        modes = field_dict['enrollment_modes']
         prof_no_id_mode = modes.pop(enrollment_modes.PROFESSIONAL_NO_ID, {})
         prof_mode = modes[enrollment_modes.PROFESSIONAL]
         for count_key in self.count_fields:
             prof_mode[count_key] = prof_mode.get(count_key, 0) + prof_no_id_mode.pop(count_key, 0)
 
         # AN-8236 replace "Starting Soon" to "Upcoming" availability to collapse the two into one value
-        if result['availability'] == 'Starting Soon':
-            result['availability'] = 'Upcoming'
+        if field_dict['availability'] == 'Starting Soon':
+            field_dict['availability'] = 'Upcoming'
 
         if self.exclude == [] or (self.exclude and 'programs' not in self.exclude):
             # don't do expensive looping for programs if we are just going to throw it away
-            result = self.add_programs(result)
+            field_dict = self.add_programs(field_dict)
 
-        return result
+        return field_dict
 
-    def add_programs(self, result):
+    def add_programs(self, field_dict):
         """Query for programs attached to a course and include them (just the IDs) in the course summary dict"""
-        result['programs'] = []
-        queryset = self.programs_model.objects.filter(course_id=result['course_id'])
+        field_dict['programs'] = []
+        queryset = self.programs_model.objects.filter(course_id=field_dict['course_id'])
         for program in queryset:
             program = self.programs_serializer_class(program.__dict__)
-            result['programs'].append(program.data['program_id'])
-        return result
+            field_dict['programs'].append(program.data['program_id'])
+        return field_dict
 
     def get_query(self):
         return reduce(lambda q, item_id: q | Q(course_id=item_id), self.ids, Q())

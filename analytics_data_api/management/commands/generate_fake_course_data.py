@@ -115,7 +115,8 @@ class Command(BaseCommand):
                       models.CourseEnrollmentByEducation,
                       models.CourseEnrollmentByBirthYear,
                       models.CourseEnrollmentByCountry,
-                      models.CourseMetaSummaryEnrollment]:
+                      models.CourseMetaSummaryEnrollment,
+                      models.CourseProgramMetadata]:
             model.objects.all().delete()
 
         logger.info("Deleted all daily course enrollment data.")
@@ -169,6 +170,9 @@ class Command(BaseCommand):
                 end_time=timezone.now() + datetime.timedelta(weeks=10),
                 pacing_type='self_paced', availability='Starting Soon', enrollment_mode=mode, count=count,
                 cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50))
+
+        models.CourseProgramMetadata.objects.create(course_id=course_id, program_id='Demo_Program',
+                                                    program_type='Demo', program_title='Demo Program')
 
         progress.update(1)
         progress.close()

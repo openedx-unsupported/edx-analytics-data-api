@@ -511,15 +511,23 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
-    A ModelSerializer that takes an additional `fields` argument that controls which
+    A ModelSerializer that takes additional `fields` and/or `exclude` keyword arguments that control which
     fields should be displayed.
 
     Blatantly taken from http://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
+
+    If a field name is specified in both `fields` and `exclude`, then the exclude option takes precedence and the field
+    will not be included in the serialized result.
+
+    Keyword Arguments:
+        fields  -- list of field names on the model to include in the serialized result
+        exclude -- list of field names on the model to exclude in the serialized result
     """
 
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
         fields = kwargs.pop('fields', None)
+        exclude = kwargs.pop('exclude', None)
 
         # Instantiate the superclass normally
         super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
@@ -529,6 +537,13 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
             allowed = set(fields)
             existing = set(self.fields.keys())
             for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+        if exclude is not None:
+            # Drop any fields that are specified in the `exclude` argument.
+            disallowed = set(exclude)
+            existing = set(self.fields.keys())
+            for field_name in existing & disallowed:  # intersection
                 self.fields.pop(field_name)
 
 
@@ -547,11 +562,34 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, Dyn
     cumulative_count = serializers.IntegerField(default=0)
     count_change_7_days = serializers.IntegerField(default=0)
     enrollment_modes = serializers.SerializerMethodField()
+    programs = serializers.SerializerMethodField()
 
     def get_enrollment_modes(self, obj):
         return obj.get('enrollment_modes', None)
+
+    def get_programs(self, obj):
+        return obj.get('programs', None)
 
     class Meta(object):
         model = models.CourseMetaSummaryEnrollment
         # start_date and end_date used instead of start_time and end_time
         exclude = ('id', 'start_time', 'end_time', 'enrollment_mode')
+
+
+class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFieldsModelSerializer):
+    """
+    Serializer for course and the programs it is under.
+    """
+    program_id = serializers.CharField()
+    program_type = serializers.CharField()
+    program_title = serializers.CharField()
+    course_ids = serializers.SerializerMethodField()
+
+    def get_course_ids(self, obj):
+        return obj.get('course_ids', None)
+
+    class Meta(object):
+        model = models.CourseProgramMetadata
+        # excluding course-related fields because the serialized output will be embedded in a course object
+        # with those fields already defined
+        exclude = ('id', 'created', 'course_id')

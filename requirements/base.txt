@@ -1,5 +1,5 @@
 boto==2.42.0                        # MIT
-Django==1.10.4 						# BSD License
+Django==1.10.7 						# BSD License
 django-countries==4.0               # MIT
 djangorestframework==3.5.3			# BSD
 django-rest-swagger==0.3.8  		# BSD

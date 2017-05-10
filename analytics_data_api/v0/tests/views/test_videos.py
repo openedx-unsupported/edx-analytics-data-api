@@ -1,6 +1,7 @@
 import datetime
 
 from django.conf import settings
+from django.utils import timezone
 from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
@@ -17,17 +18,16 @@ class VideoTimelineTests(TestCaseWithAuthentication):
         G(models.VideoTimeline)
 
         video_id = 'v1d30'
-        created = datetime.datetime.utcnow()
-        date_time_format = '%Y-%m-%d %H:%M:%S'
+        created = timezone.now()
         G(models.VideoTimeline, pipeline_video_id=video_id, segment=0, num_users=10,
-          num_views=50, created=created.strftime(date_time_format))
+          num_views=50, created=created)
         G(models.VideoTimeline, pipeline_video_id=video_id, segment=1, num_users=1,
-          num_views=1234, created=created.strftime(date_time_format))
+          num_views=1234, created=created)
 
         alt_video_id = 'altv1d30'
         alt_created = created + datetime.timedelta(seconds=17)
         G(models.VideoTimeline, pipeline_video_id=alt_video_id, segment=0, num_users=10231,
-          num_views=834828, created=alt_created.strftime(date_time_format))
+          num_views=834828, created=alt_created)
 
         expected = [
             {

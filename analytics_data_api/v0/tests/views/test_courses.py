@@ -9,6 +9,7 @@ import urllib
 
 import ddt
 from django.conf import settings
+from django.utils import timezone
 from django_dynamic_fixture import G
 import pytz
 from opaque_keys.edx.keys import CourseKey
@@ -592,10 +593,12 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
         # natural order and ensure the view properly sorts the objects before grouping.
         module_id = u'i4x://test/problem/1'
         alt_module_id = u'i4x://test/problem/2'
-        created = datetime.datetime.utcnow()
+        created = timezone.now()
         alt_created = created + datetime.timedelta(seconds=2)
         date_time_format = '%Y-%m-%d %H:%M:%S'
 
+        # using string representations of dates will cause "DateTimeField time zone support" RuntimeWarning
+        # however, using the date with timezone causes conversion errors
         o1 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=module_id,
                correct=True, last_response_count=100, created=created.strftime(date_time_format))
         o2 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=alt_module_id,
@@ -661,7 +664,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
             'learning_outcome': ['Learned nothing', 'Learned a few things', 'Learned everything']
         }
 
-        created = datetime.datetime.utcnow()
+        created = timezone.now()
         alt_created = created + datetime.timedelta(seconds=2)
 
         G(models.ProblemsAndTags, course_id=course_id, module_id=module_id,
@@ -728,18 +731,17 @@ class CourseVideosListViewTests(TestCaseWithAuthentication):
 
         module_id = 'i4x-test-video-1'
         video_id = 'v1d30'
-        created = datetime.datetime.utcnow()
-        date_time_format = '%Y-%m-%d %H:%M:%S'
+        created = timezone.now()
         G(models.Video, course_id=course_id, encoded_module_id=module_id,
           pipeline_video_id=video_id, duration=100, segment_length=1, users_at_start=50, users_at_end=10,
-          created=created.strftime(date_time_format))
+          created=created)
 
         alt_module_id = 'i4x-test-video-2'
         alt_video_id = 'a1d30'
         alt_created = created + datetime.timedelta(seconds=10)
         G(models.Video, course_id=course_id, encoded_module_id=alt_module_id,
           pipeline_video_id=alt_video_id, duration=200, segment_length=5, users_at_start=1050, users_at_end=50,
-          created=alt_created.strftime(date_time_format))
+          created=alt_created)
 
         expected = [
             {

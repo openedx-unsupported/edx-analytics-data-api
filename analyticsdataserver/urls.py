@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_auth_token),
 
     url(r'^api/', include('analytics_data_api.urls', 'api')),
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^docs/', views.SwaggerSchemaView.as_view()),
 
     url(r'^status/$', views.StatusView.as_view(), name='status'),
     url(r'^authenticated/$', views.AuthenticationTestView.as_view(), name='authenticated'),

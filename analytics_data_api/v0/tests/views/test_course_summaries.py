@@ -139,7 +139,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         [CourseSamples.course_ids[0], 'malformed-course-id'],
     )
     def test_bad_course_id(self, course_ids):
-        response = self.authenticated_get(self.path(ids=course_ids))
+        response = self.authenticated_get(self.path(course_ids=course_ids))
         self.verify_bad_course_id(response)
 
     def test_collapse_upcoming(self):

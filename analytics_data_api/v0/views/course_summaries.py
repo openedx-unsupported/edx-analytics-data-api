@@ -54,7 +54,8 @@ class CourseSummariesView(APIListView):
     model = models.CourseMetaSummaryEnrollment
     model_id_field = 'course_id'
     programs_model = models.CourseProgramMetadata
-    count_fields = ('count', 'cumulative_count', 'count_change_7_days')  # are initialized to 0 by default
+    count_fields = ('count', 'cumulative_count', 'count_change_7_days',
+                    'passing_users')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                            'pacing_type', 'availability']  # fields to extract from summary model
 
@@ -119,6 +120,10 @@ class CourseSummariesView(APIListView):
         if self.exclude == [] or (self.exclude and 'programs' not in self.exclude):
             # don't do expensive looping for programs if we are just going to throw it away
             field_dict = self.add_programs(field_dict)
+
+        for field in self.exclude:
+            for mode in field_dict['enrollment_modes']:
+                _ = field_dict['enrollment_modes'][mode].pop(field, None)
 
         return field_dict
 

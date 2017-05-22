@@ -78,6 +78,7 @@ class CourseMetaSummaryEnrollment(BaseCourseModel):
     count = models.IntegerField(null=False)
     cumulative_count = models.IntegerField(null=False)
     count_change_7_days = models.IntegerField(default=0)
+    passing_users = models.IntegerField(default=0)
 
     class Meta(BaseCourseModel.Meta):
         db_table = 'course_meta_summary_enrollment'

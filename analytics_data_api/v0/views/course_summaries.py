@@ -15,7 +15,7 @@ class CourseSummariesView(APIListView):
 
     **Example Request**
 
-        GET /api/v0/course_summaries/?ids={course_id},{course_id}
+        GET /api/v0/course_summaries/?course_ids={course_id},{course_id}
 
     **Response Values**
 
@@ -63,7 +63,7 @@ class CourseSummariesView(APIListView):
         programs = split_query_argument(query_params.get('programs'))
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
-        self.ids = split_query_argument(query_params.get('ids'))
+        self.ids = split_query_argument(query_params.get('course_ids'))
         self.verify_ids()
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response

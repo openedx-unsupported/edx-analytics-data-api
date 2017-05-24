@@ -161,15 +161,17 @@ class Command(BaseCommand):
             progress.update(1)
             date = date + datetime.timedelta(days=1)
 
-        for mode, ratio in enrollment_mode_ratios.iteritems():
+        for index, (mode, ratio) in enumerate(enrollment_mode_ratios.iteritems()):
             count = int(ratio * daily_total)
+            pass_rate = min(random.normalvariate(.45 + (.1 * index), .15), 1.0)
             cumulative_count = count + random.randint(0, 100)
             models.CourseMetaSummaryEnrollment.objects.create(
                 course_id=course_id, catalog_course_title='Demo Course', catalog_course='Demo_Course',
                 start_time=timezone.now() - datetime.timedelta(weeks=6),
                 end_time=timezone.now() + datetime.timedelta(weeks=10),
                 pacing_type='self_paced', availability='Starting Soon', enrollment_mode=mode, count=count,
-                cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50))
+                cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50),
+                passing_users=int(cumulative_count * pass_rate))
 
         models.CourseProgramMetadata.objects.create(course_id=course_id, program_id='Demo_Program',
                                                     program_type='Demo', program_title='Demo Program')

@@ -100,14 +100,28 @@ class APIListViewTestMixin(object):
     list_name = 'list'
     default_ids = []
     always_exclude = ['created']
+    test_post_method = False
 
-    def path(self, ids=None, fields=None, exclude=None, **kwargs):
-        query_params = {}
-        for query_arg, data in zip([self.ids_param, 'fields', 'exclude'], [ids, fields, exclude]) + kwargs.items():
-            if data:
-                query_params[query_arg] = ','.join(data)
-        query_string = '?{}'.format(urlencode(query_params))
+    def path(self, query_data=None):
+        query_data = query_data or {}
+        concat_query_data = {param: ','.join(arg) for param, arg in query_data.items() if arg}
+        query_string = '?{}'.format(urlencode(concat_query_data)) if concat_query_data else ''
         return '/api/v0/{}/{}'.format(self.list_name, query_string)
+
+    def validated_request(self, ids=None, fields=None, exclude=None, **extra_args):
+        params = [self.ids_param, 'fields', 'exclude']
+        args = [ids, fields, exclude]
+        data = {param: arg for param, arg in zip(params, args) if arg}
+        data.update(extra_args)
+
+        get_response = self.authenticated_get(self.path(data))
+        if self.test_post_method:
+            post_response = self.authenticated_post(self.path(), data=data)
+            self.assertEquals(get_response.status_code, post_response.status_code)
+            if 200 <= get_response.status_code < 300:
+                self.assertEquals(get_response.data, post_response.data)
+
+        return get_response
 
     def create_model(self, model_id, **kwargs):
         pass  # implement in subclass
@@ -134,19 +148,19 @@ class APIListViewTestMixin(object):
 
     def _test_all_items(self, ids):
         self.generate_data()
-        response = self.authenticated_get(self.path(ids=ids, exclude=self.always_exclude))
+        response = self.validated_request(ids=ids, exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, self.all_expected_results(ids=ids))
 
     def _test_one_item(self, item_id):
         self.generate_data()
-        response = self.authenticated_get(self.path(ids=[item_id], exclude=self.always_exclude))
+        response = self.validated_request(ids=[item_id], exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, [self.expected_result(item_id)])
 
     def _test_fields(self, fields):
         self.generate_data()
-        response = self.authenticated_get(self.path(fields=fields))
+        response = self.validated_request(fields=fields)
         self.assertEquals(response.status_code, 200)
 
         # remove fields not requested from expected results
@@ -158,10 +172,10 @@ class APIListViewTestMixin(object):
         self.assertItemsEqual(response.data, expected_results)
 
     def test_no_items(self):
-        response = self.authenticated_get(self.path())
+        response = self.validated_request()
         self.assertEquals(response.status_code, 404)
 
     def test_no_matching_items(self):
         self.generate_data()
-        response = self.authenticated_get(self.path(ids=['no/items/found']))
+        response = self.validated_request(ids=['no/items/found'])
         self.assertEquals(response.status_code, 404)

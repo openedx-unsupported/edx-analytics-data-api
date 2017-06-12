@@ -22,6 +22,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
     list_name = 'course_summaries'
     default_ids = CourseSamples.course_ids
     always_exclude = ['created', 'programs']
+    test_post_method = True
 
     def setUp(self):
         super(CourseSummariesViewTests, self).setUp()
@@ -135,7 +136,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
     )
     def test_empty_modes(self, modes):
         self.generate_data(modes=modes)
-        response = self.authenticated_get(self.path(exclude=self.always_exclude))
+        response = self.validated_request(exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, self.all_expected_results(modes=modes))
 
@@ -144,13 +145,13 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         [CourseSamples.course_ids[0], 'malformed-course-id'],
     )
     def test_bad_course_id(self, course_ids):
-        response = self.authenticated_get(self.path(ids=course_ids))
+        response = self.validated_request(ids=course_ids)
         self.verify_bad_course_id(response)
 
     def test_collapse_upcoming(self):
         self.generate_data(availability='Starting Soon')
         self.generate_data(ids=['foo/bar/baz'], availability='Upcoming')
-        response = self.authenticated_get(self.path(exclude=self.always_exclude))
+        response = self.validated_request(exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
 
         expected_summaries = self.all_expected_results(availability='Upcoming')
@@ -161,13 +162,13 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
     def test_programs(self):
         self.generate_data(programs=True)
-        response = self.authenticated_get(self.path(exclude=self.always_exclude[:1], programs=['True']))
+        response = self.validated_request(exclude=self.always_exclude[:1], programs=['True'])
         self.assertEquals(response.status_code, 200)
         self.assertItemsEqual(response.data, self.all_expected_results(programs=True))
 
     @ddt.data('passing_users', )
     def test_exclude(self, field):
         self.generate_data()
-        response = self.authenticated_get(self.path(exclude=[field]))
+        response = self.validated_request(exclude=[field])
         self.assertEquals(response.status_code, 200)
         self.assertEquals(str(response.data).count(field), 0)

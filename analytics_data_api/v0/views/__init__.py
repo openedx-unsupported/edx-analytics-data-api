@@ -119,18 +119,32 @@ class APIListView(generics.ListAPIView):
         GET /api/v0/some_endpoint/
             Returns full list of serialized models with all default fields.
 
-        GET /api/v0/some_endpoint/?ids={id},{id}
+        GET /api/v0/some_endpoint/?ids={id_1},{id_2}
             Returns list of serialized models with IDs that match an ID in the given
             `ids` query parameter with all default fields.
 
-        GET /api/v0/some_endpoint/?ids={id},{id}&fields={some_field},{some_field}
+        GET /api/v0/some_endpoint/?ids={id_1},{id_2}&fields={some_field_1},{some_field_2}
             Returns list of serialized models with IDs that match an ID in the given
             `ids` query parameter with only the fields in the given `fields` query parameter.
 
-        GET /api/v0/some_endpoint/?ids={id},{id}&exclude={some_field},{some_field}
+        GET /api/v0/some_endpoint/?ids={id_1},{id_2}&exclude={some_field_1},{some_field_2}
             Returns list of serialized models with IDs that match an ID in the given
             `ids` query parameter with all fields except those in the given `exclude` query
             parameter.
+
+        POST /api/v0/some_endpoint/
+        {
+            "ids": [
+                "{id_1}",
+                "{id_2}",
+                ...
+                "{id_200}"
+            ],
+            "fields": [
+                "{some_field_1}",
+                "{some_field_2}"
+            ]
+        }
 
     **Response Values**
 
@@ -142,6 +156,9 @@ class APIListView(generics.ListAPIView):
         explicitly specifying the fields to include in each result with `fields` as well of
         the fields to exclude with `exclude`.
 
+        For GET requests, these parameters are passed in the query string.
+        For POST requests, these parameters are passed as a JSON dict in the request body.
+
         ids -- The comma-separated list of identifiers for which results are filtered to.
             For example, 'edX/DemoX/Demo_Course,course-v1:edX+DemoX+Demo_2016'. Default is to
             return all courses.
@@ -149,6 +166,12 @@ class APIListView(generics.ListAPIView):
             For example, 'course_id,created'. Default is to return all fields.
         exclude -- The comma-separated fields to exclude in the response.
             For example, 'course_id,created'. Default is to not exclude any fields.
+
+    **Notes**
+
+        * GET is usable when the number of IDs is relatively low
+        * POST is required when the number of course IDs would cause the URL to be too long.
+        * POST functions the same as GET here. It does not modify any state.
     """
     ids = None
     fields = None
@@ -171,6 +194,19 @@ class APIListView(generics.ListAPIView):
         exclude = split_query_argument(query_params.get('exclude'))
         self.exclude = self.always_exclude + (exclude if exclude else [])
         self.ids = split_query_argument(query_params.get(self.ids_param))
+        self.verify_ids()
+
+        return super(APIListView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # self.request.data is a QueryDict. For keys with singleton lists as values,
+        # QueryDicts return the singleton element of the list instead of the list itself,
+        # which is undesirable. So, we convert to a normal dict.
+        request_data_dict = dict(request.data)
+        self.fields = request_data_dict.get('fields')
+        exclude = request_data_dict.get('exclude')
+        self.exclude = self.always_exclude + (exclude if exclude else [])
+        self.ids = request_data_dict.get(self.ids_param)
         self.verify_ids()
 
         return super(APIListView, self).get(request, *args, **kwargs)

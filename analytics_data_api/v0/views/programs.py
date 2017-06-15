@@ -35,6 +35,7 @@ class ProgramsView(APIListView):
     serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseProgramMetadata
     model_id_field = 'program_id'
+    ids_param = 'program_ids'
     program_meta_fields = ['program_type', 'program_title']
 
     def base_field_dict(self, program_id):

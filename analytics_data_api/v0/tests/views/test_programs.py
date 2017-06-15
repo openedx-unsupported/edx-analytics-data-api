@@ -11,6 +11,7 @@ from analyticsdataserver.tests import TestCaseWithAuthentication
 class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     model = models.CourseProgramMetadata
     model_id = 'program_id'
+    ids_param = 'program_ids'
     serializer = serializers.CourseProgramMetadataSerializer
     expected_programs = []
     list_name = 'programs'

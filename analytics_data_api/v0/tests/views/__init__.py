@@ -94,6 +94,7 @@ class VerifyCsvResponseMixin(object):
 class APIListViewTestMixin(object):
     model = None
     model_id = 'id'
+    ids_param = 'ids'
     serializer = None
     expected_results = []
     list_name = 'list'
@@ -102,7 +103,7 @@ class APIListViewTestMixin(object):
 
     def path(self, ids=None, fields=None, exclude=None, **kwargs):
         query_params = {}
-        for query_arg, data in zip(['ids', 'fields', 'exclude'], [ids, fields, exclude]) + kwargs.items():
+        for query_arg, data in zip([self.ids_param, 'fields', 'exclude'], [ids, fields, exclude]) + kwargs.items():
             if data:
                 query_params[query_arg] = ','.join(data)
         query_string = '?{}'.format(urlencode(query_params))

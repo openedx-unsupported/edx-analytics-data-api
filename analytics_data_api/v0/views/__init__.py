@@ -155,6 +155,7 @@ class APIListView(generics.ListAPIView):
     exclude = None
     always_exclude = []
     model_id_field = 'id'
+    ids_param = 'ids'
 
     def get_serializer(self, *args, **kwargs):
         kwargs.update({
@@ -169,9 +170,18 @@ class APIListView(generics.ListAPIView):
         self.fields = split_query_argument(query_params.get('fields'))
         exclude = split_query_argument(query_params.get('exclude'))
         self.exclude = self.always_exclude + (exclude if exclude else [])
-        self.ids = split_query_argument(query_params.get('ids'))
+        self.ids = split_query_argument(query_params.get(self.ids_param))
+        self.verify_ids()
 
         return super(APIListView, self).get(request, *args, **kwargs)
+
+    def verify_ids(self):
+        """
+        Optionally raise an exception if any of the IDs set as self.ids are invalid.
+        By default, no verification is done.
+        Subclasses can override this if they wish to perform verification.
+        """
+        pass
 
     def base_field_dict(self, item_id):
         """Default result with fields pre-populated to default values."""

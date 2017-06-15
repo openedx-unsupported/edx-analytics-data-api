@@ -53,6 +53,7 @@ class CourseSummariesView(APIListView):
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
     model_id_field = 'course_id'
+    ids_param = 'course_ids'
     programs_model = models.CourseProgramMetadata
     count_fields = ('count', 'cumulative_count', 'count_change_7_days',
                     'passing_users')  # are initialized to 0 by default
@@ -64,12 +65,14 @@ class CourseSummariesView(APIListView):
         programs = split_query_argument(query_params.get('programs'))
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
-        self.ids = split_query_argument(query_params.get('course_ids'))
-        self.verify_ids()
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
 
     def verify_ids(self):
+        """
+        Raise an exception if any of the course IDs set as self.ids are invalid.
+        Overrides APIListView.verify_ids.
+        """
         if self.ids is not None:
             for item_id in self.ids:
                 validate_course_id(item_id)

@@ -16,6 +16,7 @@ from analyticsdataserver.tests import TestCaseWithAuthentication
 class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, APIListViewTestMixin):
     model = models.CourseMetaSummaryEnrollment
     model_id = 'course_id'
+    ids_param = 'course_ids'
     serializer = serializers.CourseMetaSummaryEnrollmentSerializer
     expected_summaries = []
     list_name = 'course_summaries'
@@ -143,7 +144,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         [CourseSamples.course_ids[0], 'malformed-course-id'],
     )
     def test_bad_course_id(self, course_ids):
-        response = self.authenticated_get(self.path(course_ids=course_ids))
+        response = self.authenticated_get(self.path(ids=course_ids))
         self.verify_bad_course_id(response)
 
     def test_collapse_upcoming(self):

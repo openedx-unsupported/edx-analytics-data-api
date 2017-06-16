@@ -13,9 +13,19 @@ class CourseSummariesView(APIListView):
     """
     Returns summary information for courses.
 
-    **Example Request**
+    **Example Requests**
 
-        GET /api/v0/course_summaries/?course_ids={course_id},{course_id}
+        GET /api/v0/course_summaries/?course_ids={course_id_1},{course_id_2}
+
+        POST /api/v0/course_summaries/
+        {
+            "course_ids": [
+                "{course_id_1}",
+                "{course_id_2}",
+                ...
+                "{course_id_200}"
+            ]
+        }
 
     **Response Values**
 
@@ -39,6 +49,9 @@ class CourseSummariesView(APIListView):
 
         Results can be filed to the course IDs specified or limited to the fields.
 
+        For GET requests, these parameters are passed in the query string.
+        For POST requests, these parameters are passed as a JSON dict in the request body.
+
         course_ids -- The comma-separated course identifiers for which summaries are requested.
             For example, 'edX/DemoX/Demo_Course,course-v1:edX+DemoX+Demo_2016'.  Default is to
             return all courses.
@@ -48,6 +61,12 @@ class CourseSummariesView(APIListView):
             For example, 'course_id,created'.  Default is to exclude the programs array.
         programs -- If included in the query parameters, will find each courses' program IDs
             and include them in the response.
+
+    **Notes**
+
+        * GET is usable when the number of course IDs is relatively low
+        * POST is required when the number of course IDs would cause the URL to be too long.
+        * POST functions the same as GET for this endpoint. It does not modify any state.
     """
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
@@ -66,6 +85,17 @@ class CourseSummariesView(APIListView):
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
+        return response
+
+    def post(self, request, *args, **kwargs):
+        # self.request.data is a QueryDict. For keys with singleton lists as values,
+        # QueryDicts return the singleton element of the list instead of the list itself,
+        # which is undesirable. So, we convert to a normal dict.
+        request_data_dict = dict(self.request.data)
+        programs = request_data_dict.get('programs')
+        if not programs:
+            self.always_exclude = self.always_exclude + ['programs']
+        response = super(CourseSummariesView, self).post(request, *args, **kwargs)
         return response
 
     def verify_ids(self):

@@ -27,7 +27,15 @@ class TestCaseWithAuthentication(TestCase):
 
     def authenticated_get(self, path, data=None, follow=True, **extra):
         data = data or {}
-        return self.client.get(path, data, follow, HTTP_AUTHORIZATION='Token ' + self.token.key, **extra)
+        return self.client.get(
+            path=path, data=data, follow=follow, HTTP_AUTHORIZATION='Token ' + self.token.key, **extra
+        )
+
+    def authenticated_post(self, path, data=None, follow=True, **extra):
+        data = data or {}
+        return self.client.post(
+            path=path, data=data, follow=follow, HTTP_AUTHORIZATION='Token ' + self.token.key, **extra
+        )
 
 
 @contextmanager

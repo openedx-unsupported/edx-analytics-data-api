@@ -312,6 +312,13 @@ DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
 AGGREGATE_PAGE_SIZE = 10
 
+# Maximum number of GET/POST parameters that will be read before a
+# SuspiciousOperation (TooManyFieldsSent) is raised.
+# None indicates no maximum.
+# We need to set this to None so that we can pass in a large number of Course IDs
+# to course_summaries/
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+
 ########## END ANALYTICS DATA API CONFIGURATION
 
 

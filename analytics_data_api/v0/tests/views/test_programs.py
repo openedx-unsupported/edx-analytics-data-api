@@ -26,16 +26,44 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     def tearDown(self):
         self.model.objects.all().delete()
 
-    def create_model(self, model_id):
-        G(self.model, course_id=self.course_id, program_id=model_id, program_type='Demo', program_title='Test')
+    def generate_data(self, ids=None, course_ids=None, **kwargs):
+        """Generate program list data"""
+        if ids is None:
+            ids = self.default_ids
 
-    def expected_result(self, item_id):
+        if course_ids is None:
+            course_ids = [[self.course_id]] * len(ids)
+
+        for item_id, course_id in zip(ids, course_ids):
+            self.create_model(item_id, course_ids=course_id, **kwargs)
+
+    def create_model(self, model_id, course_ids=None, **kwargs):
+        if course_ids is None:
+            course_ids = [self.course_id]
+
+        for course_id in course_ids:
+            G(self.model, course_id=course_id, program_id=model_id, program_type='Demo', program_title='Test')
+
+    def all_expected_results(self, ids=None, course_ids=None, **kwargs):
+        if ids is None:
+            ids = self.default_ids
+
+        if course_ids is None:
+            course_ids = [[self.course_id]] * len(ids)
+
+        return [self.expected_result(item_id, course_ids=course_id, **kwargs)
+                for item_id, course_id in zip(ids, course_ids)]
+
+    def expected_result(self, item_id, course_ids=None):
         """Expected program metadata to populate with data."""
+        if course_ids is None:
+            course_ids = [self.course_id]
+
         program = super(ProgramsViewTests, self).expected_result(item_id)
         program.update([
             ('program_type', 'Demo'),
             ('program_title', 'Test'),
-            ('course_ids', [self.course_id])
+            ('course_ids', course_ids)
         ])
         return program
 
@@ -57,3 +85,17 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     )
     def test_fields(self, fields):
         self._test_fields(fields)
+
+    @ddt.data(
+        (None, None),
+        (CourseSamples.program_ids, [[id] for id in CourseSamples.course_ids]),
+        (CourseSamples.program_ids, [CourseSamples.course_ids[1:3],
+                                     CourseSamples.course_ids[0:2],
+                                     CourseSamples.course_ids[0:3]]),
+    )
+    @ddt.unpack
+    def test_all_programs_multi_courses(self, program_ids, course_ids):
+        self.generate_data(ids=program_ids, course_ids=course_ids)
+        response = self.validated_request(ids=program_ids, exclude=self.always_exclude)
+        self.assertEquals(response.status_code, 200)
+        self.assertItemsEqual(response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))

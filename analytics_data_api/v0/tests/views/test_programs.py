@@ -54,7 +54,7 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         return [self.expected_result(item_id, course_ids=course_id, **kwargs)
                 for item_id, course_id in zip(ids, course_ids)]
 
-    def expected_result(self, item_id, course_ids=None):
+    def expected_result(self, item_id, course_ids=None, **kwargs):
         """Expected program metadata to populate with data."""
         if course_ids is None:
             course_ids = [self.course_id]
@@ -88,7 +88,7 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
 
     @ddt.data(
         (None, None),
-        (CourseSamples.program_ids, [[id] for id in CourseSamples.course_ids]),
+        (CourseSamples.program_ids, [[cid] for cid in CourseSamples.course_ids]),
         (CourseSamples.program_ids, [CourseSamples.course_ids[1:3],
                                      CourseSamples.course_ids[0:2],
                                      CourseSamples.course_ids[0:3]]),

@@ -134,10 +134,10 @@ class APIListViewTestMixin(object):
         for item_id in ids:
             self.create_model(item_id, **kwargs)
 
-    def expected_result(self, item_id):
+    def expected_result(self, item_id, **kwargs):
         result = OrderedDict([
             (self.model_id, item_id),
-        ])
+        ].extend(kwargs.items()))
         return result
 
     def all_expected_results(self, ids=None, **kwargs):

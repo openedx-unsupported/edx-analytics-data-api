@@ -54,7 +54,8 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         return [self.expected_result(item_id, course_ids=course_id, **kwargs)
                 for item_id, course_id in zip(ids, course_ids)]
 
-    def expected_result(self, item_id, course_ids=None, **kwargs):
+    # pylint: disable=arguments-differ
+    def expected_result(self, item_id, course_ids=None):
         """Expected program metadata to populate with data."""
         if course_ids is None:
             course_ids = [self.course_id]

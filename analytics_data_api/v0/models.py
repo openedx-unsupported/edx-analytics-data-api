@@ -93,7 +93,7 @@ class CourseProgramMetadata(BaseCourseModel):
 
     class Meta(BaseCourseModel.Meta):
         db_table = 'course_program_metadata'
-        ordering = ('course_id',)
+        ordering = ('program_id',)
         unique_together = [('course_id', 'program_id',)]
 
 

@@ -2,14 +2,14 @@ from django.db.models import Q
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
-from analytics_data_api.v0.views import APIListView
+from analytics_data_api.v0.views import PaginatedAPIListView
 from analytics_data_api.v0.views.utils import (
     split_query_argument,
     validate_course_id,
 )
 
 
-class CourseSummariesView(APIListView):
+class CourseSummariesView(PaginatedAPIListView):
     """
     Returns summary information for courses.
 
@@ -68,6 +68,8 @@ class CourseSummariesView(APIListView):
         * POST is required when the number of course IDs would cause the URL to be too long.
         * POST functions the same as GET for this endpoint. It does not modify any state.
     """
+    page_size = 100
+
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
     model = models.CourseMetaSummaryEnrollment
@@ -78,6 +80,43 @@ class CourseSummariesView(APIListView):
                     'passing_users')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                            'pacing_type', 'availability']  # fields to extract from summary model
+
+    def get_aggregate_data(self, all_objects):
+        if not objects:
+            return None
+        res = defaultdict(lambda: 0)
+
+        has_count = 'count' in objects[0]
+        has_cumulative_count = 'cumulative_count' in objects[0]
+        has_count_change_7_days = 'count_change_7_days' in objects[0]
+
+        for summary in objects:
+            if has_count:
+                res['current_enrollment'] += summary['count']
+            if has_cumulative_count:
+                res['total_enrollment'] += summary['cumulative_count']
+            if has_count_change_7_days:
+                res['enrollment_change_7_days'] += summary['count_change_7_days']
+            verified_enrollment = summary.get('enrollment_modes', {}).get('verified', {}).get('count', None)
+            if verified_enrollment is not None:
+                res['verified_enrollment'] += verified_enrollment
+
+        return res
+
+    #'''
+    def list(self, request, *args, **kwargs):
+        response = super(CourseSummariesView, self).list(request, *args, **kwargs)
+        return response
+        data = response.data
+        if not data:
+            raise Http404()
+        response.data = {
+            'results': data,
+            'count': len(data),
+        }
+        #response.data['aggregate_data'] = self._get_aggregate_data(data)
+        return response
+    #'''
 
     def get(self, request, *args, **kwargs):
         query_params = self.request.query_params
@@ -169,5 +208,7 @@ class CourseSummariesView(APIListView):
             field_dict['programs'].append(program.data['program_id'])
         return field_dict
 
+'''
     def get_query(self):
         return reduce(lambda q, item_id: q | Q(course_id=item_id), self.ids, Q())
+'''

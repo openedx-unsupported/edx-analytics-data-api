@@ -1,7 +1,9 @@
+from collections import OrderedDict
 from itertools import groupby
 
 from django.db import models
 from django.db.models import Q
+from django.http import Http404
 from django.utils import timezone
 
 from rest_framework import generics, serializers
@@ -239,6 +241,44 @@ class APIListView(generics.ListAPIView):
 
     def group_by_id(self, queryset):
         """Return results aggregated by a distinct ID."""
+        start = 0 if self.page is None else (self.page - 1) * self.page_size
+        stop = float('inf') if self.page is None else start + self.page_size
+        #'''
+        i = 0
+        models_by_id = OrderedDict()
+        for model in queryset:
+            item_id = getattr(model, self.model_id_field)
+            field_dict = models_by_id.get(item_id)
+            if field_dict is None:
+                i += 1
+                field_dict = self.base_field_dict(item_id)
+            if i >= stop:
+                break
+            if i >= start:
+                models_by_id[item_id] = self.update_field_dict_from_model(model, base_field_dict=field_dict)
+        return models_by_id.values()
+        #'''
+        '''
+        res = []
+        curr_item_id = None
+        curr_fields = None
+        i = 0
+        for model in queryset:
+            item_id = getattr(model, self.model_id_field)
+            if item_id != curr_item_id:
+                i += 1
+                if curr_fields is not None:
+                    res.append(curr_fields)
+                curr_item_id = item_id
+                curr_fields = self.base_field_dict(item_id)
+            curr_fields = self.update_field_dict_from_model(model, base_field_dict=curr_fields)
+            if i >= 100:
+                break
+        if curr_fields is not None:
+            res.append(curr_fields)
+        return res
+        '''
+        '''
         aggregate_field_dict = []
         for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
             field_dict = self.base_field_dict(item_id)
@@ -249,10 +289,11 @@ class APIListView(generics.ListAPIView):
             field_dict = self.postprocess_field_dict(field_dict)
             aggregate_field_dict.append(field_dict)
 
-        return aggregate_field_dict
+        return aggregate_field_dict[start:stop]
+        '''
 
     def get_query(self):
-        return reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
+        return Q(**{self.model_id_field + '__in': self.ids})
 
     @raise_404_if_none
     def get_queryset(self):
@@ -260,8 +301,43 @@ class APIListView(generics.ListAPIView):
             queryset = self.model.objects.filter(self.get_query())
         else:
             queryset = self.model.objects.all()
-
+        #queryset = queryset.filter(pacing_type='self_paced')
+        queryset = queryset.order_by('start_time', 'course_id')
         field_dict = self.group_by_id(queryset)
 
         # Django-rest-framework will serialize this dictionary to a JSON response
         return field_dict
+
+
+class PaginatedAPIListView(APIListView):
+    page_size = 500
+
+    def list(self, request, *args, **kwargs):
+        response = super(PaginatedAPIListView, self).list(request, *args, **kwargs)
+        data = response.data
+        response.data = {
+            'results': data,
+            'count': len(data),
+            'next': None,
+            'previous': None,
+        }
+        return response
+
+    def get(self, request, *args, **kwargs):
+        self._extract_page()
+        return super(PaginatedAPIListView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self._extract_page()
+        return super(PaginatedAPIListView, self).post(request, *args, **kwargs)
+
+    def _extract_page(self):
+        if self.request.data.get('all'):
+            self.page = None
+            return
+        try:
+            self.page = int(self.request.data.get('page', '1'))
+        except ValueError:
+            raise Http404()
+        if self.page < 1:
+            raise Http404()

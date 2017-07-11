@@ -13,7 +13,7 @@ from django.test.utils import override_settings
 from rest_framework.authtoken.models import Token
 from requests.exceptions import ConnectionError
 
-from analytics_data_api.v0.models import CourseEnrollmentDaily, CourseEnrollmentByBirthYear
+from analytics_data_api.v1.models import CourseEnrollmentDaily, CourseEnrollmentByBirthYear
 from analyticsdataserver.clients import CourseBlocksApiClient
 from analyticsdataserver.router import AnalyticsApiRouter
 from analyticsdataserver.utils import temp_log_level

@@ -1,9 +1,12 @@
+from collections import namedtuple
+
 from django.db.models import Q
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.views import PaginatedAPIListView
 from analytics_data_api.v0.views.utils import (
+    raise_404_if_none,
     split_query_argument,
     validate_course_id,
 )
@@ -69,6 +72,7 @@ class CourseSummariesView(PaginatedAPIListView):
         * POST functions the same as GET for this endpoint. It does not modify any state.
     """
     page_size = 100
+    enable_caching = True
 
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
     programs_serializer_class = serializers.CourseProgramMetadataSerializer
@@ -146,67 +150,121 @@ class CourseSummariesView(PaginatedAPIListView):
             for item_id in self.ids:
                 validate_course_id(item_id)
 
-    def base_field_dict(self, course_id):
+    @classmethod
+    def base_field_dict(cls, course_id):
         """Default summary with fields populated to default levels."""
-        summary = super(CourseSummariesView, self).base_field_dict(course_id)
+        summary = super(CourseSummariesView, cls).base_field_dict(course_id)
         summary.update({
             'created': None,
             'enrollment_modes': {},
         })
-        summary.update({field: 0 for field in self.count_fields})
+        summary.update({field: 0 for field in cls.count_fields})
         summary['enrollment_modes'].update({
             mode: {
-                count_field: 0 for count_field in self.count_fields
+                count_field: 0 for count_field in cls.count_fields
             } for mode in enrollment_modes.ALL
         })
         return summary
 
-    def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
-        field_dict = super(CourseSummariesView, self).update_field_dict_from_model(model,
+    @classmethod
+    def update_field_dict_from_model(cls, model, base_field_dict=None, field_list=None):
+        field_dict = super(CourseSummariesView, cls).update_field_dict_from_model(model,
                                                                                    base_field_dict=base_field_dict,
-                                                                                   field_list=self.summary_meta_fields)
+                                                                                   field_list=cls.summary_meta_fields)
         field_dict['enrollment_modes'].update({
-            model.enrollment_mode: {field: getattr(model, field) for field in self.count_fields}
+            model.enrollment_mode: {field: getattr(model, field) for field in cls.count_fields}
         })
 
         # treat the most recent as the authoritative created date -- should be all the same
         field_dict['created'] = max(model.created, field_dict['created']) if field_dict['created'] else model.created
 
         # update totals for all counts
-        field_dict.update({field: field_dict[field] + getattr(model, field) for field in self.count_fields})
+        field_dict.update({field: field_dict[field] + getattr(model, field) for field in cls.count_fields})
 
         return field_dict
 
-    def postprocess_field_dict(self, field_dict):
+    @classmethod
+    def postprocess_field_dict(cls, field_dict, exclude):
         # Merge professional with non verified professional
         modes = field_dict['enrollment_modes']
         prof_no_id_mode = modes.pop(enrollment_modes.PROFESSIONAL_NO_ID, {})
         prof_mode = modes[enrollment_modes.PROFESSIONAL]
-        for count_key in self.count_fields:
+        for count_key in cls.count_fields:
             prof_mode[count_key] = prof_mode.get(count_key, 0) + prof_no_id_mode.pop(count_key, 0)
 
         # AN-8236 replace "Starting Soon" to "Upcoming" availability to collapse the two into one value
         if field_dict['availability'] == 'Starting Soon':
             field_dict['availability'] = 'Upcoming'
 
-        if self.exclude == [] or (self.exclude and 'programs' not in self.exclude):
-            # don't do expensive looping for programs if we are just going to throw it away
-            field_dict = self.add_programs(field_dict)
+        cls._do_excludes(field_dict, exclude)
+        return field_dict
 
-        for field in self.exclude:
+    @classmethod
+    def _do_excludes(cls, field_dict, exclude):
+        if exclude == [] or (exclude and 'programs' not in exclude):
+            # don't do expensive looping for programs if we are just going to throw it away
+            field_dict = cls.add_programs(field_dict)
+
+        for field in exclude:
             for mode in field_dict['enrollment_modes']:
                 _ = field_dict['enrollment_modes'][mode].pop(field, None)
 
-        return field_dict
-
-    def add_programs(self, field_dict):
+    @classmethod
+    def add_programs(cls, field_dict):
         """Query for programs attached to a course and include them (just the IDs) in the course summary dict"""
         field_dict['programs'] = []
-        queryset = self.programs_model.objects.filter(course_id=field_dict['course_id'])
+        queryset = cls.programs_model.objects.filter(course_id=field_dict['course_id'])
         for program in queryset:
-            program = self.programs_serializer_class(program.__dict__)
+            program = cls.programs_serializer_class(program.__dict__)
             field_dict['programs'].append(program.data['program_id'])
         return field_dict
+
+    from django.core.cache import caches
+    cache = caches['summaries']
+    cache_prefix = 'summary/'
+    cache_flag = 'summaries-loaded-v4'
+
+    def _cache_valid(self):
+        return bool(self.cache.get(self.cache_flag))
+
+    def _prepare_cache(self):
+        if not self._cache_valid():
+            summary_dict = self.get_full_dataset()
+            prefixed_summary_dict = {
+                self.cache_prefix + course_id: summary
+                for course_id, summary in summary_dict.iteritems()
+            }
+            self.cache.set_many(prefixed_summary_dict, timeout=None)
+            #self.cache.set('summaries', summary_dict)
+            self.cache.set(self.cache_flag, True)
+
+    @raise_404_if_none
+    def get_queryset(self):
+        if not (self.enable_caching and self.ids):
+            return super(CourseSummariesView, self).get_queryset()
+
+        #import pdb; pdb.set_trace()
+        self._prepare_cache()
+
+
+        prefixed_ids = [self.cache_prefix + course_id for course_id in self.ids]
+        model_dicts = self.cache.get_many(prefixed_ids).values()
+        model_dicts = [
+            model_dict
+            for model_dict in model_dicts
+            if model_dict['pacing_type'] in ['self_paced', 'instructor_paced']
+        ]
+        model_dicts = sorted(model_dicts, key=lambda md: md['count'])
+        for model_dict in model_dicts:
+            self._do_excludes(model_dict, self.exclude)
+        start = 0 if self.page is None else (self.page - 1) * self.page_size
+        stop = 1000000 if self.page is None else start + self.page_size
+        return model_dicts[start:stop]
+        #all_summaries = self.cache.get('summaries')
+        #return [
+        #    all_summaries[course_id]
+        #    for course_id in self.ids
+        #]
 
 '''
     def get_query(self):

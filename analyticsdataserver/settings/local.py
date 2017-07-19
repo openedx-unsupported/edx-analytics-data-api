@@ -20,7 +20,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ########## DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -31,18 +30,12 @@ DATABASES = {
         'PORT': '',
     },
     'analytics': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
-        #'USER': '',
-        #'PASSWORD': '',
-        #'HOST': '',
-        #'PORT': '',
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'reports_2_0',
-        'USER': 'readonly001',
-        'PASSWORD': 'meringues unfreehold sisterize morsing',
-        'HOST': 'stage-edx-analytics-report-rds.edx.org',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 ########## END DATABASE CONFIGURATION
@@ -53,17 +46,7 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 100000
-        },
-    },
-    'summaries': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-        'OPTIONS': {
-            'server_max_value_length': 1024 * 8,
-        },
-    },
+    }
 }
 ########## END CACHE CONFIGURATION
 

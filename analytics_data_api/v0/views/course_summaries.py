@@ -1,6 +1,8 @@
 from collections import namedtuple
 
 from django.db.models import Q
+from django.http import Http404
+from django.utils import timezone
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
@@ -71,7 +73,8 @@ class CourseSummariesView(PaginatedAPIListView):
         * POST is required when the number of course IDs would cause the URL to be too long.
         * POST functions the same as GET for this endpoint. It does not modify any state.
     """
-    page_size = 100
+    default_page_size = 100
+    max_page_size = 100
     enable_caching = True
 
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
@@ -84,49 +87,41 @@ class CourseSummariesView(PaginatedAPIListView):
                     'passing_users')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                            'pacing_type', 'availability']  # fields to extract from summary model
+    sort_key_fields = set(count_fields) | set(summary_meta_fields) | set(['verified_enrollment'])
 
-    def get_aggregate_data(self, all_objects):
-        if not objects:
+    @staticmethod
+    def _get_string(data_dict, key, possible_values, is_from_querystring=False):
+        raw_value = data_dict.get(key)
+        if raw_value is None:
             return None
-        res = defaultdict(lambda: 0)
+        elif is_from_querystring:
+            value = raw_value
+        elif raw_value == []:
+            return None
+        else:
+            value = raw_value[0]
+        if possible_values and value not in possible_values:
+            raise Http404()  # @@ TODO what should this error be
+        return value
 
-        has_count = 'count' in objects[0]
-        has_cumulative_count = 'cumulative_count' in objects[0]
-        has_count_change_7_days = 'count_change_7_days' in objects[0]
-
-        for summary in objects:
-            if has_count:
-                res['current_enrollment'] += summary['count']
-            if has_cumulative_count:
-                res['total_enrollment'] += summary['cumulative_count']
-            if has_count_change_7_days:
-                res['enrollment_change_7_days'] += summary['count_change_7_days']
-            verified_enrollment = summary.get('enrollment_modes', {}).get('verified', {}).get('count', None)
-            if verified_enrollment is not None:
-                res['verified_enrollment'] += verified_enrollment
-
-        return res
-
-    #'''
-    def list(self, request, *args, **kwargs):
-        response = super(CourseSummariesView, self).list(request, *args, **kwargs)
-        return response
-        data = response.data
-        if not data:
-            raise Http404()
-        response.data = {
-            'results': data,
-            'count': len(data),
-        }
-        #response.data['aggregate_data'] = self._get_aggregate_data(data)
-        return response
-    #'''
+    @staticmethod
+    def _get_set(data_dict, key, is_from_querystring=False):
+        raw_value = data_dict.get(key)
+        if raw_value is None:
+            return None
+        elif is_from_querystring:
+            return set(split_query_argument(raw_value))
+        else:
+            return set(raw_value)
 
     def get(self, request, *args, **kwargs):
-        query_params = self.request.query_params
-        programs = split_query_argument(query_params.get('programs'))
-        if not programs:
-            self.always_exclude = self.always_exclude + ['programs']
+        query_params = request.query_params
+        self.availability = self._get_set(query_params, 'availability', True)
+        self.pacing_type = self._get_set(query_params, 'pacing_type', True)
+        self.program_ids = self._get_set(query_params, 'program_ids', True)
+        self.text_search = self._get_string(query_params, 'text_search', None, True)
+        self.sort_key = self._get_string(query_params, 'sortKey', self.sort_key_fields, True)
+        self.order = self._get_string(query_params, 'order', set(['asc', 'desc']), True)
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
 
@@ -134,10 +129,16 @@ class CourseSummariesView(PaginatedAPIListView):
         # self.request.data is a QueryDict. For keys with singleton lists as values,
         # QueryDicts return the singleton element of the list instead of the list itself,
         # which is undesirable. So, we convert to a normal dict.
-        request_data_dict = dict(self.request.data)
+        request_data_dict = dict(request.data)
         programs = request_data_dict.get('programs')
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
+        self.availability = self._get_set(request_data_dict, 'availability')
+        self.pacing_type = self._get_set(request_data_dict, 'pacing_type')
+        self.program_ids = self._get_set(request_data_dict, 'program_ids')
+        self.text_search = self._get_string(request_data_dict, 'text_search', None)
+        self.sort_key = self._get_string(request_data_dict, 'sortKey', self.sort_key_fields)
+        self.order = self._get_string(request_data_dict, 'order', set(['asc', 'desc']))
         response = super(CourseSummariesView, self).post(request, *args, **kwargs)
         return response
 
@@ -196,7 +197,10 @@ class CourseSummariesView(PaginatedAPIListView):
         if field_dict['availability'] == 'Starting Soon':
             field_dict['availability'] = 'Upcoming'
 
-        cls._do_excludes(field_dict, exclude)
+        # Add in verified_enrollment
+        verified = modes.get('verified')
+        field_dict['verified_enrollment'] = verified.get('count', 0) if verified else 0
+
         return field_dict
 
     @classmethod
@@ -222,7 +226,7 @@ class CourseSummariesView(PaginatedAPIListView):
     from django.core.cache import caches
     cache = caches['summaries']
     cache_prefix = 'summary/'
-    cache_flag = 'summaries-loaded-v4'
+    cache_flag = 'summaries-loaded-v5'
 
     def _cache_valid(self):
         return bool(self.cache.get(self.cache_flag))
@@ -235,38 +239,49 @@ class CourseSummariesView(PaginatedAPIListView):
                 for course_id, summary in summary_dict.iteritems()
             }
             self.cache.set_many(prefixed_summary_dict, timeout=None)
-            #self.cache.set('summaries', summary_dict)
             self.cache.set(self.cache_flag, True)
 
     @raise_404_if_none
     def get_queryset(self):
         if not (self.enable_caching and self.ids):
             return super(CourseSummariesView, self).get_queryset()
-
-        #import pdb; pdb.set_trace()
         self._prepare_cache()
 
+        def filter_func(model_dict):
+            if self.availability and model_dicts['availability'] not in self.availability:
+                return False
+            if self.pacing_type and model_dicts['pacing_type'] not in self.pacing_type:
+                return False
+            if self.program_ids and not (model_dicts['program_ids'] | self.program_ids):
+                return False
+            if self.text_search and False:  # @@TODO: text search
+                return Falses
+            return True
+
+        max_datetime = timezone.make_aware(timezone.datetime.max, timezone.get_default_timezone())
+        sorting_defaults = {
+            'start_time': max_datetime,
+            'end_time': max_datetime,
+            'catalog_course_title': ''
+        }
+
+        def sorting_func(model_dict):
+            sort_value = model_dict.get(self.sort_key)
+            return sorting_defaults[self.sort_key] if sort_value is None else sort_value
 
         prefixed_ids = [self.cache_prefix + course_id for course_id in self.ids]
         model_dicts = self.cache.get_many(prefixed_ids).values()
         model_dicts = [
             model_dict
             for model_dict in model_dicts
-            if model_dict['pacing_type'] in ['self_paced', 'instructor_paced']
+            if filter_func(model_dict)
         ]
-        model_dicts = sorted(model_dicts, key=lambda md: md['count'])
+        if self.sort_key:
+            model_dicts = sorted(model_dicts, key=sorting_func)
+            if self.order == 'desc':
+                model_dicts.reverse()
         for model_dict in model_dicts:
             self._do_excludes(model_dict, self.exclude)
         start = 0 if self.page is None else (self.page - 1) * self.page_size
         stop = 1000000 if self.page is None else start + self.page_size
         return model_dicts[start:stop]
-        #all_summaries = self.cache.get('summaries')
-        #return [
-        #    all_summaries[course_id]
-        #    for course_id in self.ids
-        #]
-
-'''
-    def get_query(self):
-        return reduce(lambda q, item_id: q | Q(course_id=item_id), self.ids, Q())
-'''

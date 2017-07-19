@@ -307,7 +307,7 @@ class APIListView(generics.ListAPIView):
 
     def get_full_dataset(self):
         queryset = self.model.objects.all()
-        return self.group_by_id_dict(queryset, exclude=[])
+        return self.group_by_id_dict(queryset, exclude=['programs'])
 
     @raise_404_if_none
     def get_queryset(self):
@@ -324,7 +324,8 @@ class APIListView(generics.ListAPIView):
 
 
 class PaginatedAPIListView(APIListView):
-    page_size = 500
+    max_page_size = 500
+    default_page_size = 100
 
     def list(self, request, *args, **kwargs):
         response = super(PaginatedAPIListView, self).list(request, *args, **kwargs)
@@ -338,21 +339,24 @@ class PaginatedAPIListView(APIListView):
         return response
 
     def get(self, request, *args, **kwargs):
-        self._extract_page()
+        self._extract_pagination(dict(request.query_params))
         return super(PaginatedAPIListView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self._extract_page()
+        self._extract_pagination(dict(request.data))
         return super(PaginatedAPIListView, self).post(request, *args, **kwargs)
 
-    def _extract_page(self):
-        if self.request.data.get('all'):
+    def _extract_pagination(self, arg_dict):
+        if arg_dict.get('all'):
             self.page = None
+            self.page_size = None
             return
         try:
-            self.page = int(self.request.data.get('page', '1'))
+            self.page = int(arg_dict.get('page', ['1'])[0])
+            self.page_size = int(arg_dict.get('page_size', [self.default_page_size])[0])
         except ValueError:
             raise Http404()
         if self.page < 1:
             raise Http404()
-
+        if self.page_size > self.max_page_size:
+            raise Http404()  # @@ TODO what to raise?

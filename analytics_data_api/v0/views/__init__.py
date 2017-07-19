@@ -235,79 +235,33 @@ class APIListView(generics.ListAPIView):
                       [f.name for f in cls.model._meta.get_fields()])  # pylint: disable=protected-access
         field_dict = base_field_dict if base_field_dict else {}
         field_dict.update({field: getattr(model, field) for field in field_list})
-        return field_dict
 
     @classmethod
     def postprocess_field_dict(cls, field_dict):
         """Applies some business logic to final result without access to any data from the original model."""
-        return field_dict
+        pass
 
     @classmethod
-    def group_by_id_dict(cls, queryset, exclude=None, page=None, page_size=None):
+    def group_by_id_dict(cls, queryset, exclude=None):
         """Return results aggregated by a distinct ID."""
-        start = 0 if page is None else (page - 1) * page_size
-        stop = 1000000 if page is None else start + page_size
-        #'''
-        i = 0
-        models_by_id = OrderedDict()
-        for model in queryset:
-            item_id = getattr(model, cls.model_id_field)
-            field_dict = models_by_id.get(item_id)
-            if field_dict is None:
-                i += 1
-                field_dict = cls.base_field_dict(item_id)
-            if i >= stop:
-                break
-            if i >= start:
-                models_by_id[item_id] = cls.update_field_dict_from_model(model, base_field_dict=field_dict)
-        for model_dict in models_by_id.values():
-            cls.postprocess_field_dict(model_dict, exclude or [])
-        return models_by_id
-
-    @classmethod
-    def group_by_id(cls, queryset, exclude=None, page=None, page_size=None):
-        return cls.group_by_id_dict(queryset, exclude=exclude, page=page, page_size=page_size).values()
-        #'''
-        '''
-        res = []
-        curr_item_id = None
-        curr_fields = None
-        i = 0
-        for model in queryset:
-            item_id = getattr(model, self.model_id_field)
-            if item_id != curr_item_id:
-                i += 1
-                if curr_fields is not None:
-                    res.append(curr_fields)
-                curr_item_id = item_id
-                curr_fields = self.base_field_dict(item_id)
-            curr_fields = self.update_field_dict_from_model(model, base_field_dict=curr_fields)
-            if i >= 100:
-                break
-        if curr_fields is not None:
-            res.append(curr_fields)
-        return res
-        '''
-        '''
-        aggregate_field_dict = []
-        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
-            field_dict = self.base_field_dict(item_id)
+        aggregate_field_dict = {}
+        for item_id, model_group in groupby(queryset, lambda x: getattr(x, cls.model_id_field)):
+            field_dict = cls.base_field_dict(item_id)
 
             for model in model_group:
-                field_dict = self.update_field_dict_from_model(model, base_field_dict=field_dict)
+                cls.update_field_dict_from_model(model, base_field_dict=field_dict)
 
-            field_dict = self.postprocess_field_dict(field_dict)
-            aggregate_field_dict.append(field_dict)
+            cls.postprocess_field_dict(field_dict, exclude)
+            aggregate_field_dict[item_id] = field_dict
 
-        return aggregate_field_dict[start:stop]
-        '''
+        return aggregate_field_dict
+
+    @classmethod
+    def group_by_id(cls, queryset, exclude=None):
+        return cls.group_by_id_dict(queryset, exclude=exclude).values()
 
     def get_query(self):
         return Q(**{self.model_id_field + '__in': self.ids})
-
-    def get_full_dataset(self):
-        queryset = self.model.objects.all()
-        return self.group_by_id_dict(queryset, exclude=['programs'])
 
     @raise_404_if_none
     def get_queryset(self):
@@ -317,46 +271,8 @@ class APIListView(generics.ListAPIView):
             queryset = self.model.objects.all()
         #queryset = queryset.filter(pacing_type='self_paced')
         queryset = queryset.order_by('start_time', 'course_id')
-        field_dict = self.group_by_id(queryset, self.exclude, self.page, self.page_size)
+        field_dict = self.group_by_id(queryset, self.exclude)
 
         # Django-rest-framework will serialize this dictionary to a JSON response
         return field_dict
 
-
-class PaginatedAPIListView(APIListView):
-    max_page_size = 500
-    default_page_size = 100
-
-    def list(self, request, *args, **kwargs):
-        response = super(PaginatedAPIListView, self).list(request, *args, **kwargs)
-        data = response.data
-        response.data = {
-            'results': data,
-            'count': len(data),
-            'next': None,
-            'previous': None,
-        }
-        return response
-
-    def get(self, request, *args, **kwargs):
-        self._extract_pagination(dict(request.query_params))
-        return super(PaginatedAPIListView, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self._extract_pagination(dict(request.data))
-        return super(PaginatedAPIListView, self).post(request, *args, **kwargs)
-
-    def _extract_pagination(self, arg_dict):
-        if arg_dict.get('all'):
-            self.page = None
-            self.page_size = None
-            return
-        try:
-            self.page = int(arg_dict.get('page', ['1'])[0])
-            self.page_size = int(arg_dict.get('page_size', [self.default_page_size])[0])
-        except ValueError:
-            raise Http404()
-        if self.page < 1:
-            raise Http404()
-        if self.page_size > self.max_page_size:
-            raise Http404()  # @@ TODO what to raise?

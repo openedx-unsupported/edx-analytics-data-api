@@ -4,9 +4,11 @@ from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
 
+from rest_framework.pagination import PageNumberPagination
+
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
-from analytics_data_api.v0.views import PaginatedAPIListView
+from analytics_data_api.v0.views import APIListView
 from analytics_data_api.v0.views.utils import (
     raise_404_if_none,
     split_query_argument,
@@ -14,7 +16,13 @@ from analytics_data_api.v0.views.utils import (
 )
 
 
-class CourseSummariesView(PaginatedAPIListView):
+class CourseSummariesPaginator(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 100
+    max_page_size = 100
+
+
+class CourseSummariesView(APIListView):
     """
     Returns summary information for courses.
 
@@ -73,12 +81,10 @@ class CourseSummariesView(PaginatedAPIListView):
         * POST is required when the number of course IDs would cause the URL to be too long.
         * POST functions the same as GET for this endpoint. It does not modify any state.
     """
-    default_page_size = 100
-    max_page_size = 100
     enable_caching = True
 
     serializer_class = serializers.CourseMetaSummaryEnrollmentSerializer
-    programs_serializer_class = serializers.CourseProgramMetadataSerializer
+    pagination_class = CourseSummariesPaginator
     model = models.CourseMetaSummaryEnrollment
     model_id_field = 'course_id'
     ids_param = 'course_ids'
@@ -130,9 +136,6 @@ class CourseSummariesView(PaginatedAPIListView):
         # QueryDicts return the singleton element of the list instead of the list itself,
         # which is undesirable. So, we convert to a normal dict.
         request_data_dict = dict(request.data)
-        programs = request_data_dict.get('programs')
-        if not programs:
-            self.always_exclude = self.always_exclude + ['programs']
         self.availability = self._get_set(request_data_dict, 'availability')
         self.pacing_type = self._get_set(request_data_dict, 'pacing_type')
         self.program_ids = self._get_set(request_data_dict, 'program_ids')
@@ -165,13 +168,17 @@ class CourseSummariesView(PaginatedAPIListView):
                 count_field: 0 for count_field in cls.count_fields
             } for mode in enrollment_modes.ALL
         })
+        summary['programs'] = set()
         return summary
 
     @classmethod
     def update_field_dict_from_model(cls, model, base_field_dict=None, field_list=None):
-        field_dict = super(CourseSummariesView, cls).update_field_dict_from_model(model,
-                                                                                   base_field_dict=base_field_dict,
-                                                                                   field_list=cls.summary_meta_fields)
+        super(CourseSummariesView, cls).update_field_dict_from_model(
+            model,
+            base_field_dict=base_field_dict,
+            field_list=cls.summary_meta_fields,
+        )
+        field_dict = base_field_dict
         field_dict['enrollment_modes'].update({
             model.enrollment_mode: {field: getattr(model, field) for field in cls.count_fields}
         })
@@ -181,8 +188,6 @@ class CourseSummariesView(PaginatedAPIListView):
 
         # update totals for all counts
         field_dict.update({field: field_dict[field] + getattr(model, field) for field in cls.count_fields})
-
-        return field_dict
 
     @classmethod
     def postprocess_field_dict(cls, field_dict, exclude):
@@ -205,28 +210,28 @@ class CourseSummariesView(PaginatedAPIListView):
 
     @classmethod
     def _do_excludes(cls, field_dict, exclude):
-        if exclude == [] or (exclude and 'programs' not in exclude):
-            # don't do expensive looping for programs if we are just going to throw it away
-            field_dict = cls.add_programs(field_dict)
-
         for field in exclude:
             for mode in field_dict['enrollment_modes']:
                 _ = field_dict['enrollment_modes'][mode].pop(field, None)
-
-    @classmethod
-    def add_programs(cls, field_dict):
-        """Query for programs attached to a course and include them (just the IDs) in the course summary dict"""
-        field_dict['programs'] = []
-        queryset = cls.programs_model.objects.filter(course_id=field_dict['course_id'])
-        for program in queryset:
-            program = cls.programs_serializer_class(program.__dict__)
-            field_dict['programs'].append(program.data['program_id'])
-        return field_dict
 
     from django.core.cache import caches
     cache = caches['summaries']
     cache_prefix = 'summary/'
     cache_flag = 'summaries-loaded-v5'
+
+    @classmethod
+    def get_full_dataset(cls):
+        queryset = cls.model.objects.all()
+        summaries = cls.group_by_id_dict(queryset)
+        course_programs = cls.programs_model.objects.all()
+        for course_program in course_programs:
+            summary = summaries.get(course_program.course_id)
+            if not summary:
+                continue
+            summary['programs'].add(
+                course_program.program_id
+            )
+        return summaries
 
     def _cache_valid(self):
         return bool(self.cache.get(self.cache_flag))
@@ -248,14 +253,21 @@ class CourseSummariesView(PaginatedAPIListView):
         self._prepare_cache()
 
         def filter_func(model_dict):
-            if self.availability and model_dicts['availability'] not in self.availability:
+            if self.availability and model_dict.get('availability') not in self.availability:
                 return False
-            if self.pacing_type and model_dicts['pacing_type'] not in self.pacing_type:
+            if self.pacing_type and model_dict.get('pacing_type') not in self.pacing_type:
                 return False
-            if self.program_ids and not (model_dicts['program_ids'] | self.program_ids):
+            if self.program_ids and not (model_dict.get('programs') | self.program_ids):
                 return False
-            if self.text_search and False:  # @@TODO: text search
-                return Falses
+            if self.text_search:
+                lower_search = self.text_search.lower()
+                match = (
+                    lower_search in model_dict.get('course_id', '').lower() or
+                    lower_search in model_dict.get('course_catalog_title', '').lower()
+                )
+                if not match:
+                    return False
+
             return True
 
         max_datetime = timezone.make_aware(timezone.datetime.max, timezone.get_default_timezone())
@@ -269,19 +281,24 @@ class CourseSummariesView(PaginatedAPIListView):
             sort_value = model_dict.get(self.sort_key)
             return sorting_defaults[self.sort_key] if sort_value is None else sort_value
 
+        # Load from cache
         prefixed_ids = [self.cache_prefix + course_id for course_id in self.ids]
         model_dicts = self.cache.get_many(prefixed_ids).values()
+
+        # Fitler
         model_dicts = [
             model_dict
             for model_dict in model_dicts
             if filter_func(model_dict)
         ]
+
+        # Sort
         if self.sort_key:
             model_dicts = sorted(model_dicts, key=sorting_func)
             if self.order == 'desc':
                 model_dicts.reverse()
+
+        # Prepare for response
         for model_dict in model_dicts:
             self._do_excludes(model_dict, self.exclude)
-        start = 0 if self.page is None else (self.page - 1) * self.page_size
-        stop = 1000000 if self.page is None else start + self.page_size
-        return model_dicts[start:stop]
+        return model_dicts

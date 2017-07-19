@@ -11,15 +11,68 @@ from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.views import APIListView
 from analytics_data_api.v0.views.utils import (
     raise_404_if_none,
-    split_query_argument,
+    split_query_argument_as_set,
     validate_course_id,
 )
+
+
+def _positive_int(integer_string, strict=False, cutoff=None):
+    """
+    Cast a string to a strictly positive integer.
+    """
+    ret = int(integer_string)
+    if ret < 0 or (ret == 0 and strict):
+        raise ValueError()
+    if cutoff:
+        return min(ret, cutoff)
+    return ret
 
 
 class CourseSummariesPaginator(PageNumberPagination):
     page_size_query_param = 'page_size'
     page_size = 100
     max_page_size = 100
+
+    def paginate_queryset(self, queryset, request, view=None):
+        """
+        Paginate a queryset if required, either returning a
+        page object, or `None` if pagination is not configured for this view.
+        """
+        page_size = self.get_page_size(request)
+        if not page_size:
+            return None
+
+        paginator = self.django_paginator_class(queryset, page_size)
+        page_number = request.data.get(self.page_query_param, 1)
+        if page_number in self.last_page_strings:
+            page_number = paginator.num_pages
+
+        try:
+            self.page = paginator.page(page_number)
+        except InvalidPage as exc:
+            msg = self.invalid_page_message.format(
+                page_number=page_number, message=six.text_type(exc)
+            )
+            raise NotFound(msg)
+
+        if paginator.num_pages > 1 and self.template is not None:
+            # The browsable API should display pagination controls.
+            self.display_page_controls = True
+
+        self.request = request
+        return list(self.page)
+
+    def get_page_size(self, request):
+        if self.page_size_query_param:
+            try:
+                return _positive_int(
+                    request.data.get(self.page_size_query_param),
+                    strict=True,
+                    cutoff=self.max_page_size
+                )
+            except (KeyError, ValueError):
+                pass
+        return self.page_size
 
 
 class CourseSummariesView(APIListView):
@@ -95,55 +148,25 @@ class CourseSummariesView(APIListView):
                            'pacing_type', 'availability']  # fields to extract from summary model
     sort_key_fields = set(count_fields) | set(summary_meta_fields) | set(['verified_enrollment'])
 
-    @staticmethod
-    def _get_string(data_dict, key, possible_values, is_from_querystring=False):
-        raw_value = data_dict.get(key)
-        if raw_value is None:
-            return None
-        elif is_from_querystring:
-            value = raw_value
-        elif raw_value == []:
-            return None
-        else:
-            value = raw_value[0]
-        if possible_values and value not in possible_values:
-            raise Http404()  # @@ TODO what should this error be
-        return value
-
-    @staticmethod
-    def _get_set(data_dict, key, is_from_querystring=False):
-        raw_value = data_dict.get(key)
-        if raw_value is None:
-            return None
-        elif is_from_querystring:
-            return set(split_query_argument(raw_value))
-        else:
-            return set(raw_value)
-
     def get(self, request, *args, **kwargs):
-        query_params = request.query_params
-        self.availability = self._get_set(query_params, 'availability', True)
-        self.pacing_type = self._get_set(query_params, 'pacing_type', True)
-        self.program_ids = self._get_set(query_params, 'program_ids', True)
-        self.text_search = self._get_string(query_params, 'text_search', None, True)
-        self.sort_key = self._get_string(query_params, 'sortKey', self.sort_key_fields, True)
-        self.order = self._get_string(query_params, 'order', set(['asc', 'desc']), True)
-        response = super(CourseSummariesView, self).get(request, *args, **kwargs)
+        params = request.query_params
+        self.availability = split_query_argument_as_set(params.get('availability'))
+        self.pacing_type = split_query_argument_as_set(params.get('pacing_type'))
+        self.program_ids = split_query_argument_as_set(params.get('program_ids'))
+        self.text_search = params.get('text_search')
+        self.sort_key = params.get('sortKey')
+        self.order = params.get('order')
+        return super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
 
     def post(self, request, *args, **kwargs):
-        # self.request.data is a QueryDict. For keys with singleton lists as values,
-        # QueryDicts return the singleton element of the list instead of the list itself,
-        # which is undesirable. So, we convert to a normal dict.
-        request_data_dict = dict(request.data)
-        self.availability = self._get_set(request_data_dict, 'availability')
-        self.pacing_type = self._get_set(request_data_dict, 'pacing_type')
-        self.program_ids = self._get_set(request_data_dict, 'program_ids')
-        self.text_search = self._get_string(request_data_dict, 'text_search', None)
-        self.sort_key = self._get_string(request_data_dict, 'sortKey', self.sort_key_fields)
-        self.order = self._get_string(request_data_dict, 'order', set(['asc', 'desc']))
-        response = super(CourseSummariesView, self).post(request, *args, **kwargs)
-        return response
+        self.availability = set(request.data.getlist('availability'))
+        self.pacing_type = set(request.data.getlist('pacing_type'))
+        self.program_ids = set(request.data.getlist('program_ids'))
+        self.text_search = request.data.get('text_search')
+        self.sort_key = request.data.get('sortKey')
+        self.order = request.data.get('order')
+        return super(CourseSummariesView, self).post(request, *args, **kwargs)
 
     def verify_ids(self):
         """

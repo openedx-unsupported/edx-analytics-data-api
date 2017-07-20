@@ -7,7 +7,7 @@ from analytics_data_api.v0.views.aggregate import AggregateDataView
 COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+[/+][^/+]+[/+][^/]+)'
 
 urlpatterns = [
-    url(r'^aggregate/', AggregateDataView.as_view(), name='aggregate-data'),
+    url(r'^course_aggregate_data/', AggregateDataView.as_view(), name='aggregate-data'),
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', 'courses')),
     url(r'^problems/', include('analytics_data_api.v0.urls.problems', 'problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', 'videos')),

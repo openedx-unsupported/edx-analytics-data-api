@@ -8,9 +8,14 @@ from analytics_data_api.v0.models import CourseMetaSummaryEnrollment
 
 class AggregateDataView(APIView):
 
+    def get(self, request, *args, **kwargs):
+        return self._respond(request.query_params.getlist('course_ids'))
+
     def post(self, request, *args, **kwargs):
+        return self._respond(request.data.getlist('course_ids'))
+
+    def _respond(self, course_ids):
         queryset = CourseMetaSummaryEnrollment.objects.all()
-        course_ids = dict(request.data).get('course_ids')
         if course_ids:
             queryset = queryset.filter(course_id__in=course_ids)
 

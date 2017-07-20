@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from itertools import groupby
 
 from django.db import models
@@ -269,8 +268,6 @@ class APIListView(generics.ListAPIView):
             queryset = self.model.objects.filter(self.get_query())
         else:
             queryset = self.model.objects.all()
-        #queryset = queryset.filter(pacing_type='self_paced')
-        queryset = queryset.order_by('start_time', 'course_id')
         field_dict = self.group_by_id(queryset, self.exclude)
 
         # Django-rest-framework will serialize this dictionary to a JSON response

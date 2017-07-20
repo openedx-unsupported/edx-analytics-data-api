@@ -2,12 +2,12 @@ from django.conf.urls import url, include
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView
 
-from analytics_data_api.v0.views.aggregate import AggregateDataView
+from analytics_data_api.v0.views.course_aggregate_data import CourseAggregateDataView
 
 COURSE_ID_PATTERN = r'(?P<course_id>[^/+]+[/+][^/+]+[/+][^/]+)'
 
 urlpatterns = [
-    url(r'^course_aggregate_data/', AggregateDataView.as_view(), name='aggregate-data'),
+    url(r'^course_aggregate_data/', CourseAggregateDataView.as_view(), name='course_aggregate_data'),
     url(r'^courses/', include('analytics_data_api.v0.urls.courses', 'courses')),
     url(r'^problems/', include('analytics_data_api.v0.urls.problems', 'problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos', 'videos')),

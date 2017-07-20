@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from analytics_data_api.v0.models import CourseMetaSummaryEnrollment
 
 
-class AggregateDataView(APIView):
+class CourseAggregateDataView(APIView):
 
     def get(self, request, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         return self._respond(request.query_params.getlist('course_ids'))
 
     def post(self, request, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         return self._respond(request.data.getlist('course_ids'))
 
     def _respond(self, course_ids):

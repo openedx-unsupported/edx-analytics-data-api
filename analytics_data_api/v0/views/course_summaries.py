@@ -1,8 +1,8 @@
-from collections import namedtuple
-
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
+
+from django.core.paginator import InvalidPage
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -38,6 +38,13 @@ class CourseSummariesPaginator(PageNumberPagination):
         Paginate a queryset if required, either returning a
         page object, or `None` if pagination is not configured for this view.
         """
+        if request.method == 'GET':
+            return super(CourseSummariesPaginator, self).paginate_queryset(
+                queryset,
+                request,
+                view=view
+            )
+
         page_size = self.get_page_size(request)
         if not page_size:
             return None
@@ -51,9 +58,9 @@ class CourseSummariesPaginator(PageNumberPagination):
             self.page = paginator.page(page_number)
         except InvalidPage as exc:
             msg = self.invalid_page_message.format(
-                page_number=page_number, message=six.text_type(exc)
+                page_number=page_number, message=exc.message
             )
-            raise NotFound(msg)
+            raise Http404(msg)
 
         if paginator.num_pages > 1 and self.template is not None:
             # The browsable API should display pagination controls.
@@ -63,7 +70,10 @@ class CourseSummariesPaginator(PageNumberPagination):
         return list(self.page)
 
     def get_page_size(self, request):
-        if self.page_size_query_param:
+        if request.method == 'GET':
+            return super(CourseSummariesPaginator, self).get_page_size(request)
+
+        if self.page_size_query_param and self.page_size_query_param in request.data:
             try:
                 return _positive_int(
                     request.data.get(self.page_size_query_param),
@@ -240,7 +250,8 @@ class CourseSummariesView(APIListView):
     from django.core.cache import caches
     cache = caches['summaries']
     cache_prefix = 'summary/'
-    cache_flag = 'summaries-loaded-v5'
+    cache_flag = 'summaries-loaded-v9'
+    cache_list_key = 'summaries-id-list'
 
     @classmethod
     def get_full_dataset(cls):
@@ -266,12 +277,14 @@ class CourseSummariesView(APIListView):
                 self.cache_prefix + course_id: summary
                 for course_id, summary in summary_dict.iteritems()
             }
+            import pdb; pdb.set_trace()
             self.cache.set_many(prefixed_summary_dict, timeout=None)
-            self.cache.set(self.cache_flag, True)
+            self.cache.set(self.cache_list_key, summary_dict.keys(), timeout=None)
+            self.cache.set(self.cache_flag, True, timeout=None)
 
     @raise_404_if_none
     def get_queryset(self):
-        if not (self.enable_caching and self.ids):
+        if not self.enable_caching:
             return super(CourseSummariesView, self).get_queryset()
         self._prepare_cache()
 
@@ -285,8 +298,8 @@ class CourseSummariesView(APIListView):
             if self.text_search:
                 lower_search = self.text_search.lower()
                 match = (
-                    lower_search in model_dict.get('course_id', '').lower() or
-                    lower_search in model_dict.get('course_catalog_title', '').lower()
+                    lower_search in (model_dict.get('course_id') or '').lower() or
+                    lower_search in (model_dict.get('catalog_course_title') or '').lower()
                 )
                 if not match:
                     return False
@@ -305,7 +318,8 @@ class CourseSummariesView(APIListView):
             return sorting_defaults[self.sort_key] if sort_value is None else sort_value
 
         # Load from cache
-        prefixed_ids = [self.cache_prefix + course_id for course_id in self.ids]
+        ids_to_load = self.ids or self.cache.get(self.cache_list_key)
+        prefixed_ids = [self.cache_prefix + course_id for course_id in ids_to_load]
         model_dicts = self.cache.get_many(prefixed_ids).values()
 
         # Fitler
@@ -316,7 +330,7 @@ class CourseSummariesView(APIListView):
         ]
 
         # Sort
-        if self.sort_key:
+        if self.sort_key in self.sort_key_fields:
             model_dicts = sorted(model_dicts, key=sorting_func)
             if self.order == 'desc':
                 model_dicts.reverse()

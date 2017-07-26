@@ -2,6 +2,7 @@ from itertools import groupby
 
 from django.db import models
 from django.db.models import Q
+from django.http import Http404
 from django.utils import timezone
 
 from rest_framework import generics, serializers
@@ -219,40 +220,47 @@ class APIListView(generics.ListAPIView):
         """
         pass
 
-    def base_field_dict(self, item_id):
+    @classmethod
+    def base_field_dict(cls, item_id):
         """Default result with fields pre-populated to default values."""
         field_dict = {
-            self.model_id_field: item_id,
+            cls.model_id_field: item_id,
         }
         return field_dict
 
-    def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
+    @classmethod
+    def update_field_dict_from_model(cls, model, base_field_dict=None, field_list=None):
         field_list = (field_list if field_list else
-                      [f.name for f in self.model._meta.get_fields()])  # pylint: disable=protected-access
+                      [f.name for f in cls.model._meta.get_fields()])  # pylint: disable=protected-access
         field_dict = base_field_dict if base_field_dict else {}
         field_dict.update({field: getattr(model, field) for field in field_list})
-        return field_dict
 
-    def postprocess_field_dict(self, field_dict):
+    @classmethod
+    def postprocess_field_dict(cls, field_dict):
         """Applies some business logic to final result without access to any data from the original model."""
-        return field_dict
+        pass
 
-    def group_by_id(self, queryset):
+    @classmethod
+    def group_by_id_dict(cls, queryset, exclude=None):
         """Return results aggregated by a distinct ID."""
-        aggregate_field_dict = []
-        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
-            field_dict = self.base_field_dict(item_id)
+        aggregate_field_dict = {}
+        for item_id, model_group in groupby(queryset, lambda x: getattr(x, cls.model_id_field)):
+            field_dict = cls.base_field_dict(item_id)
 
             for model in model_group:
-                field_dict = self.update_field_dict_from_model(model, base_field_dict=field_dict)
+                cls.update_field_dict_from_model(model, base_field_dict=field_dict)
 
-            field_dict = self.postprocess_field_dict(field_dict)
-            aggregate_field_dict.append(field_dict)
+            cls.postprocess_field_dict(field_dict, exclude)
+            aggregate_field_dict[item_id] = field_dict
 
         return aggregate_field_dict
 
+    @classmethod
+    def group_by_id(cls, queryset, exclude=None):
+        return cls.group_by_id_dict(queryset, exclude=exclude).values()
+
     def get_query(self):
-        return reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
+        return Q(**{self.model_id_field + '__in': self.ids})
 
     @raise_404_if_none
     def get_queryset(self):
@@ -260,8 +268,8 @@ class APIListView(generics.ListAPIView):
             queryset = self.model.objects.filter(self.get_query())
         else:
             queryset = self.model.objects.all()
-
-        field_dict = self.group_by_id(queryset)
+        field_dict = self.group_by_id(queryset, self.exclude)
 
         # Django-rest-framework will serialize this dictionary to a JSON response
         return field_dict
+

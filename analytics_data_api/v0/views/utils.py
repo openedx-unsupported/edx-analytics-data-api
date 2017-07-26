@@ -18,6 +18,15 @@ def split_query_argument(argument):
         return None
 
 
+def split_query_argument_as_set(argument):
+    """
+    Splits a comma-separated querystring argument into a set.
+    Returns None if the argument is empty.
+    """
+    split_list = split_query_argument(argument)
+    return set(split_list) if split_list else None
+
+
 def raise_404_if_none(func):
     """
     Decorator for raising Http404 if function evaluation is falsey (e.g. empty queryset).

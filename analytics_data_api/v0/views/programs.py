@@ -50,14 +50,10 @@ class ProgramsView(APIListView):
         return program
 
     def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
-        field_dict = super(ProgramsView, self).update_field_dict_from_model(model, base_field_dict=base_field_dict,
+        super(ProgramsView, self).update_field_dict_from_model(model, base_field_dict=base_field_dict,
                                                                             field_list=self.program_meta_fields)
+        field_dict = base_field_dict
         field_dict['course_ids'].append(model.course_id)
 
         # treat the most recent as the authoritative created date -- should be all the same
         field_dict['created'] = max(model.created, field_dict['created']) if field_dict['created'] else model.created
-
-        return field_dict
-
-    def get_query(self):
-        return reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())

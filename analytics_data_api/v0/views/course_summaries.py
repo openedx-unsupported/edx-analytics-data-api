@@ -277,7 +277,6 @@ class CourseSummariesView(APIListView):
                 self.cache_prefix + course_id: summary
                 for course_id, summary in summary_dict.iteritems()
             }
-            import pdb; pdb.set_trace()
             self.cache.set_many(prefixed_summary_dict, timeout=None)
             self.cache.set(self.cache_list_key, summary_dict.keys(), timeout=None)
             self.cache.set(self.cache_flag, True, timeout=None)

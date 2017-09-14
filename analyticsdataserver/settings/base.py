@@ -58,7 +58,7 @@ ELASTICSEARCH_LEARNERS_UPDATE_INDEX = environ.get('ELASTICSEARCH_LEARNERS_UPDATE
 ELASTICSEARCH_AWS_ACCESS_KEY_ID = None
 ELASTICSEARCH_AWS_SECRET_ACCESS_KEY = None
 # override the default elasticsearch connection class and useful for signing certificates
-# e.g. 'analytics_data_api.v1.connections.BotoHttpConnection'
+# e.g. 'analytics_data_api.v0.connections.BotoHttpConnection'
 ELASTICSEARCH_CONNECTION_CLASS = None
 # only needed with BotoHttpConnection, e.g. 'us-east-1'
 ELASTICSEARCH_CONNECTION_DEFAULT_REGION = None
@@ -163,13 +163,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'analytics_data_api.v1.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
-    'analytics_data_api.v1.middleware.LearnerNotFoundErrorMiddleware',
-    'analytics_data_api.v1.middleware.CourseNotSpecifiedErrorMiddleware',
-    'analytics_data_api.v1.middleware.CourseKeyMalformedErrorMiddleware',
-    'analytics_data_api.v1.middleware.ParameterValueErrorMiddleware',
-    'analytics_data_api.v1.middleware.ReportFileNotFoundErrorMiddleware',
-    'analytics_data_api.v1.middleware.CannotCreateDownloadLinkErrorMiddleware',
+    'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
+    'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
+    'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
+    'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',
+    'analytics_data_api.v0.middleware.ParameterValueErrorMiddleware',
+    'analytics_data_api.v0.middleware.ReportFileNotFoundErrorMiddleware',
+    'analytics_data_api.v0.middleware.CannotCreateDownloadLinkErrorMiddleware',
 )
 ########## END MIDDLEWARE CONFIGURATION
 
@@ -202,7 +202,7 @@ THIRD_PARTY_APPS = (
 
 LOCAL_APPS = (
     'analytics_data_api',
-    'analytics_data_api.v1',
+    'analytics_data_api.v0',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -324,15 +324,3 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 DATE_FORMAT = '%Y-%m-%d'
 DATETIME_FORMAT = '%Y-%m-%dT%H%M%S'
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    },
-    'summaries': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'OPTIONS': {
-            'MAX_ENTRIES': 100000
-        },
-    },
-}

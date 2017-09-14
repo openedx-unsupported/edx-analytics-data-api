@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from opaque_keys.edx.locator import CourseKey
 from opaque_keys import InvalidKeyError
 
-from analytics_data_api.v1.exceptions import (
+from analytics_data_api.v0.exceptions import (
     ReportFileNotFoundError,
     CannotCreateReportDownloadLinkError
 )
@@ -230,25 +230,3 @@ def get_expiration_date(seconds):
     Determine when a given link will expire, based on a given lifetime
     """
     return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
-
-
-class classproperty(object):
-    """
-    A decorator for declaring a class-level property.
-
-    Conceptually ike combining @classmethod and @property, however that
-    doesn't work in practice, so we have to define our own decorator here.
-    """
-
-    def __init__(self, getter):
-        self.getter = getter
-
-    def __get__(self, instance, owner):
-        return self.getter(owner)
-
-
-def join_dicts(*dicts):
-    joined = {}
-    for d in dicts:
-        joined.update(d)
-    return joined

@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from analytics_data_api.constants import engagement_events
-from analytics_data_api.v1 import models
+from analytics_data_api.v0 import models
 from analyticsdataserver.clients import CourseBlocksApiClient
 
 logging.basicConfig(level=logging.INFO)

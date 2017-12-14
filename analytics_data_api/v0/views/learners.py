@@ -305,7 +305,7 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
 
     **Example Request**
 
-        GET /api/v0/engagement_timeline/{username}/?course_id={course_id}
+        GET /api/v0/engagement_timelines/{username}/?course_id={course_id}
 
     **Response Values**
 

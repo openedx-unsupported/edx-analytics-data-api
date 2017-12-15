@@ -1,1 +1,1 @@
-newrelic==2.80.1.61
+newrelic==2.98.0.81

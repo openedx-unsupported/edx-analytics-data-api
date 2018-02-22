@@ -197,7 +197,8 @@ THIRD_PARTY_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'django_countries',
-    'storages'
+    'storages',
+    'enterprise_data'
 )
 
 LOCAL_APPS = (
@@ -242,6 +243,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True
         },
+        'enterprise_data': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True
+        },
         # See https://elasticutils.readthedocs.io/en/latest/debugging.html
         # INFO-level logs tell us when nodes fail and are resurrected.
         'elasticsearch': {
@@ -256,7 +262,7 @@ LOGGING = {
         'elasticsearch.trace': {
             'handlers': ['null'],
             'propagate': False
-        }
+        },
     },
 }
 ########## END LOGGING CONFIGURATION
@@ -297,6 +303,8 @@ DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
 
 ENABLE_ADMIN_SITE = False
 
+LMS_BASE_URL = None
+
 # base url to generate link to user api
 LMS_USER_ACCOUNT_BASE_URL = None
 
@@ -318,6 +326,14 @@ AGGREGATE_PAGE_SIZE = 10
 # We need to set this to None so that we can pass in a large number of Course IDs
 # to course_summaries/
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+
+JWT_AUTH = {
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_AUDIENCE': 'lms-key',
+    'JWT_ISSUER': 'http://127.0.0.1:8000/oauth2',
+    'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.utils.jwt_decode_handler',
+    'JWT_VERIFY_AUDIENCE': False,
+}
 
 ########## END ANALYTICS DATA API CONFIGURATION
 

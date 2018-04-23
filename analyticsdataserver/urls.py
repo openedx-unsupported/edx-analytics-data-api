@@ -24,5 +24,7 @@ if settings.ENABLE_ADMIN_SITE:  # pragma: no cover
     admin.autodiscover()
     urlpatterns.append(url(r'^site/admin/', include(admin.site.urls)))
 
+urlpatterns.append(url(r'', include('enterprise_data.urls')))
+
 handler500 = 'analyticsdataserver.views.handle_internal_server_error'  # pylint: disable=invalid-name
 handler404 = 'analyticsdataserver.views.handle_missing_resource_error'  # pylint: disable=invalid-name

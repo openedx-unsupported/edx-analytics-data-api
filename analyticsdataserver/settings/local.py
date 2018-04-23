@@ -74,4 +74,11 @@ COURSE_BLOCK_API_AUTH_TOKEN = 'paste auth token here'  # see README for instruct
 # hosts.
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1', 'analyticsapi']
 
+JWT_AUTH.update({
+    'JWT_SECRET_KEY': 'lms-secret',
+    'JWT_ISSUER': 'http://edx.devstack.lms:18000/oauth2',
+    'JWT_AUDIENCE': None,
+    'JWT_VERIFY_AUDIENCE': False,
+})
+
 ########## END ANALYTICS DATA API CONFIGURATION

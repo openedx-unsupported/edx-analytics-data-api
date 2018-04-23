@@ -33,6 +33,9 @@ with open(CONFIG_FILE) as f:
 
 REPORT_DOWNLOAD_BACKEND = config_from_yaml.pop('REPORT_DOWNLOAD_BACKEND', {})
 
+JWT_AUTH_CONFIG = config_from_yaml.pop('JWT_AUTH', {})
+JWT_AUTH.update(JWT_AUTH_CONFIG)
+
 vars().update(config_from_yaml)
 vars().update(REPORT_DOWNLOAD_BACKEND)
 

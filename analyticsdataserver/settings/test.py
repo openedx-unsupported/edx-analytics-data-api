@@ -21,6 +21,8 @@ INSTALLED_APPS += (
     'django_nose',
 )
 
+LMS_BASE_URL = 'http://lms-host'
+
 LMS_USER_ACCOUNT_BASE_URL = 'http://lms-host'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

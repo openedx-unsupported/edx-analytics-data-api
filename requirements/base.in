@@ -1,0 +1,20 @@
+# Core dependencies go here
+
+boto==2.42.0                        # MIT
+django==1.11.5                      # BSD License
+django-countries==4.5               # MIT
+djangorestframework==3.6.3          # BSD
+django-rest-swagger==2.1.2          # BSD
+djangorestframework-csv==2.0.0      # BSD
+django-storages==1.5.2              # BSD
+elasticsearch-dsl==0.0.11           # Apache 2.0
+ordered-set==2.0.2                  # MIT
+tqdm==4.11.2                        # MIT
+urllib3==1.21.1                     # MIT
+Markdown==2.6.6                     # BSD:markdown is used by swagger for rendering the api docs
+edx-ccx-keys==0.2.1
+edx-django-release-util
+edx-opaque-keys==0.4.0
+edx-rest-api-client                 # Apache 2.0
+edx-drf-extensions
+edx-enterprise-data==0.1.4

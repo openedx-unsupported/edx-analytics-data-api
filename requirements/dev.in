@@ -1,0 +1,3 @@
+# Local development dependencies go here
+
+-r base.in                          # Core dependencies of edx-analytics-data-api

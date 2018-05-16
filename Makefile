@@ -13,6 +13,7 @@ requirements:
 
 production-requirements:
 	pip install -r requirements.txt
+	pip install -r requirements/optional.txt
 
 test.install_elasticsearch:
 	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip

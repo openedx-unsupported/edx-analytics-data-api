@@ -1,0 +1,5 @@
+# Dependencies for building documentation
+
+-r base.in                          # Core dependencies of edx-analytics-data-api
+
+Sphinx==1.2.1                       # Developer documentation builder

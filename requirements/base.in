@@ -17,4 +17,4 @@ edx-django-release-util
 edx-opaque-keys==0.4.0
 edx-rest-api-client                 # Apache 2.0
 edx-drf-extensions
-edx-enterprise-data==0.1.5
+edx-enterprise-data==0.1.6

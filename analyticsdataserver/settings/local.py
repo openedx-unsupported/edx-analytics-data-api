@@ -81,4 +81,8 @@ JWT_AUTH.update({
     'JWT_VERIFY_AUDIENCE': False,
 })
 
+CORS_ORIGIN_WHITELIST = (
+    'localhost:1991'
+)
+
 ########## END ANALYTICS DATA API CONFIGURATION

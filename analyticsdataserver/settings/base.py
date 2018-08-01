@@ -157,6 +157,7 @@ TEMPLATES = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
     # Default Django middleware.
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -198,7 +199,8 @@ THIRD_PARTY_APPS = (
     'rest_framework_swagger',
     'django_countries',
     'storages',
-    'enterprise_data'
+    'enterprise_data',
+    'corsheaders',
 )
 
 LOCAL_APPS = (

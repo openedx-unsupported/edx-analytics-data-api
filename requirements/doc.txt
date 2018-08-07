@@ -33,7 +33,7 @@ docutils==0.14            # via awscli, botocore, edx-enterprise-data, sphinx
 edx-ccx-keys==0.2.1
 edx-django-release-util==0.3.1
 edx-drf-extensions==1.2.4
-edx-enterprise-data==0.2.2
+edx-enterprise-data==0.2.3
 edx-opaque-keys==0.4
 edx-rest-api-client==1.7.1
 elasticsearch-dsl==0.0.11

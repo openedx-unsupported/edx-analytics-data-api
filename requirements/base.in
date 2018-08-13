@@ -15,6 +15,7 @@ Markdown==2.6.6                     # BSD:markdown is used by swagger for render
 edx-ccx-keys==0.2.1
 edx-django-release-util
 edx-opaque-keys==0.4.0
+edx-django-utils
 edx-rest-api-client                 # Apache 2.0
 edx-drf-extensions
 edx-enterprise-data==0.2.4

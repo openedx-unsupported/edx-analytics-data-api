@@ -157,6 +157,7 @@ TEMPLATES = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
     # Default Django middleware.
+    'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -164,6 +165,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'edx_django_utils.cache.middleware.TieredCacheMiddleware',
+    'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',

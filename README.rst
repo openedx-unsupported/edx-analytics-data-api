@@ -71,6 +71,40 @@ database.
 
         $ make loaddata
 
+Loading Dummy LMS Enterprise Customer/User Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*...Work in progress...*
+
+These instructions are for ingesting data for specific enterprise customers and enterprise users. Ingesting this data is particularly useful when hooking this service up to its frontend app:
+
+1. Make sure you have done all the normal setup steps in README for this project
+
+2. Make a checkout of edx-enterprise-data (https://github.com/edx/edx-enterprise-data). Location of this checkout is not important
+
+3. In the following fixture files in edx-enterprise-data, replace the value for "enterprise_id" with the UUID value of the enterprise customer in your local LMS that you wish you ingest data for:
+
+::
+
+        /some_path_to_new_enterprise_data_checkout/edx-enterprise-data/enterprise_data/fixtures/enterprise_enrollment.json
+        
+        /some_path_to_new_enterprise_data_checkout/edx-enterprise-data/enterprise_data/fixtures/enterprise_user.json
+
+
+4. In your checkout of this repo, edx-analytics-data-api, run a `make` command to load the data of the modified fixture files into your analytics database:
+
+::
+
+        ./manage.py loaddata ../edx-enterprise-data/enterprise_data/fixtures/enterprise_enrollment.json --database=analytics
+        ./manage.py loaddata ../edx-enterprise-data/enterprise_data/fixtures/enterprise_user.json --database=analytics
+
+If you see a message like the following for each of these, you should be in good shape:
+
+::
+
+        Installed 4 object(s) from 1 fixture(s)
+
+
 Loading Video Data
 ~~~~~~~~~~~~~~~~~~
 

@@ -7,4 +7,4 @@ PyYAML                              # MIT
 gevent==1.0.2
 gunicorn==19.6.0                    # MIT
 path.py==8.2.1
-newrelic==2.98.0.81                 # New Relic agent for performance monitoring
+newrelic                            # New Relic agent for performance monitoring

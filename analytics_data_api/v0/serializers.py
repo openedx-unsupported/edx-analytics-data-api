@@ -577,7 +577,7 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, Dyn
         exclude = ('id', 'start_time', 'end_time', 'enrollment_mode')
 
 
-class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFieldsModelSerializer):
+class CourseProgramMetadataSerializer(DynamicFieldsModelSerializer):
     """
     Serializer for course and the programs it is under.
     """
@@ -593,4 +593,4 @@ class CourseProgramMetadataSerializer(ModelSerializerWithCreatedField, DynamicFi
         model = models.CourseProgramMetadata
         # excluding course-related fields because the serialized output will be embedded in a course object
         # with those fields already defined
-        exclude = ('id', 'created', 'course_id')
+        exclude = ('id', 'course_id')

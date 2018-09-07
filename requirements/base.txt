@@ -24,7 +24,7 @@ django-cors-headers==2.4.0
 django-countries==4.5
 django-fernet-fields==0.5  # via edx-enterprise-data
 django-rest-swagger==2.2.0
-django-storages==1.6.6
+django-storages==1.7.1
 django-waffle==0.14.0     # via edx-django-utils, edx-drf-extensions, edx-enterprise-data
 django==1.11.15
 djangorestframework-csv==2.1.0
@@ -35,7 +35,7 @@ edx-ccx-keys==0.2.1
 edx-django-release-util==0.3.1
 edx-django-utils==0.5.1
 edx-drf-extensions==1.6.2
-edx-enterprise-data==0.2.5
+edx-enterprise-data==0.2.6
 edx-opaque-keys==0.4.4
 edx-rest-api-client==1.8.2
 elasticsearch-dsl==0.0.11

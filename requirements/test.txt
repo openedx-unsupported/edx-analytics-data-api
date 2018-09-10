@@ -42,7 +42,7 @@ djangorestframework==3.8.2
 docutils==0.14            # via awscli, botocore, edx-enterprise-data
 edx-ccx-keys==0.2.1
 edx-django-release-util==0.3.1
-edx-django-utils==0.5.1
+edx-django-utils==1.0.1
 edx-drf-extensions==1.6.2
 edx-enterprise-data==0.2.6
 edx-opaque-keys==0.4.4

@@ -64,7 +64,7 @@ SWAGGER_SETTINGS = {
 
 # These two settings are used in generate_fake_course_data.py.
 # Replace with correct values to generate local fake video data.
-LMS_BASE_URL = 'http://localhost:8000/'  # the base URL for your running local LMS instance
+LMS_BASE_URL = 'http://localhost:18000/'  # the base URL for your running local LMS instance
 COURSE_BLOCK_API_AUTH_TOKEN = 'paste auth token here'  # see README for instructions on how to configure this value
 
 # In Insights, we run this API as a separate service called "analyticsapi" to run acceptance/integration tests. Docker

@@ -206,6 +206,7 @@ THIRD_PARTY_APPS = (
     'storages',
     'enterprise_data',
     'corsheaders',
+    'waffle',
 )
 
 LOCAL_APPS = (

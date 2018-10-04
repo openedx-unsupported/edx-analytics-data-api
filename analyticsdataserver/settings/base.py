@@ -167,6 +167,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
+    'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
+    'edx_rest_framework_extensions.auth.jwt.middleware.JwtAuthCookieMiddleware',
     'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',

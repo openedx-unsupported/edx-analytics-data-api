@@ -157,6 +157,7 @@ TEMPLATES = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
     # Default Django middleware.
+    'edx_rest_framework_extensions.authn.jwt.middleware.JwtAuthCookieMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -340,6 +341,9 @@ JWT_AUTH = {
     'JWT_ISSUER': 'http://127.0.0.1:8000/oauth2',
     'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.utils.jwt_decode_handler',
     'JWT_VERIFY_AUDIENCE': False,
+    'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
+    'JWT_AUTH_COOKIE_HEADER_PAYLOAD': 'edx-jwt-cookie-header-payload',
+    'JWT_AUTH_COOKIE_SIGNATURE': 'edx-jwt-cookie-signature',
 }
 
 ########## END ANALYTICS DATA API CONFIGURATION

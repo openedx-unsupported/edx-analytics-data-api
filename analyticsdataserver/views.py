@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
@@ -7,6 +9,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+
+logger = logging.getLogger(__name__)
 
 
 def handle_internal_server_error(_request):
@@ -112,5 +116,8 @@ class HealthView(APIView):
                 'database_connection': db_conn_status
             }
         }
+
+        if overall_status == UNAVAILABLE:
+            logger.error("Health check failed: %s", response)
 
         return Response(response, status=200 if overall_status == OK else 503)

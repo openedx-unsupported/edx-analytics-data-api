@@ -338,6 +338,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 JWT_AUTH = {
     'JWT_ALGORITHM': 'HS256',
     'JWT_AUDIENCE': 'lms-key',
+    'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
     'JWT_ISSUER': 'http://127.0.0.1:8000/oauth2',
     'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.auth.jwt.decoder.jwt_decode_handler',
     'JWT_VERIFY_AUDIENCE': False,

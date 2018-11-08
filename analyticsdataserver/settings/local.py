@@ -95,5 +95,6 @@ CORS_ORIGIN_WHITELIST = (
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
+CORS_ALLOW_CREDENTIALS = True
 
 ########## END ANALYTICS DATA API CONFIGURATION

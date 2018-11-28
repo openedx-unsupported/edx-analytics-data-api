@@ -26,8 +26,7 @@ Getting Started
 
    ::
 
-       $ ./manage.py migrate --noinput
-       $ ./manage.py migrate --noinput --database=analytics
+       $ make migrate-all
 
    The learner API endpoints require elasticsearch with a mapping
    defined on this `wiki page <https://openedx.atlassian.net/wiki/display/AN/Learner+Analytics#LearnerAnalytics-ElasticSearch>`_.
@@ -40,7 +39,7 @@ Getting Started
 
       $ make test.install_elasticsearch
 
-   To run the cluster for testing:
+   Elasticsearch requires `JDK 1.8`_; install that if you don't have it or have a different version. To run the cluster for testing:
 
    ::
 
@@ -58,6 +57,8 @@ Getting Started
    ::
 
        $ ./manage.py runserver
+
+.. _JDK 1.8: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
 Loading Data
 ------------
@@ -115,9 +116,9 @@ using it here.
    in your devstack as the `edxapp` user:
 
    ::
-   
+
       $ edxapp@precise64:~/edx-platform$ ./manage.py lms createsuperuser
-   
+
    Enter a username and password that you will remember.
 
 6. On the admin site, find the "Oauth2" section and click the link "Access
@@ -144,7 +145,7 @@ using it here.
 9. Check if you now have video data in the API. Either by querying the API in
    the swagger docs at `/docs/#!/api/Videos_List_GET`, or visiting the Insights
    `engagement/videos/` page for a course.
-   
+
 Note: the access tokens expire in one year so you should only have to follow the
 above steps once a year.
 

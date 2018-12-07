@@ -72,6 +72,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
             ('count', count_factor * num_modes),
             ('cumulative_count', cumulative_count_factor * num_modes),
             ('count_change_7_days', count_change_factor * num_modes),
+            ('recent_count_change', None),
             ('passing_users', count_change_factor * num_modes),
             ('enrollment_modes', {}),
         ])

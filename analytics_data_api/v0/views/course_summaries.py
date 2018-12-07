@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from django.db.models import Q
+from django.http import HttpResponseBadRequest
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
@@ -41,6 +44,7 @@ class CourseSummariesView(APIListView):
             * count: The total count of currently enrolled learners across modes.
             * cumulative_count: The total cumulative total of all users ever enrolled across modes.
             * count_change_7_days: Total difference in enrollment counts over the past 7 days across modes.
+            * recent_count_change: If a recent_date parameter was given, this will be the count change since that date
             * enrollment_modes: For each enrollment mode, the count, cumulative_count, and count_change_7_days.
             * created: The date the counts were computed.
             * programs: List of program IDs that this course is a part of.
@@ -61,6 +65,7 @@ class CourseSummariesView(APIListView):
             For example, 'course_id,created'.  Default is to exclude the programs array.
         programs -- If included in the query parameters, will find each courses' program IDs
             and include them in the response.
+        recent_date -- A date in the past to compute enrollement count change relative to, format should be YYYY-MM-DD
 
     **Notes**
 
@@ -78,12 +83,20 @@ class CourseSummariesView(APIListView):
                     'passing_users')  # are initialized to 0 by default
     summary_meta_fields = ['catalog_course_title', 'catalog_course', 'start_time', 'end_time',
                            'pacing_type', 'availability']  # fields to extract from summary model
+    recent_date = None
 
     def get(self, request, *args, **kwargs):
         query_params = self.request.query_params
         programs = split_query_argument(query_params.get('programs'))
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
+
+        recent = query_params.get('recent_date')
+        try:
+            self.verify_recent_date(recent)
+        except ValueError as err:
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(err.message))
+
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
 
@@ -95,8 +108,22 @@ class CourseSummariesView(APIListView):
         programs = request_data_dict.get('programs')
         if not programs:
             self.always_exclude = self.always_exclude + ['programs']
+
+        recent = request_data_dict.get('recent_date')
+        try:
+            self.verify_recent_date(recent)
+        except ValueError as err:
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(err.message))
+
         response = super(CourseSummariesView, self).post(request, *args, **kwargs)
         return response
+
+    def verify_recent_date(self, recent):
+        if not recent:
+            return
+        self.recent_date = datetime.strptime(recent, '%Y-%m-%d')
+        if (datetime.now() - self.recent_date).days <= 0:
+            raise ValueError('"{}" is not in the past'.format(self.recent_date))
 
     def verify_ids(self):
         """
@@ -154,10 +181,25 @@ class CourseSummariesView(APIListView):
             # don't do expensive looping for programs if we are just going to throw it away
             field_dict = self.add_programs(field_dict)
 
+        if self.recent_date and 'recent_count_change' not in self.exclude:
+            field_dict = self.add_recent_count_change(field_dict)
+
         for field in self.exclude:
             for mode in field_dict['enrollment_modes']:
                 _ = field_dict['enrollment_modes'][mode].pop(field, None)
 
+        return field_dict
+
+    def add_recent_count_change(self, field_dict):
+        # Pick the most recent daily count on-or-before the desired date
+        # If there are no daily counts before the desired date, assume 0
+        recents = models.CourseEnrollmentDaily.objects\
+            .filter(course_id=field_dict['course_id'], date__lte=self.recent_date).order_by('-date')[0:1]
+        if recents:
+            recent_count = recents[0].count
+        else:
+            recent_count = 0
+        field_dict['recent_count_change'] = field_dict['count'] - recent_count
         return field_dict
 
     def add_programs(self, field_dict):

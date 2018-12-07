@@ -49,6 +49,7 @@ clean:
 	coverage erase
 
 test: clean
+	curl --silent --head http://localhost:9223/roster_test > /dev/null || make test.run_elasticsearch  # Launch ES if needed
 	coverage run ./manage.py test --settings=$(TEST_SETTINGS) \
 		--with-ignore-docstrings --exclude-dir=analyticsdataserver/settings \
 		$(PACKAGES)

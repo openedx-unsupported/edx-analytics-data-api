@@ -49,6 +49,7 @@ clean:
 	coverage erase
 
 test: clean
+	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  # Launch ES if installed and not running
 	coverage run ./manage.py test --settings=$(TEST_SETTINGS) \
 		--with-ignore-docstrings --exclude-dir=analyticsdataserver/settings \
 		$(PACKAGES)

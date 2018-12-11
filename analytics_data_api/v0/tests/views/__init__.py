@@ -104,7 +104,10 @@ class APIListViewTestMixin(object):
 
     def path(self, query_data=None):
         query_data = query_data or {}
-        concat_query_data = {param: ','.join(arg) for param, arg in query_data.items() if arg}
+        concat_query_data = {
+            param: arg if isinstance(arg, str) else ','.join(arg)
+            for param, arg in query_data.items() if arg
+        }
         query_string = '?{}'.format(urlencode(concat_query_data)) if concat_query_data else ''
         return '/api/v0/{}/{}'.format(self.list_name, query_string)
 

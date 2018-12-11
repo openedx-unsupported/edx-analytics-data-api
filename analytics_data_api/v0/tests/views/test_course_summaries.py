@@ -33,7 +33,8 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         self.model.objects.all().delete()
 
     def create_model(self, model_id, **kwargs):
-        for mode in kwargs['modes']:
+        modes = kwargs.get('modes', [])
+        for mode in modes:
             G(self.model, course_id=model_id, catalog_course_title='Title', catalog_course='Catalog',
               start_time=datetime.datetime(2016, 10, 11, tzinfo=pytz.utc),
               end_time=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
@@ -43,6 +44,9 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
             # Create a link from this course to a program
             G(models.CourseProgramMetadata, course_id=model_id, program_id=CourseSamples.program_ids[0],
               program_type='Demo', program_title='Test')
+        recent = kwargs.get('recent_date')
+        if recent:
+            G(models.CourseEnrollmentDaily, course_id=model_id, date=recent, count=3 * len(modes))
 
     def generate_data(self, ids=None, modes=None, availability='Current', **kwargs):
         """Generate course summary data"""
@@ -51,7 +55,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
         super(CourseSummariesViewTests, self).generate_data(ids=ids, modes=modes, availability=availability, **kwargs)
 
-    def expected_result(self, item_id, modes=None, availability='Current', programs=False):  # pylint: disable=arguments-differ
+    def expected_result(self, item_id, modes=None, availability='Current', programs=False, recent_count_change=None):  # pylint: disable=arguments-differ
         """Expected summary information for a course and modes to populate with data."""
         summary = super(CourseSummariesViewTests, self).expected_result(item_id)
 
@@ -72,6 +76,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
             ('count', count_factor * num_modes),
             ('cumulative_count', cumulative_count_factor * num_modes),
             ('count_change_7_days', count_change_factor * num_modes),
+            ('recent_count_change', recent_count_change),
             ('passing_users', count_change_factor * num_modes),
             ('enrollment_modes', {}),
         ])
@@ -103,13 +108,21 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
             summary['programs'] = [CourseSamples.program_ids[0]]
         return summary
 
-    def all_expected_results(self, ids=None, modes=None, availability='Current', programs=False):  # pylint: disable=arguments-differ
+    def all_expected_results(self,  # pylint: disable=arguments-differ
+                             ids=None,
+                             modes=None,
+                             availability='Current',
+                             programs=False,
+                             recent_count_change=None):
         if modes is None:
             modes = enrollment_modes.ALL
 
-        return super(CourseSummariesViewTests, self).all_expected_results(ids=ids, modes=modes,
-                                                                          availability=availability,
-                                                                          programs=programs)
+        return super(CourseSummariesViewTests, self).all_expected_results(
+            ids=ids, modes=modes,
+            availability=availability,
+            programs=programs,
+            recent_count_change=recent_count_change
+        )
 
     @ddt.data(
         None,
@@ -172,3 +185,54 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         response = self.validated_request(exclude=[field])
         self.assertEquals(response.status_code, 200)
         self.assertEquals(str(response.data).count(field), 0)
+
+    def test_recent_no_daily(self):
+        'Tests that recent_count_change == count if there were no CourseEnrollmentDaily entries for that course'
+        self.generate_data(programs=True)
+        yesterday = datetime.datetime.today() - datetime.timedelta(1)
+        response = self.validated_request(exclude=self.always_exclude, recent_date=yesterday.strftime('%Y-%m-%d'))
+        self.assertEquals(response.status_code, 200)
+        count_factor = 5
+        expected_count_change = count_factor * len(enrollment_modes.ALL)
+        expected = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count_change)
+        self.assertItemsEqual(response.data, expected)
+
+    def test_recent_bad_date(self):
+        'Tests that sending a bad recent_date returns 400'
+        self.generate_data(programs=True)
+        response = self.validated_request(exclude=self.always_exclude, recent_date='Not a date')
+        self.assertEquals(response.status_code, 400)
+
+    def test_recent_future_date(self):
+        'Tests that sending a recent_date in the future returns 400'
+        self.generate_data(programs=True)
+        tomorrow = datetime.datetime.today() + datetime.timedelta(1)
+        response = self.validated_request(exclude=self.always_exclude, recent_date=tomorrow.strftime('%Y-%m-%d'))
+        self.assertEquals(response.status_code, 400)
+
+    def test_recent_count_change(self):
+        'Tests that recent_count_change == count if there were no CourseEnrollmentDaily entries for that course'
+        recent = datetime.datetime.today() - datetime.timedelta(5)
+        count_factor = 5
+        expected_count = count_factor * len(enrollment_modes.ALL)
+        recent_factor = 3
+        expected_recent = recent_factor * len(enrollment_modes.ALL)
+        recent_delta = expected_count - expected_recent
+        self.generate_data(programs=True, recent_date=recent)
+        expectedOnDate = self.all_expected_results(modes=enrollment_modes.ALL,
+                                                   recent_count_change=recent_delta)
+
+        responseOnDate = self.validated_request(exclude=self.always_exclude, recent_date=recent.strftime('%Y-%m-%d'))
+        self.assertEquals(responseOnDate.status_code, 200)
+        self.assertItemsEqual(responseOnDate.data, expectedOnDate)
+
+        after = (recent + datetime.timedelta(1)).strftime('%Y-%m-%d')
+        responseAfterDate = self.validated_request(exclude=self.always_exclude, recent_date=after)
+        self.assertEquals(responseAfterDate.status_code, 200)
+        self.assertItemsEqual(responseAfterDate.data, expectedOnDate)
+
+        expectedBeforeDate = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count)
+        before = (recent - datetime.timedelta(1)).strftime('%Y-%m-%d')
+        responseBeforeDate = self.validated_request(exclude=self.always_exclude, recent_date=before)
+        self.assertEquals(responseBeforeDate.status_code, 200)
+        self.assertItemsEqual(responseBeforeDate.data, expectedBeforeDate)

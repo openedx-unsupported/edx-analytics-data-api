@@ -11,7 +11,7 @@ django-storages                     # BSD
 elasticsearch-dsl==0.0.11           # Apache 2.0
 ordered-set==2.0.2                  # MIT
 tqdm==4.11.2                        # MIT
-urllib3==1.21.1                     # MIT
+urllib3                             # MIT
 Markdown==2.6.6                     # BSD:markdown is used by swagger for rendering the api docs
 edx-ccx-keys
 edx-django-release-util

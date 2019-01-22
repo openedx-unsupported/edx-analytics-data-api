@@ -78,7 +78,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1', 'analyticsapi']
 
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'lms-secret',
-    'JWT_ISSUER': 'http://edx.devstack.lms:18000/oauth2',
+    'JWT_ISSUER': 'http://localhost:18000/oauth2',
     'JWT_AUDIENCE': None,
     'JWT_VERIFY_AUDIENCE': False,
     'JWT_PUBLIC_SIGNING_JWK_SET': (
@@ -89,12 +89,13 @@ JWT_AUTH.update({
     ),
 })
 
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     'localhost:1991'
 )
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
-CORS_ALLOW_CREDENTIALS = True
 
 ########## END ANALYTICS DATA API CONFIGURATION

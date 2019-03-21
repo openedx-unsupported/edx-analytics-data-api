@@ -56,7 +56,6 @@ CACHES = {
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'analytics'
-ENABLE_ADMIN_SITE = True
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

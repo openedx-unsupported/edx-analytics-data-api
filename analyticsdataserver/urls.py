@@ -1,10 +1,12 @@
-from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 from analyticsdataserver import views
 from rest_framework.authtoken.views import obtain_auth_token
 
+
+admin.site.site_header = 'Analytics Data API Service Administration'
+admin.site.site_title = admin.site.site_header
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/docs')),  # pylint: disable=no-value-for-parameter
@@ -19,10 +21,6 @@ urlpatterns = [
     url(r'^authenticated/$', views.AuthenticationTestView.as_view(), name='authenticated'),
     url(r'^health/$', views.HealthView.as_view(), name='health'),
 ]
-
-if settings.ENABLE_ADMIN_SITE:  # pragma: no cover
-    admin.autodiscover()
-    urlpatterns.append(url(r'^site/admin/', include(admin.site.urls)))
 
 urlpatterns.append(url(r'', include('enterprise_data.urls')))
 

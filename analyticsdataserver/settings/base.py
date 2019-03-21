@@ -205,6 +205,7 @@ THIRD_PARTY_APPS = (
     'django_countries',
     'storages',
     'enterprise_data',
+    'rules.apps.AutodiscoverRulesConfig',
     'corsheaders',
     'waffle',
 )
@@ -216,6 +217,11 @@ LOCAL_APPS = (
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+AUTHENTICATION_BACKENDS = [
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 ########## END APP CONFIGURATION
 
 

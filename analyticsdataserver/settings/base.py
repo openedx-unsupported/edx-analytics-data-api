@@ -4,6 +4,12 @@ from os import environ
 from os.path import abspath, basename, dirname, join, normpath
 from sys import stderr
 
+from enterprise_data_roles.constants import (
+    SYSTEM_ENTERPRISE_ADMIN_ROLE,
+    ENTERPRISE_DATA_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE
+)
+
 
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory:
@@ -159,6 +165,7 @@ MIDDLEWARE_CLASSES = (
     # Default Django middleware.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'crum.CurrentRequestUserMiddleware',
     'django.middleware.common.CommonMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.JwtAuthCookieMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -169,6 +176,7 @@ MIDDLEWARE_CLASSES = (
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
+    'waffle.middleware.WaffleMiddleware',
     'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
@@ -263,6 +271,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True
         },
+        'rules': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         # See https://elasticutils.readthedocs.io/en/latest/debugging.html
         # INFO-level logs tell us when nodes fail and are resurrected.
         'elasticsearch': {
@@ -354,3 +367,12 @@ JWT_AUTH = {
 
 DATE_FORMAT = '%Y-%m-%d'
 DATETIME_FORMAT = '%Y-%m-%dT%H%M%S'
+
+########## EDX ENTERPRISE DATA CONFIGURATION
+
+SYSTEM_TO_FEATURE_ROLE_MAPPING = {
+    SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_DATA_ADMIN_ROLE],
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE: [ENTERPRISE_DATA_ADMIN_ROLE],
+}
+
+########## EDX ENTERPRISE DATA CONFIGURATION

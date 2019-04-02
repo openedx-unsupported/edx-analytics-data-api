@@ -60,3 +60,6 @@ docs/_build/
 .idea/
 
 elasticsearch-*
+
+# Visual Studio Code
+.vscode

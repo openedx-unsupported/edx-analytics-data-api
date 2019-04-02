@@ -213,6 +213,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'analytics_data_api',
     'analytics_data_api.v0',
+    'enterprise_data_roles',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -314,8 +315,6 @@ REST_FRAMEWORK = {
 
 ANALYTICS_DATABASE = 'default'
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
-
-ENABLE_ADMIN_SITE = False
 
 LMS_BASE_URL = None
 

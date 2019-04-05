@@ -13,7 +13,7 @@ from analytics_data_api.v0 import models
 
 # Below are the enrollment modes supported by this API.
 ENROLLMENT_MODES = [enrollment_modes.AUDIT, enrollment_modes.CREDIT, enrollment_modes.HONOR,
-                    enrollment_modes.PROFESSIONAL, enrollment_modes.VERIFIED]
+                    enrollment_modes.PROFESSIONAL, enrollment_modes.VERIFIED, enrollment_modes.MASTERS]
 
 
 class CourseActivityByWeekSerializer(serializers.ModelSerializer):
@@ -212,6 +212,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
     honor = serializers.SerializerMethodField()
     professional = serializers.SerializerMethodField()
     verified = serializers.SerializerMethodField()
+    masters = serializers.SerializerMethodField()
 
     def get_audit(self, obj):
         return obj.get('audit', 0)
@@ -227,6 +228,9 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
 
     def get_verified(self, obj):
         return obj.get('verified', 0)
+
+    def get_masters(self, obj):
+        return obj.get('masters', 0)
 
     class Meta(object):
         model = models.CourseEnrollmentModeDaily

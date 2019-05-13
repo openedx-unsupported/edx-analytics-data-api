@@ -27,8 +27,8 @@ coreschema==0.0.4         # via coreapi
 coverage==4.4.1
 cryptography==1.9         # via django-fernet-fields, edx-enterprise-data, paramiko, pgpy, pyopenssl, urllib3
 ddt==1.1.1
-diff-cover==2.0.0
-django-cors-headers==2.5.3
+diff-cover==2.0.1
+django-cors-headers==3.0.0
 django-countries==4.5
 django-crum==0.7.3        # via edx-enterprise-data, edx-rbac
 django-dynamic-fixture==1.9.5
@@ -47,7 +47,7 @@ edx-ccx-keys==0.2.1
 edx-django-release-util==0.3.1
 edx-django-utils==1.0.3
 edx-drf-extensions==2.2.0
-edx-enterprise-data==1.2.5
+edx-enterprise-data==1.2.6
 edx-opaque-keys==0.4.4
 edx-rbac==0.2.0           # via edx-enterprise-data
 edx-rest-api-client==1.9.2
@@ -60,13 +60,13 @@ futures==3.2.0            # via edx-enterprise-data, isort, s3transfer
 idna==2.8                 # via cryptography, edx-enterprise-data, urllib3
 inflect==2.1.0            # via jinja2-pluralize
 ipaddress==1.0.22         # via cryptography, edx-enterprise-data, urllib3
-isort==4.3.18             # via pylint
+isort==4.3.19             # via pylint
 itypes==1.1.0             # via coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
 jinja2==2.10.1            # via coreschema, diff-cover, jinja2-pluralize
 jmespath==0.9.4           # via boto3, botocore, edx-enterprise-data
 kombu==3.0.37             # via celery, edx-enterprise-data
-lazy-object-proxy==1.3.1  # via astroid
+lazy-object-proxy==1.4.1  # via astroid
 markdown==2.6.6
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint

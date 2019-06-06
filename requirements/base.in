@@ -18,6 +18,6 @@ edx-django-release-util
 edx-opaque-keys==0.4.4              # pinning to 0.4.4 until all dependent libraries have been appropriately updated
 edx-django-utils
 edx-rest-api-client                 # Apache 2.0
-edx-drf-extensions
-edx-enterprise-data
+edx-drf-extensions==2.2.1
+edx-enterprise-data==1.2.8
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests

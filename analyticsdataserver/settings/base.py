@@ -42,14 +42,29 @@ MANAGERS = ADMINS
 
 ########## DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
+DEFAULT_MYSQL_OPTIONS = {
+    'connect_timeout': 10,
+    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+}
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'localhost',
+        'NAME': 'analytics-api',
+        'OPTIONS': DEFAULT_MYSQL_OPTIONS,
+        'PASSWORD': 'password',
+        'PORT': '3306',
+        'USER': 'api001',
+        'ATOMIC_REQUESTS': False,
+    },
+    'reports': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'localhost',
+        'NAME': 'reports',
+        'OPTIONS': DEFAULT_MYSQL_OPTIONS,
+        'PASSWORD': 'password',
+        'PORT': '3306',
+        'USER': 'reports001',
     }
 }
 ########## END DATABASE CONFIGURATION
@@ -340,7 +355,12 @@ MEDIA_ROOT = normpath(join(SITE_ROOT, 'static', 'reports'))
 MEDIA_URL = 'http://localhost:8100/static/reports/'
 COURSE_REPORT_FILE_LOCATION_TEMPLATE = '{course_id}_{report_name}.csv'
 ENABLED_REPORT_IDENTIFIERS = ('problem_response',)
-
+REPORT_DOWNLOAD_BACKEND = {
+    DEFAULT_FILE_STORAGE: 'django.core.files.storage.FileSystemStorage',
+    MEDIA_ROOT: MEDIA_ROOT,
+    MEDIA_URL: MEDIA_URL,
+    COURSE_REPORT_FILE_LOCATION_TEMPLATE: ENABLED_REPORT_IDENTIFIERS
+}
 # Warning: using 0 or None for these can alter the structure of the REST response.
 DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
@@ -357,9 +377,20 @@ JWT_AUTH = {
     'JWT_ALGORITHM': 'HS256',
     'JWT_AUDIENCE': 'lms-key',
     'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
-    'JWT_ISSUER': 'http://127.0.0.1:8000/oauth2',
+    'JWT_ISSUER': [
+        {
+            'AUDIENCE': 'SET-ME-PLEASE',
+            'ISSUER': 'http://127.0.0.1:8000/oauth2',
+            'SECRET_KEY': 'SET-ME-PLEASE'
+        }
+    ],
     'JWT_DECODE_HANDLER': 'edx_rest_framework_extensions.auth.jwt.decoder.jwt_decode_handler',
     'JWT_VERIFY_AUDIENCE': False,
+    'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
+    'JWT_PUBLIC_SIGNING_JWK_SET': None,
+    'JWT_AUTH_COOKIE_HEADER_PAYLOAD': 'edx-jwt-cookie-header-payload',
+    'JWT_AUTH_COOKIE_SIGNATURE': 'edx-jwt-cookie-signature',
+    'JWT_AUTH_REFRESH_COOKIE': 'edx-jwt-refresh-cookie'
 }
 
 ########## END ANALYTICS DATA API CONFIGURATION
@@ -376,3 +407,41 @@ SYSTEM_TO_FEATURE_ROLE_MAPPING = {
 }
 
 ########## EDX ENTERPRISE DATA CONFIGURATION
+API_AUTH_TOKEN = 'put-your-api-token-here'
+CSRF_COOKIE_SECURE = False
+
+EXTRA_APPS = []
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+SOCIAL_AUTH_EDX_OAUTH2_KEY = "analytics_api-sso-key"
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = "-sso-secret"
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "http://127.0.0.1:8000"
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://127.0.0.1:8000"
+SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = "http://127.0.0.1:8000/logout"
+
+BACKEND_SERVICE_EDX_OAUTH2_KEY = "analytics_api-backend-service-key"
+BACKEND_SERVICE_EDX_OAUTH2_SECRET = "analytics_api-backend-service-secret"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
+EDX_DRF_EXTENSIONS = {
+    "OAUTH2_USER_INFO_URL": "http://127.0.0.1:8000/oauth2/user_info"
+}
+API_ROOT = None
+MEDIA_STORAGE_BACKEND = {
+    'DEFAULT_FILE_STORAGE': 'django.core.files.storage.FileSystemStorage',
+    'MEDIA_ROOT': MEDIA_ROOT,
+    'MEDIA_URL': MEDIA_URL
+}
+# Set these to the correct values for your OAuth2/OpenID Connect provider (e.g., devstack)
+SOCIAL_AUTH_EDX_OIDC_KEY = 'analytics_api-key'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'analytics_api-secret'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL = 'http://127.0.0.1:8000/logout'
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = 'analytics_api-secret'
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'

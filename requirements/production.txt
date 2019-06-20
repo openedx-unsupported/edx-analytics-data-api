@@ -61,6 +61,7 @@ jmespath==0.9.4           # via boto3, botocore, edx-enterprise-data
 kombu==3.0.37             # via celery, edx-enterprise-data
 markdown==2.6.6
 markupsafe==1.1.1         # via jinja2
+mysql-python==1.2.5
 neobolt==1.7.13           # via edx-enterprise-data, py2neo
 neotime==1.7.4            # via edx-enterprise-data, py2neo
 newrelic==4.20.0.120

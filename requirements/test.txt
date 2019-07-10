@@ -28,7 +28,7 @@ coreschema==0.0.4         # via coreapi
 coverage==4.4.1
 cryptography==1.9         # via django-fernet-fields, edx-enterprise-data, paramiko, pgpy, pyopenssl
 ddt==1.1.1
-diff-cover==2.2.0
+diff-cover==2.3.0
 django-cors-headers==3.0.2
 django-countries==4.5
 django-crum==0.7.3        # via edx-enterprise-data, edx-rbac
@@ -48,7 +48,7 @@ edx-ccx-keys==0.2.2
 edx-django-release-util==0.3.1
 edx-django-utils==1.0.5
 edx-drf-extensions==2.3.1
-edx-enterprise-data==1.2.12
+edx-enterprise-data==1.2.13
 edx-opaque-keys==1.0.1
 edx-rbac==0.2.1           # via edx-enterprise-data
 edx-rest-api-client==1.9.2
@@ -62,7 +62,7 @@ idna==2.8                 # via cryptography, edx-enterprise-data
 importlib-metadata==0.18  # via edx-enterprise-data, pluggy
 inflect==2.1.0            # via jinja2-pluralize
 ipaddress==1.0.22         # via cryptography, edx-enterprise-data
-isort==4.3.20             # via pylint
+isort==4.3.21             # via pylint
 itypes==1.1.0             # via coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
 jinja2==2.10.1            # via coreschema, diff-cover, jinja2-pluralize

@@ -8,7 +8,7 @@ amqp==1.4.9               # via edx-enterprise-data, kombu
 anyjson==0.3.3            # via edx-enterprise-data, kombu
 asn1crypto==0.24.0        # via cryptography, edx-enterprise-data
 awscli==1.11.178          # via edx-enterprise-data
-bcrypt==3.1.6             # via edx-enterprise-data, paramiko
+bcrypt==3.1.7             # via edx-enterprise-data, paramiko
 billiard==3.3.0.23        # via celery, edx-enterprise-data
 boto3==1.4.7              # via edx-enterprise-data
 boto==2.42.0
@@ -27,10 +27,10 @@ django-cors-headers==3.0.2
 django-countries==4.5
 django-crum==0.7.3        # via edx-enterprise-data, edx-rbac
 django-fernet-fields==0.5  # via edx-enterprise-data
-django-model-utils==3.1.2  # via edx-enterprise-data, edx-rbac
+django-model-utils==3.2.0  # via edx-enterprise-data, edx-rbac
 django-rest-swagger==2.2.0
 django-storages==1.7.1
-django-waffle==0.16.0     # via edx-django-utils, edx-drf-extensions, edx-enterprise-data
+django-waffle==0.17.0     # via edx-django-utils, edx-drf-extensions, edx-enterprise-data
 django==1.11.15
 djangorestframework-csv==2.1.0
 djangorestframework-jwt==1.11.0  # via edx-drf-extensions, edx-enterprise-data
@@ -38,11 +38,11 @@ djangorestframework==3.9.4
 docutils==0.14            # via awscli, botocore, edx-enterprise-data
 edx-ccx-keys==0.2.2
 edx-django-release-util==0.3.1
-edx-django-utils==1.0.5
-edx-drf-extensions==2.3.1
-edx-enterprise-data==1.2.12
+edx-django-utils==2.0.0
+edx-drf-extensions==2.3.3
+edx-enterprise-data==1.3.0
 edx-opaque-keys==1.0.1
-edx-rbac==0.2.1           # via edx-enterprise-data
+edx-rbac==1.0.2           # via edx-enterprise-data
 edx-rest-api-client==1.9.2
 elasticsearch-dsl==0.0.11
 elasticsearch==1.9.0      # via elasticsearch-dsl
@@ -64,13 +64,13 @@ markupsafe==1.1.1         # via jinja2
 mysql-python==1.2.5
 neobolt==1.7.13           # via edx-enterprise-data, py2neo
 neotime==1.7.4            # via edx-enterprise-data, py2neo
-newrelic==4.20.0.120
+newrelic==4.20.1.121
 openapi-codec==1.3.2      # via django-rest-swagger
 ordered-set==2.0.2
 paramiko==2.4             # via edx-enterprise-data
 path.py==8.2.1
-pathlib2==2.3.3           # via edx-enterprise-data, importlib-metadata
-pbr==5.3.0                # via edx-enterprise-data, stevedore
+pathlib2==2.3.4           # via edx-enterprise-data, importlib-metadata
+pbr==5.4.0                # via edx-enterprise-data, stevedore
 pgpy==0.4.3               # via edx-enterprise-data
 pip-tools==3.8.0          # via edx-enterprise-data
 pluggy==0.12.0            # via edx-enterprise-data, tox
@@ -112,4 +112,4 @@ urllib3==1.24.3
 vertica-python==0.7.3     # via edx-enterprise-data
 virtualenv==16.6.1        # via edx-enterprise-data, tox
 wcwidth==0.1.7            # via edx-enterprise-data, prompt-toolkit
-zipp==0.5.1               # via edx-enterprise-data, importlib-metadata
+zipp==0.5.2               # via edx-enterprise-data, importlib-metadata

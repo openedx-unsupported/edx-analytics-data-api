@@ -73,7 +73,7 @@ COURSE_BLOCK_API_AUTH_TOKEN = 'paste auth token here'  # see README for instruct
 # However, in Django 1.10.3, the HTTP_HOST header of requests started to be checked against the ALLOWED_HOSTS setting
 # even in DEBUG=True mode. Here, we add the Docker service name "analyticsapi" to the default set of local allowed
 # hosts.
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1', 'analyticsapi']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1', 'analyticsapi', 'host.docker.internal']
 
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'lms-secret',

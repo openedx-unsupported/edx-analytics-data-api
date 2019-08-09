@@ -790,55 +790,63 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
 
     @ddt.data(*CourseSamples.course_ids)
     def test_get(self, course_id):
-        activity_date = datetime.date(2019, 1, 1).strftime(settings.DATE_FORMAT)
-        create_engagement(course_id, 'user1', VIDEO, VIEWED, 'id-1', 3, activity_date)
-        create_engagement(course_id, 'user1', PROBLEM, ATTEMPTED, 'id-2', 4, activity_date)
-        create_engagement(course_id, 'user2', DISCUSSION, CONTRIBUTED, 'id-3', 2, activity_date)
-        create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 6, activity_date)
-        response = self._get_data(course_id)
+        activity_date_today = datetime.datetime.today().strftime(settings.DATE_FORMAT)
+        activity_date_more_than_7_days_ago = (datetime.datetime.today() - datetime.timedelta(days=9))\
+            .strftime(settings.DATE_FORMAT)
+        create_engagement(course_id, 'user1', VIDEO, VIEWED, 'id-1', 3, activity_date_today)
+        create_engagement(course_id, 'user1', PROBLEM, ATTEMPTED, 'id-2', 4, activity_date_today)
+        create_engagement(course_id, 'user1', PROBLEM, COMPLETED, 'id-2', 4, activity_date_more_than_7_days_ago)
+        create_engagement(course_id, 'user1', DISCUSSION, CONTRIBUTED, 'id-3', 2, activity_date_today)
+        create_engagement(course_id, 'user2', DISCUSSION, CONTRIBUTED, 'id-3', 2, activity_date_today)
+        create_engagement(course_id, 'user2', DISCUSSION, CONTRIBUTED, 'id-3', 11, activity_date_more_than_7_days_ago)
 
+        create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 6, activity_date_today)
+        create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 5, activity_date_more_than_7_days_ago)
+        create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 4, activity_date_more_than_7_days_ago)
+        create_engagement(course_id, 'user3', PROBLEM, ATTEMPTED, 'id-4', 3, activity_date_more_than_7_days_ago)
+
+        response = self._get_data(course_id)
         self.assertEquals(response.status_code, 200)
         expected = [
             OrderedDict([
-                ('id', 1),
-                ('course_id', course_id),
                 ('username', 'user1'),
-                ('date', activity_date),
-                ('entity_type', VIDEO),
-                ('entity_id', 'id-1'),
-                ('event', VIEWED),
-                ('count', 3),
-                ('created', response.data[0]['created'])]),
+                ('videos_overall', 3),
+                ('videos_last_week', 1),
+                ('problems_overall', 8),
+                ('problems_last_week', 4),
+                ('correct_problems_overall', 4),
+                ('correct_problems_last_week', None),
+                ('problems_attempts_overall', 4),
+                ('problems_attempts_last_week', 4),
+                ('forum_posts_overall', 2),
+                ('forum_posts_last_week', 2),
+                ('date_last_active', activity_date_today)]),
             OrderedDict([
-                ('id', 2),
-                ('course_id', course_id),
-                ('username', 'user1'),
-                ('date', activity_date),
-                ('entity_type', PROBLEM),
-                ('entity_id', 'id-2'),
-                ('event', ATTEMPTED),
-                ('count', 4),
-                ('created', response.data[1]['created'])]),
-            OrderedDict([
-                ('id', 3),
-                ('course_id', course_id),
                 ('username', 'user2'),
-                ('date', activity_date),
-                ('entity_type', DISCUSSION),
-                ('entity_id', 'id-3'),
-                ('event', CONTRIBUTED),
-                ('count', 2),
-                ('created', response.data[2]['created'])]),
+                ('videos_overall', None),
+                ('videos_last_week', None),
+                ('problems_overall', None),
+                ('problems_last_week', None),
+                ('correct_problems_overall', None),
+                ('correct_problems_last_week', None),
+                ('problems_attempts_overall', None),
+                ('problems_attempts_last_week', None),
+                ('forum_posts_overall', 13),
+                ('forum_posts_last_week', 2),
+                ('date_last_active', activity_date_today)]),
             OrderedDict([
-                ('id', 4),
-                ('course_id', course_id),
                 ('username', 'user3'),
-                ('date', activity_date),
-                ('entity_type', PROBLEM),
-                ('entity_id', 'id-4'),
-                ('event', COMPLETED),
-                ('count', 6),
-                ('created', response.data[3]['created'])]),
+                ('videos_overall', None),
+                ('videos_last_week', None),
+                ('problems_overall', 18),
+                ('problems_last_week', 6),
+                ('correct_problems_overall', 15),
+                ('correct_problems_last_week', 6),
+                ('problems_attempts_overall', 3),
+                ('problems_attempts_last_week', None),
+                ('forum_posts_overall', None),
+                ('forum_posts_last_week', None),
+                ('date_last_active', activity_date_today)]),
         ]
         self.assertListEqual(response.data, expected)
 

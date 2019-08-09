@@ -35,4 +35,5 @@ def create_engagement(course_id, username, entity_type, event_type, entity_id, c
         entity_id=entity_id,
         event=event_type,
         count=count,
+        created=date,
     )

@@ -1,7 +1,7 @@
 # Core dependencies go here
 
 boto==2.42.0                        # MIT
-django==1.11.15                     # BSD License
+django<1.12                         # BSD License
 django-countries==4.5               # MIT
 python-memcached                    # Python Software Foundation License v2
 djangorestframework                 # BSD

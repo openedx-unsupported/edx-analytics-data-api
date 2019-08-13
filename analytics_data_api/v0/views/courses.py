@@ -20,6 +20,10 @@ from analytics_data_api.v0.exceptions import ReportFileNotFoundError
 
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
+from analytics_data_api.v0.models import (
+    ModuleEngagement,
+)
+
 
 class BaseCourseView(generics.ListAPIView):
     start_date = None
@@ -810,3 +814,52 @@ class ReportDownloadView(APIView):
             return Response(response)
         else:
             raise ReportFileNotFoundError(course_id=course_id, report_name=report_name)
+
+
+# pylint: disable=abstract-method
+class UserEngagementView(BaseCourseView):
+    """
+    Get intervention information for a course in the form of a list of dicitonaries
+
+    **Example Request**
+
+        GET /api/v0/intervention/{course_id}/
+
+    **Response Values**
+
+        Returns a list of dictionaries of engagement information
+
+            * days: An array of the learner's daily engagement timeline.
+                * username
+                * videos_overall
+                * videos_last_week
+                * problems_overall
+                * problems_last_week
+                * correct_problems_overall
+                * correct_problems_last_week
+                * problem_attempts_overall
+                * problem_attempts_last_week
+                * forum_posts_overall
+                * forum_posts_last_week
+                * date_last_active
+
+    **Parameters**
+
+        You can specify the course ID for which you want data.
+
+        course_id -- The course identifier for which user data is requested.
+        For example, edX/DemoX/Demo_Course.
+
+    """
+    serializer_class = serializers.ModuleEngagementSerializer
+    username = None
+    lookup_field = 'username'
+
+    def get(self, request, *args, **kwargs):
+        self.username = self.kwargs.get('username')
+        return super(UserEngagementView, self).get(request, *args, **kwargs)
+
+    @raise_404_if_none
+    def get_queryset(self):
+        queryset = ModuleEngagement.objects.get_simple_data_for_all_students(self.course_id)
+        return queryset

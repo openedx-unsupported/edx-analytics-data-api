@@ -481,6 +481,22 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
 
 
 # pylint: disable=abstract-method
+class ModuleEngagementSerializer(serializers.Serializer):
+    """
+    Serializes row data from module_engagement
+    """
+    id = serializers.IntegerField()
+    course_id = serializers.CharField()
+    username = serializers.CharField()
+    date = serializers.DateField()
+    entity_type = serializers.CharField()
+    entity_id = serializers.CharField()
+    event = serializers.CharField()
+    count = serializers.IntegerField()
+    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+
+
+# pylint: disable=abstract-method
 class CourseLearnerMetadataSerializer(serializers.Serializer):
     enrollment_modes = serializers.ReadOnlyField(source='es_data.enrollment_modes')
     segments = serializers.ReadOnlyField(source='es_data.segments')

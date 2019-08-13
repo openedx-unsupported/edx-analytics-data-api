@@ -493,6 +493,10 @@ class ModuleEngagementTimelineManager(models.Manager):
 
         return full_timeline
 
+    def get_simple_data_for_all_students(self, course_id):
+        return ModuleEngagement.objects.all().filter(course_id=course_id) \
+            .order_by('username')
+
 
 class ModuleEngagement(BaseCourseModel):
     """User interactions with entities within the courseware."""

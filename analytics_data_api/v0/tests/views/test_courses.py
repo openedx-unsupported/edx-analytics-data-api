@@ -6,6 +6,7 @@
 import datetime
 from itertools import groupby
 import urllib
+from collections import OrderedDict
 
 import ddt
 from django.conf import settings
@@ -17,9 +18,13 @@ from mock import patch, Mock
 
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
+from analytics_data_api.constants.engagement_events import (ATTEMPTED, COMPLETED, CONTRIBUTED, DISCUSSION,
+                                                            PROBLEM, VIDEO, VIEWED)
+
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
 from analytics_data_api.utils import get_filename_safe_course_id
+from analytics_data_api.v0.tests.utils import create_engagement
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -766,6 +771,75 @@ class CourseVideosListViewTests(TestCaseWithAuthentication):
 
         response = self._get_data(course_id)
         self.assertEquals(response.status_code, 200)
+        self.assertListEqual(response.data, expected)
+
+    def test_get_404(self):
+        response = self._get_data('foo/bar/course')
+        self.assertEquals(response.status_code, 404)
+
+
+@ddt.ddt
+class UserEngagementViewTests(TestCaseWithAuthentication):
+
+    def _get_data(self, course_id):
+        """
+        Retrieve intervention report a specified course.
+        """
+        url = '/api/v0/courses/{}/user_engagement/'.format(course_id)
+        return self.authenticated_get(url)
+
+    @ddt.data(*CourseSamples.course_ids)
+    def test_get(self, course_id):
+        activity_date = datetime.date(2019, 1, 1).strftime(settings.DATE_FORMAT)
+        create_engagement(course_id, 'user1', VIDEO, VIEWED, 'id-1', 3, activity_date)
+        create_engagement(course_id, 'user1', PROBLEM, ATTEMPTED, 'id-2', 4, activity_date)
+        create_engagement(course_id, 'user2', DISCUSSION, CONTRIBUTED, 'id-3', 2, activity_date)
+        create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 6, activity_date)
+        response = self._get_data(course_id)
+
+        self.assertEquals(response.status_code, 200)
+        expected = [
+            OrderedDict([
+                ('id', 1),
+                ('course_id', course_id),
+                ('username', 'user1'),
+                ('date', activity_date),
+                ('entity_type', VIDEO),
+                ('entity_id', 'id-1'),
+                ('event', VIEWED),
+                ('count', 3),
+                ('created', response.data[0]['created'])]),
+            OrderedDict([
+                ('id', 2),
+                ('course_id', course_id),
+                ('username', 'user1'),
+                ('date', activity_date),
+                ('entity_type', PROBLEM),
+                ('entity_id', 'id-2'),
+                ('event', ATTEMPTED),
+                ('count', 4),
+                ('created', response.data[1]['created'])]),
+            OrderedDict([
+                ('id', 3),
+                ('course_id', course_id),
+                ('username', 'user2'),
+                ('date', activity_date),
+                ('entity_type', DISCUSSION),
+                ('entity_id', 'id-3'),
+                ('event', CONTRIBUTED),
+                ('count', 2),
+                ('created', response.data[2]['created'])]),
+            OrderedDict([
+                ('id', 4),
+                ('course_id', course_id),
+                ('username', 'user3'),
+                ('date', activity_date),
+                ('entity_type', PROBLEM),
+                ('entity_id', 'id-4'),
+                ('event', COMPLETED),
+                ('count', 6),
+                ('created', response.data[3]['created'])]),
+        ]
         self.assertListEqual(response.data, expected)
 
     def test_get_404(self):

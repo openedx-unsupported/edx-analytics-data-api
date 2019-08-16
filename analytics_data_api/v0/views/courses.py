@@ -851,7 +851,7 @@ class UserEngagementView(BaseCourseView):
         For example, edX/DemoX/Demo_Course.
 
     """
-    serializer_class = serializers.ModuleEngagementSerializer
+    serializer_class = serializers.UserEngagementSerializer
     username = None
     lookup_field = 'username'
 
@@ -861,5 +861,5 @@ class UserEngagementView(BaseCourseView):
 
     @raise_404_if_none
     def get_queryset(self):
-        queryset = ModuleEngagement.objects.get_simple_data_for_all_students(self.course_id)
+        queryset = ModuleEngagement.objects.get_aggregate_engagement_data(self.course_id)
         return queryset

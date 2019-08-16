@@ -481,19 +481,22 @@ class EnagementRangeMetricSerializer(serializers.Serializer):
 
 
 # pylint: disable=abstract-method
-class ModuleEngagementSerializer(serializers.Serializer):
+class UserEngagementSerializer(serializers.Serializer):
     """
     Serializes row data from module_engagement
     """
-    id = serializers.IntegerField()
-    course_id = serializers.CharField()
     username = serializers.CharField()
-    date = serializers.DateField()
-    entity_type = serializers.CharField()
-    entity_id = serializers.CharField()
-    event = serializers.CharField()
-    count = serializers.IntegerField()
-    created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
+    videos_overall = serializers.IntegerField()
+    videos_last_week = serializers.IntegerField()
+    problems_overall = serializers.IntegerField()
+    problems_last_week = serializers.IntegerField()
+    correct_problems_overall = serializers.IntegerField()
+    correct_problems_last_week = serializers.IntegerField()
+    problems_attempts_overall = serializers.IntegerField()
+    problems_attempts_last_week = serializers.IntegerField()
+    forum_posts_overall = serializers.IntegerField()
+    forum_posts_last_week = serializers.IntegerField()
+    date_last_active = serializers.DateTimeField(format=settings.DATE_FORMAT)
 
 
 # pylint: disable=abstract-method

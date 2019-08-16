@@ -3,7 +3,8 @@ from itertools import groupby
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, When, IntegerField, Case, Max
+from django.utils.timezone import now
 # some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
 from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String  # pylint: disable=no-name-in-module
 
@@ -496,6 +497,29 @@ class ModuleEngagementTimelineManager(models.Manager):
     def get_simple_data_for_all_students(self, course_id):
         return ModuleEngagement.objects.all().filter(course_id=course_id) \
             .order_by('username')
+
+    def get_aggregate_engagement_data(self, course_id):
+        seven_days_ago = now() - datetime.timedelta(days=7)
+        dict_list = [
+            ('videos_overall', When(entity_type='video', then='count')),
+            ('videos_last_week', When(entity_type='video', created__gt=seven_days_ago, then=1)),
+            ('problems_overall', When(entity_type='problem', then='count')),
+            ('problems_last_week', When(entity_type='problem', created__gt=seven_days_ago, then='count')),
+            ('correct_problems_overall', When(entity_type='problem', event='completed', then='count')),
+            ('correct_problems_last_week', When(entity_type='problem', event='completed',
+                                                created__gt=seven_days_ago, then='count')),
+            ('problems_attempts_overall', When(entity_type='problem', event='attempted', then='count')),
+            ('problems_attempts_last_week', When(entity_type='problem', event='attempted',
+                                                 created__gt=seven_days_ago, then='count')),
+            ('forum_posts_overall', When(entity_type='discussion', then='count')),
+            ('forum_posts_last_week', When(entity_type='discussion', created__gt=seven_days_ago, then='count')),
+        ]
+        dict_parameters = {key: Sum(Case(val, output_field=IntegerField())) for key, val in dict_list}
+        dict_parameters['date_last_active'] = Max('created')
+        query = ModuleEngagement.objects.filter(course_id=course_id)\
+            .values('username')\
+            .annotate(**dict_parameters)
+        return query
 
 
 class ModuleEngagement(BaseCourseModel):

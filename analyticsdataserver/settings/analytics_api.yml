@@ -1,6 +1,4 @@
 ---
-# Ansible managed
-
 
 AGGREGATE_PAGE_SIZE: 10
 ANALYTICS_DATABASE: reports

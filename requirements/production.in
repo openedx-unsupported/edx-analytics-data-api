@@ -4,7 +4,7 @@
 -r base.in                          # Core dependencies of edx-analytics-data-api
 MySQL-python==1.2.5                 # GPL License
 PyYAML                              # MIT
-gevent==1.0.2
+gevent
 gunicorn==19.6.0                    # MIT
 path.py==8.2.1
 newrelic                            # New Relic agent for performance monitoring

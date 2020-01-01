@@ -25,13 +25,13 @@ coreschema==0.0.4         # via coreapi
 cryptography==2.8         # via django-fernet-fields, edx-enterprise-data, paramiko, pgpy, pyopenssl
 django-cors-headers==3.0.2
 django-countries==4.5
-django-crum==0.7.4        # via edx-enterprise-data, edx-rbac
+django-crum==0.7.5        # via edx-enterprise-data, edx-rbac
 django-fernet-fields==0.5  # via edx-enterprise-data
 django-model-utils==3.2.0  # via edx-enterprise-data, edx-rbac
 django-rest-swagger==2.2.0
 django-storages==1.8
 django-waffle==0.18.0     # via edx-django-utils, edx-drf-extensions, edx-enterprise-data
-django==1.11.26
+django==1.11.27
 djangorestframework-csv==2.1.0
 djangorestframework-jwt==1.11.0  # via edx-drf-extensions, edx-enterprise-data
 djangorestframework==3.9.4
@@ -40,9 +40,9 @@ edx-ccx-keys==1.0.0
 edx-django-release-util==0.3.2
 edx-django-utils==2.0.2
 edx-drf-extensions==2.4.5
-edx-enterprise-data==1.3.9
+edx-enterprise-data==1.3.12
 edx-opaque-keys==2.0.1
-edx-rbac==1.0.3           # via edx-enterprise-data
+edx-rbac==1.0.5           # via edx-enterprise-data
 edx-rest-api-client==1.9.2
 elasticsearch-dsl==0.0.11
 elasticsearch==1.9.0      # via elasticsearch-dsl
@@ -50,7 +50,7 @@ enum34==1.1.6             # via cryptography, edx-enterprise-data, pgpy
 future==0.18.2            # via edx-enterprise-data, pyjwkest, vertica-python
 futures==3.2.0            # via edx-enterprise-data, s3transfer
 idna==2.8                 # via edx-enterprise-data, requests
-importlib-metadata==1.1.0  # via edx-enterprise-data, pluggy
+importlib-metadata==1.3.0  # via edx-enterprise-data, pluggy
 ipaddress==1.0.23         # via cryptography, edx-enterprise-data
 itypes==1.1.0             # via coreapi
 jinja2==2.10.3            # via coreschema
@@ -59,9 +59,9 @@ kombu==3.0.37             # via celery, edx-enterprise-data
 markdown==2.6.6
 markupsafe==1.1.1         # via jinja2
 more-itertools==5.0.0     # via edx-enterprise-data, zipp
-neobolt==1.7.15           # via edx-enterprise-data, py2neo
+neobolt==1.7.16           # via edx-enterprise-data, py2neo
 neotime==1.7.4            # via edx-enterprise-data, py2neo
-newrelic==5.4.0.132       # via edx-django-utils, edx-enterprise-data
+newrelic==5.4.1.134       # via edx-django-utils, edx-enterprise-data
 openapi-codec==1.3.2      # via django-rest-swagger
 ordered-set==2.0.2
 paramiko==2.4             # via edx-enterprise-data
@@ -73,7 +73,7 @@ pluggy==0.13.1            # via edx-enterprise-data, tox
 prompt-toolkit==2.0.10    # via edx-enterprise-data, py2neo
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions, edx-enterprise-data
 py2neo==4.3.0             # via edx-enterprise-data
-py==1.8.0                 # via edx-enterprise-data, tox
+py==1.8.1                 # via edx-enterprise-data, tox
 pyasn1==0.4.8             # via edx-enterprise-data, paramiko, pgpy, rsa
 pycparser==2.19           # via cffi, edx-enterprise-data
 pycryptodomex==3.9.4      # via edx-enterprise-data, pyjwkest
@@ -81,7 +81,7 @@ pygments==2.3.1           # via edx-enterprise-data, py2neo
 pyjwkest==1.3.2           # via edx-drf-extensions, edx-enterprise-data
 pyjwt==1.7.1              # via djangorestframework-jwt, edx-enterprise-data, edx-rest-api-client
 pyminizip==0.2.4          # via edx-enterprise-data
-pymongo==3.9.0            # via edx-enterprise-data, edx-opaque-keys
+pymongo==3.10.0           # via edx-enterprise-data, edx-opaque-keys
 pynacl==1.3.0             # via edx-enterprise-data, paramiko
 pyopenssl==17.4.0         # via edx-enterprise-data
 python-dateutil==2.8.1    # via botocore, edx-drf-extensions, edx-enterprise-data, elasticsearch-dsl, vertica-python
@@ -94,7 +94,7 @@ rsa==3.4.2                # via awscli, edx-enterprise-data
 rules==2.1                # via edx-enterprise-data
 s3transfer==0.1.13        # via awscli, boto3, edx-enterprise-data
 scandir==1.10.0           # via edx-enterprise-data, pathlib2
-semantic-version==2.8.3   # via edx-drf-extensions, edx-enterprise-data
+semantic-version==2.8.4   # via edx-drf-extensions, edx-enterprise-data
 simplejson==3.17.0        # via django-rest-swagger
 singledispatch==3.4.0.3   # via edx-enterprise-data, pgpy
 six==1.10.0               # via bcrypt, cryptography, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, more-itertools, neotime, pathlib2, pgpy, pip-tools, prompt-toolkit, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, singledispatch, stevedore, tox, vertica-python
@@ -103,9 +103,9 @@ stevedore==1.31.0         # via edx-enterprise-data, edx-opaque-keys
 tox==3.0.0                # via edx-enterprise-data
 tqdm==4.11.2
 unicodecsv==0.14.1        # via djangorestframework-csv, edx-enterprise-data
-uritemplate==3.0.0        # via coreapi
+uritemplate==3.0.1        # via coreapi
 urllib3==1.24.3
 vertica-python==0.7.3     # via edx-enterprise-data
-virtualenv==16.7.8        # via edx-enterprise-data, tox
+virtualenv==16.7.9        # via edx-enterprise-data, tox
 wcwidth==0.1.7            # via edx-enterprise-data, prompt-toolkit
 zipp==0.6.0               # via edx-enterprise-data, importlib-metadata

@@ -1,0 +1,33 @@
+FROM ubuntu:xenial as openedx
+
+RUN apt update && \
+  apt install -y git-core language-pack-en python python-pip python-dev libmysqlclient-dev libffi-dev libssl-dev build-essential gettext openjdk-8-jdk && \
+  pip install --upgrade pip setuptools && \
+  rm -rf /var/lib/apt/lists/*
+
+
+
+
+
+
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+ENV ANALYTICS_API_CFG /edx/etc/analytics_api.yml
+
+WORKDIR /edx/app/analytics_api
+COPY requirements /edx/app/analytics_api/requirements
+RUN pip install -r requirements/production.txt
+
+EXPOSE 8100
+CMD gunicorn --bind=0.0.0.0:8100 --workers 2 --max-requests=1000 -c /edx/app/analytics_api/analytics_data_api/docker_gunicorn_configuration.py analyticsdataserver.wsgi:application
+
+RUN useradd -m --shell /bin/false app
+USER app
+COPY . /edx/app/analytics_api
+
+FROM openedx as edx.org
+RUN pip install newrelic
+CMD newrelic-admin run-program gunicorn --bind=0.0.0.0:8100 --workers 2 --max-requests=1000 -c /edx/app/analytics_api/analytics_data_api/docker_gunicorn_configuration.py analyticsdataserver.wsgi:application

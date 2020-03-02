@@ -50,7 +50,7 @@ clean:
 
 test: clean
 	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  # Launch ES if installed and not running
-	coverage run -m pytest \
+	coverage run -m pytest --ignore=analyticsdataserver/settings \
 		$(PACKAGES)
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
 		coverage html && \

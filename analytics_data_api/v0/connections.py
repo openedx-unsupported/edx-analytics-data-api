@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import json
 import time
 
+import six
 from boto.connection import AWSAuthConnection
 from elasticsearch import Connection
 
@@ -37,7 +40,7 @@ class BotoHttpConnection(Connection):
         and the default is 70 seconds.
         See: https://github.com/boto/boto/blob/develop/boto/connection.py#L533
         """
-        if not isinstance(body, basestring):
+        if not isinstance(body, six.string_types):
             body = json.dumps(body)
         start = time.time()
         response = self.connection.make_request(method, url, params=params, data=body)

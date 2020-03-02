@@ -11,7 +11,7 @@ import six
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from six.moves import range, zip
+from six.moves import range, zip  # pylint: disable=ungrouped-imports
 from tqdm import tqdm
 
 from analytics_data_api.constants import engagement_events
@@ -107,9 +107,9 @@ class Command(BaseCommand):
         }
 
         # Generate birth year ratios
-        birth_years = list(range(1960, 2005))
-        ratios = [n / 1000.0 for n in constrained_sum_sample_pos(len(birth_years), 1000)]
-        birth_years = dict(list(zip(birth_years, ratios)))
+        birth_years_range = list(range(1960, 2005))
+        ratios = [n / 1000.0 for n in constrained_sum_sample_pos(len(birth_years_range), 1000)]
+        birth_years = dict(list(zip(birth_years_range, ratios)))
 
         # Delete existing data
         for model in [models.CourseEnrollmentDaily,

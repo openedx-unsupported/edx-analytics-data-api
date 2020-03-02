@@ -5,8 +5,7 @@ from __future__ import absolute_import, print_function
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from analytics_data_api.utils import (delete_user_auth_token,
-                                      set_user_auth_token)
+from analytics_data_api.utils import delete_user_auth_token, set_user_auth_token
 
 User = get_user_model()
 

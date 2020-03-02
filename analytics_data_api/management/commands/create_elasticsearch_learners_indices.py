@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from elasticsearch import Elasticsearch
 
 from django.conf import settings

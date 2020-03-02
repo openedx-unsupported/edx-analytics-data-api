@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from analytics_data_api.constants.engagement_events import (ATTEMPTED, ATTEMPTS_PER_COMPLETED, COMPLETED,
                                                             CONTRIBUTED, DISCUSSION, PROBLEM, VIDEO, VIEWED)
 

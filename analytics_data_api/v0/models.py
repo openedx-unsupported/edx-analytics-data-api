@@ -8,8 +8,8 @@ from django.db import models
 from django.db.models import Case, Count, IntegerField, Max, Sum, When
 from django.utils.timezone import now
 # some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
-from elasticsearch_dsl import (Date,  # pylint: disable=no-name-in-module
-                               DocType, Float, Integer, Q, String)
+from elasticsearch_dsl import Date  # pylint: disable=no-name-in-module
+from elasticsearch_dsl import DocType, Float, Integer, Q, String
 
 from analytics_data_api.constants import country, genders, learner
 from analytics_data_api.constants.engagement_types import EngagementType

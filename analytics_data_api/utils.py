@@ -1,23 +1,21 @@
-from __future__ import absolute_import
-from __future__ import print_function
-import datetime
-from importlib import import_module
-import re
+from __future__ import absolute_import, print_function
 
-from django.db.models import Q
+import datetime
+import re
+from importlib import import_module
+
+import six
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.core.exceptions import SuspiciousFileOperation, SuspiciousOperation
-from rest_framework.authtoken.models import Token
-from opaque_keys.edx.locator import CourseKey
+from django.core.files.storage import default_storage
+from django.db.models import Q
 from opaque_keys import InvalidKeyError
+from opaque_keys.edx.locator import CourseKey
+from rest_framework.authtoken.models import Token
+from six.moves import zip  # pylint: disable=ungrouped-imports
 
 from analytics_data_api.v0.exceptions import (
-    ReportFileNotFoundError,
-    CannotCreateReportDownloadLinkError
-)
-import six
-from six.moves import zip
+    CannotCreateReportDownloadLinkError, ReportFileNotFoundError)
 
 
 def get_filename_safe_course_id(course_id, replacement_char='_'):

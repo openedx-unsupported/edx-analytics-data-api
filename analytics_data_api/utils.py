@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import datetime
 from importlib import import_module
 import re
@@ -14,6 +16,8 @@ from analytics_data_api.v0.exceptions import (
     ReportFileNotFoundError,
     CannotCreateReportDownloadLinkError
 )
+import six
+from six.moves import zip
 
 
 def get_filename_safe_course_id(course_id, replacement_char='_'):
@@ -22,7 +26,7 @@ def get_filename_safe_course_id(course_id, replacement_char='_'):
     """
     try:
         course_key = CourseKey.from_string(course_id)
-        filename = unicode(replacement_char).join([course_key.org, course_key.course, course_key.run])
+        filename = six.text_type(replacement_char).join([course_key.org, course_key.course, course_key.run])
     except InvalidKeyError:
         # If the course_id doesn't parse, we will still return a value here.
         filename = course_id
@@ -30,7 +34,7 @@ def get_filename_safe_course_id(course_id, replacement_char='_'):
     # The safest characters are A-Z, a-z, 0-9, <underscore>, <period> and <hyphen>.
     # We represent the first four with \w.
     # TODO: Once we support courses with unicode characters, we will need to revisit this.
-    return re.sub(r'[^\w\.\-]', unicode(replacement_char), filename)
+    return re.sub(r'[^\w\.\-]', six.text_type(replacement_char), filename)
 
 
 def delete_user_auth_token(username):
@@ -61,7 +65,7 @@ def set_user_auth_token(user, key):
     Token.objects.filter(user=user).delete()
     Token.objects.create(user=user, key=key)
 
-    print "Set API key for user %s to %s" % (user, key)
+    print("Set API key for user %s to %s" % (user, key))
 
 
 def matching_tuple(answer):
@@ -79,7 +83,7 @@ def dictfetchall(cursor):
 
     desc = cursor.description
     return [
-        dict(zip([col[0] for col in desc], row))
+        dict(list(zip([col[0] for col in desc], row)))
         for row in cursor.fetchall()
     ]
 

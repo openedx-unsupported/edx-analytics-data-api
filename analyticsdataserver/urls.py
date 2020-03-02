@@ -1,10 +1,11 @@
 from __future__ import absolute_import
+
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
-from analyticsdataserver import views
 from rest_framework.authtoken.views import obtain_auth_token
 
+from analyticsdataserver import views
 
 admin.site.site_header = 'Analytics Data API Service Administration'
 admin.site.site_title = admin.site.site_header

@@ -1,12 +1,12 @@
 from __future__ import absolute_import
-import logging
 
-from requests.exceptions import RequestException
+import logging
 
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpClientError
-from opaque_keys.edx.keys import UsageKey
 from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import UsageKey
+from requests.exceptions import RequestException
 
 from analyticsdataserver.utils import temp_log_level
 

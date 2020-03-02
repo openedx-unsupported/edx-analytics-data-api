@@ -2,12 +2,12 @@
 
 
 from __future__ import absolute_import
+
 from os.path import join, normpath
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
 from analyticsdataserver.settings.base import *
-
 
 ########## DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug

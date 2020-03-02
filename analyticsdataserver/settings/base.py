@@ -1,16 +1,16 @@
 """Common settings and globals."""
 
 from __future__ import absolute_import
+
 from os import environ
 from os.path import abspath, basename, dirname, join, normpath
 from sys import stderr
 
 from enterprise_data_roles.constants import (
-    SYSTEM_ENTERPRISE_ADMIN_ROLE,
     ENTERPRISE_DATA_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_ADMIN_ROLE,
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
-
 
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory:

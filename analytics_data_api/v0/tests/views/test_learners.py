@@ -16,7 +16,7 @@ from elasticsearch import Elasticsearch
 from mock import Mock, patch
 from rest_framework import status
 from six.moves import range, zip
-from six.moves.urllib.parse import urlencode
+from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges

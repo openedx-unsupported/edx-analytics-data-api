@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from functools import reduce
+from functools import reduce as functools_reduce
 
 from django.db.models import Q
 
@@ -64,4 +64,4 @@ class ProgramsView(APIListView):
         return field_dict
 
     def get_query(self):
-        return reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())
+        return functools_reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())

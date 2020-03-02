@@ -12,29 +12,31 @@ from itertools import groupby
 import ddt
 import pytz
 import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
+import six.moves.urllib.error  # pylint: disable=import-error
+import six.moves.urllib.parse  # pylint: disable=import-error
+import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.utils import timezone
 from django_dynamic_fixture import G
 from mock import Mock, patch
 from opaque_keys.edx.keys import CourseKey
-from six.moves import range
+from six.moves import range  # pylint: disable=ungrouped-imports
 
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
-from analytics_data_api.constants.engagement_events import (ATTEMPTED,
-                                                            COMPLETED,
-                                                            CONTRIBUTED,
-                                                            DISCUSSION,
-                                                            PROBLEM, VIDEO,
-                                                            VIEWED)
+from analytics_data_api.constants.engagement_events import (
+    ATTEMPTED,
+    COMPLETED,
+    CONTRIBUTED,
+    DISCUSSION,
+    PROBLEM,
+    VIDEO,
+    VIEWED
+)
 from analytics_data_api.utils import get_filename_safe_course_id
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.utils import create_engagement
-from analytics_data_api.v0.tests.views import (CourseSamples,
-                                               VerifyCsvResponseMixin)
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
 from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
@@ -291,8 +293,10 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'birth_year': ce.birth_year, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'birth_year': ce.birth_year,
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
     @ddt.data(*CourseSamples.course_ids)
     def test_get(self, course_id):
@@ -323,9 +327,10 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'education_level': ce.education_level, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for
-            ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'education_level': ce.education_level,
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
 
 @ddt.ddt
@@ -402,9 +407,10 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'created': ce.created.strftime(settings.DATETIME_FORMAT)}
-            for ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'created': ce.created.strftime(settings.DATETIME_FORMAT)}
+            for ce in args
+        ]
 
 
 @ddt.ddt
@@ -489,10 +495,11 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
         response = [unknown]
         response += [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name},
-             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in
-            args]
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
         return response
 

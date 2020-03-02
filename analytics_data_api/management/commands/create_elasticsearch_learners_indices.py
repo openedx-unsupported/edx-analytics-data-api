@@ -1,8 +1,8 @@
 from __future__ import absolute_import
-from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from elasticsearch import Elasticsearch
 
 from analytics_data_api.management.utils import elasticsearch_settings_defined
 

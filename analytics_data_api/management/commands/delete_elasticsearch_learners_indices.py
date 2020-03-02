@@ -1,8 +1,8 @@
 from __future__ import absolute_import
-from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from elasticsearch import Elasticsearch
 
 
 class Command(BaseCommand):

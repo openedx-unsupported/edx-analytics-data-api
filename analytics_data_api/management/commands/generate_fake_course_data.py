@@ -1,23 +1,22 @@
 # pylint: disable=line-too-long,invalid-name
 
 from __future__ import absolute_import
+
 import datetime
 import logging
 import math
 import random
 
-from tqdm import tqdm
-
+import six
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from six.moves import range, zip
+from tqdm import tqdm
 
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0 import models
 from analyticsdataserver.clients import CourseBlocksApiClient
-import six
-from six.moves import range
-from six.moves import zip
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf.urls import url
 
 from analytics_data_api.v0.views import course_summaries as views

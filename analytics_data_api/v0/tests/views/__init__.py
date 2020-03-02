@@ -1,11 +1,15 @@
+from __future__ import absolute_import
+
 import csv
 import json
 import StringIO
 from collections import OrderedDict
-from urllib import urlencode
 
+import six
 from django_dynamic_fixture import G
 from rest_framework import status
+from six.moves import map, zip
+from six.moves.urllib.parse import urlencode
 
 from analytics_data_api.v0.tests.utils import flatten
 
@@ -58,12 +62,12 @@ class VerifyCsvResponseMixin(object):
 
         # Validate other response headers
         if expected_headers:
-            for header_name, header_content in expected_headers.iteritems():
+            for header_name, header_content in six.iteritems(expected_headers):
                 self.assertEquals(response.get(header_name), header_content)
 
         # Validate the content data
         if expected_data:
-            data = map(flatten, expected_data)
+            data = list(map(flatten, expected_data))
 
             # The CSV renderer sorts the headers alphabetically
             fieldnames = sorted(data[0].keys())

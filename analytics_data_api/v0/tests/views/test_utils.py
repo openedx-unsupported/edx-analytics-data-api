@@ -1,12 +1,13 @@
-import ddt
-from mock import Mock
+from __future__ import absolute_import
 
+import ddt
 from django.http import Http404
 from django.test import TestCase
+from mock import Mock
 
+import analytics_data_api.v0.views.utils as utils
 from analytics_data_api.v0.exceptions import CourseKeyMalformedError
 from analytics_data_api.v0.tests.views import CourseSamples
-import analytics_data_api.v0.views.utils as utils
 
 
 @ddt.ddt

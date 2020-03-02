@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+
+from functools import reduce
+
 from django.db.models import Q
 
 from analytics_data_api.v0 import models, serializers

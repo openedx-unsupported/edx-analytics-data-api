@@ -1,5 +1,6 @@
 """Test settings and globals."""
 
+from __future__ import absolute_import
 from analyticsdataserver.settings.base import *
 
 ########## IN-MEMORY TEST DATABASE

@@ -1,5 +1,6 @@
 """Production settings and globals."""
 
+from __future__ import absolute_import
 from os import environ
 
 # Normally you should not import ANYTHING from Django directly
@@ -10,6 +11,7 @@ import yaml
 
 from analyticsdataserver.settings.base import *
 from analyticsdataserver.settings.logger import get_logger_config
+import six
 
 LOGGING = get_logger_config()
 
@@ -48,5 +50,5 @@ DB_OVERRIDES = dict(
     PORT=environ.get('DB_MIGRATION_PORT', DATABASES['default']['PORT']),
 )
 
-for override, value in DB_OVERRIDES.iteritems():
+for override, value in six.iteritems(DB_OVERRIDES):
     DATABASES['default'][override] = value

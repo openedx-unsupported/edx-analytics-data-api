@@ -1,5 +1,6 @@
 # Put utilities that are used in managing the server or local environment here.
 # Utilities critical to application functionality should go under analytics_data_api.
+from __future__ import absolute_import
 import logging
 from contextlib import contextmanager
 

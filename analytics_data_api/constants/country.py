@@ -3,9 +3,11 @@ This file holds constants and helper functions related to countries. All codes a
 codes.
 """
 from __future__ import absolute_import
+
 from collections import namedtuple
-from django_countries import countries
+
 import six
+from django_countries import countries
 
 Country = namedtuple('Country', 'name, alpha2, alpha3, numeric')
 

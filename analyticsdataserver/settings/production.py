@@ -1,12 +1,14 @@
 """Production settings and globals."""
 
+from __future__ import absolute_import
+
 from os import environ
 
+import six
+import yaml
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
-
-import yaml
 
 from analyticsdataserver.settings.base import *
 from analyticsdataserver.settings.logger import get_logger_config
@@ -48,5 +50,5 @@ DB_OVERRIDES = dict(
     PORT=environ.get('DB_MIGRATION_PORT', DATABASES['default']['PORT']),
 )
 
-for override, value in DB_OVERRIDES.iteritems():
+for override, value in six.iteritems(DB_OVERRIDES):
     DATABASES['default'][override] = value

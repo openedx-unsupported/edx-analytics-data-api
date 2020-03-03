@@ -1,8 +1,10 @@
 """
 Custom REST framework renderers common to all versions of the API.
 """
-from rest_framework_csv.renderers import CSVRenderer
+from __future__ import absolute_import
+
 from ordered_set import OrderedSet
+from rest_framework_csv.renderers import CSVRenderer
 
 
 class ResultsOnlyRendererMixin(object):

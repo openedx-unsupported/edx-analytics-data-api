@@ -1,14 +1,15 @@
+from __future__ import absolute_import
+
 import datetime
 
 from django.contrib.auth.models import User
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError, call_command
 from django.test import TestCase
-from django_dynamic_fixture import G
 from rest_framework.authtoken.models import Token
 
-from analytics_data_api.constants.country import get_country, UNKNOWN_COUNTRY
-
+from analytics_data_api.constants.country import UNKNOWN_COUNTRY, get_country
 from analytics_data_api.utils import date_range, delete_user_auth_token, set_user_auth_token
+from django_dynamic_fixture import G
 
 
 class UtilsTests(TestCase):

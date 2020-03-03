@@ -1,10 +1,12 @@
 """
 Tests for the custom REST framework renderers.
 """
-from mock import MagicMock, PropertyMock
+from __future__ import absolute_import
+
 from django.test import TestCase
 
 from analytics_data_api.renderers import PaginatedCsvRenderer
+from mock import MagicMock, PropertyMock
 
 
 class PaginatedCsvRendererTests(TestCase):

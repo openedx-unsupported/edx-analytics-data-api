@@ -4,7 +4,6 @@ PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
 ELASTICSEARCH_PORT = 9223
-TEST_SETTINGS = analyticsdataserver.settings.test
 
 .PHONY: requirements develop clean diff.report view.diff.report quality static
 
@@ -51,8 +50,7 @@ clean:
 
 test: clean
 	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  # Launch ES if installed and not running
-	coverage run ./manage.py test --settings=$(TEST_SETTINGS) \
-		--with-ignore-docstrings --exclude-dir=analyticsdataserver/settings \
+	coverage run -m pytest --ignore=analyticsdataserver/settings \
 		$(PACKAGES)
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
 		coverage html && \

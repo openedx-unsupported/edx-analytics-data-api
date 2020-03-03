@@ -2,7 +2,7 @@
 # production that isn't in development.
 
 -r base.in                          # Core dependencies of edx-analytics-data-api
-MySQL-python==1.2.5                 # GPL License
+mysqlclient                         # GPL License
 PyYAML                              # MIT
 gevent
 gunicorn==19.6.0                    # MIT

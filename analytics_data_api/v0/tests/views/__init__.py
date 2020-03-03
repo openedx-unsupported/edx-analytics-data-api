@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import csv
 import json
-import StringIO
 from collections import OrderedDict
 
 import six
@@ -73,7 +72,7 @@ class VerifyCsvResponseMixin(object):
             fieldnames = sorted(data[0].keys())
 
             # Generate the expected CSV output
-            expected = StringIO.StringIO()
+            expected = six.StringIO()
             writer = csv.DictWriter(expected, fieldnames)
             writer.writeheader()
             writer.writerows(data)
@@ -85,7 +84,7 @@ class VerifyCsvResponseMixin(object):
         content_type = response.get('Content-Type', '').split(';')[0]
         self.assertEquals(content_type, 'text/csv')
 
-        data = StringIO.StringIO(response.content)
+        data = six.StringIO(response.content)
         reader = csv.reader(data)
         rows = []
         for row in reader:

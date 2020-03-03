@@ -6,12 +6,12 @@ import StringIO
 from collections import OrderedDict
 
 import six
-from django_dynamic_fixture import G
 from rest_framework import status
 from six.moves import map, zip  # pylint: disable=ungrouped-imports
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from analytics_data_api.v0.tests.utils import flatten
+from django_dynamic_fixture import G
 
 
 class CourseSamples(object):

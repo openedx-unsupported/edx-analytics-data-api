@@ -9,14 +9,14 @@ from __future__ import absolute_import
 
 import json
 
-from django_dynamic_fixture import G
-
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.serializers import (
     GradeDistributionSerializer,
     ProblemFirstLastResponseAnswerDistributionSerializer,
-    SequentialOpenDistributionSerializer)
+    SequentialOpenDistributionSerializer
+)
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
 
 
 class AnswerDistributionTests(TestCaseWithAuthentication):

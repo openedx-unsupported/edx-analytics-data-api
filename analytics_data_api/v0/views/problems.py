@@ -13,12 +13,17 @@ from rest_framework import generics
 
 from analytics_data_api.utils import matching_tuple
 from analytics_data_api.v0.models import (
-    GradeDistribution, ProblemFirstLastResponseAnswerDistribution,
-    ProblemResponseAnswerDistribution, SequentialOpenDistribution)
+    GradeDistribution,
+    ProblemFirstLastResponseAnswerDistribution,
+    ProblemResponseAnswerDistribution,
+    SequentialOpenDistribution
+)
 from analytics_data_api.v0.serializers import (
     ConsolidatedAnswerDistributionSerializer,
     ConsolidatedFirstLastAnswerDistributionSerializer,
-    GradeDistributionSerializer, SequentialOpenDistributionSerializer)
+    GradeDistributionSerializer,
+    SequentialOpenDistributionSerializer
+)
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
 

@@ -10,9 +10,7 @@ from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics, serializers
 
 from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
-from analytics_data_api.v0.views.utils import (raise_404_if_none,
-                                               split_query_argument,
-                                               validate_course_id)
+from analytics_data_api.v0.views.utils import raise_404_if_none, split_query_argument, validate_course_id
 
 
 class CourseViewMixin(object):

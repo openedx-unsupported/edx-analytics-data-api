@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from datetime import date
 
 from django.test import TestCase
-from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models as api_models
 from analytics_data_api.v0 import serializers as api_serializers
+from django_dynamic_fixture import G
 
 
 class TestSerializer(api_serializers.CourseEnrollmentDailySerializer, api_serializers.DynamicFieldsModelSerializer):

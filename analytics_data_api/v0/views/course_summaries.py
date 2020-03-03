@@ -9,8 +9,7 @@ from django.http import HttpResponseBadRequest
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.views import APIListView
-from analytics_data_api.v0.views.utils import (split_query_argument,
-                                               validate_course_id)
+from analytics_data_api.v0.views.utils import split_query_argument, validate_course_id
 
 
 class CourseSummariesView(APIListView):

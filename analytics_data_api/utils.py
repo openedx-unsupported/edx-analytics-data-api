@@ -14,8 +14,7 @@ from opaque_keys.edx.locator import CourseKey
 from rest_framework.authtoken.models import Token
 from six.moves import zip  # pylint: disable=ungrouped-imports
 
-from analytics_data_api.v0.exceptions import (
-    CannotCreateReportDownloadLinkError, ReportFileNotFoundError)
+from analytics_data_api.v0.exceptions import CannotCreateReportDownloadLinkError, ReportFileNotFoundError
 
 
 def get_filename_safe_course_id(course_id, replacement_char='_'):

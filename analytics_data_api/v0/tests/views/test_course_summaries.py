@@ -2,19 +2,15 @@ from __future__ import absolute_import
 
 import datetime
 
-import ddt
 import pytz
 from django.conf import settings
-from django_dynamic_fixture import G
 
+import ddt
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
-from analytics_data_api.v0.tests.views import (
-    APIListViewTestMixin,
-    CourseSamples,
-    VerifyCourseIdMixin
-)
+from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples, VerifyCourseIdMixin
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
 
 
 @ddt.ddt

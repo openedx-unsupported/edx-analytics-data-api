@@ -16,8 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from analytics_data_api.constants import enrollment_modes
-from analytics_data_api.utils import (dictfetchall,
-                                      get_course_report_download_details)
+from analytics_data_api.utils import dictfetchall, get_course_report_download_details
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.exceptions import ReportFileNotFoundError
 from analytics_data_api.v0.models import ModuleEngagement

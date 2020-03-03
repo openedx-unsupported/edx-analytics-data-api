@@ -4,9 +4,9 @@ import collections
 import datetime
 
 import pytz
-from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
+from django_dynamic_fixture import G
 
 
 def flatten(dictionary, parent_key='', sep='.'):

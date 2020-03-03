@@ -7,24 +7,22 @@ import datetime
 import json
 from itertools import groupby
 
-import ddt
 from django.conf import settings
 from django.core import management
 from django.test import override_settings
-from django_dynamic_fixture import G
 from elasticsearch import Elasticsearch
-from mock import Mock, patch
 from rest_framework import status
 from six.moves import range, zip
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
+import ddt
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
-from analytics_data_api.v0.tests.views import (CourseSamples,
-                                               VerifyCourseIdMixin,
-                                               VerifyCsvResponseMixin)
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
+from mock import Mock, patch
 
 
 class LearnerAPITestMixin(CsvViewMixin):

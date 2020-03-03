@@ -8,18 +8,19 @@ import logging
 from rest_framework import generics, status
 
 from analytics_data_api.v0.exceptions import (
-    LearnerEngagementTimelineNotFoundError, LearnerNotFoundError,
-    ParameterValueError)
-from analytics_data_api.v0.models import (ModuleEngagement,
-                                          ModuleEngagementMetricRanges,
-                                          RosterEntry, RosterUpdate)
-from analytics_data_api.v0.serializers import (CourseLearnerMetadataSerializer,
-                                               EdxPaginationSerializer,
-                                               EngagementDaySerializer,
-                                               LastUpdatedSerializer,
-                                               LearnerSerializer)
-from analytics_data_api.v0.views import (CourseViewMixin, CsvViewMixin,
-                                         PaginatedHeadersMixin)
+    LearnerEngagementTimelineNotFoundError,
+    LearnerNotFoundError,
+    ParameterValueError
+)
+from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges, RosterEntry, RosterUpdate
+from analytics_data_api.v0.serializers import (
+    CourseLearnerMetadataSerializer,
+    EdxPaginationSerializer,
+    EngagementDaySerializer,
+    LastUpdatedSerializer,
+    LearnerSerializer
+)
+from analytics_data_api.v0.views import CourseViewMixin, CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.views.utils import split_query_argument
 
 logger = logging.getLogger(__name__)

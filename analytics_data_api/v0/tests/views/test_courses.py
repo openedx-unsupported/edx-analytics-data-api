@@ -19,7 +19,7 @@ from django.utils import timezone
 from opaque_keys.edx.keys import CourseKey
 from six.moves import range  # pylint: disable=ungrouped-imports
 
-import ddt
+import ddt  # pylint: disable=duplicate-code
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
 from analytics_data_api.constants.engagement_events import (
@@ -150,7 +150,7 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
             self.api_root_path, course_id, self.path, start, end))
         self.assertEquals(response.status_code, 200)
-        self.assertListEqual(response.data, expected_response)
+        self.assertListEqual(dict(response.data), expected_response)
 
         # Passing dates in DATE_FORMAT still works
         start = start_date.strftime(settings.DATE_FORMAT)

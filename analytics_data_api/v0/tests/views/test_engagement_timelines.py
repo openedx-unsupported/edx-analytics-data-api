@@ -7,7 +7,7 @@ import pytz
 from django.utils.http import urlquote
 from rest_framework import status
 
-import ddt
+import ddt  # pylint: disable=duplicate-code
 from analytics_data_api.constants.engagement_events import (
     ATTEMPTED,
     COMPLETED,

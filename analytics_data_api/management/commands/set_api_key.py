@@ -1,10 +1,11 @@
 """A command to set the API key for a user using when using TokenAuthentication."""
 
+from __future__ import absolute_import, print_function
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from analytics_data_api.utils import delete_user_auth_token, set_user_auth_token
-
 
 User = get_user_model()
 
@@ -32,7 +33,7 @@ class Command(BaseCommand):
 
         if options['delete_key']:
             delete_user_auth_token(username)
-            print 'Removed API key for user: <{0}>'.format(username)
+            print('Removed API key for user: <{0}>'.format(username))
         else:
             if options['api_key'] is None:
                 raise CommandError("You must supply both a username and key.")
@@ -44,4 +45,4 @@ class Command(BaseCommand):
                 key = options['api_key']
                 set_user_auth_token(user, key)
             except AttributeError:
-                print "The key %s is in use by another user. Please select another key." % key
+                print("The key %s is in use by another user. Please select another key." % key)

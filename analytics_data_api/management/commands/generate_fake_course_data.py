@@ -1,15 +1,18 @@
 # pylint: disable=line-too-long,invalid-name
 
+from __future__ import absolute_import
+
 import datetime
 import logging
 import math
 import random
 
-from tqdm import tqdm
-
+import six
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from six.moves import range, zip  # pylint: disable=ungrouped-imports
+from tqdm import tqdm
 
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0 import models
@@ -24,7 +27,7 @@ def constrained_sum_sample_pos(num_values, total):
     """Return a randomly chosen list of n positive integers summing to total.
     Each such list is equally likely to occur."""
 
-    dividers = sorted(random.sample(xrange(1, total), num_values - 1))
+    dividers = sorted(random.sample(range(1, total), num_values - 1))
     return [a - b for a, b in zip(dividers + [total], [0] + dividers)]
 
 
@@ -104,9 +107,9 @@ class Command(BaseCommand):
         }
 
         # Generate birth year ratios
-        birth_years = range(1960, 2005)
-        ratios = [n / 1000.0 for n in constrained_sum_sample_pos(len(birth_years), 1000)]
-        birth_years = dict(zip(birth_years, ratios))
+        birth_years_range = list(range(1960, 2005))
+        ratios = [n / 1000.0 for n in constrained_sum_sample_pos(len(birth_years_range), 1000)]
+        birth_years = dict(list(zip(birth_years_range, ratios)))
 
         # Delete existing data
         for model in [models.CourseEnrollmentDaily,
@@ -132,28 +135,28 @@ class Command(BaseCommand):
             daily_total = get_count(daily_total)
             models.CourseEnrollmentDaily.objects.create(course_id=course_id, date=date, count=daily_total)
 
-            for mode, ratio in enrollment_mode_ratios.iteritems():
+            for mode, ratio in six.iteritems(enrollment_mode_ratios):
                 count = int(ratio * daily_total)
                 cumulative_count = max(cumulative_count + 10, count)
                 models.CourseEnrollmentModeDaily.objects.create(course_id=course_id, date=date, count=count,
                                                                 cumulative_count=cumulative_count, mode=mode)
 
-            for gender, ratio in gender_ratios.iteritems():
+            for gender, ratio in six.iteritems(gender_ratios):
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByGender.objects.create(course_id=course_id, date=date, count=count,
                                                                gender=gender)
 
-            for education_level, ratio in education_level_ratios.iteritems():
+            for education_level, ratio in six.iteritems(education_level_ratios):
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByEducation.objects.create(course_id=course_id, date=date, count=count,
                                                                   education_level=education_level)
 
-            for country_code, ratio in country_ratios.iteritems():
+            for country_code, ratio in six.iteritems(country_ratios):
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByCountry.objects.create(course_id=course_id, date=date, count=count,
                                                                 country_code=country_code)
 
-            for birth_year, ratio in birth_years.iteritems():
+            for birth_year, ratio in six.iteritems(birth_years):
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByBirthYear.objects.create(course_id=course_id, date=date, count=count,
                                                                   birth_year=birth_year)
@@ -161,7 +164,7 @@ class Command(BaseCommand):
             progress.update(1)
             date = date + datetime.timedelta(days=1)
 
-        for index, (mode, ratio) in enumerate(enrollment_mode_ratios.iteritems()):
+        for index, (mode, ratio) in enumerate(six.iteritems(enrollment_mode_ratios)):
             count = int(ratio * daily_total)
             pass_rate = min(random.normalvariate(.45 + (.1 * index), .15), 1.0)
             cumulative_count = count + random.randint(0, 100)
@@ -240,7 +243,7 @@ class Command(BaseCommand):
             for metric in engagement_events.INDIVIDUAL_EVENTS:
                 num_events = random.randint(0, max_value)
                 if num_events:
-                    for _ in xrange(num_events):
+                    for _ in range(num_events):
                         count = random.randint(0, max_value / 20)
                         entity_type = metric.split('_', 1)[0]
                         event = metric.split('_', 1)[1]
@@ -278,7 +281,7 @@ class Command(BaseCommand):
         chance_difficulty = 5
 
         logger.info("Generating new tags distribution data...")
-        for i in xrange(problems_num):
+        for i in range(problems_num):
             module_id = module_id_tpl % i
             total_submissions = random.randint(0, 100)
             correct_submissions = random.randint(0, total_submissions)

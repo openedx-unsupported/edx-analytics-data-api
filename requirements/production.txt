@@ -62,7 +62,7 @@ kombu==3.0.37             # via celery, edx-enterprise-data
 markdown==2.6.6           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
 more-itertools==5.0.0     # via edx-enterprise-data, zipp
-mysql-python==1.2.5       # via -r requirements/production.in
+mysqlclient==1.4.6        # via -c requirements/constraints.txt, -r requirements/production.in
 neobolt==1.7.16           # via edx-enterprise-data, py2neo
 neotime==1.7.4            # via edx-enterprise-data, py2neo
 newrelic==5.4.1.134       # via -r requirements/production.in, edx-django-utils, edx-enterprise-data

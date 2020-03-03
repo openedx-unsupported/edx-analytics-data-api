@@ -1,7 +1,9 @@
 # Core dependencies go here
 
+-c constraints.txt
+
 boto==2.42.0                        # MIT
-django<1.12                         # BSD License
+Django                              # BSD License
 django-countries==4.5               # MIT
 python-memcached                    # Python Software Foundation License v2
 djangorestframework                 # BSD

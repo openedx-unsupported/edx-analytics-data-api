@@ -5,7 +5,7 @@ from django.test import TestCase
 
 import analytics_data_api.v0.views.utils as utils
 import ddt
-from analytics_data_api.v0.exceptions import CourseKeyMalformedError
+from analytics_data_api.v0.exceptions import CourseKeyMalformedError  # pylint: disable=ungrouped-imports
 from analytics_data_api.v0.tests.views import CourseSamples
 from mock import Mock
 

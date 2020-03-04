@@ -24,7 +24,7 @@ coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
 cryptography==2.8         # via django-fernet-fields, edx-enterprise-data, paramiko, pgpy, pyopenssl
 django-cors-headers==3.0.2  # via -r requirements/base.in
-django-countries==4.5     # via -r requirements/base.in
+django-countries==5.5     # via -c requirements/constraints.txt, -r requirements/base.in
 django-crum==0.7.5        # via edx-enterprise-data, edx-rbac
 django-fernet-fields==0.5  # via edx-enterprise-data
 django-model-utils==3.2.0  # via edx-enterprise-data, edx-rbac
@@ -97,7 +97,7 @@ scandir==1.10.0           # via edx-enterprise-data, pathlib2
 semantic-version==2.8.4   # via edx-drf-extensions, edx-enterprise-data
 simplejson==3.17.0        # via django-rest-swagger
 singledispatch==3.4.0.3   # via edx-enterprise-data, pgpy
-six==1.10.0               # via bcrypt, cryptography, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, more-itertools, neotime, pathlib2, pgpy, pip-tools, prompt-toolkit, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, singledispatch, stevedore, tox, vertica-python
+six==1.10.0               # via bcrypt, cryptography, django-countries, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, more-itertools, neotime, pathlib2, pgpy, pip-tools, prompt-toolkit, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, singledispatch, stevedore, tox, vertica-python
 slumber==0.7.1            # via edx-enterprise-data, edx-rest-api-client
 sphinx==1.2.1             # via -r requirements/doc.in
 stevedore==1.31.0         # via edx-enterprise-data, edx-opaque-keys

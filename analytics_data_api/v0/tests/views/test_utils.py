@@ -1,12 +1,13 @@
-import ddt
-from mock import Mock
+from __future__ import absolute_import
 
 from django.http import Http404
 from django.test import TestCase
 
-from analytics_data_api.v0.exceptions import CourseKeyMalformedError
-from analytics_data_api.v0.tests.views import CourseSamples
 import analytics_data_api.v0.views.utils as utils
+import ddt
+from analytics_data_api.v0.exceptions import CourseKeyMalformedError  # pylint: disable=ungrouped-imports
+from analytics_data_api.v0.tests.views import CourseSamples
+from mock import Mock
 
 
 @ddt.ddt

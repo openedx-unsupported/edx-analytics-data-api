@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+
+from functools import reduce as functools_reduce
+
 from django.db.models import Q
 
 from analytics_data_api.v0 import models, serializers
@@ -60,4 +64,4 @@ class ProgramsView(APIListView):
         return field_dict
 
     def get_query(self):
-        return reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())
+        return functools_reduce(lambda q, item_id: q | Q(program_id=item_id), self.ids, Q())

@@ -1,15 +1,15 @@
+from __future__ import absolute_import
+
 from collections import OrderedDict
-from urlparse import urljoin
+
+import six
 from django.conf import settings
 from rest_framework import pagination, serializers
 from rest_framework.response import Response
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error,ungrouped-imports
 
-from analytics_data_api.constants import (
-    engagement_events,
-    enrollment_modes,
-)
+from analytics_data_api.constants import engagement_events, enrollment_modes
 from analytics_data_api.v0 import models
-
 
 # Below are the enrollment modes supported by this API.
 ENROLLMENT_MODES = [enrollment_modes.AUDIT, enrollment_modes.CREDIT, enrollment_modes.HONOR,
@@ -369,7 +369,7 @@ class LearnerSerializer(serializers.Serializer):
         # using hasattr() instead because DocType.get() is overloaded and makes a request
         if hasattr(obj, 'segments'):
             # json parsing will fail unless in unicode
-            return [unicode(segment) for segment in obj.segments]
+            return [six.text_type(segment) for segment in obj.segments]
         else:
             return []
 

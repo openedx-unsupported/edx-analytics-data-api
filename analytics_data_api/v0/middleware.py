@@ -1,24 +1,26 @@
+from __future__ import absolute_import
+
 import abc
+
+import six
 from django.http.response import JsonResponse
 from rest_framework import status
 
 from analytics_data_api.v0.exceptions import (
+    CannotCreateReportDownloadLinkError,
     CourseKeyMalformedError,
     CourseNotSpecifiedError,
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
     ParameterValueError,
     ReportFileNotFoundError,
-    CannotCreateReportDownloadLinkError,
 )
 
 
-class BaseProcessErrorMiddleware(object):
+class BaseProcessErrorMiddleware(six.with_metaclass(abc.ABCMeta, object)):
     """
     Base error.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractproperty
     def error(self):

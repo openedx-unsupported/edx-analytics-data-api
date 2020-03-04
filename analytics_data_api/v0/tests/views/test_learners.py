@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import copy
 import datetime
-from itertools import groupby
 import json
-from urllib import urlencode
-
-import ddt
-from django_dynamic_fixture import G
-from elasticsearch import Elasticsearch
-from mock import patch, Mock
-from rest_framework import status
+from itertools import groupby
 
 from django.conf import settings
 from django.core import management
 from django.test import override_settings
+from elasticsearch import Elasticsearch
+from rest_framework import status
+from six.moves import range, zip
+from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
-from analyticsdataserver.tests import TestCaseWithAuthentication
+import ddt
 from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
-from analytics_data_api.v0.tests.views import (
-    CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin,
-)
+from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
+from mock import Mock, patch
 
 
 class LearnerAPITestMixin(CsvViewMixin):
@@ -689,7 +689,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         learners = [
             {'username': '{}_{}'.format(segment, i), 'course_id': course_id, 'segments': [segment]}
             for segment, count in segments.items()
-            for i in xrange(count)
+            for i in range(count)
         ]
         self.create_learners(learners)
         expected_segments = {"highly_engaged": 0, "disengaging": 0, "struggling": 0, "inactive": 0, "unenrolled": 0}

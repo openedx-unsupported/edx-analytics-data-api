@@ -1,6 +1,8 @@
 """
 API methods for module level data.
 """
+from __future__ import absolute_import
+
 import logging
 
 from rest_framework import generics, status
@@ -10,12 +12,7 @@ from analytics_data_api.v0.exceptions import (
     LearnerNotFoundError,
     ParameterValueError,
 )
-from analytics_data_api.v0.models import (
-    ModuleEngagement,
-    ModuleEngagementMetricRanges,
-    RosterEntry,
-    RosterUpdate,
-)
+from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges, RosterEntry, RosterUpdate
 from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
     EdxPaginationSerializer,
@@ -23,9 +20,8 @@ from analytics_data_api.v0.serializers import (
     LastUpdatedSerializer,
     LearnerSerializer,
 )
-from analytics_data_api.v0.views import CourseViewMixin, PaginatedHeadersMixin, CsvViewMixin
+from analytics_data_api.v0.views import CourseViewMixin, CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.views.utils import split_query_argument
-
 
 logger = logging.getLogger(__name__)
 

@@ -3,29 +3,39 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-import datetime
-from itertools import groupby
-import urllib
-from collections import OrderedDict
+from __future__ import absolute_import
 
-import ddt
+import datetime
+from collections import OrderedDict
+from itertools import groupby
+
+import pytz
+import six
+import six.moves.urllib.parse  # pylint: disable=import-error
 from django.conf import settings
 from django.utils import timezone
-from django_dynamic_fixture import G
-import pytz
 from opaque_keys.edx.keys import CourseKey
-from mock import patch, Mock
+from six.moves import range  # pylint: disable=ungrouped-imports
 
+import ddt
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
-from analytics_data_api.constants.engagement_events import (ATTEMPTED, COMPLETED, CONTRIBUTED, DISCUSSION,
-                                                            PROBLEM, VIDEO, VIEWED)
-
-from analytics_data_api.v0 import models
-from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
+from analytics_data_api.constants.engagement_events import (
+    ATTEMPTED,
+    COMPLETED,
+    CONTRIBUTED,
+    DISCUSSION,
+    PROBLEM,
+    VIDEO,
+    VIEWED,
+)
 from analytics_data_api.utils import get_filename_safe_course_id
+from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.utils import create_engagement
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCsvResponseMixin
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
+from mock import Mock, patch
 
 
 @ddt.ddt
@@ -223,7 +233,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     @ddt.data(*CourseSamples.course_ids)
     def test_url_encoded_course_id(self, course_id):
         self.generate_data(course_id)
-        url_encoded_course_id = urllib.quote_plus(course_id)
+        url_encoded_course_id = six.moves.urllib.parse.quote_plus(course_id)
         response = self.authenticated_get(u'/api/v0/courses/{}/recent_activity'.format(url_encoded_course_id))
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.data, self.get_activity_record(course_id=course_id))
@@ -281,8 +291,10 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def format_as_response(self, *args):
         return [
-            {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'birth_year': ce.birth_year, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'birth_year': ce.birth_year,
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
     @ddt.data(*CourseSamples.course_ids)
     def test_get(self, course_id):
@@ -313,9 +325,10 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def format_as_response(self, *args):
         return [
-            {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'education_level': ce.education_level, 'created': ce.created.strftime(settings.DATETIME_FORMAT)} for
-            ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'education_level': ce.education_level,
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
 
 @ddt.ddt
@@ -344,7 +357,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
     def serialize_enrollment(self, enrollment):
         return {
             'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
-            'course_id': unicode(enrollment.course_id),
+            'course_id': six.text_type(enrollment.course_id),
             'date': enrollment.date.strftime(settings.DATE_FORMAT),
             enrollment.cleaned_gender: enrollment.count
         }
@@ -392,9 +405,10 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
 
     def format_as_response(self, *args):
         return [
-            {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
-             'created': ce.created.strftime(settings.DATETIME_FORMAT)}
-            for ce in args]
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT), 'created': ce.created.strftime(settings.DATETIME_FORMAT)}
+            for ce in args
+        ]
 
 
 @ddt.ddt
@@ -479,10 +493,11 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
         response = [unknown]
         response += [
-            {'course_id': unicode(ce.course_id), 'count': ce.count, 'date': ce.date.strftime(settings.DATE_FORMAT),
+            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+             'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name},
-             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in
-            args]
+             'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
+        ]
 
         return response
 
@@ -616,15 +631,15 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
                 'module_id': module_id,
                 'total_submissions': 150,
                 'correct_submissions': 50,
-                'part_ids': [unicode(o1.part_id), unicode(o3.part_id)],
+                'part_ids': [six.text_type(o1.part_id), six.text_type(o3.part_id)],
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 100,
                 'correct_submissions': 100,
-                'part_ids': [unicode(o2.part_id)],
-                'created': unicode(created.strftime(settings.DATETIME_FORMAT))
+                'part_ids': [six.text_type(o2.part_id)],
+                'created': six.text_type(created.strftime(settings.DATETIME_FORMAT))
             }
         ]
 

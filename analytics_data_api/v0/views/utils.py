@@ -1,6 +1,7 @@
 """Utilities for view-level API logic."""
-from django.http import Http404
+from __future__ import absolute_import
 
+from django.http import Http404
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 

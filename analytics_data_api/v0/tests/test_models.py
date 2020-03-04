@@ -1,8 +1,10 @@
-from django.test import TestCase
-from django_dynamic_fixture import G
+from __future__ import absolute_import
 
-from analytics_data_api.v0 import models
+from django.test import TestCase
+
 from analytics_data_api.constants.country import UNKNOWN_COUNTRY, get_country
+from analytics_data_api.v0 import models
+from django_dynamic_fixture import G
 
 
 class CourseEnrollmentByCountryTests(TestCase):

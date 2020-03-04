@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+
 import socket
 
 from django.test import TestCase
 from elasticsearch.exceptions import ElasticsearchException
-from mock import patch
 
 from analytics_data_api.v0.connections import BotoHttpConnection, ESConnection
+from mock import patch
 
 
 class ESConnectionTests(TestCase):

@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 import datetime
-from itertools import groupby
 import warnings
+from itertools import groupby
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,21 +10,17 @@ from django.db import connections
 from django.db.models import Max
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
+from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from opaque_keys.edx.keys import CourseKey
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.utils import dictfetchall, get_course_report_download_details
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.exceptions import ReportFileNotFoundError
-
+from analytics_data_api.v0.models import ModuleEngagement
 from analytics_data_api.v0.views.utils import raise_404_if_none
-
-from analytics_data_api.v0.models import (
-    ModuleEngagement,
-)
 
 
 class BaseCourseView(generics.ListAPIView):
@@ -750,7 +748,7 @@ class ProblemsAndTagsListView(BaseCourseView):
                     'created': v.created
                 }
 
-        return result.values()
+        return list(result.values())
 
 
 class VideosListView(BaseCourseView):

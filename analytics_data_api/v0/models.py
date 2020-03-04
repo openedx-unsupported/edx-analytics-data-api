@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+
 import datetime
 from itertools import groupby
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, Sum, When, IntegerField, Case, Max
+from django.db.models import Case, Count, IntegerField, Max, Sum, When
 from django.utils.timezone import now
 # some fields (e.g. Float, Integer) are dynamic and your IDE may highlight them as unavailable
 from elasticsearch_dsl import Date, DocType, Float, Integer, Q, String  # pylint: disable=no-name-in-module

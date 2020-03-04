@@ -1,11 +1,13 @@
+from __future__ import absolute_import
+
 import datetime
 
 from django.conf import settings
 from django.utils import timezone
-from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
 from analyticsdataserver.tests import TestCaseWithAuthentication
+from django_dynamic_fixture import G
 
 
 class VideoTimelineTests(TestCaseWithAuthentication):

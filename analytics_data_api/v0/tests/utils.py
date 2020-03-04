@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 import collections
 import datetime
+
 import pytz
 
-from django_dynamic_fixture import G
 from analytics_data_api.v0 import models
+from django_dynamic_fixture import G
 
 
 def flatten(dictionary, parent_key='', sep='.'):
@@ -16,7 +19,7 @@ def flatten(dictionary, parent_key='', sep='.'):
     for key, value in dictionary.items():
         new_key = parent_key + sep + key if parent_key else key
         if isinstance(value, collections.MutableMapping):
-            items.extend(flatten(value, new_key).items())
+            items.extend(list(flatten(value, new_key).items()))
         else:
             items.append((new_key, value))
     return dict(items)

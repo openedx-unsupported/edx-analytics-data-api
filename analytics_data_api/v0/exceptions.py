@@ -1,12 +1,14 @@
+from __future__ import absolute_import
+
 import abc
 
+import six
 
-class BaseError(Exception):
+
+class BaseError(six.with_metaclass(abc.ABCMeta, Exception)):
     """
     Base error.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     message = None
 

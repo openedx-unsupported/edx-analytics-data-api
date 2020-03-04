@@ -1,19 +1,16 @@
+from __future__ import absolute_import
+
+from functools import reduce as functools_reduce
 from itertools import groupby
 
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
-
+from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics, serializers
 
-from opaque_keys.edx.keys import CourseKey
-
 from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
-from analytics_data_api.v0.views.utils import (
-    raise_404_if_none,
-    split_query_argument,
-    validate_course_id
-)
+from analytics_data_api.v0.views.utils import raise_404_if_none, split_query_argument, validate_course_id
 
 
 class CourseViewMixin(object):
@@ -252,7 +249,7 @@ class APIListView(generics.ListAPIView):
         return aggregate_field_dict
 
     def get_query(self):
-        return reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
+        return functools_reduce(lambda q, item_id: q | Q(id=item_id), self.ids, Q())
 
     @raise_404_if_none
     def get_queryset(self):

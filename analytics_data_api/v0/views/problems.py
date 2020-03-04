@@ -2,16 +2,20 @@
 API methods for module level data.
 """
 
+from __future__ import absolute_import
+
 from collections import defaultdict
 from itertools import groupby
 
+import six
 from django.db import OperationalError
 from rest_framework import generics
 
+from analytics_data_api.utils import matching_tuple
 from analytics_data_api.v0.models import (
     GradeDistribution,
-    ProblemResponseAnswerDistribution,
     ProblemFirstLastResponseAnswerDistribution,
+    ProblemResponseAnswerDistribution,
     SequentialOpenDistribution,
 )
 from analytics_data_api.v0.serializers import (
@@ -20,8 +24,6 @@ from analytics_data_api.v0.serializers import (
     GradeDistributionSerializer,
     SequentialOpenDistributionSerializer,
 )
-from analytics_data_api.utils import matching_tuple
-
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
 
@@ -70,13 +72,13 @@ class ProblemResponseAnswerDistributionView(generics.ListAPIView):
             match_tuple_sets[answer.value_id].add(matching_tuple(answer))
 
         # If a part has more than one unique tuple of matching fields, do not consolidate.
-        for _, match_tuple_set in match_tuple_sets.iteritems():
+        for _, match_tuple_set in six.iteritems(match_tuple_sets):
             if len(match_tuple_set) > 1:
                 return problem
 
         consolidated_answers = []
 
-        for _, answers in answer_sets.iteritems():
+        for _, answers in six.iteritems(answer_sets):
             consolidated_answer = None
 
             if len(answers) == 1:

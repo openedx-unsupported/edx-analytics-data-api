@@ -1,17 +1,25 @@
+from __future__ import absolute_import
+
 import datetime
 import json
 
-import ddt
-
-from django.utils.http import urlquote
 import pytz
+from django.utils.http import urlquote
 from rest_framework import status
 
-from analyticsdataserver.tests import TestCaseWithAuthentication
-from analytics_data_api.constants.engagement_events import (ATTEMPTED, COMPLETED, CONTRIBUTED, DISCUSSION,
-                                                            PROBLEM, VIDEO, VIEWED)
-from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin
+import ddt
+from analytics_data_api.constants.engagement_events import (
+    ATTEMPTED,
+    COMPLETED,
+    CONTRIBUTED,
+    DISCUSSION,
+    PROBLEM,
+    VIDEO,
+    VIEWED,
+)
 from analytics_data_api.v0.tests.utils import create_engagement
+from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin
+from analyticsdataserver.tests import TestCaseWithAuthentication
 
 
 @ddt.ddt

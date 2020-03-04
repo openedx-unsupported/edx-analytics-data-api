@@ -2,11 +2,12 @@
 API methods for module level data.
 """
 
+from __future__ import absolute_import
+
 from rest_framework import generics
 
 from analytics_data_api.v0.models import VideoTimeline
 from analytics_data_api.v0.serializers import VideoTimelineSerializer
-
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
 

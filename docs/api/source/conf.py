@@ -1,5 +1,8 @@
-import sys
+from __future__ import absolute_import
+
 import os
+import sys
+
 from path import path
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'

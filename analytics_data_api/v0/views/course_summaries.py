@@ -5,6 +5,7 @@ from functools import reduce as functools_reduce
 
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
+from six import text_type
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
@@ -95,7 +96,7 @@ class CourseSummariesView(APIListView):
         try:
             self.verify_recent_date(recent)
         except ValueError as err:
-            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(err.message))
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(text_type(err)))
 
         response = super(CourseSummariesView, self).get(request, *args, **kwargs)
         return response
@@ -114,7 +115,7 @@ class CourseSummariesView(APIListView):
             if recent:
                 self.verify_recent_date(recent[0])  # Post argument always comes in as a list
         except ValueError as err:
-            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(err.message))
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(text_type(err)))
 
         response = super(CourseSummariesView, self).post(request, *args, **kwargs)
         return response

@@ -6,6 +6,7 @@ from __future__ import absolute_import
 import logging
 
 from rest_framework import generics, status
+from six import text_type
 
 from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
@@ -290,8 +291,8 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, PaginatedHeadersMixin, C
         params = {key: val for key, val in params.items() if val is not None}
         try:
             return RosterEntry.get_users_in_course(self.course_id, **params)
-        except ValueError as e:
-            raise ParameterValueError(e.message)
+        except ValueError as err:
+            raise ParameterValueError(text_type(err))
 
 
 class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):

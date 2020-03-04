@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import datetime
 
 import pytz
+import six
 from django.conf import settings
 
 import ddt
@@ -152,7 +153,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         self.generate_data(modes=modes)
         response = self.validated_request(exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_results(modes=modes))
+        six.assertCountEqual(self, response.data, self.all_expected_results(modes=modes))
 
     @ddt.data(
         ['malformed-course-id'],
@@ -172,13 +173,13 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         expected_summaries.extend(self.all_expected_results(ids=['foo/bar/baz'],
                                                             availability='Upcoming'))
 
-        self.assertItemsEqual(response.data, expected_summaries)
+        six.assertCountEqual(self, response.data, expected_summaries)
 
     def test_programs(self):
         self.generate_data(programs=True)
         response = self.validated_request(exclude=self.always_exclude[:1], programs=['True'])
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_results(programs=True))
+        six.assertCountEqual(self, response.data, self.all_expected_results(programs=True))
 
     @ddt.data('passing_users', )
     def test_exclude(self, field):
@@ -196,7 +197,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         count_factor = 5
         expected_count_change = count_factor * len(enrollment_modes.ALL)
         expected = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count_change)
-        self.assertItemsEqual(response.data, expected)
+        six.assertCountEqual(self, response.data, expected)
 
     def test_recent_bad_date(self):
         'Tests that sending a bad recent_date returns 400'
@@ -225,15 +226,15 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
         responseOnDate = self.validated_request(exclude=self.always_exclude, recent_date=recent.strftime('%Y-%m-%d'))
         self.assertEquals(responseOnDate.status_code, 200)
-        self.assertItemsEqual(responseOnDate.data, expectedOnDate)
+        six.assertCountEqual(self, responseOnDate.data, expectedOnDate)
 
         after = (recent + datetime.timedelta(1)).strftime('%Y-%m-%d')
         responseAfterDate = self.validated_request(exclude=self.always_exclude, recent_date=after)
         self.assertEquals(responseAfterDate.status_code, 200)
-        self.assertItemsEqual(responseAfterDate.data, expectedOnDate)
+        six.assertCountEqual(self, responseAfterDate.data, expectedOnDate)
 
         expectedBeforeDate = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count)
         before = (recent - datetime.timedelta(1)).strftime('%Y-%m-%d')
         responseBeforeDate = self.validated_request(exclude=self.always_exclude, recent_date=before)
         self.assertEquals(responseBeforeDate.status_code, 200)
-        self.assertItemsEqual(responseBeforeDate.data, expectedBeforeDate)
+        six.assertCountEqual(self, responseBeforeDate.data, expectedBeforeDate)

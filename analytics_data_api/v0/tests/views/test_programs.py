@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import datetime
 
+import six
 from six.moves import zip
 
 import ddt
@@ -103,4 +104,4 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         self.generate_data(ids=program_ids, course_ids=course_ids)
         response = self.validated_request(ids=program_ids, exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))
+        six.assertCountEqual(self, response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))

@@ -10,7 +10,7 @@ from rest_framework import generics, status
 from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
-    ParameterValueError
+    ParameterValueError,
 )
 from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges, RosterEntry, RosterUpdate
 from analytics_data_api.v0.serializers import (
@@ -18,7 +18,7 @@ from analytics_data_api.v0.serializers import (
     EdxPaginationSerializer,
     EngagementDaySerializer,
     LastUpdatedSerializer,
-    LearnerSerializer
+    LearnerSerializer,
 )
 from analytics_data_api.v0.views import CourseViewMixin, CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.views.utils import split_query_argument

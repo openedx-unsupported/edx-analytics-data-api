@@ -16,13 +16,13 @@ from analytics_data_api.v0.models import (
     GradeDistribution,
     ProblemFirstLastResponseAnswerDistribution,
     ProblemResponseAnswerDistribution,
-    SequentialOpenDistribution
+    SequentialOpenDistribution,
 )
 from analytics_data_api.v0.serializers import (
     ConsolidatedAnswerDistributionSerializer,
     ConsolidatedFirstLastAnswerDistributionSerializer,
     GradeDistributionSerializer,
-    SequentialOpenDistributionSerializer
+    SequentialOpenDistributionSerializer,
 )
 from analytics_data_api.v0.views.utils import raise_404_if_none
 

@@ -29,7 +29,7 @@ from analytics_data_api.constants.engagement_events import (
     DISCUSSION,
     PROBLEM,
     VIDEO,
-    VIEWED
+    VIEWED,
 )
 from analytics_data_api.utils import get_filename_safe_course_id
 from analytics_data_api.v0 import models

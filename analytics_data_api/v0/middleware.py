@@ -13,7 +13,7 @@ from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
     ParameterValueError,
-    ReportFileNotFoundError
+    ReportFileNotFoundError,
 )
 
 

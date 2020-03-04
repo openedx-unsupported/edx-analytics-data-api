@@ -13,7 +13,7 @@ from analytics_data_api.v0 import models
 from analytics_data_api.v0.serializers import (
     GradeDistributionSerializer,
     ProblemFirstLastResponseAnswerDistributionSerializer,
-    SequentialOpenDistributionSerializer
+    SequentialOpenDistributionSerializer,
 )
 from analyticsdataserver.tests import TestCaseWithAuthentication
 from django_dynamic_fixture import G

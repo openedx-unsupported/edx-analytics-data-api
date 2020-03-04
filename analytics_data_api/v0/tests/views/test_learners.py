@@ -239,7 +239,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             u"error_code": u"no_learner_for_course",
             u"developer_message": u"Learner a_user not found for course edX/DemoX/Demo_Course."
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
     def test_no_course_id(self):
         base_path = '/api/v0/learners/{}'
@@ -274,7 +274,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         returned.
         """
         self.assertEqual(response.status_code, 200)
-        returned_learners = json.loads(response.content)['results']
+        returned_learners = json.loads(response.content.decode('utf-8'))['results']
         if expected_learners is None:
             self.assertEqual(returned_learners, list())
         else:
@@ -452,7 +452,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         self.create_learners([{'username': username, 'course_id': self.course_id} for username in usernames])
 
         response = self._get(self.course_id, page_size=2)
-        payload = json.loads(response.content)
+        payload = json.loads(response.content.decode('utf-8'))
         self.assertDictContainsSubset(
             {
                 'count': len(usernames),
@@ -465,7 +465,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         self.assert_learners_returned(response, [{'username': 'a'}, {'username': 'b'}])
 
         response = self._get(self.course_id, page_size=2, page=3)
-        payload = json.loads(response.content)
+        payload = json.loads(response.content.decode('utf-8'))
         self.assertDictContainsSubset(
             {
                 'count': len(usernames),
@@ -496,7 +496,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
     def test_bad_request(self, parameters, expected_error_code, expected_status_code=400):
         response = self.authenticated_get('/api/v0/learners/', parameters)
         self.assertEqual(response.status_code, expected_status_code)
-        response_json = json.loads(response.content)
+        response_json = json.loads(response.content.decode('utf-8'))
         self.assertEqual(response_json.get('error_code', response_json.get('detail')), expected_error_code)
 
 
@@ -663,7 +663,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
 
     def assert_response_matches(self, response, expected_status_code, expected_data):
         self.assertEqual(response.status_code, expected_status_code)
-        self.assertDictEqual(json.loads(response.content), expected_data)
+        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected_data)
 
     def test_no_course_id(self):
         response = self.authenticated_get('/api/v0/course_learner_metadata/')
@@ -815,7 +815,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
     def test_no_engagement_ranges(self, course_id):
         response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(self.empty_engagement_ranges, json.loads(response.content))
+        self.assertDictContainsSubset(self.empty_engagement_ranges, json.loads(response.content.decode('utf-8')))
 
     @ddt.data(*CourseSamples.course_ids)
     def test_one_engagement_range(self, course_id):
@@ -839,7 +839,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
 
         response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(expected_ranges, json.loads(response.content))
+        self.assertDictContainsSubset(expected_ranges, json.loads(response.content.decode('utf-8')))
 
     def _get_full_engagement_ranges(self, course_id):
         """ Populates a full set of engagement ranges and returns the expected engagement ranges. """
@@ -885,7 +885,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         expected = self._get_full_engagement_ranges(course_id)
         response = self._get(course_id)
         self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(expected, json.loads(response.content))
+        self.assertDictContainsSubset(expected, json.loads(response.content.decode('utf-8')))
 
     @ddt.data(*CourseSamples.course_ids)
     def test_engagement_ranges_fields(self, course_id):

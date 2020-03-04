@@ -37,7 +37,7 @@ class VerifyCourseIdMixin(object):
             u"error_code": u"course_not_specified",
             u"developer_message": u"Course id/key not specified."
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
     def verify_bad_course_id(self, response, course_id='malformed-course-id'):
         """ Assert that a course ID must be valid. """
@@ -46,7 +46,7 @@ class VerifyCourseIdMixin(object):
             u"error_code": u"course_key_malformed",
             u"developer_message": u"Course id/key {} malformed.".format(course_id)
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
 
 class VerifyCsvResponseMixin(object):
@@ -76,15 +76,15 @@ class VerifyCsvResponseMixin(object):
             writer = csv.DictWriter(expected, fieldnames)
             writer.writeheader()
             writer.writerows(data)
-            self.assertEqual(response.content, expected.getvalue())
+            self.assertEqual(response.content.decode('utf-8'), expected.getvalue())
         else:
-            self.assertEqual(response.content, '')
+            self.assertEqual(response.content.decode('utf-8'), '')
 
     def assertResponseFields(self, response, fields):
         content_type = response.get('Content-Type', '').split(';')[0]
         self.assertEquals(content_type, 'text/csv')
 
-        data = six.StringIO(response.content)
+        data = six.StringIO(response.content.decode('utf-8'))
         reader = csv.reader(data)
         rows = []
         for row in reader:

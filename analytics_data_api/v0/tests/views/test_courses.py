@@ -11,9 +11,7 @@ from itertools import groupby
 
 import pytz
 import six
-import six.moves.urllib.error  # pylint: disable=import-error
 import six.moves.urllib.parse  # pylint: disable=import-error
-import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.utils import timezone
 from opaque_keys.edx.keys import CourseKey

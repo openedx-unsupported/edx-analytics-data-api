@@ -156,13 +156,13 @@ class APIListViewTestMixin(object):
         self.generate_data()
         response = self.validated_request(ids=ids, exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, self.all_expected_results(ids=ids))
+        six.assertCountEqual(self, response.data, self.all_expected_results(ids=ids))
 
     def _test_one_item(self, item_id):
         self.generate_data()
         response = self.validated_request(ids=[item_id], exclude=self.always_exclude)
         self.assertEquals(response.status_code, 200)
-        self.assertItemsEqual(response.data, [self.expected_result(item_id)])
+        six.assertCountEqual(self, response.data, [self.expected_result(item_id)])
 
     def _test_fields(self, fields):
         self.generate_data()
@@ -175,7 +175,7 @@ class APIListViewTestMixin(object):
             for field_to_remove in set(expected_result.keys()) - set(fields):
                 expected_result.pop(field_to_remove)
 
-        self.assertItemsEqual(response.data, expected_results)
+        six.assertCountEqual(self, response.data, expected_results)
 
     def test_no_items(self):
         response = self.validated_request()

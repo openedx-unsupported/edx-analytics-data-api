@@ -39,3 +39,6 @@ futures; python_version == "2.7"
 
 # mysqlclient>1.4.6 dropped support to Python 2.7
 mysqlclient==1.4.6
+
+# tests are failing due to the BlacklistedToken app not being installed. https://github.com/Styria-Digital/django-rest-framework-jwt/issues/34
+drf-jwt<1.15.0

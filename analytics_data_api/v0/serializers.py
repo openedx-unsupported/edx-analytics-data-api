@@ -449,6 +449,12 @@ class EngagementDaySerializer(serializers.Serializer):
         return obj.get('videos_viewed', 0)
 
 
+class EnterpriseLearnerEngagementSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = models.ModuleEngagement
+        fields = '__all__'
+
+
 # pylint: disable=abstract-method
 class DateRangeSerializer(serializers.Serializer):
     start = serializers.DateField(source='start_date', format=settings.DATE_FORMAT)

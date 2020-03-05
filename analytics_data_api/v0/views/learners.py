@@ -5,6 +5,8 @@ from __future__ import absolute_import
 
 import logging
 
+from django.conf import settings
+
 from rest_framework import generics, status
 from six import text_type
 
@@ -20,9 +22,12 @@ from analytics_data_api.v0.serializers import (
     EngagementDaySerializer,
     LastUpdatedSerializer,
     LearnerSerializer,
+    EnterpriseLearnerEngagementSerializer,
 )
 from analytics_data_api.v0.views import CourseViewMixin, CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.views.utils import split_query_argument
+
+from enterprise_data.models import EnterpriseUser
 
 logger = logging.getLogger(__name__)
 
@@ -350,6 +355,26 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
         if len(queryset) == 0:
             raise LearnerEngagementTimelineNotFoundError(username=self.username, course_id=self.course_id)
         return queryset
+
+
+class EnterpriseLearnerEngagementView(generics.ListAPIView):
+    """
+    Return engagement data for enterprise learners.
+    """
+    serializer_class = EnterpriseLearnerEngagementSerializer
+    pagination_class = EdxPaginationSerializer
+
+    def get_queryset(self):
+        enterprise_users = EnterpriseUser.objects.filter(
+            enterprise_id=self.kwargs.get('enterprise_customer')
+        ).values_list(
+            'user_username', flat=True
+        )
+        # TODO: __in statement should be replaced with sql join once we have foriegn
+        # key relationship between ModuleEngagement and EnterpriseUser models
+        return ModuleEngagement.objects.filter(username__in=enterprise_users).exclude(
+            entity_type__in=settings.EXCLUDED_ENGAGEMENT_ENTITY_TYPES
+        )
 
 
 class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):

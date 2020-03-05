@@ -147,7 +147,7 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
             u"developer_message": u"Learner {} engagement timeline not found for course {}.".format(
                 self.DEFAULT_USERNAME, course_id)
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
     def test_no_course_id(self):
         base_path = '/api/v0/engagement_timelines/{}'

@@ -890,7 +890,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
     @ddt.data(*CourseSamples.course_ids)
     def test_engagement_ranges_fields(self, course_id):
         expected_events = engagement_events.EVENTS
-        response = json.loads(self._get(course_id).content)
+        response = json.loads(self._get(course_id).content.decode('utf-8'))
         self.assertTrue('engagement_ranges' in response)
         for event in expected_events:
             self.assertTrue(event in response['engagement_ranges'])

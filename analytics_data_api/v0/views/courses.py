@@ -592,7 +592,7 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
         items = queryset.all()
 
         # Data must be sorted in order for groupby to work properly
-        items = sorted(items, key=lambda x: x.country.alpha2)
+        items = sorted(items, key=lambda x: '' if x.country.alpha2 is None else x.country.alpha2)
 
         # Items to be returned by this method
         returned_items = []

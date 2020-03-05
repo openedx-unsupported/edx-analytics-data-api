@@ -2,7 +2,7 @@ ROOT = $(shell echo "$$PWD")
 COVERAGE_DIR = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
-ELASTICSEARCH_VERSION = 1.5.2
+ELASTICSEARCH_VERSION = 7.5
 ELASTICSEARCH_PORT = 9223
 
 .PHONY: requirements develop clean diff.report view.diff.report quality static

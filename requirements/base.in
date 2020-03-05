@@ -4,7 +4,7 @@
 
 boto==2.42.0                        # MIT
 Django                              # BSD License
-django-countries==4.5               # MIT
+django-countries                    # MIT
 python-memcached                    # Python Software Foundation License v2
 djangorestframework                 # BSD
 django-rest-swagger                 # BSD

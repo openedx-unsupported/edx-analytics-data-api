@@ -41,7 +41,7 @@ class BotoHttpConnection(Connection):
         See: https://github.com/boto/boto/blob/develop/boto/connection.py#L533
         """
         if not isinstance(body, six.string_types):
-            body = json.dumps(body)
+            body = json.dumps(body).encode('UTF-8')
         start = time.time()
         response = self.connection.make_request(method, url, params=params, data=body)
         duration = time.time() - start

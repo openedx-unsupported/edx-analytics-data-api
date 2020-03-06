@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db.utils import ConnectionHandler, DatabaseError
 from django.test import TestCase
 from django.test.utils import override_settings
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from rest_framework.authtoken.models import Token
 
 import mock
@@ -189,7 +189,7 @@ class ClientTests(TestCase):
     @responses.activate
     @mock.patch('analyticsdataserver.clients.logger')
     def test_all_videos_connection_error(self, logger):
-        exception = ConnectionError('LMS is dead')
+        exception = RequestsConnectionError('LMS is dead')
         responses.add(responses.GET, 'http://example.com/blocks/', body=exception)
         videos = self.client.all_videos('course_id')
         logger.warning.assert_called_with('Course Blocks API request failed. Is the LMS running?: ' + str(exception))

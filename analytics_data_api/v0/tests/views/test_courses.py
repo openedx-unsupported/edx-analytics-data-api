@@ -208,7 +208,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
             course_id, activity_type))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
-                                                                  count=count))
+                                                                 count=count))
 
     @staticmethod
     def get_activity_record(**kwargs):
@@ -273,7 +273,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
             course_id, activity_type))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
-                                                                  count=400))
+                                                                 count=400))
 
 
 @ddt.ddt

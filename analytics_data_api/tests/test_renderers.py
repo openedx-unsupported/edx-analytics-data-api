@@ -39,7 +39,7 @@ class PaginatedCsvRendererTests(TestCase):
 
     def test_render(self):
         rendered_data = self.renderer.render(self.data, renderer_context=self.context)
-        self.assertEquals(rendered_data,
+        self.assertEqual(rendered_data,
                           'dict.a,dict.b,dict.c,dict.d,list,string,string2\r\n'
                           '1,2,3,,"a, b, c","ab,c",\r\n'
                           ',5,6,4,"d, e, f, g",def,ghi\r\n')
@@ -47,7 +47,7 @@ class PaginatedCsvRendererTests(TestCase):
     def test_render_fields(self):
         self.set_request(dict(fields='string2,invalid,dict.b,list,dict.a,string'))
         rendered_data = self.renderer.render(self.data, renderer_context=self.context)
-        self.assertEquals(rendered_data,
+        self.assertEqual(rendered_data,
                           'string2,dict.b,list,dict.a,string\r\n'
                           ',2,"a, b, c",1,"ab,c"\r\n'
                           'ghi,5,"d, e, f, g",,def\r\n')
@@ -55,7 +55,7 @@ class PaginatedCsvRendererTests(TestCase):
     def test_render_flatten_lists(self):
         self.renderer.concatenate_lists_sep = None
         rendered_data = self.renderer.render(self.data, renderer_context=self.context)
-        self.assertEquals(rendered_data,
+        self.assertEqual(rendered_data,
                           'dict.a,dict.b,dict.c,dict.d,list.0,list.1,list.2,list.3,string,string2\r\n'
                           '1,2,3,,a,b,c,,"ab,c",\r\n'
                           ',5,6,4,d,e,f,g,def,ghi\r\n')
@@ -64,7 +64,7 @@ class PaginatedCsvRendererTests(TestCase):
         self.renderer.concatenate_lists_sep = None
         self.set_request(dict(fields='string2,invalid,list.2,dict.a,list.1,string'))
         rendered_data = self.renderer.render(self.data, renderer_context=self.context)
-        self.assertEquals(rendered_data,
+        self.assertEqual(rendered_data,
                           'string2,list.2,dict.a,list.1,string\r\n'
                           ',c,1,b,"ab,c"\r\n'
                           'ghi,f,,e,def\r\n')
@@ -73,7 +73,7 @@ class PaginatedCsvRendererTests(TestCase):
         self.renderer.header = ('string2', 'invalid', 'dict.a')
         self.set_request(dict(fields='string2,invalid,dict.b,list,dict.a,string'))
         rendered_data = self.renderer.render(self.data, renderer_context=self.context)
-        self.assertEquals(rendered_data,
+        self.assertEqual(rendered_data,
                           'string2,invalid,dict.a\r\n'
                           ',,1\r\n'
                           'ghi,,\r\n')

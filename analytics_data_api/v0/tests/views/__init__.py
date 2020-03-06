@@ -32,7 +32,7 @@ class VerifyCourseIdMixin(object):
 
     def verify_no_course_id(self, response):
         """ Assert that a course ID must be provided. """
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected = {
             u"error_code": u"course_not_specified",
             u"developer_message": u"Course id/key not specified."
@@ -41,7 +41,7 @@ class VerifyCourseIdMixin(object):
 
     def verify_bad_course_id(self, response, course_id='malformed-course-id'):
         """ Assert that a course ID must be valid. """
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected = {
             u"error_code": u"course_key_malformed",
             u"developer_message": u"Course id/key {} malformed.".format(course_id)
@@ -54,15 +54,15 @@ class VerifyCsvResponseMixin(object):
     def assertCsvResponseIsValid(self, response, expected_filename, expected_data=None, expected_headers=None):
 
         # Validate the basic response status, content type, and filename
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         if expected_data:
-            self.assertEquals(response['Content-Type'].split(';')[0], 'text/csv')
-        self.assertEquals(response['Content-Disposition'], u'attachment; filename={}'.format(expected_filename))
+            self.assertEqual(response['Content-Type'].split(';')[0], 'text/csv')
+        self.assertEqual(response['Content-Disposition'], u'attachment; filename={}'.format(expected_filename))
 
         # Validate other response headers
         if expected_headers:
             for header_name, header_content in six.iteritems(expected_headers):
-                self.assertEquals(response.get(header_name), header_content)
+                self.assertEqual(response.get(header_name), header_content)
 
         # Validate the content data
         if expected_data:
@@ -82,7 +82,7 @@ class VerifyCsvResponseMixin(object):
 
     def assertResponseFields(self, response, fields):
         content_type = response.get('Content-Type', '').split(';')[0]
-        self.assertEquals(content_type, 'text/csv')
+        self.assertEqual(content_type, 'text/csv')
 
         data = six.StringIO(response.content.decode('utf-8'))
         reader = csv.reader(data)
@@ -123,9 +123,9 @@ class APIListViewTestMixin(object):
         get_response = self.authenticated_get(self.path(data))
         if self.test_post_method:
             post_response = self.authenticated_post(self.path(), data=data)
-            self.assertEquals(get_response.status_code, post_response.status_code)
+            self.assertEqual(get_response.status_code, post_response.status_code)
             if 200 <= get_response.status_code < 300:
-                self.assertEquals(get_response.data, post_response.data)
+                self.assertEqual(get_response.data, post_response.data)
 
         return get_response
 
@@ -155,19 +155,19 @@ class APIListViewTestMixin(object):
     def _test_all_items(self, ids):
         self.generate_data()
         response = self.validated_request(ids=ids, exclude=self.always_exclude)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         six.assertCountEqual(self, response.data, self.all_expected_results(ids=ids))
 
     def _test_one_item(self, item_id):
         self.generate_data()
         response = self.validated_request(ids=[item_id], exclude=self.always_exclude)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         six.assertCountEqual(self, response.data, [self.expected_result(item_id)])
 
     def _test_fields(self, fields):
         self.generate_data()
         response = self.validated_request(fields=fields)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         # remove fields not requested from expected results
         expected_results = self.all_expected_results()
@@ -179,9 +179,9 @@ class APIListViewTestMixin(object):
 
     def test_no_items(self):
         response = self.validated_request()
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     def test_no_matching_items(self):
         self.generate_data()
         response = self.validated_request(ids=['no/items/found'])
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)

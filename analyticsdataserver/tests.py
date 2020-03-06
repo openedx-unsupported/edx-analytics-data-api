@@ -49,22 +49,22 @@ def no_database():
 class OperationalEndpointsTest(TestCaseWithAuthentication):
     def test_status(self):
         response = self.client.get('/status', follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_authentication_check_failure(self):
         response = self.client.get('/authenticated', follow=True)
-        self.assertEquals(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
 
     def test_authentication_check_success(self):
         response = self.authenticated_get('/authenticated', follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_health(self):
         self.assert_database_health('OK')
 
     def assert_database_health(self, status, status_code=200):
         response = self.client.get('/health', follow=True)
-        self.assertEquals(
+        self.assertEqual(
             response.data,
             {
                 'overall_status': status,
@@ -73,7 +73,7 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
                 }
             }
         )
-        self.assertEquals(response.status_code, status_code)
+        self.assertEqual(response.status_code, status_code)
 
     @staticmethod
     @contextmanager

@@ -103,5 +103,5 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     def test_all_programs_multi_courses(self, program_ids, course_ids):
         self.generate_data(ids=program_ids, course_ids=course_ids)
         response = self.validated_request(ids=program_ids, exclude=self.always_exclude)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         six.assertCountEqual(self, response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))

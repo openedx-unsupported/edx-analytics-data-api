@@ -9,9 +9,7 @@ python-memcached                    # Python Software Foundation License v2
 djangorestframework                 # BSD
 django-rest-swagger                 # BSD
 djangorestframework-csv             # BSD
-
-# django-storages version 1.9 drops support for boto storage backend.
-django-storages<1.9                 # BSD
+django-storages                     # BSD
 elasticsearch-dsl                   # Apache 2.0
 ordered-set==2.0.2                  # MIT
 tqdm==4.11.2                        # MIT

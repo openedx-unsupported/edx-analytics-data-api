@@ -724,7 +724,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
 
         response = self._get_data(course_id)
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual(sorted([dict(d) for d in response.data]), sorted(expected))
+        six.assertCountEqual(self, [dict(d) for d in response.data], expected)
 
     def test_get_404(self):
         """

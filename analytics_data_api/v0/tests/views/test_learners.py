@@ -197,7 +197,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
         self.create_update_index(last_updated)
 
         response = self.authenticated_get(self.path_template.format(username, course_id))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected = {
             "username": username,
@@ -234,7 +234,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
         user_name = 'a_user'
         course_id = 'edX/DemoX/Demo_Course'
         response = self.authenticated_get(self.path_template.format(user_name, course_id))
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         expected = {
             u"error_code": u"no_learner_for_course",
             u"developer_message": u"Learner a_user not found for course edX/DemoX/Demo_Course."

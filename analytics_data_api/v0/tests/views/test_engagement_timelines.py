@@ -58,8 +58,8 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
             expected_data['days'][0][metric_display_name] = 10
         path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(course_id))
         response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
             response.data,
             expected_data
         )
@@ -80,7 +80,7 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         create_engagement(course_id, self.DEFAULT_USERNAME, PROBLEM, ATTEMPTED, 'id-6', count=8, date=day_two)
         create_engagement(course_id, self.DEFAULT_USERNAME, PROBLEM, ATTEMPTED, 'id-7', count=4, date=day_two)
         response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         expected = {
             'days': [
                 {
@@ -99,7 +99,7 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
                 },
             ]
         }
-        self.assertEquals(response.data, expected)
+        self.assertEqual(response.data, expected)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_day_gap(self, course_id):
@@ -109,7 +109,7 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         create_engagement(course_id, self.DEFAULT_USERNAME, VIDEO, VIEWED, 'id-1', 1, date=first_day)
         create_engagement(course_id, self.DEFAULT_USERNAME, PROBLEM, ATTEMPTED, 'id-2', 1, date=last_day)
         response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         expected = {
             'days': [
                 {
@@ -135,13 +135,13 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
                 },
             ]
         }
-        self.assertEquals(response.data, expected)
+        self.assertEqual(response.data, expected)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_not_found(self, course_id):
         path = self.path_template.format(self.DEFAULT_USERNAME, urlquote(course_id))
         response = self.authenticated_get(path)
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         expected = {
             u"error_code": u"no_learner_engagement_timeline",
             u"developer_message": u"Learner {} engagement timeline not found for course {}.".format(

@@ -99,7 +99,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
     def test_nonconsolidated_get(self):
         """ Verify that answers which should not be consolidated are not. """
         response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id2, self.path))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected_data = models.ProblemFirstLastResponseAnswerDistribution.objects.filter(module_id=self.module_id2)
         expected_data = [ProblemFirstLastResponseAnswerDistributionSerializer(answer).data for answer in expected_data]
@@ -116,7 +116,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         """ Verify that valid consolidation does occur. """
         response = self.authenticated_get(
             '/api/v0/problems/{0}{1}'.format(self.module_id1, self.path))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected_data = [self.ad1, self.ad3]
 
@@ -133,11 +133,11 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         response.data = [json.dumps(answer) for answer in response.data]
         expected_data = [json.dumps(answer) for answer in expected_data]
 
-        self.assertEquals(set(response.data), set(expected_data))
+        self.assertEqual(set(response.data), set(expected_data))
 
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 class GradeDistributionTests(TestCaseWithAuthentication):
@@ -157,16 +157,16 @@ class GradeDistributionTests(TestCaseWithAuthentication):
 
     def test_get(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected_dict = GradeDistributionSerializer(self.ad1).data
         actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
+        self.assertEqual(len(actual_list), 1)
         self.assertDictEqual(actual_list[0], expected_dict)
 
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 class SequentialOpenDistributionTests(TestCaseWithAuthentication):
@@ -186,13 +186,13 @@ class SequentialOpenDistributionTests(TestCaseWithAuthentication):
 
     def test_get(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % (self.module_id, self.path))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected_dict = SequentialOpenDistributionSerializer(self.ad1).data
         actual_list = response.data
-        self.assertEquals(len(actual_list), 1)
+        self.assertEqual(len(actual_list), 1)
         self.assertDictEqual(actual_list[0], expected_dict)
 
     def test_get_404(self):
         response = self.authenticated_get('/api/v0/problems/%s%s' % ("DOES-NOT-EXIST", self.path))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)

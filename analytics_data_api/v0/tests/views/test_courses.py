@@ -93,15 +93,15 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
         """ Requests made against non-existent courses should return a 404 """
         course_id = u'edX/DemoX/Non_Existent_Course'
         response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     def assertViewReturnsExpectedData(self, expected, course_id):
         # Validate the basic response status
         response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
-        self.assertEquals(response.data, expected)
+        self.assertEqual(response.data, expected)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_get(self, course_id):
@@ -134,20 +134,20 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
         date = (start_date + datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?start_date=%s' % (self.api_root_path, course_id, self.path, date))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
         # If end date is before date of existing data, return a 404
         date = (start_date - datetime.timedelta(days=30)).strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get(
             '%scourses/%s%s?end_date=%s' % (self.api_root_path, course_id, self.path, date))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
         # If data falls in date range, data should be returned
         start = start_date.strftime(settings.DATETIME_FORMAT)
         end = end_date.strftime(settings.DATETIME_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
             self.api_root_path, course_id, self.path, start, end))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
         # Passing dates in DATE_FORMAT still works
@@ -155,7 +155,7 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
         end = end_date.strftime(settings.DATE_FORMAT)
         response = self.authenticated_get('%scourses/%s%s?start_date=%s&end_date=%s' % (
             self.api_root_path, course_id, self.path, start, end))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(response.data, expected_response)
 
 
@@ -200,15 +200,15 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def test_activity(self, course_id):
         self.generate_data(course_id)
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format(course_id))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(course_id=course_id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, self.get_activity_record(course_id=course_id))
 
     def assertValidActivityResponse(self, course_id, activity_type, count):
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
             course_id, activity_type))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
-                                                                  count=count))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
+                                                                 count=count))
 
     @staticmethod
     def get_activity_record(**kwargs):
@@ -228,15 +228,15 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def test_activity_auth(self, course_id):
         self.generate_data(course_id)
         response = self.client.get(u'/api/v0/courses/{0}/recent_activity'.format(course_id), follow=True)
-        self.assertEquals(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_url_encoded_course_id(self, course_id):
         self.generate_data(course_id)
         url_encoded_course_id = six.moves.urllib.parse.quote_plus(course_id)
         response = self.authenticated_get(u'/api/v0/courses/{}/recent_activity'.format(url_encoded_course_id))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(course_id=course_id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, self.get_activity_record(course_id=course_id))
 
     @ddt.data(*CourseSamples.course_ids)
     def test_any_activity(self, course_id):
@@ -255,15 +255,15 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         activity_type = 'missing_activity_type'
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
             course_id, activity_type))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     def test_unknown_course_id(self):
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format('foo'))
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     def test_missing_course_id(self):
         response = self.authenticated_get(u'/api/v0/courses/recent_activity')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_label_parameter(self, course_id):
@@ -271,9 +271,9 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
         activity_type = 'played_video'
         response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?label={1}'.format(
             course_id, activity_type))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
-                                                                  count=400))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
+                                                                 count=400))
 
 
 @ddt.ddt
@@ -300,10 +300,10 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
     def test_get(self, course_id):
         self.generate_data(course_id)
         response = self.authenticated_get('/api/v0/courses/%s%s' % (course_id, self.path,))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         expected = self.format_as_response(*self.model.objects.filter(date=self.date))
-        self.assertEquals(response.data, expected)
+        self.assertEqual(response.data, expected)
 
 
 class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
@@ -644,7 +644,7 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
         ]
 
         response = self._get_data(course_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual([dict(d) for d in response.data], expected)
 
     def test_get_404(self):
@@ -653,7 +653,7 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
         """
 
         response = self._get_data('foo/bar/course')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @ddt.ddt
@@ -723,7 +723,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
         ]
 
         response = self._get_data(course_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(sorted([dict(d) for d in response.data]), sorted(expected))
 
     def test_get_404(self):
@@ -732,7 +732,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
         """
 
         response = self._get_data('foo/bar/course')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @ddt.ddt
@@ -785,12 +785,12 @@ class CourseVideosListViewTests(TestCaseWithAuthentication):
         ]
 
         response = self._get_data(course_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(response.data, expected)
 
     def test_get_404(self):
         response = self._get_data('foo/bar/course')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @ddt.ddt
@@ -821,7 +821,7 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
         create_engagement(course_id, 'user3', PROBLEM, ATTEMPTED, 'id-4', 3, activity_date_more_than_7_days_ago)
 
         response = self._get_data(course_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         expected = [
             OrderedDict([
                 ('username', 'user1'),
@@ -867,7 +867,7 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
 
     def test_get_404(self):
         response = self._get_data('foo/bar/course')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @ddt.ddt

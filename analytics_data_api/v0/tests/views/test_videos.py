@@ -46,7 +46,7 @@ class VideoTimelineTests(TestCaseWithAuthentication):
             }
         ]
         response = self._get_data(video_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(response.data, expected)
 
         expected = [
@@ -58,9 +58,9 @@ class VideoTimelineTests(TestCaseWithAuthentication):
             }
         ]
         response = self._get_data(alt_video_id)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertListEqual(response.data, expected)
 
     def test_get_404(self):
         response = self._get_data('no_id')
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)

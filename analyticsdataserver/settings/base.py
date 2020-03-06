@@ -176,8 +176,8 @@ TEMPLATES = [
 
 
 ########## MIDDLEWARE CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
-MIDDLEWARE_CLASSES = (
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-MIDDLEWARE
+MIDDLEWARE = [
     # Default Django middleware.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -200,7 +200,7 @@ MIDDLEWARE_CLASSES = (
     'analytics_data_api.v0.middleware.ParameterValueErrorMiddleware',
     'analytics_data_api.v0.middleware.ReportFileNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CannotCreateDownloadLinkErrorMiddleware',
-)
+]
 ########## END MIDDLEWARE CONFIGURATION
 
 

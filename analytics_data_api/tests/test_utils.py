@@ -98,8 +98,8 @@ class CountryTests(TestCase):
 
 class DateRangeTests(TestCase):
     def test_empty_range(self):
-        date = datetime.datetime(2016, 1, 1)
-        self.assertEqual([date for date in date_range(date, date)], [])
+        same_date = datetime.datetime(2016, 1, 1)
+        self.assertEqual([date for date in date_range(same_date, same_date)], [])
 
     def test_range_exclusive(self):
         start_date = datetime.datetime(2016, 1, 1)

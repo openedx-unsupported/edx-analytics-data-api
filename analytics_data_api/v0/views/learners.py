@@ -37,7 +37,7 @@ class LastUpdateMixin(object):
         if len(roster_update) >= 1:
             last_updated = roster_update[0]
         else:
-            logger.warn('RosterUpdate not found.')
+            logger.warning('RosterUpdate not found.')
         return LastUpdatedSerializer(last_updated).data
 
 

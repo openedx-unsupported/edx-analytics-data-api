@@ -4,6 +4,7 @@ PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
 ELASTICSEARCH_PORT = 9223
+PYTHON_ENV=py27
 
 .PHONY: requirements develop clean diff.report view.diff.report quality static
 
@@ -24,6 +25,9 @@ test.run_elasticsearch:
 test.requirements: requirements
 	pip install -q -r requirements/test.txt
 
+tox.requirements:
+	 pip install -q -r requirements/tox.txt
+
 develop: test.requirements
 	pip install -q -r requirements/dev.txt
 
@@ -36,42 +40,43 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
+	pip-compile --upgrade -o requirements/travis.txt requirements/tox.in
 	scripts/post-pip-compile.sh \
         requirements/pip_tools.txt \
 	    requirements/base.txt \
 	    requirements/doc.txt \
 	    requirements/dev.txt \
 	    requirements/production.txt \
-	    requirements/test.txt
+	    requirements/test.txt \
+	    requirements/tox.txt
 
 clean:
+	tox -e $(PYTHON_ENV)-clean
 	find . -name '*.pyc' -delete
-	coverage erase
 
-test: clean
+test: tox.requirements clean
 	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  # Launch ES if installed and not running
-	coverage run -m pytest --ignore=analyticsdataserver/settings \
-		$(PACKAGES)
+	tox -e $(PYTHON_ENV)-tests
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
-		coverage html && \
-		coverage xml
+	tox -e $(PYTHON_ENV)-coverage
 
-diff.report:
+diff.report: test.requirements
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
-	diff-quality --violations=pep8 --html-report $(COVERAGE_DIR)/diff_quality_pep8.html
+	diff-quality --violations=pycodestyle --html-report $(COVERAGE_DIR)/diff_quality_pycodestyle.html
 	diff-quality --violations=pylint --html-report $(COVERAGE_DIR)/diff_quality_pylint.html
 
 view.diff.report:
 	xdg-open file:///$(COVERAGE_DIR)/diff_cover.html
-	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pep8.html
+	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pycodestyle.html
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pylint.html
 
-quality:
-	pep8 $(PACKAGES)
-	pylint $(PACKAGES)
+run_check_isort:
+	tox -e $(PYTHON_ENV)-check_isort
 
-	# Ignore module level docstrings and all test files
-	#pep257 --ignore=D100,D203 --match='(?!test).*py' $(PACKAGES)
+run_pylint:
+	tox -e $(PYTHON_ENV)-pylint
+
+quality: tox.requirements run_pylint
 
 validate: test.requirements test quality
 

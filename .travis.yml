@@ -1,6 +1,4 @@
 language: python
-python:
-  - "2.7"
 
 branches:
   only:
@@ -14,9 +12,29 @@ before_install:
   - docker-compose -f .travis/docker-compose-travis.yml up -d
 
 script:
-  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_tests.sh
-
-after_success:
-  - pip install -U codecov
-  - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
-  - codecov
+  - docker exec -t -e TRAVIS=1 analytics_api_testing bash -c "
+      cd /edx/app/analytics_api/analytics_api/ &&
+      make $TARGETS
+      "
+matrix:
+  include:
+    - python: 2.7
+      env:
+        TESTNAME=quality
+        TARGETS="quality"
+    - python: 2.7
+      env:
+        TESTNAME=test-python
+        TARGETS="test"
+      after_success:
+        - pip install -U codecov
+        - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
+        - codecov --disable pycov
+    - python: 3.5
+      env:
+        TESTNAME=quality-python-3.5
+        TARGETS="PYTHON_ENV=py35 quality"
+    - python: 3.5
+      env:
+        TESTNAME=test-python-3.5
+        TARGETS="PYTHON_ENV=py35 test"

@@ -37,7 +37,7 @@ enum34==1.1.10            # via cryptography
 future==0.18.2            # via pyjwkest
 gevent==1.4.0             # via -r requirements/production.in
 greenlet==0.4.15          # via gevent
-gunicorn==19.6.0          # via -r requirements/production.in
+gunicorn==19.10.0         # via -c requirements/constraints.txt, -r requirements/production.in
 idna==2.9                 # via requests
 ipaddress==1.0.23         # via cryptography
 itypes==1.1.0             # via coreapi

@@ -5,6 +5,6 @@
 mysqlclient                         # GPL License
 PyYAML                              # MIT
 gevent
-gunicorn==19.6.0                    # MIT
+gunicorn                            # MIT
 path.py==8.2.1
 newrelic                            # New Relic agent for performance monitoring

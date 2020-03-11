@@ -11,11 +11,15 @@ sudo: required
 before_install:
   - docker-compose -f .travis/docker-compose-travis.yml up -d
 
+install:
+    - pip install -r requirements/travis.txt
+
 script:
   - docker exec -t -e TRAVIS=1 analytics_api_testing bash -c "
       cd /edx/app/analytics_api/analytics_api/ &&
       make $TARGETS
       "
+
 matrix:
   include:
     - python: 2.7
@@ -27,7 +31,6 @@ matrix:
         TESTNAME=test-python
         TARGETS="test"
       after_success:
-        - pip install -U codecov
         - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
         - codecov --disable pycov
     - python: 3.5

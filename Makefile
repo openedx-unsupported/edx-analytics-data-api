@@ -40,7 +40,8 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
-	pip-compile --upgrade -o requirements/travis.txt requirements/tox.in
+	pip-compile --upgrade -o requirements/tox.txt requirements/tox.in
+	pip-compile --upgrade -o requirements/travis.txt requirements/travis.in
 	scripts/post-pip-compile.sh \
         requirements/pip_tools.txt \
 	    requirements/base.txt \
@@ -48,7 +49,8 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	    requirements/dev.txt \
 	    requirements/production.txt \
 	    requirements/test.txt \
-	    requirements/tox.txt
+	    requirements/tox.txt \
+	    requirements/travis.txt
 
 clean:
 	tox -e $(PYTHON_ENV)-clean

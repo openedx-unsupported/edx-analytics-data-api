@@ -20,7 +20,8 @@ scandir==1.10.0           # via pathlib2
 singledispatch==3.4.0.3   # via importlib-resources
 six==1.14.0               # via packaging, pathlib2, tox, virtualenv
 toml==0.10.0              # via tox
-tox==3.14.5               # via -r requirements/travis.in
+tox-battery==0.5.2        # via -r requirements/tox.in
+tox==3.14.5               # via -r requirements/tox.in, tox-battery
 typing==3.7.4.1           # via importlib-resources
-virtualenv==20.0.9        # via tox
+virtualenv==20.0.10       # via tox
 zipp==1.2.0               # via importlib-metadata, importlib-resources

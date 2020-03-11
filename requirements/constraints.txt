@@ -16,6 +16,15 @@
 # django-storages version 1.9 drops support for boto storage backend.
 django-storages<1.9                 # BSD
 
+# django-waffle version 0.19.0 dropped support to Django 2.0 and 2.1, see https://github.com/django-waffle/django-waffle/blob/master/CHANGES
+django-waffle<0.19.0
+
+# django22 tests are failing. Constraint taken from https://github.com/edx/edx-drf-extensions version 5.0.2
+drf-jwt<1.15.0
+
+# drf-yasg version 1.17.1 dropped support to Django 2.0 and 2.1 and python 3.5, see https://github.com/axnsan12/drf-yasg/blob/master/docs/changelog.rst
+drf-yasg<1.17.1
+
 # elasticsearch-dsl depends on elasticsearch >2.0.0,<3.0.0
 elasticsearch-dsl<2.0.0
 

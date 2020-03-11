@@ -228,7 +228,12 @@ THIRD_PARTY_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_jwt',
-    'rest_framework_swagger',
+
+    # API Documentation
+    'drf_yasg',
+    'edx_api_doc_tools',
+
+
     'django_countries',
     'storages',
     'enterprise_data',

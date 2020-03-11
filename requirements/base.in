@@ -11,7 +11,7 @@ django-rest-swagger                 # BSD
 djangorestframework-csv             # BSD
 django-storages                     # BSD
 elasticsearch-dsl                   # Apache 2.0
-ordered-set==2.0.2                  # MIT
+ordered-set                         # MIT
 tqdm==4.11.2                        # MIT
 urllib3                             # MIT
 Markdown==2.6.6                     # BSD:markdown is used by swagger for rendering the api docs

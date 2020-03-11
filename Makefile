@@ -92,7 +92,7 @@ demo: clean requirements loaddata
 	python manage.py set_api_key edx edx
 
 # Target used by edx-analytics-dashboard during its testing.
-travis: clean test.requirements migrate
+travis: clean test.requirements migrate-all
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"

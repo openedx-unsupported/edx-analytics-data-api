@@ -12,6 +12,8 @@ from enterprise_data_roles.constants import (
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
 
+from analytics_data_api.constants.engagement_events import DISCUSSION
+
 ########## PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory:
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
@@ -445,3 +447,6 @@ SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = 'analytics_api-secret'
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
 SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
+
+########## ENTERPRISE LEARNER ENGAGEMENT REPORTING
+EXCLUDED_ENGAGEMENT_ENTITY_TYPES = [DISCUSSION]

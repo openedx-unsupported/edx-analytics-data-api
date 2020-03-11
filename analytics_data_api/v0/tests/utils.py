@@ -7,6 +7,7 @@ import pytz
 
 from analytics_data_api.v0 import models
 from django_dynamic_fixture import G
+import enterprise_data
 
 
 def flatten(dictionary, parent_key='', sep='.'):
@@ -39,4 +40,15 @@ def create_engagement(course_id, username, entity_type, event_type, entity_id, c
         event=event_type,
         count=count,
         created=date,
+    )
+
+
+def create_enterprise_user(enterprise_customer_uuid, username, enterprise_user_id=1000):
+    """Create EnterpriseUser model data"""
+    G(
+        enterprise_data.models.EnterpriseUser,
+        enterprise_id=enterprise_customer_uuid,
+        lms_user_id=1,
+        enterprise_user_id=enterprise_user_id,
+        user_username=username,
     )

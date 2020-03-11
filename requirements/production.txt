@@ -67,7 +67,7 @@ six==1.14.0               # via cryptography, djangorestframework-csv, edx-ccx-k
 slumber==0.7.1            # via edx-rest-api-client
 sqlparse==0.3.1           # via django
 stevedore==1.32.0         # via edx-opaque-keys
-tqdm==4.11.2              # via -r requirements/base.in
+tqdm==4.43.0              # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.8           # via -r requirements/base.in, elasticsearch, requests

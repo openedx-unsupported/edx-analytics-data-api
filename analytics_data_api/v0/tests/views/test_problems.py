@@ -62,7 +62,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
             problem_display_name=cls.problem_display_name,
             question_text=cls.question_text,
             variant=345,
-            first_reponse_count=0,
+            first_response_count=0,
             last_response_count=2,
         )
         cls.ad3 = G(

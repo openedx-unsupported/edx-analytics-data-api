@@ -23,6 +23,7 @@ class CourseBlocksApiClient(EdxRestApiClient):
 
     Currently, this client is only used for a local-only developer script (generate_fake_course_data).
     """
+
     def __init__(self, url, access_token, timeout):
         super(CourseBlocksApiClient, self).__init__(url, oauth_access_token=access_token, timeout=timeout)
 
@@ -33,11 +34,11 @@ class CourseBlocksApiClient(EdxRestApiClient):
             logger.info("Successfully authenticated with the Course Blocks API.")
         except HttpClientError as e:
             if e.response.status_code == 401:
-                logger.warning("Course Blocks API failed to return video ids (%s). " +
+                logger.warning("Course Blocks API failed to return video ids (%s). "
                                "See README for instructions on how to authenticate the API with your local LMS.",
                                e.response.status_code)
             elif e.response.status_code == 404:
-                logger.warning("Course Blocks API failed to return video ids (%s). " +
+                logger.warning("Course Blocks API failed to return video ids (%s). "
                                "Does the course exist in the LMS?",
                                e.response.status_code)
             else:

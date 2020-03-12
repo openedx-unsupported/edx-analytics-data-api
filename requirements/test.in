@@ -8,7 +8,7 @@ diff-cover >= 0.9.9
 django-dynamic-fixture==1.9.5
 mock==2.0.0
 pep257==0.7.0
-pep8==1.7.0
+pycodestyle
 pylint==1.6.5
 pytest-cov
 pytest-django

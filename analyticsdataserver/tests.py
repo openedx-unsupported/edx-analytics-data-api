@@ -165,7 +165,7 @@ class ClientTests(TestCase):
         responses.add(responses.GET, 'http://example.com/blocks/', status=401, content_type='application/json')
         videos = self.client.all_videos('course_id')
         logger.warning.assert_called_with(
-            'Course Blocks API failed to return video ids (%s). ' +
+            'Course Blocks API failed to return video ids (%s). '
             'See README for instructions on how to authenticate the API with your local LMS.', 401)
         self.assertEqual(videos, None)
 
@@ -174,7 +174,7 @@ class ClientTests(TestCase):
     def test_all_videos_404(self, logger):
         responses.add(responses.GET, 'http://example.com/blocks/', status=404, content_type='application/json')
         videos = self.client.all_videos('course_id')
-        logger.warning.assert_called_with('Course Blocks API failed to return video ids (%s). ' +
+        logger.warning.assert_called_with('Course Blocks API failed to return video ids (%s). '
                                           'Does the course exist in the LMS?', 404)
         self.assertEqual(videos, None)
 

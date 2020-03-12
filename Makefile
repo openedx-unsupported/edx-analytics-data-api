@@ -75,10 +75,13 @@ view.diff.report:
 run_check_isort:
 	tox -e $(PYTHON_ENV)-check_isort
 
+run_pycodestyle:
+	tox -e $(PYTHON_ENV)-pycodestyle
+
 run_pylint:
 	tox -e $(PYTHON_ENV)-pylint
 
-quality: tox.requirements run_pylint
+quality: tox.requirements run_pylint run_pycodestyle
 
 validate: test.requirements test quality
 

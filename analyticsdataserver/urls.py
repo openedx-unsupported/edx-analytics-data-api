@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', 'rest_framework')),
     url(r'^api-token-auth/', obtain_auth_token),
 
-    url(r'^api/', include('analytics_data_api.urls', 'api')),
+    url(r'^api/', include('analytics_data_api.urls')),
     url(r'^docs/', views.SwaggerSchemaView.as_view()),
 
     url(r'^status/$', views.StatusView.as_view(), name='status'),

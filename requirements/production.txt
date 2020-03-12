@@ -48,7 +48,6 @@ mysqlclient==1.4.6        # via -c requirements/constraints.txt, -r requirements
 newrelic==5.10.0.138      # via -r requirements/production.in, edx-django-utils
 openapi-codec==1.3.2      # via django-rest-swagger
 ordered-set==2.0.2        # via -r requirements/base.in
-path.py==8.2.1            # via -r requirements/production.in
 pbr==5.4.4                # via stevedore
 psutil==1.2.1             # via edx-django-utils
 pycparser==2.20           # via cffi

@@ -52,7 +52,7 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	    requirements/tox.txt \
 	    requirements/travis.txt
 
-clean:
+clean: tox.requirements
 	tox -e $(PYTHON_ENV)-clean
 	find . -name '*.pyc' -delete
 
@@ -72,13 +72,13 @@ view.diff.report:
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pycodestyle.html
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pylint.html
 
-run_check_isort:
+run_check_isort: tox.requirements
 	tox -e $(PYTHON_ENV)-check_isort
 
-run_pycodestyle:
+run_pycodestyle: tox.requirements
 	tox -e $(PYTHON_ENV)-pycodestyle
 
-run_pylint:
+run_pylint: tox.requirements
 	tox -e $(PYTHON_ENV)-pylint
 
 quality: tox.requirements run_pylint run_pycodestyle

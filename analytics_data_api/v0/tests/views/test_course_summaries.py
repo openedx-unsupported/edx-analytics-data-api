@@ -41,7 +41,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
               start_time=datetime.datetime(2016, 10, 11, tzinfo=pytz.utc),
               end_time=datetime.datetime(2016, 12, 18, tzinfo=pytz.utc),
               pacing_type='instructor', availability=kwargs['availability'], enrollment_mode=mode,
-              count=5, cumulative_count=10, count_change_7_days=1, passing_users=1, create=self.now,)
+              count=5, cumulative_count=10, count_change_7_days=1, passing_users=1, created=self.now,)
         if 'programs' in kwargs and kwargs['programs']:
             # Create a link from this course to a program
             G(models.CourseProgramMetadata, course_id=model_id, program_id=CourseSamples.program_ids[0],

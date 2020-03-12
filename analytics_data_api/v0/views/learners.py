@@ -374,7 +374,7 @@ class EnterpriseLearnerEngagementView(generics.ListAPIView):
         # key relationship between ModuleEngagement and EnterpriseUser models
         return ModuleEngagement.objects.filter(username__in=enterprise_users).exclude(
             entity_type__in=settings.EXCLUDED_ENGAGEMENT_ENTITY_TYPES
-        )
+        ).order_by('id')
 
 
 class CourseLearnerMetadata(CourseViewMixin, generics.RetrieveAPIView):

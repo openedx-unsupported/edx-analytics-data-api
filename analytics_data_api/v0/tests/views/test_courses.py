@@ -615,10 +615,8 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
         alt_module_id = u'i4x://test/problem/2'
         created = timezone.now()
         alt_created = created + datetime.timedelta(seconds=2)
-        date_time_format = '%Y-%m-%d %H:%M:%S'
+        date_time_format = '%Y-%m-%d %H:%M:%S%z'
 
-        # using string representations of dates will cause "DateTimeField time zone support" RuntimeWarning
-        # however, using the date with timezone causes conversion errors
         o1 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=module_id,
                correct=True, last_response_count=100, created=created.strftime(date_time_format))
         o2 = G(models.ProblemFirstLastResponseAnswerDistribution, course_id=course_id, module_id=alt_module_id,
@@ -805,9 +803,8 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
 
     @ddt.data(*CourseSamples.course_ids)
     def test_get(self, course_id):
-        activity_date_today = datetime.datetime.today().strftime(settings.DATE_FORMAT)
-        activity_date_more_than_7_days_ago = (datetime.datetime.today() - datetime.timedelta(days=9))\
-            .strftime(settings.DATE_FORMAT)
+        activity_date_today = timezone.now()
+        activity_date_more_than_7_days_ago = (timezone.now() - datetime.timedelta(days=9))
         create_engagement(course_id, 'user1', VIDEO, VIEWED, 'id-1', 3, activity_date_today)
         create_engagement(course_id, 'user1', PROBLEM, ATTEMPTED, 'id-2', 4, activity_date_today)
         create_engagement(course_id, 'user1', PROBLEM, COMPLETED, 'id-2', 4, activity_date_more_than_7_days_ago)
@@ -819,6 +816,9 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
         create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 5, activity_date_more_than_7_days_ago)
         create_engagement(course_id, 'user3', PROBLEM, COMPLETED, 'id-4', 4, activity_date_more_than_7_days_ago)
         create_engagement(course_id, 'user3', PROBLEM, ATTEMPTED, 'id-4', 3, activity_date_more_than_7_days_ago)
+
+        activity_date_today = activity_date_today.strftime(settings.DATE_FORMAT)
+        activity_date_more_than_7_days_ago = activity_date_more_than_7_days_ago.strftime(settings.DATE_FORMAT)
 
         response = self._get_data(course_id)
         self.assertEqual(response.status_code, 200)

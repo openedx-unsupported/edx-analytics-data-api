@@ -3,6 +3,7 @@
 -c constraints.txt
 
 boto==2.42.0                        # MIT
+boto3
 Django                              # BSD License
 django-countries                    # MIT
 python-memcached                    # Python Software Foundation License v2

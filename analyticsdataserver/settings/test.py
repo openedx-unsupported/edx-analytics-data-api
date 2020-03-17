@@ -29,10 +29,11 @@ ELASTICSEARCH_LEARNERS_INDEX = 'roster_test'
 ELASTICSEARCH_LEARNERS_UPDATE_INDEX = 'index_update_test'
 
 # Default the django-storage settings so we can test easily
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = 'xxxxx'
 AWS_SECRET_ACCESS_KEY = 'xxxxx'
 AWS_STORAGE_BUCKET_NAME = 'fake-bucket'
+AWS_DEFAULT_ACL = None
 FTP_STORAGE_LOCATION = 'ftp://localhost:80/path'
 
 # Default settings for report download endpoint

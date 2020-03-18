@@ -5,6 +5,7 @@ import datetime
 import pytz
 import six
 from django.conf import settings
+from django.utils import timezone
 
 import ddt
 from analytics_data_api.constants import enrollment_modes
@@ -28,7 +29,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
     def setUp(self):
         super(CourseSummariesViewTests, self).setUp()
-        self.now = datetime.datetime.utcnow()
+        self.now = timezone.now()
         self.maxDiff = None
 
     def tearDown(self):

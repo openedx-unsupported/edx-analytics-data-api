@@ -6,6 +6,8 @@ from django.conf.urls import url
 
 from analytics_data_api.v0.views import problems as views
 
+app_name = 'problems'
+
 PROBLEM_URLS = [
     ('answer_distribution', views.ProblemResponseAnswerDistributionView, 'answer_distribution'),
     ('grade_distribution', views.GradeDistributionView, 'grade_distribution'),

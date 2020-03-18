@@ -7,6 +7,8 @@ from analytics_data_api.v0.views import learners as views
 
 from analytics_data_api.constants.learner import UUID_REGEX_PATTERN
 
+app_name = 'learners'
+
 USERNAME_PATTERN = r'(?P<username>[\w.+-]+)'
 
 urlpatterns = [

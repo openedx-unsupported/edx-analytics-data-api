@@ -5,6 +5,8 @@ from django.conf.urls import url
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN
 from analytics_data_api.v0.views import courses as views
 
+app_name = 'courses'
+
 COURSE_URLS = [
     ('activity', views.CourseActivityWeeklyView, 'activity'),
     ('recent_activity', views.CourseActivityMostRecentWeekView, 'recent_activity'),

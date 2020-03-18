@@ -6,6 +6,8 @@ from django.conf.urls import url
 
 from analytics_data_api.v0.views import videos as views
 
+app_name = 'videos'
+
 VIDEO_URLS = [
     ('timeline', views.VideoTimelineView, 'timeline'),
 ]

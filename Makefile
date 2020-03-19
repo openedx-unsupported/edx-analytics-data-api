@@ -4,7 +4,7 @@ PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
 ELASTICSEARCH_PORT = 9223
-PYTHON_ENV=py27
+PYTHON_ENV=py35
 
 .PHONY: requirements develop clean diff.report view.diff.report quality static
 

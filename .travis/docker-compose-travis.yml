@@ -1,5 +1,6 @@
 version: "2"
 
+
 services:
   analytics_api:
     image: edxops/analytics_api:latest

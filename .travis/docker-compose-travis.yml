@@ -16,5 +16,5 @@ services:
     depends_on:
       - "es"
   es:
-    image: elasticsearch:1.5.2
+    image: elasticsearch:5.0.0
     container_name: es

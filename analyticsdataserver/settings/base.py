@@ -227,6 +227,7 @@ THIRD_PARTY_APPS = (
     'release_util',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_jwt',
     'rest_framework_swagger',
     'django_countries',
     'storages',

@@ -6,7 +6,7 @@
 #
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
-codecov==2.0.21           # via -r requirements/travis.in
+codecov==2.0.22           # via -r requirements/travis.in
 coverage==5.0.4           # via codecov
 idna==2.9                 # via requests
 requests==2.23.0          # via codecov

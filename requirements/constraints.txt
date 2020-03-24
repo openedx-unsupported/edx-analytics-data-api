@@ -13,6 +13,9 @@
 # Django 2 drops Python 2.7 support
 Django<2.0.0
 
+# The CORS_ORIGIN_WHITELIST changes in a backwards incompatible way in 3.0.0, needs matching configuration repo changes
+django-cors-headers<3.0.0
+
 # django-countries version 6.0.0 dropped support to Python 2.7
 django-countries<6.0.0
 

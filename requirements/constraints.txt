@@ -25,9 +25,6 @@ django-waffle<0.19.0
 # django22 tests are failing. Constraint taken from https://github.com/edx/edx-drf-extensions version 5.0.2
 drf-jwt<1.15.0
 
-# edx-django-utils version 3.0.0 dropped support for python 2.7, see https://github.com/edx/edx-django-utils/releases/tag/3.0.0
-edx-django-utils<3.0.0
-
 # edx-rest-api-client version 4.0.0 dropped support for python 2.7, see https://github.com/edx/edx-rest-api-client/releases/tag/4.0.0
 edx-rest-api-client<4.0.0
 

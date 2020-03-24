@@ -1,7 +1,7 @@
 """
 Tests for the custom REST framework renderers.
 """
-from __future__ import absolute_import
+
 
 from django.test import TestCase
 

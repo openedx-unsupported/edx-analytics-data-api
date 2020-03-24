@@ -5,7 +5,7 @@
 
 # pylint: disable=no-member,no-value-for-parameter
 
-from __future__ import absolute_import
+
 
 import json
 

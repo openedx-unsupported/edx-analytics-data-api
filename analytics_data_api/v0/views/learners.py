@@ -1,7 +1,7 @@
 """
 API methods for module level data.
 """
-from __future__ import absolute_import
+
 
 import logging
 

@@ -3,7 +3,7 @@ A variation on the local environment that uses mysql for the analytics database.
 
 Useful for developers running both mysql ingress locally and the api locally
 """
-from __future__ import absolute_import
+
 
 from analyticsdataserver.settings.local import *
 

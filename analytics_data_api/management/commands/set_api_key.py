@@ -1,6 +1,6 @@
 """A command to set the API key for a user using when using TokenAuthentication."""
 
-from __future__ import absolute_import, print_function
+
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError

@@ -2,7 +2,7 @@
 This file holds constants and helper functions related to countries. All codes are assumed to be valid ISO 3166 country
 codes.
 """
-from __future__ import absolute_import
+
 
 from collections import namedtuple
 

@@ -4,6 +4,7 @@
 nick: aap
 oeps:
     oep-2: true
+    oep-7: true
     oep-18: true
 openedx-release: {ref: master}
 owner: edx/analytics

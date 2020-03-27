@@ -22,22 +22,14 @@ script:
 
 matrix:
   include:
-    - python: 2.7
+    - python: 3.5
       env:
         TESTNAME=quality
         TARGETS="quality"
-    - python: 2.7
+    - python: 3.5
       env:
         TESTNAME=test-python
         TARGETS="test"
       after_success:
         - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
         - codecov --disable pycov
-    - python: 3.5
-      env:
-        TESTNAME=quality-python-3.5
-        TARGETS="PYTHON_ENV=py35 quality"
-    - python: 3.5
-      env:
-        TESTNAME=test-python-3.5
-        TARGETS="PYTHON_ENV=py35 test"

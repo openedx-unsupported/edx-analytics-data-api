@@ -5,6 +5,7 @@ DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
 ELASTICSEARCH_PORT = 9223
 PYTHON_ENV=py35
+DJANGO_VERSION=django111
 
 .PHONY: requirements develop clean diff.report view.diff.report quality static
 
@@ -51,16 +52,21 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	    requirements/test.txt \
 	    requirements/tox.txt \
 	    requirements/travis.txt
+	# Let tox control the Django version for tests
+	grep -e "^django==" requirements/base.txt > requirements/django.txt
+	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
+	mv requirements/test.tmp requirements/test.txt
+
 
 clean: tox.requirements
-	tox -e $(PYTHON_ENV)-clean
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-clean
 	find . -name '*.pyc' -delete
 
 test: tox.requirements clean
 	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  # Launch ES if installed and not running
-	tox -e $(PYTHON_ENV)-tests
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-tests
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
-	tox -e $(PYTHON_ENV)-coverage
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-coverage
 
 diff.report: test.requirements
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
@@ -73,13 +79,13 @@ view.diff.report:
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pylint.html
 
 run_check_isort: tox.requirements
-	tox -e $(PYTHON_ENV)-check_isort
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-check_isort
 
 run_pycodestyle: tox.requirements
-	tox -e $(PYTHON_ENV)-pycodestyle
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-pycodestyle
 
 run_pylint: tox.requirements
-	tox -e $(PYTHON_ENV)-pylint
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-pylint
 
 quality: tox.requirements run_pylint run_pycodestyle
 

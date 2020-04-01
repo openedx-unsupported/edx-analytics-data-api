@@ -48,3 +48,6 @@ mysqlclient==1.4.6
 
 # ordered-set version 4.0.0 dropped support to python 2.7, see https://github.com/LuminosoInsight/ordered-set/commit/c4ebdc58007b251165145c520580c09d13730400#diff-2eeaed663bd0d25b7e608891384b7298
 ordered_set<4.0
+
+# Constraining edx-enterprise-data until we have next release with fix of ENT-2717 https://github.com/edx/edx-enterprise-data/pull/192
+edx-enterprise-data==1.3.15

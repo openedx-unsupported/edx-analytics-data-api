@@ -42,9 +42,9 @@ class ProgramsView(APIListView):
     ids_param = 'program_ids'
     program_meta_fields = ['program_type', 'program_title']
 
-    def base_field_dict(self, program_id):
+    def base_field_dict(self, item_id):
         """Default program with id, empty metadata, and empty courses array."""
-        program = super(ProgramsView, self).base_field_dict(program_id)
+        program = super(ProgramsView, self).base_field_dict(item_id)
         program.update({
             'program_type': '',
             'program_title': '',

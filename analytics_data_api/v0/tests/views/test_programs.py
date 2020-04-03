@@ -31,37 +31,40 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     def tearDown(self):
         self.model.objects.all().delete()
 
-    def generate_data(self, ids=None, course_ids=None, **kwargs):
+    def generate_data(self, ids=None, **kwargs):
         """Generate program list data"""
         if ids is None:
             ids = self.default_ids
 
+        course_ids = kwargs.pop('course_ids', None)
         if course_ids is None:
             course_ids = [[self.course_id]] * len(ids)
 
         for item_id, course_id in zip(ids, course_ids):
             self.create_model(item_id, course_ids=course_id, **kwargs)
 
-    def create_model(self, model_id, course_ids=None, **kwargs):
+    def create_model(self, model_id, **kwargs):
+        course_ids = kwargs.get('course_ids', None)
         if course_ids is None:
             course_ids = [self.course_id]
 
         for course_id in course_ids:
             G(self.model, course_id=course_id, program_id=model_id, program_type='Demo', program_title='Test')
 
-    def all_expected_results(self, ids=None, course_ids=None, **kwargs):
+    def all_expected_results(self, ids=None, **kwargs):
         if ids is None:
             ids = self.default_ids
 
+        course_ids = kwargs.pop('course_ids', None)
         if course_ids is None:
             course_ids = [[self.course_id]] * len(ids)
 
         return [self.expected_result(item_id, course_ids=course_id, **kwargs)
                 for item_id, course_id in zip(ids, course_ids)]
 
-    # pylint: disable=arguments-differ
-    def expected_result(self, item_id, course_ids=None):
+    def expected_result(self, item_id, **kwargs):
         """Expected program metadata to populate with data."""
+        course_ids = kwargs.get('course_ids', None)
         if course_ids is None:
             course_ids = [self.course_id]
 

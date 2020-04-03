@@ -1,9 +1,9 @@
 
+from unittest.mock import Mock
 
 import ddt
 from django.http import Http404
 from django.test import TestCase
-from mock import Mock
 
 import analytics_data_api.v0.views.utils as utils
 from analytics_data_api.v0.exceptions import CourseKeyMalformedError  # pylint: disable=ungrouped-imports

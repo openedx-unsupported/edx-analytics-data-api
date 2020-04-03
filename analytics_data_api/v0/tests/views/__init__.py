@@ -140,7 +140,7 @@ class APIListViewTestMixin:
         for item_id in ids:
             self.create_model(item_id, **kwargs)
 
-    def expected_result(self, item_id):
+    def expected_result(self, item_id, **kwargs):  # pylint: disable=unused-argument
         result = OrderedDict([
             (self.model_id, item_id),
         ])

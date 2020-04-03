@@ -379,7 +379,7 @@ class RosterEntry(DocType):
             search.query.must.append(Q('bool', should=[Q('term', segments=segment) for segment in segments]))
         elif ignore_segments:
             for segment in ignore_segments:
-                search = search.query(~Q('term', segments=segment))
+                search = search.query(~Q('term', segments=segment))  # pylint: disable=invalid-unary-operand-type
         if cohort:
             search = search.query('term', cohort=cohort)
         if enrollment_mode:

@@ -45,7 +45,7 @@ class CourseBlocksApiClient(EdxRestApiClient):
                 logger.warning("Course Blocks API failed to return video ids (%s).", e.response.status_code)
             return None
         except RequestException as e:
-            logger.warning("Course Blocks API request failed. Is the LMS running?: " + str(e))
+            logger.warning("Course Blocks API request failed. Is the LMS running?: %s", str(e))
             return None
 
         # Setup a terrible hack to silence mysterious flood of ImportErrors from stevedore inside edx-opaque-keys.

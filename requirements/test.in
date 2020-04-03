@@ -2,15 +2,14 @@
 
 -r base.in                          # Core dependencies of edx-analytics-data-api
 
-coverage==4.4.1
-ddt==1.1.1
-diff-cover >= 0.9.9
+coverage
+ddt
+diff-cover
 django-dynamic-fixture
-mock==2.0.0
-pep257==0.7.0
 pycodestyle
-pylint==1.6.5
+pydocstyle
+pylint
 pytest-cov
 pytest-django
 pytz
-responses==0.5.1
+responses

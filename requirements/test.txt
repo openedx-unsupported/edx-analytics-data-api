@@ -14,7 +14,7 @@ cookies==2.2.1            # via responses
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
 coverage==4.4.1           # via -r requirements/test.in, pytest-cov
-cryptography==2.8         # via django-fernet-fields
+cryptography==2.9         # via django-fernet-fields
 ddt==1.1.1                # via -r requirements/test.in
 diff-cover==2.6.0         # via -r requirements/test.in
 django-cors-headers==3.2.1  # via -r requirements/base.in

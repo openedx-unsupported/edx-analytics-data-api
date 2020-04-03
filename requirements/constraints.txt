@@ -10,14 +10,11 @@
 
 # TODO: Many pinned dependencies should be unpinned and/or moved to this constraints file.
 
-# Django 2 drops Python 2.7 support
-Django<2.0.0
+# Use latest Django LTS version
+Django>=2.2,<2.3.0
 
-# django-countries version 6.0.0 dropped support to Python 2.7
-django-countries<6.0.0
-
-# django-model-utils version 4.0.0 dropped support to python 2.7
-django-model-utils<4.0.0
+# django-model-utils version 4.0.0 dropped support to python 2.7	
+django-model-utils<4.0.0	
 
 # django-storages version 1.9 drops support for boto storage backend.
 django-storages<1.9                 # BSD
@@ -37,14 +34,8 @@ edx-rest-api-client<4.0.0
 # elasticsearch-dsl depends on elasticsearch >2.0.0,<3.0.0
 elasticsearch-dsl<2.0.0
 
-# Already in python3 standard library
-futures; python_version == "2.7"
-
 # gunicorn version 20.0.0 dropped support to Python 2.7
 gunicorn<20.0.0
 
 # mysqlclient>1.4.6 dropped support to Python 2.7
 mysqlclient==1.4.6
-
-# ordered-set version 4.0.0 dropped support to python 2.7, see https://github.com/LuminosoInsight/ordered-set/commit/c4ebdc58007b251165145c520580c09d13730400#diff-2eeaed663bd0d25b7e608891384b7298
-ordered_set<4.0

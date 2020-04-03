@@ -1,7 +1,5 @@
 # pylint: disable=line-too-long,invalid-name
 
-
-
 import datetime
 import logging
 import math

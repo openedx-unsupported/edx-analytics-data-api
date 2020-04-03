@@ -2,8 +2,6 @@
 API methods for module level data.
 """
 
-
-
 from rest_framework import generics
 
 from analytics_data_api.v0.models import VideoTimeline

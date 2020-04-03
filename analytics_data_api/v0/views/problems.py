@@ -2,8 +2,6 @@
 API methods for module level data.
 """
 
-
-
 from collections import defaultdict
 from itertools import groupby
 

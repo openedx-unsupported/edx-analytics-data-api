@@ -5,8 +5,6 @@
 
 # pylint: disable=no-member,no-value-for-parameter
 
-
-
 import json
 
 from analytics_data_api.v0 import models

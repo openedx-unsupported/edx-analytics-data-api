@@ -19,7 +19,7 @@ class BaseCourseModel(models.Model):
     course_id = models.CharField(db_index=True, max_length=255)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta(object):
+    class Meta:
         abstract = True
 
 
@@ -232,7 +232,7 @@ class BaseVideo(models.Model):
     pipeline_video_id = models.CharField(db_index=True, max_length=255)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta(object):
+    class Meta:
         abstract = True
 
 

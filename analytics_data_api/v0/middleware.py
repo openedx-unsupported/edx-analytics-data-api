@@ -26,17 +26,14 @@ class BaseProcessErrorMiddleware(six.with_metaclass(abc.ABCMeta, MiddlewareMixin
     @abc.abstractproperty
     def error(self):
         """ Error class to catch. """
-        pass
 
     @abc.abstractproperty
     def error_code(self):
         """ Error code to return. """
-        pass
 
     @abc.abstractproperty
     def status_code(self):
         """ HTTP status code to return. """
-        pass
 
     def process_exception(self, _request, exception):
         if isinstance(exception, self.error):
@@ -44,6 +41,7 @@ class BaseProcessErrorMiddleware(six.with_metaclass(abc.ABCMeta, MiddlewareMixin
                 "error_code": self.error_code,
                 "developer_message": str(exception)
             }, status=self.status_code)
+        return None
 
 
 class LearnerNotFoundErrorMiddleware(BaseProcessErrorMiddleware):

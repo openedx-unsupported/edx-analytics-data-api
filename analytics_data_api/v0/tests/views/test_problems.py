@@ -106,8 +106,8 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         for answer in expected_data:
             answer['consolidated_variant'] = False
 
-        response.data = set([json.dumps(answer) for answer in response.data])
-        expected_data = set([json.dumps(answer) for answer in expected_data])
+        response.data = {json.dumps(answer) for answer in response.data}
+        expected_data = {json.dumps(answer) for answer in expected_data}
 
         self.assertEqual(response.data, expected_data)
 

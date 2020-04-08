@@ -9,7 +9,7 @@ from sys import stderr
 from enterprise_data_roles.constants import (
     ENTERPRISE_DATA_ADMIN_ROLE,
     SYSTEM_ENTERPRISE_ADMIN_ROLE,
-    SYSTEM_ENTERPRISE_OPERATOR_ROLE
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE,
 )
 
 from analytics_data_api.constants.engagement_events import DISCUSSION

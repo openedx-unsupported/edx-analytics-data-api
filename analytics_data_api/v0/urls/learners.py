@@ -2,10 +2,9 @@
 
 from django.conf.urls import url
 
+from analytics_data_api.constants.learner import UUID_REGEX_PATTERN
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN
 from analytics_data_api.v0.views import learners as views
-
-from analytics_data_api.constants.learner import UUID_REGEX_PATTERN
 
 app_name = 'learners'
 

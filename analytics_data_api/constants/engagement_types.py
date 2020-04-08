@@ -8,7 +8,7 @@ from analytics_data_api.constants.engagement_events import (
     DISCUSSION,
     PROBLEM,
     VIDEO,
-    VIEWED
+    VIEWED,
 )
 
 

@@ -3,11 +3,11 @@
 import datetime
 import json
 
+import ddt
 import pytz
 from django.utils.http import urlquote
 from rest_framework import status
 
-import ddt
 from analytics_data_api.constants.engagement_events import (
     ATTEMPTED,
     COMPLETED,

@@ -512,7 +512,7 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
     def get_engagement_ranges(self, obj):
         query_set = obj['engagement_ranges']
         engagement_ranges = {
-            'date_range': DateRangeSerializer(query_set[0] if len(query_set) else None).data
+            'date_range': DateRangeSerializer(query_set[0] if len(query_set) > 0 else None).data
         }
 
         for metric in engagement_events.EVENTS:
@@ -527,7 +527,7 @@ class CourseLearnerMetadataSerializer(serializers.Serializer):
             serializer_kwargs = {}
             for range_type, class_rank_type in ranges_ranks:
                 range_queryset = query_set.filter(metric=metric, range_type=range_type)
-                serializer_kwargs[class_rank_type] = range_queryset[0] if len(range_queryset) else None
+                serializer_kwargs[class_rank_type] = range_queryset[0] if len(range_queryset) > 0 else None
             engagement_ranges.update({
                 metric: EnagementRangeMetricSerializer(serializer_kwargs).data
             })

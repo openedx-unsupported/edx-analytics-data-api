@@ -3,7 +3,7 @@
 from django.conf import settings
 
 
-class AnalyticsApiRouter(object):
+class AnalyticsApiRouter:
     def db_for_read(self, model, **hints):  # pylint: disable=unused-argument
         # pylint: disable=protected-access
         return self._get_database(model._meta.app_label)

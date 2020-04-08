@@ -735,7 +735,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         expected_enrollment_modes = {}
         for enrollment_mode, group in groupby(enrollment_modes):
             # can't call 'len' directly on a group object
-            count = len([mode for mode in group])
+            count = len(list(group))
             expected_enrollment_modes[enrollment_mode] = count
         expected = self.get_expected_json(
             course_id=course_id,
@@ -758,7 +758,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
             for i, cohort in enumerate(cohorts)
         ])
         expected_cohorts = {
-            cohort: len([mode for mode in group]) for cohort, group in groupby(cohorts)
+            cohort: len(list(group)) for cohort, group in groupby(cohorts)
         }
         expected = self.get_expected_json(
             course_id=course_id,

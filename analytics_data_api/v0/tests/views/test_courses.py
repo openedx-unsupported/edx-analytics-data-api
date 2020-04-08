@@ -3,8 +3,6 @@
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
 
-from __future__ import absolute_import
-
 import datetime
 from collections import OrderedDict
 from itertools import groupby

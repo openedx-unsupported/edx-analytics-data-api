@@ -15,8 +15,7 @@ def split_query_argument(argument):
     """
     if argument:
         return argument.split(',')
-    else:
-        return None
+    return None
 
 
 def raise_404_if_none(func):
@@ -27,8 +26,7 @@ def raise_404_if_none(func):
         queryset = func(self)
         if queryset:
             return queryset
-        else:
-            raise Http404
+        raise Http404
     return func_wrapper
 
 

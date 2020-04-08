@@ -37,7 +37,7 @@ from mock import Mock, patch
 
 
 @ddt.ddt
-class DefaultFillTestMixin(object):
+class DefaultFillTestMixin:
     """
     Test that the view fills in missing data with a default value.
     """

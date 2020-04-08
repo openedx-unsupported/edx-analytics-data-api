@@ -32,7 +32,7 @@ from enterprise_data.models import EnterpriseUser
 logger = logging.getLogger(__name__)
 
 
-class LastUpdateMixin(object):
+class LastUpdateMixin:
 
     @classmethod
     def get_last_updated(cls):

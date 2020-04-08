@@ -13,7 +13,7 @@ from analytics_data_api.v0.exceptions import CourseNotSpecifiedError
 from analytics_data_api.v0.views.utils import raise_404_if_none, split_query_argument, validate_course_id
 
 
-class CourseViewMixin(object):
+class CourseViewMixin:
     """
     Captures the course_id from the url and validates it.
     """
@@ -29,7 +29,7 @@ class CourseViewMixin(object):
         return super(CourseViewMixin, self).get(request, *args, **kwargs)
 
 
-class PaginatedHeadersMixin(object):
+class PaginatedHeadersMixin:
     """
     If the response is paginated, then augment it with this response header:
 
@@ -80,7 +80,7 @@ class PaginatedHeadersMixin(object):
         return link.format(next_url=next_url, prev_url=prev_url)
 
 
-class CsvViewMixin(object):
+class CsvViewMixin:
     """
     Augments a text/csv response with this header:
 
@@ -214,7 +214,6 @@ class APIListView(generics.ListAPIView):
         By default, no verification is done.
         Subclasses can override this if they wish to perform verification.
         """
-        pass
 
     def base_field_dict(self, item_id):
         """Default result with fields pre-populated to default values."""

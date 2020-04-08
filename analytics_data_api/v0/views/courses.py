@@ -810,8 +810,7 @@ class ReportDownloadView(APIView):
         if report_name in self.enabled_reports:
             response = get_course_report_download_details(course_id, report_name)
             return Response(response)
-        else:
-            raise ReportFileNotFoundError(course_id=course_id, report_name=report_name)
+        raise ReportFileNotFoundError(course_id=course_id, report_name=report_name)
 
 
 # pylint: disable=abstract-method

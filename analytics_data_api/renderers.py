@@ -7,7 +7,7 @@ from ordered_set import OrderedSet
 from rest_framework_csv.renderers import CSVRenderer
 
 
-class ResultsOnlyRendererMixin(object):
+class ResultsOnlyRendererMixin:
     """
     Render data using just the results array.
 

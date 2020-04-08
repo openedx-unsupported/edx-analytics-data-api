@@ -37,7 +37,7 @@ class CourseActivityByWeekSerializer(serializers.ModelSerializer):
 
         return activity_type
 
-    class Meta(object):
+    class Meta:
         model = models.CourseActivityWeekly
         fields = ('interval_start', 'interval_end', 'activity_type', 'count', 'course_id')
 
@@ -83,7 +83,7 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
     particular record is likely to change unexpectedly so we avoid exposing it.
     """
 
-    class Meta(object):
+    class Meta:
         model = models.ProblemResponseAnswerDistribution
         fields = (
             'course_id',
@@ -166,7 +166,7 @@ class GradeDistributionSerializer(ModelSerializerWithCreatedField):
     Representation of the grade_distribution table without id
     """
 
-    class Meta(object):
+    class Meta:
         model = models.GradeDistribution
         fields = (
             'module_id',
@@ -183,7 +183,7 @@ class SequentialOpenDistributionSerializer(ModelSerializerWithCreatedField):
     Representation of the sequential_open_distribution table without id
     """
 
-    class Meta(object):
+    class Meta:
         model = models.SequentialOpenDistribution
         fields = (
             'module_id',
@@ -200,7 +200,7 @@ class BaseCourseEnrollmentModelSerializer(ModelSerializerWithCreatedField):
 class CourseEnrollmentDailySerializer(BaseCourseEnrollmentModelSerializer):
     """ Representation of course enrollment for a single day and course. """
 
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentDaily
         fields = ('course_id', 'date', 'count', 'created')
 
@@ -232,7 +232,7 @@ class CourseEnrollmentModeDailySerializer(BaseCourseEnrollmentModelSerializer):
     def get_masters(self, obj):
         return obj.get('masters', 0)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentModeDaily
 
         # Declare the dynamically-created fields here as well so that they will be picked up by Swagger.
@@ -257,7 +257,7 @@ class CourseEnrollmentByCountrySerializer(BaseCourseEnrollmentModelSerializer):
     # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
     country = CountrySerializer(many=False)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentByCountry
         fields = ('date', 'course_id', 'country', 'count', 'created')
 
@@ -281,19 +281,19 @@ class CourseEnrollmentByGenderSerializer(BaseCourseEnrollmentModelSerializer):
     def get_unknown(self, obj):
         return obj.get('unknown', None)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentByGender
         fields = ('course_id', 'date', 'female', 'male', 'other', 'unknown', 'created')
 
 
 class CourseEnrollmentByEducationSerializer(BaseCourseEnrollmentModelSerializer):
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentByEducation
         fields = ('course_id', 'date', 'education_level', 'count', 'created')
 
 
 class CourseEnrollmentByBirthYearSerializer(BaseCourseEnrollmentModelSerializer):
-    class Meta(object):
+    class Meta:
         model = models.CourseEnrollmentByBirthYear
         fields = ('course_id', 'date', 'birth_year', 'count', 'created')
 
@@ -307,14 +307,14 @@ class CourseActivityWeeklySerializer(serializers.ModelSerializer):
     posted_forum = serializers.IntegerField(required=False)
     created = serializers.DateTimeField(format=settings.DATETIME_FORMAT)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseActivityWeekly
         fields = ('interval_start', 'interval_end', 'course_id', 'any', 'attempted_problem', 'played_video',
                   'posted_forum', 'created')
 
 
 class VideoSerializer(ModelSerializerWithCreatedField):
-    class Meta(object):
+    class Meta:
         model = models.Video
         fields = (
             'pipeline_video_id',
@@ -328,7 +328,7 @@ class VideoSerializer(ModelSerializerWithCreatedField):
 
 
 class VideoTimelineSerializer(ModelSerializerWithCreatedField):
-    class Meta(object):
+    class Meta:
         model = models.VideoTimeline
         fields = (
             'segment',
@@ -370,21 +370,18 @@ class LearnerSerializer(serializers.Serializer):
         if hasattr(obj, 'segments'):
             # json parsing will fail unless in unicode
             return [six.text_type(segment) for segment in obj.segments]
-        else:
-            return []
+        return []
 
     def get_cohort(self, obj):
         # using hasattr() instead because DocType.get() is overloaded and makes a request
         if hasattr(obj, 'cohort') and len(obj.cohort) > 0:
             return obj.cohort
-        else:
-            return None
+        return None
 
     def get_account_url(self, obj):
         if settings.LMS_USER_ACCOUNT_BASE_URL:
             return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)
-        else:
-            return None
+        return None
 
     def default_if_none(self, value, default=0):
         return value if value is not None else default
@@ -450,7 +447,7 @@ class EngagementDaySerializer(serializers.Serializer):
 
 
 class EnterpriseLearnerEngagementSerializer(serializers.ModelSerializer):
-    class Meta(object):
+    class Meta:
         model = models.ModuleEngagement
         fields = '__all__'
 
@@ -601,7 +598,7 @@ class CourseMetaSummaryEnrollmentSerializer(ModelSerializerWithCreatedField, Dyn
     def get_programs(self, obj):
         return obj.get('programs', None)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseMetaSummaryEnrollment
         # start_date and end_date used instead of start_time and end_time
         exclude = ('id', 'start_time', 'end_time', 'enrollment_mode')
@@ -619,7 +616,7 @@ class CourseProgramMetadataSerializer(DynamicFieldsModelSerializer):
     def get_course_ids(self, obj):
         return obj.get('course_ids', None)
 
-    class Meta(object):
+    class Meta:
         model = models.CourseProgramMetadata
         # excluding course-related fields because the serialized output will be embedded in a course object
         # with those fields already defined

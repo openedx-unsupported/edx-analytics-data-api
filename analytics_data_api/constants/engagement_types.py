@@ -12,7 +12,7 @@ from analytics_data_api.constants.engagement_events import (
 )
 
 
-class EngagementType(object):
+class EngagementType:
     """
     Encapsulates:
         - The API consumer-facing display name for engagement types

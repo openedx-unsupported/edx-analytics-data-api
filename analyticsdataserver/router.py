@@ -26,5 +26,4 @@ class AnalyticsApiRouter(object):
         dest_db = self._get_database(app_label)
         if dest_db is not None:
             return database == dest_db
-        else:
-            return None
+        return None

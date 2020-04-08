@@ -13,7 +13,7 @@ from analytics_data_api.v0.tests.utils import flatten
 from django_dynamic_fixture import G
 
 
-class CourseSamples(object):
+class CourseSamples:
 
     course_ids = [
         'edX/DemoX/Demo_Course',
@@ -28,7 +28,7 @@ class CourseSamples(object):
     ]
 
 
-class VerifyCourseIdMixin(object):
+class VerifyCourseIdMixin:
 
     def verify_no_course_id(self, response):
         """ Assert that a course ID must be provided. """
@@ -49,7 +49,7 @@ class VerifyCourseIdMixin(object):
         self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
 
-class VerifyCsvResponseMixin(object):
+class VerifyCsvResponseMixin:
 
     def assertCsvResponseIsValid(self, response, expected_filename, expected_data=None, expected_headers=None):
 
@@ -94,7 +94,7 @@ class VerifyCsvResponseMixin(object):
         self.assertEqual(rows[0], fields)
 
 
-class APIListViewTestMixin(object):
+class APIListViewTestMixin:
     model = None
     model_id = 'id'
     ids_param = 'ids'

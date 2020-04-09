@@ -4,9 +4,9 @@ Tests for the custom REST framework renderers.
 
 
 from django.test import TestCase
+from mock import MagicMock, PropertyMock
 
 from analytics_data_api.renderers import PaginatedCsvRenderer
-from mock import MagicMock, PropertyMock
 
 
 class PaginatedCsvRendererTests(TestCase):

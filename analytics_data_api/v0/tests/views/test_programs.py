@@ -2,14 +2,14 @@
 
 import datetime
 
-import six
-from six.moves import zip
-
 import ddt
+import six
+from django_dynamic_fixture import G
+from six.moves import zip  # pylint: disable=ungrouped-imports
+
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples
 from analyticsdataserver.tests import TestCaseWithAuthentication
-from django_dynamic_fixture import G
 
 
 @ddt.ddt

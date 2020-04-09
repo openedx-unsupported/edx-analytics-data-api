@@ -6,7 +6,7 @@ API methods for module level data.
 import logging
 
 from django.conf import settings
-
+from enterprise_data.models import EnterpriseUser
 from rest_framework import generics, status
 from six import text_type
 
@@ -20,14 +20,12 @@ from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
     EdxPaginationSerializer,
     EngagementDaySerializer,
+    EnterpriseLearnerEngagementSerializer,
     LastUpdatedSerializer,
     LearnerSerializer,
-    EnterpriseLearnerEngagementSerializer,
 )
 from analytics_data_api.v0.views import CourseViewMixin, CsvViewMixin, PaginatedHeadersMixin
 from analytics_data_api.v0.views.utils import split_query_argument
-
-from enterprise_data.models import EnterpriseUser
 
 logger = logging.getLogger(__name__)
 

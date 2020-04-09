@@ -4,6 +4,8 @@ import json
 import logging
 from contextlib import contextmanager
 
+import mock
+import responses
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.utils import ConnectionHandler, DatabaseError
@@ -12,8 +14,6 @@ from django.test.utils import override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from rest_framework.authtoken.models import Token
 
-import mock
-import responses
 from analytics_data_api.v0.models import CourseEnrollmentByBirthYear, CourseEnrollmentDaily
 from analyticsdataserver.clients import CourseBlocksApiClient
 from analyticsdataserver.router import AnalyticsApiRouter

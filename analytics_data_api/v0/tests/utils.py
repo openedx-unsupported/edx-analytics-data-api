@@ -3,11 +3,11 @@
 import collections
 import datetime
 
+import enterprise_data
 import pytz
+from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
-from django_dynamic_fixture import G
-import enterprise_data
 
 
 def flatten(dictionary, parent_key='', sep='.'):

@@ -87,7 +87,10 @@ run_pycodestyle: tox.requirements
 run_pylint: tox.requirements
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-pylint
 
-quality: tox.requirements run_pylint run_pycodestyle
+run_isort: tox.requirements
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-isort
+
+quality: tox.requirements run_pylint run_check_isort run_pycodestyle
 
 validate: test.requirements test quality
 

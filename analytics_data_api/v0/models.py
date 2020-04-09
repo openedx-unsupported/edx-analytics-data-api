@@ -265,7 +265,6 @@ class RosterUpdate(DocType):
 
     date = Date(format=settings.DATE_FORMAT)
 
-    # pylint: disable=old-style-class
     class Meta:
         index = settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX
         doc_type = 'marker'
@@ -307,7 +306,6 @@ class RosterEntry(DocType):
     enrollment_date = Date(format=settings.DATE_FORMAT)
     last_updated = Date(format=settings.DATE_FORMAT)
 
-    # pylint: disable=old-style-class
     class Meta:
         index = settings.ELASTICSEARCH_LEARNERS_INDEX
         doc_type = 'roster_entry'

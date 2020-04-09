@@ -110,7 +110,6 @@ class ConsolidatedAnswerDistributionSerializer(ProblemResponseAnswerDistribution
     class Meta(ProblemResponseAnswerDistributionSerializer.Meta):
         fields = ProblemResponseAnswerDistributionSerializer.Meta.fields + ('consolidated_variant',)
 
-    # pylint: disable=super-on-old-class
     def restore_object(self, attrs, instance=None):
         """
         Pops and restores non-model field.
@@ -148,7 +147,6 @@ class ConsolidatedFirstLastAnswerDistributionSerializer(ProblemFirstLastResponse
     class Meta(ProblemFirstLastResponseAnswerDistributionSerializer.Meta):
         fields = ProblemFirstLastResponseAnswerDistributionSerializer.Meta.fields + ('consolidated_variant',)
 
-    # pylint: disable=super-on-old-class
     def restore_object(self, attrs, instance=None):
         """
         Pops and restores non-model field.

@@ -99,23 +99,23 @@ class CountryTests(TestCase):
 class DateRangeTests(TestCase):
     def test_empty_range(self):
         same_date = datetime.datetime(2016, 1, 1)
-        self.assertEqual([date for date in date_range(same_date, same_date)], [])
+        self.assertEqual(list(date_range(same_date, same_date)), [])
 
     def test_range_exclusive(self):
         start_date = datetime.datetime(2016, 1, 1)
         end_date = datetime.datetime(2016, 1, 2)
-        self.assertEqual([date for date in date_range(start_date, end_date)], [start_date])
+        self.assertEqual(list(date_range(start_date, end_date)), [start_date])
 
     def test_delta_goes_past_end_date(self):
         start_date = datetime.datetime(2016, 1, 1)
         end_date = datetime.datetime(2016, 1, 3)
         time_delta = datetime.timedelta(days=5)
-        self.assertEqual([date for date in date_range(start_date, end_date, time_delta)], [start_date])
+        self.assertEqual(list(date_range(start_date, end_date, time_delta)), [start_date])
 
     def test_general_range(self):
         start_date = datetime.datetime(2016, 1, 1)
         end_date = datetime.datetime(2016, 1, 5)
-        self.assertEqual([date for date in date_range(start_date, end_date)], [
+        self.assertEqual(list(date_range(start_date, end_date)), [
             datetime.datetime(2016, 1, 1),
             datetime.datetime(2016, 1, 2),
             datetime.datetime(2016, 1, 3),

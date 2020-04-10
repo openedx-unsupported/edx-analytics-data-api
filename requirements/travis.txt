@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-certifi==2019.11.28       # via requests
+certifi==2020.4.5.1       # via requests
 chardet==3.0.4            # via requests
 codecov==2.0.22           # via -r requirements/travis.in
 coverage==5.0.4           # via codecov

@@ -51,8 +51,12 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         if recent:
             G(models.CourseEnrollmentDaily, course_id=model_id, date=recent, count=3 * len(modes))
 
-    def generate_data(self, ids=None, modes=None, availability='Current', **kwargs):
+    def generate_data(self, ids=None, **kwargs):
         """Generate course summary data"""
+
+        modes = kwargs.pop('modes', None)
+        availability = kwargs.pop('availability', 'Current')
+
         if modes is None:
             modes = enrollment_modes.ALL
 

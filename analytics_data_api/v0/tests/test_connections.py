@@ -1,10 +1,10 @@
 
 
 import socket
+from unittest.mock import patch
 
 from django.test import TestCase
 from elasticsearch.exceptions import ElasticsearchException
-from mock import patch
 
 from analytics_data_api.v0.connections import BotoHttpConnection, ESConnection
 

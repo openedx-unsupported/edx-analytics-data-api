@@ -6,15 +6,14 @@
 import datetime
 from collections import OrderedDict
 from itertools import groupby
+from unittest.mock import Mock, patch
 
 import ddt
 import pytz
 import six
-import six.moves.urllib.parse  # pylint: disable=import-error
 from django.conf import settings
 from django.utils import timezone
 from django_dynamic_fixture import G
-from mock import Mock, patch
 from opaque_keys.edx.keys import CourseKey
 from six.moves import range  # pylint: disable=ungrouped-imports
 

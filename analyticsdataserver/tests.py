@@ -2,9 +2,9 @@
 
 import json
 import logging
+import unittest.mock as mock
 from contextlib import contextmanager
 
-import mock
 import responses
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -134,7 +134,7 @@ class UtilsTests(TestCase):
 
 class ClientTests(TestCase):
     @mock.patch('analyticsdataserver.clients.EdxRestApiClient')
-    def setUp(self, *args, **kwargs):  # pylint: disable=unused-argument
+    def setUp(self):
         self.client = CourseBlocksApiClient('http://example.com/', 'token', 5)
 
     @responses.activate

@@ -4,6 +4,7 @@ import copy
 import datetime
 import json
 from itertools import groupby
+from unittest.mock import Mock, patch
 
 import ddt
 from django.conf import settings
@@ -11,7 +12,6 @@ from django.core import management
 from django.test import override_settings
 from django_dynamic_fixture import G
 from elasticsearch import Elasticsearch
-from mock import Mock, patch
 from rest_framework import status
 from six.moves import range, zip
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error

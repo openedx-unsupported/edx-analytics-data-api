@@ -80,7 +80,7 @@ class DynamicFieldsCsvRenderer(CSVRenderer):
                     if request_field in header:
                         requested.update((request_field,))
 
-                header = requested  # pylint: disable=redefined-variable-type
+                header = requested
 
         return header
 

@@ -10,7 +10,7 @@ class ApiAppConfig(AppConfig):
     name = 'analytics_data_api.v0'
 
     def ready(self):
-        from analytics_data_api.utils import load_fully_qualified_definition
+        from analytics_data_api.utils import load_fully_qualified_definition  # pylint: disable=import-outside-toplevel
 
         super(ApiAppConfig, self).ready()
         if settings.ELASTICSEARCH_LEARNERS_HOST:

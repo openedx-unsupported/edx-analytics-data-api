@@ -136,9 +136,9 @@ class CourseSummariesView(APIListView):
             for item_id in self.ids:
                 validate_course_id(item_id)
 
-    def base_field_dict(self, course_id):
+    def base_field_dict(self, item_id):
         """Default summary with fields populated to default levels."""
-        summary = super(CourseSummariesView, self).base_field_dict(course_id)
+        summary = super(CourseSummariesView, self).base_field_dict(item_id)
         summary.update({
             'created': None,
             'enrollment_modes': {},

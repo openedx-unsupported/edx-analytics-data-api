@@ -13,23 +13,11 @@
 # Use latest Django LTS version
 Django>=2.2,<2.3.0
 
-# django-model-utils version 4.0.0 dropped support to python 2.7	
-django-model-utils<4.0.0	
-
 # django-storages version 1.9 drops support for boto storage backend.
 django-storages<1.9                 # BSD
-
-# django-waffle version 0.19.0 dropped support to Django 2.0 and 2.1, see https://github.com/django-waffle/django-waffle/blob/master/CHANGES
-django-waffle<0.19.0
 
 # django22 tests are failing. Constraint taken from https://github.com/edx/edx-drf-extensions version 5.0.2
 drf-jwt<1.15.0
 
 # elasticsearch-dsl depends on elasticsearch >2.0.0,<3.0.0
 elasticsearch-dsl<2.0.0
-
-# gunicorn version 20.0.0 dropped support to Python 2.7
-gunicorn<20.0.0
-
-# mysqlclient>1.4.6 dropped support to Python 2.7
-mysqlclient==1.4.6

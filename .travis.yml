@@ -1,6 +1,5 @@
 language: python
-python:
-  - 3.5
+
 branches:
   only:
     - master
@@ -23,21 +22,26 @@ script:
 
 matrix:
   include:
-    - env:
-        TESTNAME=quality
-        TARGETS="quality"
-    - env:
-        TESTNAME=test-python
-        TARGETS="test"
+    - python: 3.5
+      env:
+        TESTNAME=quality-python-3.5
+        TARGETS="PYTHON_ENV=py35 quality"
+    - python: 3.5
+      env:
+        TESTNAME=test-python-3.5
+        TARGETS="PYTHON_ENV=py35 test"
       after_success:
         - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
         - codecov --disable pycov
-    - env:
-        TESTNAME=test-python-django20
-        TARGETS="DJANGO_VERSION=django20 test"
-    - env:
-        TESTNAME=test-python-django21
-        TARGETS="DJANGO_VERSION=django21 test"
-    - env:
-        TESTNAME=test-python-django111
-        TARGETS="DJANGO_VERSION=django111 test"
+
+    - python: 3.8
+      env:
+        TESTNAME=quality-python-3.8
+        TARGETS="PYTHON_ENV=py38 quality"
+    - python: 3.8
+      env:
+        TESTNAME=test-python-3.8
+        TARGETS="PYTHON_ENV=py38 test"
+
+  allow_failures:
+    - python: 3.8

@@ -10,4 +10,4 @@ codecov==2.0.22           # via -r requirements/travis.in
 coverage==5.1             # via codecov
 idna==2.9                 # via requests
 requests==2.23.0          # via codecov
-urllib3==1.25.8           # via requests
+urllib3==1.25.9           # via requests

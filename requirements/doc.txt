@@ -4,15 +4,15 @@
 #
 #    make upgrade
 #
-boto3==1.12.39            # via -r requirements/base.in
+boto3==1.12.45            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.15.39         # via boto3, s3transfer
+botocore==1.15.45         # via boto3, s3transfer
 certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-cryptography==2.9         # via django-fernet-fields
+cryptography==2.9.2       # via django-fernet-fields
 django-cors-headers==3.2.1  # via -r requirements/base.in
 django-countries==6.1.2   # via -r requirements/base.in
 django-crum==0.7.5        # via edx-rbac
@@ -38,7 +38,7 @@ elasticsearch-dsl==0.0.11  # via -c requirements/constraints.txt, -r requirement
 elasticsearch==1.9.0      # via elasticsearch-dsl
 future==0.18.2            # via pyjwkest
 idna==2.9                 # via requests
-itypes==1.1.0             # via coreapi
+itypes==1.2.0             # via coreapi
 jinja2==2.11.2            # via coreschema, sphinx
 jmespath==0.9.5           # via boto3, botocore
 markdown==2.6.6           # via -r requirements/base.in
@@ -72,4 +72,4 @@ stevedore==1.32.0         # via edx-opaque-keys
 tqdm==4.45.0              # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
-urllib3==1.25.9           # via -r requirements/base.in, elasticsearch, requests
+urllib3==1.25.9           # via -r requirements/base.in, botocore, elasticsearch, requests

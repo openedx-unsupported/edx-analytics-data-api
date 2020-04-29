@@ -97,7 +97,7 @@ class LearnerAPITestMixin(CsvViewMixin):
             if optional_field[1]:
                 body[optional_field[0]] = optional_field[1]
 
-        self._es.create(
+        self._es.index(
             index=settings.ELASTICSEARCH_LEARNERS_INDEX,
             doc_type='roster_entry',
             body=body
@@ -119,7 +119,7 @@ class LearnerAPITestMixin(CsvViewMixin):
         """
         Created an index with the date of when the learner index was updated.
         """
-        self._es.create(
+        self._es.index(
             index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
             doc_type='marker',
             body={

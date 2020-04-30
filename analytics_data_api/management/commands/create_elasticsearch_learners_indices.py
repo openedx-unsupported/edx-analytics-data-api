@@ -34,19 +34,19 @@ class Command(BaseCommand):
                                     'type': 'integer', 'index': 'not_analyzed'
                                 },
                                 'username': {
-                                    'type': 'string', 'index': 'not_analyzed'
+                                    'type': 'keyword', 'index': 'not_analyzed'
                                 },
                                 'email': {
-                                    'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                                    'type': 'keyword', 'index': 'not_analyzed', 'doc_values': True
                                 },
                                 'course_id': {
-                                    'type': 'string', 'index': 'not_analyzed'
+                                    'type': 'keyword', 'index': 'not_analyzed'
                                 },
                                 'enrollment_mode': {
-                                    'type': 'string', 'index': 'not_analyzed', 'doc_values': True
+                                    'type': 'keyword', 'index': 'not_analyzed', 'doc_values': True
                                 },
                                 'language': {
-                                    'type': 'string', 'index': 'not_analyzed'
+                                    'type': 'keyword', 'index': 'not_analyzed'
                                 },
                                 'location': {
                                     'type': 'string', 'index': 'not_analyzed'
@@ -58,7 +58,7 @@ class Command(BaseCommand):
                                     'type': 'string', 'index': 'not_analyzed'
                                 },
                                 'gender': {
-                                    'type': 'string', 'index': 'not_analyzed'
+                                    'type': 'keyword', 'index': 'not_analyzed'
                                 },
                                 'mailing_address': {
                                     'type': 'string', 'index': 'not_analyzed'
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                                     'type': 'date', 'doc_values': True
                                 },
                                 'target_index': {
-                                    'type': 'string'
+                                    'type': 'keyword'
                                 },
                             }
                         }

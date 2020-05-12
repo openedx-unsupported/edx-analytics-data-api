@@ -1,4 +1,5 @@
 language: python
+dist: xenial
 branches:
   only:
   - master
@@ -25,8 +26,6 @@ matrix:
     env: TESTNAME=quality-python-3.8 TARGETS="PYTHON_ENV=py38 quality"
   - python: 3.8
     env: TESTNAME=test-python-3.8 TARGETS="PYTHON_ENV=py38 test"
-  allow_failures:
-  - python: 3.8
 env:
   global:
   - DOCKER_USERNAME=edxbuilder

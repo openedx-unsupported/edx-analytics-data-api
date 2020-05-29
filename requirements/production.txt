@@ -4,20 +4,20 @@
 #
 #    make upgrade
 #
-boto3==1.12.39            # via -r requirements/base.in
+boto3==1.13.19            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.15.39         # via boto3, s3transfer
+botocore==1.16.19         # via boto3, s3transfer
 certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-cryptography==2.9         # via django-fernet-fields
-django-cors-headers==3.2.1  # via -r requirements/base.in
+cryptography==2.9.2       # via django-fernet-fields
+django-cors-headers==3.3.0  # via -r requirements/base.in
 django-countries==6.1.2   # via -r requirements/base.in
-django-crum==0.7.5        # via edx-rbac
+django-crum==0.7.6        # via edx-rbac
 django-fernet-fields==0.6  # via edx-enterprise-data
-django-model-utils==3.2.0  # via edx-enterprise-data, edx-rbac
+django-model-utils==4.0.0  # via edx-enterprise-data, edx-rbac
 django-rest-swagger==2.2.0  # via -r requirements/base.in
 django-storages==1.8      # via -c requirements/constraints.txt, -r requirements/base.in
 django-waffle==0.20.0     # via edx-django-utils, edx-drf-extensions
@@ -26,30 +26,30 @@ djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework==3.11.0  # via -r requirements/base.in, django-rest-swagger, djangorestframework-csv, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.15.2          # via botocore
 drf-jwt==1.14.0           # via -c requirements/constraints.txt, edx-drf-extensions
-edx-ccx-keys==1.0.1       # via -r requirements/base.in
-edx-django-release-util==0.4.2  # via -r requirements/base.in
-edx-django-utils==3.2.1   # via -r requirements/base.in, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client
-edx-drf-extensions==5.0.2  # via -r requirements/base.in, edx-enterprise-data, edx-rbac
-edx-enterprise-data==2.0.0  # via -r requirements/base.in
-edx-opaque-keys==2.0.2    # via -r requirements/base.in, edx-ccx-keys, edx-drf-extensions, edx-enterprise-data
-edx-rbac==1.1.3           # via edx-enterprise-data
-edx-rest-api-client==5.1.0  # via -r requirements/base.in, edx-enterprise-data
+edx-ccx-keys==1.1.0       # via -r requirements/base.in
+edx-django-release-util==0.4.4  # via -r requirements/base.in
+edx-django-utils==3.2.2   # via -r requirements/base.in, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client
+edx-drf-extensions==6.0.0  # via -r requirements/base.in, edx-enterprise-data, edx-rbac
+edx-enterprise-data==2.1.0  # via -r requirements/base.in
+edx-opaque-keys==2.1.0    # via -r requirements/base.in, edx-ccx-keys, edx-drf-extensions, edx-enterprise-data
+edx-rbac==1.2.1           # via edx-enterprise-data
+edx-rest-api-client==5.2.1  # via -r requirements/base.in, edx-enterprise-data
 elasticsearch-dsl==0.0.11  # via -c requirements/constraints.txt, -r requirements/base.in
 elasticsearch==1.9.0      # via elasticsearch-dsl
 future==0.18.2            # via pyjwkest
-gevent==1.5.0             # via -r requirements/production.in
+gevent==20.5.2            # via -r requirements/production.in
 greenlet==0.4.15          # via gevent
 gunicorn==20.0.4          # via -r requirements/production.in
 idna==2.9                 # via requests
-itypes==1.1.0             # via coreapi
+itypes==1.2.0             # via coreapi
 jinja2==2.11.2            # via coreschema
-jmespath==0.9.5           # via boto3, botocore
+jmespath==0.10.0          # via boto3, botocore
 markdown==2.6.6           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
 mysqlclient==1.4.6        # via -r requirements/production.in
-newrelic==5.12.0.140      # via -r requirements/production.in, edx-django-utils
+newrelic==5.12.1.141      # via -r requirements/production.in, edx-django-utils
 openapi-codec==1.3.2      # via django-rest-swagger
-ordered-set==3.1.1        # via -r requirements/base.in
+ordered-set==4.0.1        # via -r requirements/base.in
 path.py==8.2.1            # via -r requirements/production.in
 pbr==5.4.5                # via stevedore
 psutil==1.2.1             # via edx-django-utils
@@ -60,20 +60,24 @@ pyjwt==1.7.1              # via drf-jwt, edx-rest-api-client
 pymongo==3.10.1           # via edx-opaque-keys
 python-dateutil==2.8.1    # via botocore, edx-drf-extensions, elasticsearch-dsl
 python-memcached==1.59    # via -r requirements/base.in
-pytz==2019.3              # via django
+pytz==2020.1              # via django
 pyyaml==5.3.1             # via -r requirements/production.in, edx-django-release-util
 requests==2.23.0          # via coreapi, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client, pyjwkest, slumber
 rest-condition==1.0.3     # via edx-drf-extensions
 rules==2.2                # via edx-enterprise-data
 s3transfer==0.3.3         # via boto3
-semantic-version==2.8.4   # via edx-drf-extensions
+semantic-version==2.8.5   # via edx-drf-extensions
 simplejson==3.17.0        # via django-rest-swagger
-six==1.14.0               # via cryptography, django-waffle, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, pyjwkest, python-dateutil, python-memcached, stevedore
+six==1.15.0               # via cryptography, django-waffle, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, pyjwkest, python-dateutil, python-memcached, stevedore
 slumber==0.7.1            # via edx-rest-api-client
 sqlparse==0.3.1           # via django
 stevedore==1.32.0         # via edx-opaque-keys
-tqdm==4.45.0              # via -r requirements/base.in
+tqdm==4.46.0              # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
-urllib3==1.25.9           # via -r requirements/base.in, elasticsearch, requests
+urllib3==1.25.9           # via -r requirements/base.in, botocore, elasticsearch, requests
+zope.event==4.4           # via gevent
+zope.interface==5.1.0     # via gevent
 
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

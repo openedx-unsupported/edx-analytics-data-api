@@ -1,7 +1,7 @@
 FROM ubuntu:xenial as app
 
 RUN apt update && \
-  apt install -y git-core language-pack-en python3 python3-pip python3-dev libmysqlclient-dev libffi-dev libssl-dev build-essential gettext openjdk-8-jdk && \
+  apt install -y git-core language-pack-en python3.5 python3-pip python3-dev libmysqlclient-dev libffi-dev libssl-dev build-essential gettext openjdk-8-jdk && \
   pip3 install --upgrade pip setuptools && \
   rm -rf /var/lib/apt/lists/*
 

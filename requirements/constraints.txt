@@ -21,3 +21,14 @@ drf-jwt<1.15.0
 
 # elasticsearch-dsl depends on elasticsearch >2.0.0,<3.0.0
 elasticsearch-dsl<2.0.0
+
+# Python3.5 compatibility is broken until this
+# gets merged https://github.com/LuminosoInsight/ordered-set/pull/68
+ordered-set==3.1.1
+
+# Tests with 3.15.0 fail trying to install psutil
+tox==3.14.6
+
+# Use same version of edx-lint
+pylint==2.4.4
+pylint-django==2.0.11

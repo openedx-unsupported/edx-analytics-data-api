@@ -10,10 +10,10 @@ DJANGO_VERSION=django22
 .PHONY: requirements develop clean diff.report view.diff.report quality static
 
 requirements:
-	pip install -q -r requirements/base.txt
+	pip3 install -q -r requirements/base.txt
 
 production-requirements:
-	pip install -r requirements.txt
+	pip3 install -r requirements.txt
 
 test.install_elasticsearch:
 	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip
@@ -24,17 +24,17 @@ test.run_elasticsearch:
 	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d --http.port=$(ELASTICSEARCH_PORT)
 
 test.requirements: requirements
-	pip install -q -r requirements/test.txt
+	pip3 install -q -r requirements/test.txt
 
 tox.requirements:
-	 pip install -q -r requirements/tox.txt
+	 pip3 install -q -r requirements/tox.txt
 
 develop: test.requirements
-	pip install -q -r requirements/dev.txt
+	pip3 install -q -r requirements/dev.txt
 
 upgrade: export CUSTOM_COMPILE_COMMAND=make upgrade
 upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -q -r requirements/pip_tools.txt
+	pip3 install -q -r requirements/pip_tools.txt
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/doc.txt requirements/doc.in

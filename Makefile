@@ -94,27 +94,30 @@ quality: tox.requirements run_pylint run_check_isort run_pycodestyle
 
 validate: test.requirements test quality
 
-static:
-	python manage.py collectstatic --noinput
+static: tox.requirements
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-static
 
-migrate:
-	./manage.py migrate --noinput --run-syncdb --database=default
+migrate: tox.requirements
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-migrate -- --run-syncdb --database=default
 
-migrate-all:
-	$(foreach db_name,$(DATABASES),./manage.py migrate --noinput --run-syncdb --database=$(db_name);)
+migrate-all: tox.requirements
+	$(foreach db_name,$(DATABASES),\
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-migrate -- --run-syncdb --database=$(db_name);\
+	)
 
 loaddata: migrate
-	python manage.py loaddata problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_course_data
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-loaddata
+	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-generate_fake_course_data
 
-demo: clean requirements loaddata
-	python manage.py set_api_key edx edx
+demo: clean loaddata
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-set_api_key
+
 
 # Target used by edx-analytics-dashboard during its testing.
-travis: clean test.requirements migrate-all
-	python manage.py set_api_key edx edx
-	python manage.py loaddata problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
+travis: clean migrate-all
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-set_api_key
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-loaddata
+	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-generate_fake_course_data -- --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"                                                                                                                                                                                                          
 docker_build:
 	docker build . -f Dockerfile -t openedx/analytics-data-api
 	docker build . -f Dockerfile --target newrelic -t openedx/analytics-data-api:latest-newrelic

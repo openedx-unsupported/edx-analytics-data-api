@@ -14,7 +14,8 @@ from analytics_data_api.v0.exceptions import (
     LearnerNotFoundError,
     ParameterValueError,
 )
-from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges, RosterEntry, RosterUpdate
+from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges
+from analytics_data_api.v0.documents import RosterEntry, RosterUpdate
 from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
     EdxPaginationSerializer,

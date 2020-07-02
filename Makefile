@@ -2,8 +2,6 @@ ROOT = $(shell echo "$$PWD")
 COVERAGE_DIR = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
-ELASTICSEARCH_VERSION = 1.5.2
-ELASTICSEARCH_PORT = 9223
 PYTHON_ENV=py35
 DJANGO_VERSION=django22
 .DEFAULT_GOAL := help
@@ -20,13 +18,11 @@ requirements:  ## install base requirements
 production-requirements:  ## install production requirements
 	pip3 install -r requirements.txt
 
-test.install_elasticsearch:  ## install elasticsearch
-	curl -L -O https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$(ELASTICSEARCH_VERSION).zip
-	unzip elasticsearch-$(ELASTICSEARCH_VERSION).zip
-	echo "http.port: $(ELASTICSEARCH_PORT)" >> elasticsearch-$(ELASTICSEARCH_VERSION)/config/elasticsearch.yml
+test.run_elasticsearch:
+	docker-compose up -d
 
-test.run_elasticsearch:  ## run elasticsearch
-	cd elasticsearch-$(ELASTICSEARCH_VERSION) && ./bin/elasticsearch -d --http.port=$(ELASTICSEARCH_PORT)
+test.stop_elasticsearch:
+	docker-compose stop
 
 test.requirements: requirements  ## install base and test requirements
 	pip3 install -q -r requirements/test.txt
@@ -67,11 +63,12 @@ clean: tox.requirements  ## install tox requirements and run tox clean. Delete *
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-clean
 	find . -name '*.pyc' -delete
 
-test: tox.requirements clean  ## install tox requirements, run tox clean. Install elasticsearch and run tests. Run coverage report.
-	if [ -e elasticsearch-$(ELASTICSEARCH_VERSION) ]; then curl --silent --head http://localhost:$(ELASTICSEARCH_PORT)/roster_test > /dev/null || make test.run_elasticsearch; fi  ## Launch ES if installed and not running
+test: tox.requirements clean
+	make test.run_elasticsearch
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-tests
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-coverage
+	make test.stop_elasticsearch
 
 diff.report: test.requirements  ## Show the diff in quality and coverage
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html

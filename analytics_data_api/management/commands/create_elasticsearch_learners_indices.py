@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from elasticsearch import Elasticsearch
 
 from analytics_data_api.management.utils import elasticsearch_settings_defined
+from analytics_data_api.v0.documents import RosterEntry, RosterUpdate
 
 
 class Command(BaseCommand):
@@ -19,107 +20,9 @@ class Command(BaseCommand):
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_INDEX):
             self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_INDEX}" index already exists.')
         else:
-            es.indices.create(
-                index=settings.ELASTICSEARCH_LEARNERS_INDEX,
-                body={
-                    'mappings': {
-                        'roster_entry': {
-                            'properties': {
-                                'name': {
-                                    'type': 'string'
-                                },
-                                'user_id': {
-                                    'type': 'integer', 'index': 'not_analyzed'
-                                },
-                                'username': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'email': {
-                                    'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                                },
-                                'course_id': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'enrollment_mode': {
-                                    'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                                },
-                                'language': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'location': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'year_of_birth': {
-                                    'type': 'integer', 'index': 'not_analyzed'
-                                },
-                                'level_of_education': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'gender': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'mailing_address': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'city': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'country': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'goals': {
-                                    'type': 'string', 'index': 'not_analyzed'
-                                },
-                                'segments': {
-                                    'type': 'string'
-                                },
-                                'cohort': {
-                                    'type': 'string', 'index': 'not_analyzed', 'doc_values': True
-                                },
-                                'discussion_contributions': {
-                                    'type': 'integer', 'doc_values': True
-                                },
-                                'problems_attempted': {
-                                    'type': 'integer', 'doc_values': True
-                                },
-                                'problems_completed': {
-                                    'type': 'integer', 'doc_values': True
-                                },
-                                'problem_attempts_per_completed': {
-                                    'type': 'float', 'doc_values': True
-                                },
-                                'attempt_ratio_order': {
-                                    'type': 'integer', 'doc_values': True
-                                },
-                                'videos_viewed': {
-                                    'type': 'integer', 'doc_values': True
-                                },
-                                'enrollment_date': {
-                                    'type': 'date', 'doc_values': True
-                                },
-                            }
-                        }
-                    }
-                }
-            )
+            RosterEntry.init(using=es)
 
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX):
             self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX}" index already exists.')
         else:
-            es.indices.create(
-                index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
-                body={
-                    'mappings': {
-                        'marker': {
-                            'properties': {
-                                'date': {
-                                    'type': 'date', 'doc_values': True
-                                },
-                                'target_index': {
-                                    'type': 'string'
-                                },
-                            }
-                        }
-                    }
-                }
-            )
+            RosterUpdate.init(using=es)

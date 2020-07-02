@@ -35,18 +35,24 @@ Getting Started
    defined on this `wiki page <https://openedx.atlassian.net/wiki/display/AN/Learner+Analytics#LearnerAnalytics-ElasticSearch>`_.
    The connection to elasticsearch can be configured by the
    ``ELASTICSEARCH_LEARNERS_HOST`` and
-   ``ELASTICSEARCH_LEARNERS_INDEX`` django settings.  For testing, you
-   can install elasticsearch locally:
+   ``ELASTICSEARCH_LEARNERS_INDEX`` django settings. To run tests locally use:
 
    ::
 
-      $ make test.install_elasticsearch
+      $ make test
 
-   Elasticsearch requires `JDK 1.8`_; install that if you don't have it or have a different version. To run the cluster for testing:
+   This will launch an Elasticsearch Docker container for the tests. To simply run the container without starting
+   the tests, run:
 
    ::
 
       $ make test.run_elasticsearch
+
+   To stop an Elasticsearch Docker container, run:
+
+   ::
+
+      $ make test.stop_elasticsearch
 
 #. Create a user and authentication token. Note that the user will be
    created if one does not exist.

@@ -1,6 +1,7 @@
 version: "2"
 
 services:
+
   analytics_api:
     image: edxops/analytics_api:latest
     container_name: analytics_api_testing
@@ -8,13 +9,33 @@ services:
       - ..:/edx/app/analytics_api/analytics_api
     command: tail -f /dev/null
     environment:
-      ELASTICSEARCH_LEARNERS_HOST: 'http://es:9200/'
+      ELASTICSEARCH_LEARNERS_HOST: "http://es:9223"
       # Pull these from the host environment.
       TRAVIS_BRANCH:
       TRAVIS_PULL_REQUEST:
       DATADOG_API_KEY:
     depends_on:
       - "es"
+
   es:
-    image: elasticsearch:1.5.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: es
+    environment:
+      - node.name=es
+      - cluster.name=docker-cluster
+      - cluster.initial_master_nodes=es
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.port=9223
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - "9223:9223"
+
+volumes:
+  data01:
+    driver: local

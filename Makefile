@@ -63,12 +63,12 @@ clean: tox.requirements  ## install tox requirements and run tox clean. Delete *
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-clean
 	find . -name '*.pyc' -delete
 
-test: tox.requirements clean
-	make test.run_elasticsearch
+main.test: tox.requirements clean
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-tests
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
 	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-coverage
-	make test.stop_elasticsearch
+
+test: test.run_elasticsearch main.test test.stop_elasticsearch
 
 diff.report: test.requirements  ## Show the diff in quality and coverage
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
@@ -117,6 +117,7 @@ travis: clean test.requirements migrate-all  ## Used by travis for testing
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
+
 docker_build:
 	docker build . -f Dockerfile -t openedx/analytics-data-api
 	docker build . -f Dockerfile --target newrelic -t openedx/analytics-data-api:latest-newrelic

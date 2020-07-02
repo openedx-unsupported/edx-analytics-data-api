@@ -3,7 +3,6 @@ import datetime
 import json
 from itertools import groupby
 from unittest.mock import Mock, patch
-import uuid
 
 import ddt
 from django.conf import settings
@@ -97,7 +96,6 @@ class LearnerAPITestMixin(CsvViewMixin):
 
         self._es.index(
             index=settings.ELASTICSEARCH_LEARNERS_INDEX,
-            id=uuid.uuid4(),
             body=body
         )
 
@@ -119,7 +117,6 @@ class LearnerAPITestMixin(CsvViewMixin):
         """
         self._es.index(
             index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
-            id=uuid.uuid4(),
             body={
                 'date': date,
                 'target_index': settings.ELASTICSEARCH_LEARNERS_INDEX,

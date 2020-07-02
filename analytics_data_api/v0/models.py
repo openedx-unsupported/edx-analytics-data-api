@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Case, Count, IntegerField, Max, Sum, When
 from django.utils.timezone import now
 
-from analytics_data_api.constants import country, genders, learner
+from analytics_data_api.constants import country, genders
 from analytics_data_api.constants.engagement_types import EngagementType
 from analytics_data_api.utils import date_range
 

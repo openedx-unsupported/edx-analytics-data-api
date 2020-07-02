@@ -362,14 +362,14 @@ class LearnerSerializer(serializers.Serializer):
 
     def get_segments(self, obj):
         # using hasattr() instead because DocType.get() is overloaded and makes a request
-        if hasattr(obj, 'segments'):
+        if hasattr(obj, 'segments') and obj.segments:
             # json parsing will fail unless in unicode
             return [str(segment) for segment in obj.segments]
         return []
 
     def get_cohort(self, obj):
         # using hasattr() instead because DocType.get() is overloaded and makes a request
-        if hasattr(obj, 'cohort') and len(obj.cohort) > 0:
+        if hasattr(obj, 'cohort') and obj.cohort and len(obj.cohort) > 0:
             return obj.cohort
         return None
 

@@ -6,9 +6,9 @@
 #
 astroid==2.3.3            # via pylint
 attrs==19.3.0             # via pytest
-boto3==1.14.14            # via -r requirements/base.in
+boto3==1.14.16            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.17.14         # via boto3, s3transfer
+botocore==1.17.16         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests

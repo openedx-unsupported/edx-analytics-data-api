@@ -4,15 +4,15 @@
 #
 #    make upgrade
 #
-boto3==1.14.14            # via -r requirements/base.in
+boto3==1.14.17            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.17.14         # via boto3, s3transfer
+botocore==1.17.17         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-cryptography==2.9.2       # via django-fernet-fields, pyjwt
+cryptography==2.9.2       # via django-fernet-fields
 django-cors-headers==3.4.0  # via -r requirements/base.in
 django-countries==6.1.2   # via -r requirements/base.in
 django-crum==0.7.6        # via edx-rbac
@@ -25,7 +25,7 @@ django==2.2.14            # via -c requirements/constraints.txt, -r requirements
 djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework==3.11.0  # via -r requirements/base.in, django-rest-swagger, djangorestframework-csv, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.15.2          # via botocore
-drf-jwt==1.16.2           # via edx-drf-extensions
+drf-jwt==1.14.0           # via -c requirements/constraints.txt, edx-drf-extensions
 edx-ccx-keys==1.1.0       # via -r requirements/base.in
 edx-django-release-util==0.4.4  # via -r requirements/base.in
 edx-django-utils==3.2.3   # via -r requirements/base.in, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client
@@ -46,7 +46,7 @@ jinja2==2.11.2            # via coreschema
 jmespath==0.10.0          # via boto3, botocore
 markdown==2.6.6           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
-mysqlclient==1.4.6        # via -r requirements/production.in
+mysqlclient==2.0.1        # via -r requirements/production.in
 newrelic==5.14.1.144      # via -r requirements/production.in, edx-django-utils
 openapi-codec==1.3.2      # via django-rest-swagger
 ordered-set==3.1.1        # via -c requirements/constraints.txt, -r requirements/base.in
@@ -56,7 +56,7 @@ psutil==1.2.1             # via edx-django-utils
 pycparser==2.20           # via cffi
 pycryptodomex==3.9.8      # via pyjwkest
 pyjwkest==1.4.2           # via edx-drf-extensions
-pyjwt[crypto]==1.7.1      # via drf-jwt, edx-rest-api-client
+pyjwt==1.7.1              # via drf-jwt, edx-rest-api-client
 pymongo==3.10.1           # via edx-opaque-keys
 python-dateutil==2.8.1    # via botocore, edx-drf-extensions, elasticsearch-dsl
 python-memcached==1.59    # via -r requirements/base.in

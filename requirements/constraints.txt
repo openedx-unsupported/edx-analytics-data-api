@@ -16,6 +16,9 @@ Django>=2.2,<2.3.0
 # django-storages version 1.9 drops support for boto storage backend.
 django-storages<1.9                 # BSD
 
+# django22 tests are failing. Constraint taken from https://github.com/edx/edx-drf-extensions version 5.0.2
+drf-jwt<1.15.0
+
 # elasticsearch-dsl depends on elasticsearch >2.0.0,<3.0.0
 elasticsearch-dsl<2.0.0
 

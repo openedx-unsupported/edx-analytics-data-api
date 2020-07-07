@@ -6,19 +6,19 @@
 #
 astroid==2.3.3            # via pylint
 attrs==19.3.0             # via pytest
-boto3==1.13.21            # via -r requirements/base.in
+boto3==1.14.17            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.16.21         # via boto3, s3transfer
-certifi==2020.4.5.1       # via requests
+botocore==1.17.17         # via boto3, s3transfer
+certifi==2020.6.20        # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-coverage==5.1             # via -r requirements/test.in, pytest-cov
+coverage==5.2             # via -r requirements/test.in, pytest-cov
 cryptography==2.9.2       # via django-fernet-fields
 ddt==1.4.1                # via -r requirements/test.in
-diff-cover==3.0.0         # via -r requirements/test.in
-django-cors-headers==3.3.0  # via -r requirements/base.in
+diff-cover==3.0.1         # via -r requirements/test.in
+django-cors-headers==3.4.0  # via -r requirements/base.in
 django-countries==6.1.2   # via -r requirements/base.in
 django-crum==0.7.6        # via edx-rbac
 django-dynamic-fixture==3.1.0  # via -r requirements/test.in
@@ -26,24 +26,24 @@ django-fernet-fields==0.6  # via edx-enterprise-data
 django-model-utils==4.0.0  # via edx-enterprise-data, edx-rbac
 django-rest-swagger==2.2.0  # via -r requirements/base.in
 django-storages==1.8      # via -c requirements/constraints.txt, -r requirements/base.in
-django-waffle==0.20.0     # via edx-django-utils, edx-drf-extensions
+django-waffle==1.0.0      # via edx-django-utils, edx-drf-extensions
 djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework==3.11.0  # via -r requirements/base.in, django-rest-swagger, djangorestframework-csv, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.15.2          # via botocore
 drf-jwt==1.14.0           # via -c requirements/constraints.txt, edx-drf-extensions
 edx-ccx-keys==1.1.0       # via -r requirements/base.in
 edx-django-release-util==0.4.4  # via -r requirements/base.in
-edx-django-utils==3.2.2   # via -r requirements/base.in, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client
-edx-drf-extensions==6.0.0  # via -r requirements/base.in, edx-enterprise-data, edx-rbac
+edx-django-utils==3.2.3   # via -r requirements/base.in, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client
+edx-drf-extensions==6.1.0  # via -r requirements/base.in, edx-enterprise-data, edx-rbac
 edx-enterprise-data==2.1.0  # via -r requirements/base.in
 edx-opaque-keys==2.1.0    # via -r requirements/base.in, edx-ccx-keys, edx-drf-extensions, edx-enterprise-data
-edx-rbac==1.2.1           # via edx-enterprise-data
+edx-rbac==1.3.1           # via edx-enterprise-data
 edx-rest-api-client==5.2.1  # via -r requirements/base.in, edx-enterprise-data
 elasticsearch-dsl==0.0.11  # via -c requirements/constraints.txt, -r requirements/base.in
 elasticsearch==1.9.0      # via elasticsearch-dsl
 future==0.18.2            # via pyjwkest
-idna==2.9                 # via requests
-importlib-metadata==1.6.0  # via inflect, pluggy, pytest
+idna==2.10                # via requests
+importlib-metadata==1.7.0  # via inflect, pluggy, pytest
 inflect==3.0.2            # via jinja2-pluralize
 isort==4.3.21             # via pylint
 itypes==1.2.0             # via coreapi
@@ -54,8 +54,8 @@ lazy-object-proxy==1.4.3  # via astroid
 markdown==2.6.6           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
-more-itertools==8.3.0     # via pytest
-newrelic==5.14.0.142      # via edx-django-utils
+more-itertools==8.4.0     # via pytest
+newrelic==5.14.1.144      # via edx-django-utils
 openapi-codec==1.3.2      # via django-rest-swagger
 ordered-set==3.1.1        # via -c requirements/constraints.txt, -r requirements/base.in
 packaging==20.4           # via pytest
@@ -63,10 +63,10 @@ pathlib2==2.3.5           # via pytest
 pbr==5.4.5                # via stevedore
 pluggy==0.13.1            # via diff-cover, pytest
 psutil==1.2.1             # via edx-django-utils
-py==1.8.1                 # via pytest
+py==1.9.0                 # via pytest
 pycodestyle==2.6.0        # via -r requirements/test.in
 pycparser==2.20           # via cffi
-pycryptodomex==3.9.7      # via pyjwkest
+pycryptodomex==3.9.8      # via pyjwkest
 pydocstyle==5.0.2         # via -r requirements/test.in
 pygments==2.6.1           # via diff-cover
 pyjwkest==1.4.2           # via edx-drf-extensions
@@ -74,30 +74,30 @@ pyjwt==1.7.1              # via drf-jwt, edx-rest-api-client
 pylint==2.4.4             # via -c requirements/constraints.txt, -r requirements/test.in
 pymongo==3.10.1           # via edx-opaque-keys
 pyparsing==2.4.7          # via packaging
-pytest-cov==2.9.0         # via -r requirements/test.in
+pytest-cov==2.10.0        # via -r requirements/test.in
 pytest-django==3.9.0      # via -r requirements/test.in
 pytest==5.4.3             # via pytest-cov, pytest-django
 python-dateutil==2.8.1    # via botocore, edx-drf-extensions, elasticsearch-dsl
 python-memcached==1.59    # via -r requirements/base.in
 pytz==2020.1              # via -r requirements/test.in, django
 pyyaml==5.3.1             # via edx-django-release-util
-requests==2.23.0          # via coreapi, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client, pyjwkest, responses, slumber
-responses==0.10.14        # via -r requirements/test.in
+requests==2.24.0          # via coreapi, edx-drf-extensions, edx-enterprise-data, edx-rest-api-client, pyjwkest, responses, slumber
+responses==0.10.15        # via -r requirements/test.in
 rest-condition==1.0.3     # via edx-drf-extensions
 rules==2.2                # via edx-enterprise-data
 s3transfer==0.3.3         # via boto3
 semantic-version==2.8.5   # via edx-drf-extensions
 simplejson==3.17.0        # via django-rest-swagger
-six==1.15.0               # via astroid, cryptography, diff-cover, django-dynamic-fixture, django-waffle, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, packaging, pathlib2, pyjwkest, python-dateutil, python-memcached, responses, stevedore
+six==1.15.0               # via astroid, cryptography, diff-cover, django-dynamic-fixture, djangorestframework-csv, edx-ccx-keys, edx-django-release-util, edx-drf-extensions, edx-enterprise-data, edx-opaque-keys, edx-rbac, elasticsearch-dsl, packaging, pathlib2, pyjwkest, python-dateutil, python-memcached, responses, stevedore
 slumber==0.7.1            # via edx-rest-api-client
 snowballstemmer==2.0.0    # via pydocstyle
 sqlparse==0.3.1           # via django
 stevedore==1.32.0         # via edx-opaque-keys
-tqdm==4.46.1              # via -r requirements/base.in
+tqdm==4.47.0              # via -r requirements/base.in
 typed-ast==1.4.1          # via astroid
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.9           # via -r requirements/base.in, botocore, elasticsearch, requests
-wcwidth==0.2.3            # via pytest
+wcwidth==0.2.5            # via pytest
 wrapt==1.11.2             # via astroid
 zipp==1.2.0               # via importlib-metadata

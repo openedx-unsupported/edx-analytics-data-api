@@ -93,14 +93,14 @@ using it here.
 1. Start your local LMS server. (e.g. in devstack, run `paver devstack --fast lms`).
 
 2. If your local LMS server is running on any address other than the default of
-   `http://localhost:8000/`, make sure to add this setting to
+   `http://localhost:18000/`, make sure to add this setting to
    `analyticsdataserver/settings/local.py` with the correct URL. (you will
    likely not need to do this):
 
    ::
 
       # Don't forget to add the trailing forward slash
-      LMS_BASE_URL = 'http://example.com:8000/'
+      LMS_BASE_URL = 'http://example.com:18000/'
 
 3. Sign into your local Insights server making sure to use your local LMS for
    authentication. This will generate a new OAuth access token if you do not
@@ -110,7 +110,7 @@ using it here.
    want generated video data.
 
 4. Visit your local LMS server's admin site (by default, this is at
-   `http://localhost:8000/admin`).
+   `http://localhost:18000/admin`).
 
 5. Sign in with a superuser account. Don't have one? Make one with this command
    in your devstack as the `edxapp` user:
@@ -121,8 +121,8 @@ using it here.
 
    Enter a username and password that you will remember.
 
-6. On the admin site, find the "Oauth2" section and click the link "Access
-   tokens". The breadcrumbs should show "Home > Oauth2 > Access tokens".
+6. On the admin site, find the "Django OAuth Toolkit" section and click the link "Access
+   tokens". The breadcrumbs should show "Home > Django OAuth Toolkit > Access tokens".
 
    Copy the string in the "Token" column for the first row in the table. Also,
    make sure the "User" of the first row is the same user that you signed in

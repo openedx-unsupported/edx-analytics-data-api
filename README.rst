@@ -5,6 +5,8 @@ This repository includes the Django server for the API as well as the
 API package itself. The client is hosted at
 https://github.com/edx/edx-analytics-data-api-client.
 
+The enterprise client is hosted at https://github.com/edx/frontend-app-admin-portal.
+
 License
 -------
 
@@ -15,14 +17,15 @@ Please see ``LICENSE.txt`` for details.
 
 Getting Started
 ---------------
+#. Create a virtual environment and activate it.
 
-1. Install the requirements:
+#. Install the requirements:
 
    ::
 
        $ make develop
 
-2. Setup the databases:
+#. Setup the databases:
 
    ::
 
@@ -45,20 +48,31 @@ Getting Started
 
       $ make test.run_elasticsearch
 
-3. Create a user and authentication token. Note that the user will be
+#. Create a user and authentication token. Note that the user will be
    created if one does not exist.
 
    ::
 
        $ ./manage.py set_api_key <username> <token>
 
-4. Run the server:
+#. Run the server:
 
    ::
 
        $ ./manage.py runserver
 
 .. _JDK 1.8: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+
+Development with edx-enterprise-data
+------------------------------------
+If you need to make changes to ``edx-enterprise-data`` and have them reflected when you run the ``edx-analytics-data-api`` server,
+you can follow these steps. If you do not intend to make changes to ``edx-enterprise-data``, you can skip this section.
+
+#. Recommended: Install this repo into a subfolder of your working directory. Within that subfolder create an ``src`` folder.
+#. Clone the `edx-enterprise-data <https://github.com/edx/edx-enterprise-data>`_ repo into the ``src`` folder.
+#. ``cd`` into your ``edx-data-analytics-api`` folder and activate your virtualenv.
+#. Run ``pip install -e ./src/edx-enterprise-data``.
+#. Run the server as per instructions above. Changes to ``edx-enterprise-data`` should be picked up by the server.
 
 Loading Data
 ------------
@@ -71,6 +85,8 @@ database.
 ::
 
         $ make loaddata
+
+Additional management commands for creating data can be found in `edx-enterprise-data <https://github.com/edx/edx-enterprise-data>`_
 
 Loading Video Data
 ~~~~~~~~~~~~~~~~~~

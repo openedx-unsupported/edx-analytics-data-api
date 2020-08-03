@@ -25,7 +25,7 @@ Getting Started
 
        $ make develop
 
-2. Setup the databases:
+#. Setup the databases:
 
    ::
 
@@ -41,19 +41,19 @@ Getting Started
 
       $ make test
 
-   For testing is used docker Elasticsearch; to run ES container:
+   This will launch an Elasticsearch Docker container for the tests. To simply run the container without starting
+   the tests, run:
 
    ::
 
       $ make test.run_elasticsearch
 
-   To stop ES container:
+   To stop an Elasticsearch Docker container, run:
 
    ::
 
       $ make test.stop_elasticsearch
 
-3. Create a user and authentication token. Note that the user will be
 #. Create a user and authentication token. Note that the user will be
    created if one does not exist.
 

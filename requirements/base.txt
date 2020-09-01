@@ -21,7 +21,7 @@ django-model-utils==3.2.0  # via edx-enterprise-data, edx-rbac
 django-rest-swagger==2.2.0  # via -r requirements/base.in
 django-storages==1.8      # via -c requirements/constraints.txt, -r requirements/base.in
 django-waffle==0.20.0     # via edx-django-utils, edx-drf-extensions
-django==2.2.15            # via -c requirements/constraints.txt, -r requirements/base.in, django-cors-headers, django-crum, django-fernet-fields, django-model-utils, django-storages, djangorestframework, drf-jwt, edx-django-release-util, edx-django-utils, edx-drf-extensions, edx-enterprise-data, edx-rbac, rest-condition
+django==2.2.16            # via -c requirements/constraints.txt, -r requirements/base.in, django-cors-headers, django-crum, django-fernet-fields, django-model-utils, django-storages, djangorestframework, drf-jwt, edx-django-release-util, edx-django-utils, edx-drf-extensions, edx-enterprise-data, edx-rbac, rest-condition
 djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework==3.11.0  # via -r requirements/base.in, django-rest-swagger, djangorestframework-csv, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.15.2          # via botocore

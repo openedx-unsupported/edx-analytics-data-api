@@ -29,3 +29,12 @@ tox==3.14.6
 # Use same version of edx-lint
 pylint==2.4.4
 pylint-django==2.0.11
+
+# 4.0.0 dropped support for Python3.5
+inflect<4.0.0
+
+# stevedore 2.0.0+ requires Python>=3.6
+stevedore<2.0.0
+
+# zipp 2.0.0+ requires Python>=3.6
+zipp<2.0.0

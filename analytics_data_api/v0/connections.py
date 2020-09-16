@@ -3,7 +3,7 @@
 import json
 import time
 
-from boto.connection import AWSAuthConnection
+from boto3.connection import AWSAuthConnection
 from elasticsearch import Connection
 
 

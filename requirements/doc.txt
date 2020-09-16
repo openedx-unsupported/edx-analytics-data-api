@@ -4,9 +4,8 @@
 #
 #    make upgrade
 #
-boto3==1.14.56            # via -r requirements/base.in
-boto==2.42.0              # via -r requirements/base.in
-botocore==1.17.56         # via boto3, s3transfer
+boto3==1.14.62            # via -r requirements/base.in
+botocore==1.17.62         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.2              # via cryptography
 chardet==3.0.4            # via requests
@@ -50,7 +49,7 @@ pbr==5.5.0                # via stevedore
 psutil==5.7.2             # via edx-django-utils
 pycparser==2.20           # via cffi
 pycryptodomex==3.9.8      # via pyjwkest
-pygments==2.6.1           # via sphinx
+pygments==2.7.0           # via sphinx
 pyjwkest==1.4.2           # via edx-drf-extensions
 pyjwt[crypto]==1.7.1      # via drf-jwt, edx-rest-api-client
 pymongo==3.11.0           # via edx-opaque-keys
@@ -69,7 +68,7 @@ slumber==0.7.1            # via edx-rest-api-client
 sphinx==1.2.1             # via -r requirements/doc.in
 sqlparse==0.3.1           # via django
 stevedore==1.32.0         # via -c requirements/constraints.txt, edx-django-utils, edx-opaque-keys
-tqdm==4.48.2              # via -r requirements/base.in
+tqdm==4.49.0              # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.10          # via -r requirements/base.in, botocore, elasticsearch, requests

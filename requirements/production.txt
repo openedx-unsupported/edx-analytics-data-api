@@ -4,9 +4,8 @@
 #
 #    make upgrade
 #
-boto3==1.14.56            # via -r requirements/base.in
-boto==2.42.0              # via -r requirements/base.in
-botocore==1.17.56         # via boto3, s3transfer
+boto3==1.14.62            # via -r requirements/base.in
+botocore==1.17.62         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.2              # via cryptography
 chardet==3.0.4            # via requests
@@ -72,7 +71,7 @@ six==1.15.0               # via cryptography, djangorestframework-csv, edx-ccx-k
 slumber==0.7.1            # via edx-rest-api-client
 sqlparse==0.3.1           # via django
 stevedore==1.32.0         # via -c requirements/constraints.txt, edx-django-utils, edx-opaque-keys
-tqdm==4.48.2              # via -r requirements/base.in
+tqdm==4.49.0              # via -r requirements/base.in
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.1        # via coreapi
 urllib3==1.25.10          # via -r requirements/base.in, botocore, elasticsearch, requests

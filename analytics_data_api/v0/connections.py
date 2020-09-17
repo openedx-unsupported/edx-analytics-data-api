@@ -3,8 +3,11 @@
 import json
 import time
 
-from boto3.connection import AWSAuthConnection
+import boto3
+# from boto.connection import AWSAuthConnection
 from elasticsearch import Connection
+
+AWSAuthConnection = boto3.resource('AWSAuthConnection')
 
 
 class BotoHttpConnection(Connection):

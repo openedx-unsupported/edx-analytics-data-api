@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import copy
 import datetime
 import json
@@ -13,7 +11,6 @@ from django.test import override_settings
 from django_dynamic_fixture import G
 from elasticsearch import Elasticsearch
 from rest_framework import status
-from six.moves import range, zip
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from analytics_data_api.constants import engagement_events
@@ -29,7 +26,7 @@ class LearnerAPITestMixin(CsvViewMixin):
     """Manages an elasticsearch index for testing the learner API."""
     def setUp(self):
         """Creates the index and defines a mapping."""
-        super(LearnerAPITestMixin, self).setUp()
+        super().setUp()
         self._es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         management.call_command('create_elasticsearch_learners_indices')
         # ensure that the index is ready
@@ -69,7 +66,7 @@ class LearnerAPITestMixin(CsvViewMixin):
             'username': username,
             'course_id': course_id,
             'name': name if name is not None else username,
-            'email': email if email is not None else '{}@example.com'.format(username),
+            'email': email if email is not None else f'{username}@example.com',
             'enrollment_mode': enrollment_mode,
             'discussion_contributions': discussion_contributions,
             'problems_attempted': problems_attempted,
@@ -137,8 +134,8 @@ class LearnerAPITestMixin(CsvViewMixin):
         if page is None:
             return None
         course_q = urlencode({'course_id': course_id})
-        page_q = '&page={}'.format(page) if page and page > 1 else ''
-        page_size_q = '&page_size={}'.format(page_size) if page_size > 0 else ''
+        page_q = f'&page={page}' if page and page > 1 else ''
+        page_size_q = f'&page_size={page_size}' if page_size > 0 else ''
         return 'http://testserver/api/v0/learners/?{course_q}{page_q}{page_size_q}'.format(
             course_q=course_q, page_q=page_q, page_size_q=page_size_q,
         )
@@ -201,8 +198,8 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
             "username": username,
             "enrollment_mode": enrollment_mode,
             "name": name,
-            "email": "{}@example.com".format(username),
-            "account_url": "http://lms-host/{}".format(username),
+            "email": f"{username}@example.com",
+            "account_url": f"http://lms-host/{username}",
             "segments": segments or [],
             "cohort": cohort,
             "engagements": {
@@ -234,8 +231,8 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
         response = self.authenticated_get(self.path_template.format(user_name, course_id))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         expected = {
-            u"error_code": u"no_learner_for_course",
-            u"developer_message": u"Learner a_user not found for course edX/DemoX/Demo_Course."
+            "error_code": "no_learner_for_course",
+            "developer_message": "Learner a_user not found for course edX/DemoX/Demo_Course."
         }
         self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
@@ -254,7 +251,7 @@ class LearnerTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthent
 class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAuthentication):
     """Tests for the learner list endpoint."""
     def setUp(self):
-        super(LearnerListTests, self).setUp()
+        super().setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
         self.create_update_index('2015-09-28')
 
@@ -340,7 +337,7 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         ('cohort', 'a', 'cohort', 'a', True),
         ('cohort', 'a', 'cohort', '', True),
         ('cohort', 'a', 'cohort', 'b', False),
-        ('cohort', u'Ich möchte Brot zu essen.', 'cohort', u'Ich möchte Brot zu essen.', True),
+        ('cohort', 'Ich möchte Brot zu essen.', 'cohort', 'Ich möchte Brot zu essen.', True),
         ('enrollment_mode', 'a', 'enrollment_mode', 'a', True),
         ('enrollment_mode', 'a', 'enrollment_mode', '', True),
         ('enrollment_mode', 'a', 'enrollment_mode', 'b', False),
@@ -503,7 +500,7 @@ class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
                           VerifyCsvResponseMixin, TestCaseWithAuthentication):
     """Tests for the learner list CSV endpoint."""
     def setUp(self):
-        super(LearnerCsvListTests, self).setUp()
+        super().setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
         self.create_update_index('2015-09-28')
         self.path = '/api/v0/learners/'
@@ -549,8 +546,8 @@ class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
                 "username": username,
                 "enrollment_mode": 'honor',
                 "name": username,
-                "email": "{}@example.com".format(username),
-                "account_url": "http://lms-host/{}".format(username),
+                "email": f"{username}@example.com",
+                "account_url": f"http://lms-host/{username}",
                 "cohort": commaCohort,
                 "engagements.problems_attempted": 0,
                 "engagements.problems_completed": 0,
@@ -650,7 +647,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
 
     def _get(self, course_id):
         """Helper to send a GET request to the API."""
-        return self.authenticated_get('/api/v0/course_learner_metadata/{}/'.format(course_id))
+        return self.authenticated_get(f'/api/v0/course_learner_metadata/{course_id}/')
 
     def get_expected_json(self, course_id, segments, enrollment_modes, cohorts):
         expected_json = self._get_full_engagement_ranges(course_id)
@@ -685,7 +682,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         Tests segment counts when each learner belongs to at most one segment.
         """
         learners = [
-            {'username': '{}_{}'.format(segment, i), 'course_id': course_id, 'segments': [segment]}
+            {'username': f'{segment}_{i}', 'course_id': course_id, 'segments': [segment]}
             for segment, count in segments.items()
             for i in range(count)
         ]
@@ -729,7 +726,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
     @ddt.unpack
     def test_enrollment_modes(self, course_id, enrollment_modes):
         self.create_learners([
-            {'username': 'user_{}'.format(i), 'course_id': course_id, 'enrollment_mode': enrollment_mode}
+            {'username': f'user_{i}', 'course_id': course_id, 'enrollment_mode': enrollment_mode}
             for i, enrollment_mode in enumerate(enrollment_modes)
         ])
         expected_enrollment_modes = {}
@@ -754,7 +751,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
     @ddt.unpack
     def test_cohorts(self, course_id, cohorts):
         self.create_learners([
-            {'username': 'user_{}'.format(i), 'course_id': course_id, 'cohort': cohort}
+            {'username': f'user_{i}', 'course_id': course_id, 'cohort': cohort}
             for i, cohort in enumerate(cohorts)
         ])
         expected_cohorts = {
@@ -780,7 +777,7 @@ class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestC
         """ Ensure that the AGGREGATE_PAGE_SIZE sets the max number of cohorts returned."""
 
         self.create_learners([
-            {'username': 'user_{}'.format(i), 'course_id': course_id, 'cohort': cohort}
+            {'username': f'user_{i}', 'course_id': course_id, 'cohort': cohort}
             for i, cohort in enumerate(cohorts)
         ])
         expected = self.get_expected_json(

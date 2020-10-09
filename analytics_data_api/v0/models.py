@@ -1,5 +1,3 @@
-
-
 import datetime
 from itertools import groupby
 
@@ -120,9 +118,9 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
 class CourseEnrollmentByGender(BaseCourseEnrollment):
     CLEANED_GENDERS = {
-        u'f': genders.FEMALE,
-        u'm': genders.MALE,
-        u'o': genders.OTHER
+        'f': genders.FEMALE,
+        'm': genders.MALE,
+        'o': genders.OTHER
     }
 
     gender = models.CharField(max_length=255, null=True, db_column='gender')
@@ -462,7 +460,7 @@ class ModuleEngagementTimelineManager(models.Manager):
             # Iterate over engagements for this day and create a single day with
             # engagement data.
             day = {
-                u'date': date,
+                'date': date,
             }
             for engagement in engagements:
                 engagement_type = EngagementType(engagement['entity_type'], engagement['event'])

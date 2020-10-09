@@ -1,5 +1,3 @@
-
-
 import csv
 import json
 from collections import OrderedDict
@@ -7,7 +5,6 @@ from collections import OrderedDict
 import six
 from django_dynamic_fixture import G
 from rest_framework import status
-from six.moves import map, zip  # pylint: disable=ungrouped-imports
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from analytics_data_api.v0.tests.utils import flatten
@@ -34,8 +31,8 @@ class VerifyCourseIdMixin:
         """ Assert that a course ID must be provided. """
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected = {
-            u"error_code": u"course_not_specified",
-            u"developer_message": u"Course id/key not specified."
+            "error_code": "course_not_specified",
+            "developer_message": "Course id/key not specified."
         }
         self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
@@ -43,8 +40,8 @@ class VerifyCourseIdMixin:
         """ Assert that a course ID must be valid. """
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expected = {
-            u"error_code": u"course_key_malformed",
-            u"developer_message": u"Course id/key {} malformed.".format(course_id)
+            "error_code": "course_key_malformed",
+            "developer_message": f"Course id/key {course_id} malformed."
         }
         self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
 
@@ -57,11 +54,11 @@ class VerifyCsvResponseMixin:
         self.assertEqual(response.status_code, 200)
         if expected_data:
             self.assertEqual(response['Content-Type'].split(';')[0], 'text/csv')
-        self.assertEqual(response['Content-Disposition'], u'attachment; filename={}'.format(expected_filename))
+        self.assertEqual(response['Content-Disposition'], f'attachment; filename={expected_filename}')
 
         # Validate other response headers
         if expected_headers:
-            for header_name, header_content in six.iteritems(expected_headers):
+            for header_name, header_content in expected_headers.items():
                 self.assertEqual(response.get(header_name), header_content)
 
         # Validate the content data
@@ -112,7 +109,7 @@ class APIListViewTestMixin:
             for param, arg in query_data.items() if arg
         }
         query_string = '?{}'.format(urlencode(concat_query_data)) if concat_query_data else ''
-        return '/api/v0/{}/{}'.format(self.list_name, query_string)
+        return f'/api/v0/{self.list_name}/{query_string}'
 
     def validated_request(self, ids=None, fields=None, exclude=None, **extra_args):
         params = [self.ids_param, 'fields', 'exclude']
@@ -156,13 +153,13 @@ class APIListViewTestMixin:
         self.generate_data()
         response = self.validated_request(ids=ids, exclude=self.always_exclude)
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, response.data, self.all_expected_results(ids=ids))
+        self.assertCountEqual(response.data, self.all_expected_results(ids=ids))
 
     def _test_one_item(self, item_id):
         self.generate_data()
         response = self.validated_request(ids=[item_id], exclude=self.always_exclude)
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, response.data, [self.expected_result(item_id)])
+        self.assertCountEqual(response.data, [self.expected_result(item_id)])
 
     def _test_fields(self, fields):
         self.generate_data()
@@ -175,7 +172,7 @@ class APIListViewTestMixin:
             for field_to_remove in set(expected_result.keys()) - set(fields):
                 expected_result.pop(field_to_remove)
 
-        six.assertCountEqual(self, response.data, expected_results)
+        self.assertCountEqual(response.data, expected_results)
 
     def test_no_items(self):
         response = self.validated_request()

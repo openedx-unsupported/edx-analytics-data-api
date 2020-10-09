@@ -1,5 +1,3 @@
-
-
 import json
 import logging
 import unittest.mock as mock
@@ -22,7 +20,7 @@ from analyticsdataserver.utils import temp_log_level
 
 class TestCaseWithAuthentication(TestCase):
     def setUp(self):
-        super(TestCaseWithAuthentication, self).setUp()
+        super().setUp()
         test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
         self.token = Token.objects.create(user=test_user)
 

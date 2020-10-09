@@ -1,5 +1,3 @@
-
-
 import json
 import time
 
@@ -17,7 +15,7 @@ class BotoHttpConnection(Connection):
 
     def __init__(self, host='localhost', port=443, aws_access_key_id=None, aws_secret_access_key=None,
                  region=None, **kwargs):
-        super(BotoHttpConnection, self).__init__(host=host, port=port, **kwargs)
+        super().__init__(host=host, port=port, **kwargs)
         connection_params = {'host': host, 'port': port}
 
         # If not provided, boto will attempt to use default environment variables to fill
@@ -64,7 +62,7 @@ class ESConnection(AWSAuthConnection):
     def __init__(self, *args, **kwargs):
         region = kwargs.pop('region', None)
         kwargs.setdefault('is_secure', True)
-        super(ESConnection, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.auth_region_name = region
         self.auth_service_name = 'es'
 

@@ -1,5 +1,3 @@
-
-
 from functools import reduce as functools_reduce
 
 from django.db.models import Q
@@ -44,7 +42,7 @@ class ProgramsView(APIListView):
 
     def base_field_dict(self, item_id):
         """Default program with id, empty metadata, and empty courses array."""
-        program = super(ProgramsView, self).base_field_dict(item_id)
+        program = super().base_field_dict(item_id)
         program.update({
             'program_type': '',
             'program_title': '',
@@ -54,8 +52,8 @@ class ProgramsView(APIListView):
         return program
 
     def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
-        field_dict = super(ProgramsView, self).update_field_dict_from_model(model, base_field_dict=base_field_dict,
-                                                                            field_list=self.program_meta_fields)
+        field_dict = super().update_field_dict_from_model(model, base_field_dict=base_field_dict,
+                                                          field_list=self.program_meta_fields)
         field_dict['course_ids'].append(model.course_id)
 
         # treat the most recent as the authoritative created date -- should be all the same

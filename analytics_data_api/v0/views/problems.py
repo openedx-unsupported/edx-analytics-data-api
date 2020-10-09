@@ -5,7 +5,6 @@ API methods for module level data.
 from collections import defaultdict
 from itertools import groupby
 
-import six
 from django.db import OperationalError
 from rest_framework import generics
 
@@ -70,13 +69,13 @@ class ProblemResponseAnswerDistributionView(generics.ListAPIView):
             match_tuple_sets[answer.value_id].add(matching_tuple(answer))
 
         # If a part has more than one unique tuple of matching fields, do not consolidate.
-        for _, match_tuple_set in six.iteritems(match_tuple_sets):
+        for _, match_tuple_set in match_tuple_sets.items():
             if len(match_tuple_set) > 1:
                 return problem
 
         consolidated_answers = []
 
-        for _, answers in six.iteritems(answer_sets):
+        for _, answers in answer_sets.items():
             consolidated_answer = None
 
             if len(answers) == 1:

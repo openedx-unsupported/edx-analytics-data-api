@@ -1,5 +1,3 @@
-
-
 from django.test import TestCase
 from django.urls import reverse
 
@@ -11,7 +9,7 @@ class UrlRedirectTests(TestCase):
         assert_kwargs = {'status_code': 302}
         assert_kwargs.update(kwargs)
 
-        p = '{0}{1}/'.format(self.api_root_path, path)
+        p = f'{self.api_root_path}{path}/'
         response = self.client.get(p)
         self.assertRedirects(response, reverse(path), **assert_kwargs)
 

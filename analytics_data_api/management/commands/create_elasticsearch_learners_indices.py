@@ -1,5 +1,3 @@
-
-
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from elasticsearch import Elasticsearch
@@ -19,7 +17,7 @@ class Command(BaseCommand):
 
         es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_INDEX):
-            self.stderr.write('"{}" index already exists.'.format(settings.ELASTICSEARCH_LEARNERS_INDEX))
+            self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_INDEX}" index already exists.')
         else:
             es.indices.create(
                 index=settings.ELASTICSEARCH_LEARNERS_INDEX,
@@ -106,7 +104,7 @@ class Command(BaseCommand):
             )
 
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX):
-            self.stderr.write('"{}" index already exists.'.format(settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX))
+            self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX}" index already exists.')
         else:
             es.indices.create(
                 index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,

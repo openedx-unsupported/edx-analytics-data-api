@@ -1,10 +1,7 @@
-
-
 import datetime
 import re
 from importlib import import_module
 
-import six
 from django.conf import settings
 from django.core.exceptions import SuspiciousFileOperation, SuspiciousOperation
 from django.core.files.storage import default_storage
@@ -12,7 +9,6 @@ from django.db.models import Q
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import CourseKey
 from rest_framework.authtoken.models import Token
-from six.moves import zip  # pylint: disable=ungrouped-imports
 
 from analytics_data_api.v0.exceptions import CannotCreateReportDownloadLinkError, ReportFileNotFoundError
 
@@ -23,7 +19,7 @@ def get_filename_safe_course_id(course_id, replacement_char='_'):
     """
     try:
         course_key = CourseKey.from_string(course_id)
-        filename = six.text_type(replacement_char).join([course_key.org, course_key.course, course_key.run])
+        filename = str(replacement_char).join([course_key.org, course_key.course, course_key.run])
     except InvalidKeyError:
         # If the course_id doesn't parse, we will still return a value here.
         filename = course_id
@@ -31,7 +27,7 @@ def get_filename_safe_course_id(course_id, replacement_char='_'):
     # The safest characters are A-Z, a-z, 0-9, <underscore>, <period> and <hyphen>.
     # We represent the first four with \w.
     # TODO: Once we support courses with unicode characters, we will need to revisit this.
-    return re.sub(r'[^\w\.\-]', six.text_type(replacement_char), filename)
+    return re.sub(r'[^\w\.\-]', str(replacement_char), filename)
 
 
 def delete_user_auth_token(username):
@@ -57,7 +53,7 @@ def set_user_auth_token(user, key):
     """
     # Check that no other user has the same key
     if Token.objects.filter(~Q(user=user), key=key).exists():
-        raise AttributeError("The key {} is already in use by another user.".format(key))
+        raise AttributeError(f"The key {key} is already in use by another user.")
 
     Token.objects.filter(user=user).delete()
     Token.objects.create(user=user, key=key)
@@ -204,7 +200,7 @@ def get_file_object_url(filename, download_filename):
         url = default_storage.url(
             name=filename,
             response_headers={
-                'response-content-disposition': 'attachment; filename={}'.format(download_filename),
+                'response-content-disposition': f'attachment; filename={download_filename}',
                 'response-content-type': 'text/csv',
                 # The Expires header requires a very particular timestamp format
                 'response-expires': expires_at.strftime('%a, %d %b %Y %H:%M:%S GMT')

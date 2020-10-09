@@ -1,5 +1,5 @@
-FEMALE = u'female'
-MALE = u'male'
-OTHER = u'other'
-UNKNOWN = u'unknown'
+FEMALE = 'female'
+MALE = 'male'
+OTHER = 'other'
+UNKNOWN = 'unknown'
 ALL = [FEMALE, MALE, OTHER, UNKNOWN]

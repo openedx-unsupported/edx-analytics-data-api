@@ -1,11 +1,7 @@
-
-
 import datetime
 
 import ddt
-import six
 from django_dynamic_fixture import G
-from six.moves import zip  # pylint: disable=ungrouped-imports
 
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples
@@ -23,7 +19,7 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     default_ids = CourseSamples.program_ids
 
     def setUp(self):
-        super(ProgramsViewTests, self).setUp()
+        super().setUp()
         self.now = datetime.datetime.utcnow()
         self.maxDiff = None
         self.course_id = CourseSamples.course_ids[0]
@@ -68,7 +64,7 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         if course_ids is None:
             course_ids = [self.course_id]
 
-        program = super(ProgramsViewTests, self).expected_result(item_id)
+        program = super().expected_result(item_id)
         program.update([
             ('program_type', 'Demo'),
             ('program_title', 'Test'),
@@ -107,4 +103,4 @@ class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
         self.generate_data(ids=program_ids, course_ids=course_ids)
         response = self.validated_request(ids=program_ids, exclude=self.always_exclude)
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))
+        self.assertCountEqual(response.data, self.all_expected_results(ids=program_ids, course_ids=course_ids))

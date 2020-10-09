@@ -1,5 +1,3 @@
-
-
 import datetime
 
 from django.conf import settings
@@ -13,7 +11,7 @@ from analyticsdataserver.tests import TestCaseWithAuthentication
 class VideoTimelineTests(TestCaseWithAuthentication):
 
     def _get_data(self, video_id=None):
-        return self.authenticated_get('/api/v0/videos/{}/timeline'.format(video_id))
+        return self.authenticated_get(f'/api/v0/videos/{video_id}/timeline')
 
     def test_get(self):
         # add a blank row, which shouldn't be included in results

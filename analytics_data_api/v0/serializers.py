@@ -1,8 +1,5 @@
-
-
 from collections import OrderedDict
 
-import six
 from django.conf import settings
 from rest_framework import pagination, serializers
 from rest_framework.response import Response
@@ -116,7 +113,7 @@ class ConsolidatedAnswerDistributionSerializer(ProblemResponseAnswerDistribution
         """
 
         consolidated_variant = attrs.pop('consolidated_variant', None)
-        distribution = super(ConsolidatedAnswerDistributionSerializer, self).restore_object(attrs, instance)
+        distribution = super().restore_object(attrs, instance)
         distribution.consolidated_variant = consolidated_variant
 
         return distribution
@@ -153,7 +150,7 @@ class ConsolidatedFirstLastAnswerDistributionSerializer(ProblemFirstLastResponse
         """
 
         consolidated_variant = attrs.pop('consolidated_variant', None)
-        distribution = super(ConsolidatedFirstLastAnswerDistributionSerializer, self).restore_object(attrs, instance)
+        distribution = super().restore_object(attrs, instance)
         distribution.consolidated_variant = consolidated_variant
 
         return distribution
@@ -367,7 +364,7 @@ class LearnerSerializer(serializers.Serializer):
         # using hasattr() instead because DocType.get() is overloaded and makes a request
         if hasattr(obj, 'segments'):
             # json parsing will fail unless in unicode
-            return [six.text_type(segment) for segment in obj.segments]
+            return [str(segment) for segment in obj.segments]
         return []
 
     def get_cohort(self, obj):
@@ -554,7 +551,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
         exclude = kwargs.pop('exclude', None)
 
         # Instantiate the superclass normally
-        super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if fields is not None:
             # Drop any fields that are not specified in the `fields` argument.

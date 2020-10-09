@@ -1,5 +1,3 @@
-
-
 import datetime
 import warnings
 from itertools import groupby
@@ -39,7 +37,7 @@ class BaseCourseView(generics.ListAPIView):
         self.start_date = self.parse_date(start_date, timezone)
         self.end_date = self.parse_date(end_date, timezone)
 
-        return super(BaseCourseView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def parse_date(self, date, timezone):
         if date:
@@ -61,13 +59,13 @@ class BaseCourseView(generics.ListAPIView):
 
     def get_csv_filename(self):
         course_key = CourseKey.from_string(self.course_id)
-        course_id = u'-'.join([course_key.org, course_key.course, course_key.run])
-        return u'{0}--{1}.csv'.format(course_id, self.slug)
+        course_id = '-'.join([course_key.org, course_key.course, course_key.run])
+        return f'{course_id}--{self.slug}.csv'
 
     def finalize_response(self, request, response, *args, **kwargs):
-        if request.META.get('HTTP_ACCEPT') == u'text/csv':
-            response['Content-Disposition'] = u'attachment; filename={}'.format(self.get_csv_filename())
-        return super(BaseCourseView, self).finalize_response(request, response, *args, **kwargs)
+        if request.META.get('HTTP_ACCEPT') == 'text/csv':
+            response['Content-Disposition'] = f'attachment; filename={self.get_csv_filename()}'
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 # pylint: disable=line-too-long
@@ -117,7 +115,7 @@ class CourseActivityWeeklyView(BaseCourseView):
         end_date -- Date before which all data is returned (exclusive).
     """
 
-    slug = u'engagement-activity'
+    slug = 'engagement-activity'
     model = models.CourseActivityWeekly
     serializer_class = serializers.CourseActivityWeeklySerializer
 
@@ -138,7 +136,7 @@ class CourseActivityWeeklyView(BaseCourseView):
         return queryset
 
     def get_queryset(self):
-        queryset = super(CourseActivityWeeklyView, self).get_queryset()
+        queryset = super().get_queryset()
         queryset = self.format_data(queryset)
         return queryset
 
@@ -163,16 +161,16 @@ class CourseActivityWeeklyView(BaseCourseView):
         for key, group in groupby(data, lambda x: (x.course_id, x.interval_start, x.interval_end)):
             # Iterate over groups and create a single item with all activity types
             item = {
-                u'course_id': key[0],
-                u'interval_start': key[1],
-                u'interval_end': key[2],
-                u'created': None
+                'course_id': key[0],
+                'interval_start': key[1],
+                'interval_end': key[2],
+                'created': None
             }
 
             for activity in group:
                 activity_type = self._format_activity_type(activity.activity_type)
                 item[activity_type] = activity.count
-                item[u'created'] = max(activity.created, item[u'created']) if item[u'created'] else activity.created
+                item['created'] = max(activity.created, item['created']) if item['created'] else activity.created
 
             formatted_data.append(item)
 
@@ -314,7 +312,7 @@ class CourseEnrollmentByBirthYearView(BaseCourseEnrollmentView):
         end_date -- Date before which enrolled students are counted (exclusive).
     """
 
-    slug = u'enrollment-age'
+    slug = 'enrollment-age'
     serializer_class = serializers.CourseEnrollmentByBirthYearSerializer
     model = models.CourseEnrollmentByBirthYear
 
@@ -355,7 +353,7 @@ class CourseEnrollmentByEducationView(BaseCourseEnrollmentView):
 
         end_date -- Date before which enrolled students are counted (exclusive).
     """
-    slug = u'enrollment-education'
+    slug = 'enrollment-education'
     serializer_class = serializers.CourseEnrollmentByEducationSerializer
     model = models.CourseEnrollmentByEducation
 
@@ -395,24 +393,24 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
 
         end_date -- Date before which enrolled students are counted (exclusive).
     """
-    slug = u'enrollment-gender'
+    slug = 'enrollment-gender'
     serializer_class = serializers.CourseEnrollmentByGenderSerializer
     model = models.CourseEnrollmentByGender
 
     def get_queryset(self):
-        queryset = super(CourseEnrollmentByGenderView, self).get_queryset()
+        queryset = super().get_queryset()
         formatted_data = []
 
         for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
             # Iterate over groups and create a single item with gender data
             item = {
-                u'course_id': key[0],
-                u'date': key[1],
-                u'created': None,
-                u'male': 0,
-                u'female': 0,
-                u'other': 0,
-                u'unknown': 0
+                'course_id': key[0],
+                'date': key[1],
+                'created': None,
+                'male': 0,
+                'female': 0,
+                'other': 0,
+                'unknown': 0
             }
 
             for enrollment in group:
@@ -420,7 +418,7 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
                 count = item.get(gender, 0)
                 count += enrollment.count
                 item[gender] = count
-                item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
+                item['created'] = max(enrollment.created, item['created']) if item['created'] else enrollment.created
 
             formatted_data.append(item)
 
@@ -459,7 +457,7 @@ class CourseEnrollmentView(BaseCourseEnrollmentView):
 
         end_date -- Date before which enrolled students are counted (exclusive).
     """
-    slug = u'enrollment'
+    slug = 'enrollment'
     serializer_class = serializers.CourseEnrollmentDailySerializer
     model = models.CourseEnrollmentDaily
 
@@ -501,19 +499,19 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
         end_date -- Date before which enrolled students are counted (exclusive).
     """
 
-    slug = u'enrollment_mode'
+    slug = 'enrollment_mode'
     serializer_class = serializers.CourseEnrollmentModeDailySerializer
     model = models.CourseEnrollmentModeDaily
 
     def get_queryset(self):
-        queryset = super(CourseEnrollmentModeView, self).get_queryset()
+        queryset = super().get_queryset()
         formatted_data = []
 
         for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
             item = {
-                u'course_id': key[0],
-                u'date': key[1],
-                u'created': None
+                'course_id': key[0],
+                'date': key[1],
+                'created': None
             }
 
             total = 0
@@ -522,7 +520,7 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
             for enrollment in group:
                 mode = enrollment.mode
                 item[mode] = enrollment.count
-                item[u'created'] = max(enrollment.created, item[u'created']) if item[u'created'] else enrollment.created
+                item['created'] = max(enrollment.created, item['created']) if item['created'] else enrollment.created
                 total += enrollment.count
                 cumulative_total += enrollment.cumulative_count
 
@@ -530,8 +528,8 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
             item[enrollment_modes.PROFESSIONAL] = \
                 item.get(enrollment_modes.PROFESSIONAL, 0) + item.pop(enrollment_modes.PROFESSIONAL_NO_ID, 0)
 
-            item[u'count'] = total
-            item[u'cumulative_count'] = cumulative_total
+            item['count'] = total
+            item['cumulative_count'] = cumulative_total
 
             formatted_data.append(item)
 
@@ -582,13 +580,13 @@ class CourseEnrollmentByLocationView(BaseCourseEnrollmentView):
         end_date -- Date before which enrolled students are counted (exclusive).
     """
 
-    slug = u'enrollment-location'
+    slug = 'enrollment-location'
     serializer_class = serializers.CourseEnrollmentByCountrySerializer
     model = models.CourseEnrollmentByCountry
 
     def get_queryset(self):
         # Get all of the data from the database
-        queryset = super(CourseEnrollmentByLocationView, self).get_queryset()
+        queryset = super().get_queryset()
         items = queryset.all()
 
         # Data must be sorted in order for groupby to work properly
@@ -677,7 +675,7 @@ GROUP BY module_id;
                 cursor.execute("PRAGMA table_info(answer_distribution)")
                 column_names = [row[1] for row in cursor.fetchall()]
 
-            if u'last_response_count' in column_names:
+            if 'last_response_count' in column_names:
                 cursor.execute(aggregation_query, [self.course_id])
             else:
                 cursor.execute(aggregation_query.replace('last_response_count', 'count'), [self.course_id])
@@ -854,7 +852,7 @@ class UserEngagementView(BaseCourseView):
 
     def get(self, request, *args, **kwargs):
         self.username = self.kwargs.get('username')
-        return super(UserEngagementView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     @raise_404_if_none
     def get_queryset(self):

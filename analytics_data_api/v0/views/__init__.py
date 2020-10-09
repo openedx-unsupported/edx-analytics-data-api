@@ -1,5 +1,3 @@
-
-
 from functools import reduce as functools_reduce
 from itertools import groupby
 
@@ -26,7 +24,7 @@ class CourseViewMixin:
         if not self.course_id:
             raise CourseNotSpecifiedError()
         validate_course_id(self.course_id)
-        return super(CourseViewMixin, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class PaginatedHeadersMixin:
@@ -50,7 +48,7 @@ class PaginatedHeadersMixin:
         """
         Stores pagination links in a response header.
         """
-        response = super(PaginatedHeadersMixin, self).get(request, args, kwargs)
+        response = super().get(request, args, kwargs)
         link = self.get_paginated_links(response.data)
         if link:
             response['Link'] = link
@@ -94,17 +92,17 @@ class CsvViewMixin:
         Returns the filename for the CSV download.
         """
         course_key = CourseKey.from_string(self.course_id)
-        course_id = u'-'.join([course_key.org, course_key.course, course_key.run])
+        course_id = '-'.join([course_key.org, course_key.course, course_key.run])
         now = timezone.now().replace(microsecond=0)
-        return u'{0}--{1}--{2}.csv'.format(course_id, now.isoformat(), self.filename_slug)
+        return f'{course_id}--{now.isoformat()}--{self.filename_slug}.csv'
 
     def finalize_response(self, request, response, *args, **kwargs):
         """
         Append Content-Disposition header to CSV requests.
         """
-        if request.META.get('HTTP_ACCEPT') == u'text/csv':
-            response['Content-Disposition'] = u'attachment; filename={}'.format(self.get_csv_filename())
-        return super(CsvViewMixin, self).finalize_response(request, response, *args, **kwargs)
+        if request.META.get('HTTP_ACCEPT') == 'text/csv':
+            response['Content-Disposition'] = f'attachment; filename={self.get_csv_filename()}'
+        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class APIListView(generics.ListAPIView):
@@ -193,7 +191,7 @@ class APIListView(generics.ListAPIView):
         self.ids = split_query_argument(query_params.get(self.ids_param))
         self.verify_ids()
 
-        return super(APIListView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # self.request.data is a QueryDict. For keys with singleton lists as values,
@@ -206,7 +204,7 @@ class APIListView(generics.ListAPIView):
         self.ids = request_data_dict.get(self.ids_param)
         self.verify_ids()
 
-        return super(APIListView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def verify_ids(self):
         """

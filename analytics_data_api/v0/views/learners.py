@@ -8,7 +8,6 @@ import logging
 from django.conf import settings
 from enterprise_data.models import EnterpriseUser
 from rest_framework import generics, status
-from six import text_type
 
 from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
@@ -100,13 +99,13 @@ class LearnerView(LastUpdateMixin, CourseViewMixin, generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         self.username = self.kwargs.get('username')
-        return super(LearnerView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """
         Adds the last_updated field to the result.
         """
-        response = super(LearnerView, self).retrieve(request, args, kwargs)
+        response = super().retrieve(request, args, kwargs)
         response.data.update(self.get_last_updated())
         return response
 
@@ -251,7 +250,7 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, PaginatedHeadersMixin, C
         """
         Adds the last_updated field to the results.
         """
-        response = super(LearnerListView, self).list(request, args, kwargs)
+        response = super().list(request, args, kwargs)
         last_updated = self.get_last_updated()
         if response.data['results'] is not None:
             for result in response.data['results']:
@@ -295,7 +294,7 @@ class LearnerListView(LastUpdateMixin, CourseViewMixin, PaginatedHeadersMixin, C
         try:
             return RosterEntry.get_users_in_course(self.course_id, **params)
         except ValueError as err:
-            raise ParameterValueError(text_type(err))
+            raise ParameterValueError(str(err))
 
 
 class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
@@ -339,14 +338,14 @@ class EngagementTimelineView(CourseViewMixin, generics.ListAPIView):
     lookup_field = 'username'
 
     def list(self, request, *args, **kwargs):
-        response = super(EngagementTimelineView, self).list(request, *args, **kwargs)
+        response = super().list(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
             response.data = {'days': response.data}
         return response
 
     def get(self, request, *args, **kwargs):
         self.username = self.kwargs.get('username')
-        return super(EngagementTimelineView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = ModuleEngagement.objects.get_timeline(self.course_id, self.username)

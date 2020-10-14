@@ -4,9 +4,9 @@
 #
 #    make upgrade
 #
-boto3==1.15.15            # via -r requirements/base.in
+boto3==1.15.16            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.18.15         # via boto3, s3transfer
+botocore==1.18.16         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.3              # via cryptography
 chardet==3.0.4            # via requests

@@ -6,9 +6,9 @@
 #
 astroid==2.3.3            # via pylint
 attrs==20.2.0             # via pytest
-boto3==1.15.15            # via -r requirements/base.in
+boto3==1.15.16            # via -r requirements/base.in
 boto==2.42.0              # via -r requirements/base.in
-botocore==1.18.15         # via boto3, s3transfer
+botocore==1.18.16         # via boto3, s3transfer
 certifi==2020.6.20        # via requests
 cffi==1.14.3              # via cryptography
 chardet==3.0.4            # via requests
@@ -43,7 +43,7 @@ elasticsearch==1.9.0      # via elasticsearch-dsl
 future==0.18.2            # via pyjwkest
 idna==2.10                # via requests
 inflect==4.1.0            # via jinja2-pluralize
-iniconfig==1.0.1          # via pytest
+iniconfig==1.1.1          # via pytest
 isort==4.3.21             # via pylint
 itypes==1.2.0             # via coreapi
 jinja2-pluralize==0.3.0   # via diff-cover

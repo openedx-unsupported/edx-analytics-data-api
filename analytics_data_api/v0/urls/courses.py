@@ -1,5 +1,3 @@
-
-
 from django.conf.urls import url
 
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN
@@ -26,5 +24,5 @@ COURSE_URLS = [
 urlpatterns = []
 
 for path, view, name in COURSE_URLS:
-    regex = r'^{0}/{1}/$'.format(COURSE_ID_PATTERN, path)
+    regex = fr'^{COURSE_ID_PATTERN}/{path}/$'
     urlpatterns.append(url(regex, view.as_view(), name=name))

@@ -5,11 +5,9 @@ import logging
 import math
 import random
 
-import six
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from six.moves import range, zip  # pylint: disable=ungrouped-imports
 from tqdm import tqdm
 
 from analytics_data_api.constants import engagement_events
@@ -133,28 +131,28 @@ class Command(BaseCommand):
             daily_total = get_count(daily_total)
             models.CourseEnrollmentDaily.objects.create(course_id=course_id, date=date, count=daily_total)
 
-            for mode, ratio in six.iteritems(enrollment_mode_ratios):
+            for mode, ratio in enrollment_mode_ratios.items():
                 count = int(ratio * daily_total)
                 cumulative_count = max(cumulative_count + 10, count)
                 models.CourseEnrollmentModeDaily.objects.create(course_id=course_id, date=date, count=count,
                                                                 cumulative_count=cumulative_count, mode=mode)
 
-            for gender, ratio in six.iteritems(gender_ratios):
+            for gender, ratio in gender_ratios.items():
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByGender.objects.create(course_id=course_id, date=date, count=count,
                                                                gender=gender)
 
-            for education_level, ratio in six.iteritems(education_level_ratios):
+            for education_level, ratio in education_level_ratios.items():
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByEducation.objects.create(course_id=course_id, date=date, count=count,
                                                                   education_level=education_level)
 
-            for country_code, ratio in six.iteritems(country_ratios):
+            for country_code, ratio in country_ratios.items():
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByCountry.objects.create(course_id=course_id, date=date, count=count,
                                                                 country_code=country_code)
 
-            for birth_year, ratio in six.iteritems(birth_years):
+            for birth_year, ratio in birth_years.items():
                 count = int(ratio * daily_total)
                 models.CourseEnrollmentByBirthYear.objects.create(course_id=course_id, date=date, count=count,
                                                                   birth_year=birth_year)
@@ -162,7 +160,7 @@ class Command(BaseCommand):
             progress.update(1)
             date = date + datetime.timedelta(days=1)
 
-        for index, (mode, ratio) in enumerate(six.iteritems(enrollment_mode_ratios)):
+        for index, (mode, ratio) in enumerate(enrollment_mode_ratios.items()):
             count = int(ratio * daily_total)
             pass_rate = min(random.normalvariate(.45 + (.1 * index), .15), 1.0)
             cumulative_count = count + random.randint(0, 100)
@@ -245,7 +243,7 @@ class Command(BaseCommand):
                         count = random.randint(0, max_value / 20)
                         entity_type = metric.split('_', 1)[0]
                         event = metric.split('_', 1)[1]
-                        entity_id = 'an-id-{}-{}'.format(entity_type, event)
+                        entity_id = f'an-id-{entity_type}-{event}'
                         models.ModuleEngagement.objects.create(
                             course_id=course_id, username=username, date=current,
                             entity_type=entity_type, entity_id=entity_id, event=event, count=count)

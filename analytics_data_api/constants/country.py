@@ -6,17 +6,16 @@ codes.
 
 from collections import namedtuple
 
-import six
 from django_countries import countries
 
 Country = namedtuple('Country', 'name, alpha2, alpha3, numeric')
 
-UNKNOWN_COUNTRY_CODE = u'UNKNOWN'
+UNKNOWN_COUNTRY_CODE = 'UNKNOWN'
 UNKNOWN_COUNTRY = Country(UNKNOWN_COUNTRY_CODE, None, None, None)
 
 
 def _get_country_property(code, property_name):
-    return six.text_type(getattr(countries, property_name)(code))
+    return str(getattr(countries, property_name)(code))
 
 
 def get_country(code):

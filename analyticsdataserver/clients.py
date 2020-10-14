@@ -1,5 +1,3 @@
-
-
 import logging
 
 from edx_rest_api_client.client import EdxRestApiClient
@@ -25,7 +23,7 @@ class CourseBlocksApiClient(EdxRestApiClient):
     """
 
     def __init__(self, url, access_token, timeout):
-        super(CourseBlocksApiClient, self).__init__(url, oauth_access_token=access_token, timeout=timeout)
+        super().__init__(url, oauth_access_token=access_token, timeout=timeout)
 
     def all_videos(self, course_id):
         try:

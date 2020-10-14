@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
         if options['delete_key']:
             delete_user_auth_token(username)
-            print('Removed API key for user: <{0}>'.format(username))
+            print(f'Removed API key for user: <{username}>')
         else:
             if options['api_key'] is None:
                 raise CommandError("You must supply both a username and key.")

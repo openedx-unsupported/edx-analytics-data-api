@@ -1,5 +1,3 @@
-
-
 from analytics_data_api.constants.engagement_events import (
     ATTEMPTED,
     ATTEMPTS_PER_COMPLETED,

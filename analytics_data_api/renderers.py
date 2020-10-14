@@ -21,7 +21,7 @@ class ResultsOnlyRendererMixin:
         """
         if not isinstance(data, list):
             data = data.get(self.results_field, [])
-        return super(ResultsOnlyRendererMixin, self).render(data, *args, **kwargs)
+        return super().render(data, *args, **kwargs)
 
 
 class DynamicFieldsCsvRenderer(CSVRenderer):
@@ -46,7 +46,7 @@ class DynamicFieldsCsvRenderer(CSVRenderer):
 
     def flatten_list(self, l):
         if self.concatenate_lists_sep is None:
-            return super(DynamicFieldsCsvRenderer, self).flatten_list(l)
+            return super().flatten_list(l)
         return {'': self.concatenate_lists_sep.join(l)}
 
     def get_header(self, data, renderer_context):
@@ -88,7 +88,7 @@ class DynamicFieldsCsvRenderer(CSVRenderer):
         """Override the default "get headers" behaviour, then render the data."""
         renderer_context = renderer_context or {}
         self.header = self.get_header(data, renderer_context)
-        return super(DynamicFieldsCsvRenderer, self).render(data, media_type, renderer_context, writer_opts)
+        return super().render(data, media_type, renderer_context, writer_opts)
 
 
 class PaginatedCsvRenderer(ResultsOnlyRendererMixin, DynamicFieldsCsvRenderer):

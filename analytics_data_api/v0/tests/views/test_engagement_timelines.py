@@ -1,5 +1,3 @@
-
-
 import datetime
 import json
 
@@ -143,8 +141,8 @@ class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
         response = self.authenticated_get(path)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         expected = {
-            u"error_code": u"no_learner_engagement_timeline",
-            u"developer_message": u"Learner {} engagement timeline not found for course {}.".format(
+            "error_code": "no_learner_engagement_timeline",
+            "developer_message": "Learner {} engagement timeline not found for course {}.".format(
                 self.DEFAULT_USERNAME, course_id)
         }
         self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)

@@ -1,11 +1,7 @@
-
-
 import abc
 
-import six
 
-
-class BaseError(six.with_metaclass(abc.ABCMeta, Exception)):
+class BaseError(Exception, metaclass=abc.ABCMeta):
     """
     Base error.
     """
@@ -23,7 +19,7 @@ class LearnerNotFoundError(BaseError):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
         username = kwargs.pop('username')
-        super(LearnerNotFoundError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = self.message_template.format(username=username, course_id=course_id)
 
     @property
@@ -38,7 +34,7 @@ class LearnerEngagementTimelineNotFoundError(BaseError):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
         username = kwargs.pop('username')
-        super(LearnerEngagementTimelineNotFoundError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = self.message_template.format(username=username, course_id=course_id)
 
     @property
@@ -51,7 +47,7 @@ class CourseNotSpecifiedError(BaseError):
     Raise if course not specified.
     """
     def __init__(self, *args, **kwargs):
-        super(CourseNotSpecifiedError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = 'Course id/key not specified.'
 
 
@@ -61,7 +57,7 @@ class CourseKeyMalformedError(BaseError):
     """
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
-        super(CourseKeyMalformedError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = self.message_template.format(course_id=course_id)
 
     @property
@@ -72,7 +68,7 @@ class CourseKeyMalformedError(BaseError):
 class ParameterValueError(BaseError):
     """Raise if multiple incompatible parameters were provided."""
     def __init__(self, message, *args, **kwargs):
-        super(ParameterValueError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = message
 
 
@@ -83,7 +79,7 @@ class ReportFileNotFoundError(BaseError):
     def __init__(self, *args, **kwargs):
         course_id = kwargs.pop('course_id')
         report_name = kwargs.pop('report_name')
-        super(ReportFileNotFoundError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.message = self.message_template.format(course_id=course_id, report_name=report_name)
 
     @property

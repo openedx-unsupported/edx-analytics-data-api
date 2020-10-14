@@ -1,11 +1,8 @@
-
-
 from datetime import datetime
 from functools import reduce as functools_reduce
 
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
-from six import text_type
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
@@ -96,9 +93,9 @@ class CourseSummariesView(APIListView):
         try:
             self.verify_recent_date(recent)
         except ValueError as err:
-            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(text_type(err)))
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(str(err)))
 
-        response = super(CourseSummariesView, self).get(request, *args, **kwargs)
+        response = super().get(request, *args, **kwargs)
         return response
 
     def post(self, request, *args, **kwargs):
@@ -115,9 +112,9 @@ class CourseSummariesView(APIListView):
             if recent:
                 self.verify_recent_date(recent[0])  # Post argument always comes in as a list
         except ValueError as err:
-            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(text_type(err)))
+            return HttpResponseBadRequest(content='Error in recent_date: {}\n'.format(str(err)))
 
-        response = super(CourseSummariesView, self).post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
         return response
 
     def verify_recent_date(self, recent):
@@ -125,7 +122,7 @@ class CourseSummariesView(APIListView):
             return
         self.recent_date = datetime.strptime(recent, '%Y-%m-%d')
         if (datetime.now() - self.recent_date).days <= 0:
-            raise ValueError('"{}" is not in the past'.format(self.recent_date))
+            raise ValueError(f'"{self.recent_date}" is not in the past')
 
     def verify_ids(self):
         """
@@ -138,7 +135,7 @@ class CourseSummariesView(APIListView):
 
     def base_field_dict(self, item_id):
         """Default summary with fields populated to default levels."""
-        summary = super(CourseSummariesView, self).base_field_dict(item_id)
+        summary = super().base_field_dict(item_id)
         summary.update({
             'created': None,
             'enrollment_modes': {},
@@ -152,9 +149,8 @@ class CourseSummariesView(APIListView):
         return summary
 
     def update_field_dict_from_model(self, model, base_field_dict=None, field_list=None):
-        field_dict = super(CourseSummariesView, self).update_field_dict_from_model(model,
-                                                                                   base_field_dict=base_field_dict,
-                                                                                   field_list=self.summary_meta_fields)
+        field_dict = super().update_field_dict_from_model(model, base_field_dict=base_field_dict,
+                                                          field_list=self.summary_meta_fields)
         field_dict['enrollment_modes'].update({
             model.enrollment_mode: {field: getattr(model, field) for field in self.count_fields}
         })

@@ -12,7 +12,7 @@ from analytics_data_api.renderers import PaginatedCsvRenderer
 class PaginatedCsvRendererTests(TestCase):
 
     def setUp(self):
-        super(PaginatedCsvRendererTests, self).setUp()
+        super().setUp()
         self.renderer = PaginatedCsvRenderer()
         self.data = {'results': [
             {

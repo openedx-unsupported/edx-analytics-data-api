@@ -1,4 +1,3 @@
-# coding=utf-8
 # NOTE: Full URLs are used throughout these tests to ensure that the API contract is fulfilled. The URLs should *not*
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
@@ -24,7 +23,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
-        super(AnswerDistributionTests, cls).setUpClass()
+        super().setUpClass()
         cls.course_id = "org/num/run"
         cls.module_id1 = "i4x://org/num/run/problem/RANDOMNUMBER"
         cls.module_id2 = "i4x://org/num/run/problem/OTHERRANDOM"
@@ -114,7 +113,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
     def test_consolidated_get(self):
         """ Verify that valid consolidation does occur. """
         response = self.authenticated_get(
-            '/api/v0/problems/{0}{1}'.format(self.module_id1, self.path))
+            f'/api/v0/problems/{self.module_id1}{self.path}')
         self.assertEqual(response.status_code, 200)
 
         expected_data = [self.ad1, self.ad3]
@@ -145,7 +144,7 @@ class GradeDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
-        super(GradeDistributionTests, cls).setUpClass()
+        super().setUpClass()
         cls.course_id = "org/class/test"
         cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
         cls.ad1 = G(
@@ -174,7 +173,7 @@ class SequentialOpenDistributionTests(TestCaseWithAuthentication):
 
     @classmethod
     def setUpClass(cls):
-        super(SequentialOpenDistributionTests, cls).setUpClass()
+        super().setUpClass()
         cls.course_id = "org/class/test"
         cls.module_id = "i4x://org/class/test/problem/RANDOM_NUMBER"
         cls.ad1 = G(

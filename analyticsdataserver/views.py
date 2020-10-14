@@ -1,5 +1,3 @@
-
-
 import logging
 
 from django.conf import settings
@@ -31,7 +29,7 @@ def _handle_error(status_code):
     }
 
     renderer = JSONRenderer()
-    content_type = '{media}; charset={charset}'.format(media=renderer.media_type, charset=renderer.charset)
+    content_type = f'{renderer.media_type}; charset={renderer.charset}'
     return HttpResponse(renderer.render(info), content_type=content_type, status=status_code)
 
 

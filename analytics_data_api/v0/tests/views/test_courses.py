@@ -1,4 +1,3 @@
-# coding=utf-8
 # NOTE: Full URLs are used throughout these tests to ensure that the API contract is fulfilled. The URLs should *not*
 # change for versions greater than 1.0.0. Tests target a specific version of the API, additional tests should be added
 # for subsequent versions if there are breaking changes introduced in those versions.
@@ -15,7 +14,6 @@ from django.conf import settings
 from django.utils import timezone
 from django_dynamic_fixture import G
 from opaque_keys.edx.keys import CourseKey
-from six.moves import range  # pylint: disable=ungrouped-imports
 
 from analytics_data_api.constants import country, enrollment_modes, genders
 from analytics_data_api.constants.country import get_country
@@ -83,18 +81,18 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
 
     def csv_filename(self, course_id):
         course_key = CourseKey.from_string(course_id)
-        safe_course_id = u'-'.join([course_key.org, course_key.course, course_key.run])
-        return u'{0}--{1}.csv'.format(safe_course_id, self.csv_filename_slug)
+        safe_course_id = '-'.join([course_key.org, course_key.course, course_key.run])
+        return f'{safe_course_id}--{self.csv_filename_slug}.csv'
 
     def test_get_not_found(self):
         """ Requests made against non-existent courses should return a 404 """
-        course_id = u'edX/DemoX/Non_Existent_Course'
-        response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
+        course_id = 'edX/DemoX/Non_Existent_Course'
+        response = self.authenticated_get('%scourses/%s%s' % (self.api_root_path, course_id, self.path))
         self.assertEqual(response.status_code, 404)
 
     def assertViewReturnsExpectedData(self, expected, course_id):
         # Validate the basic response status
-        response = self.authenticated_get(u'%scourses/%s%s' % (self.api_root_path, course_id, self.path))
+        response = self.authenticated_get('%scourses/%s%s' % (self.api_root_path, course_id, self.path))
         self.assertEqual(response.status_code, 200)
 
         # Validate the data is correct and sorted chronologically
@@ -108,7 +106,7 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
         self.assertViewReturnsExpectedData(expected, course_id)
 
     def assertCSVIsValid(self, course_id, filename):
-        path = u'{0}courses/{1}{2}'.format(self.api_root_path, course_id, self.path)
+        path = f'{self.api_root_path}courses/{course_id}{self.path}'
         csv_content_type = 'text/csv'
         response = self.authenticated_get(path, HTTP_ACCEPT=csv_content_type)
 
@@ -163,7 +161,7 @@ class CourseEnrollmentViewTestCaseMixin(CourseViewTestCaseMixin):
 
     @classmethod
     def setUpClass(cls):
-        super(CourseEnrollmentViewTestCaseMixin, cls).setUpClass()
+        super().setUpClass()
         cls.date = datetime.date(2014, 1, 1)
 
     def get_latest_data(self, course_id):
@@ -196,12 +194,12 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     @ddt.data(*CourseSamples.course_ids)
     def test_activity(self, course_id):
         self.generate_data(course_id)
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format(course_id))
+        response = self.authenticated_get(f'/api/v0/courses/{course_id}/recent_activity')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id))
 
     def assertValidActivityResponse(self, course_id, activity_type, count):
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
+        response = self.authenticated_get('/api/v0/courses/{}/recent_activity?activity_type={}'.format(
             course_id, activity_type))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
@@ -224,14 +222,14 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     @ddt.data(*CourseSamples.course_ids)
     def test_activity_auth(self, course_id):
         self.generate_data(course_id)
-        response = self.client.get(u'/api/v0/courses/{0}/recent_activity'.format(course_id), follow=True)
+        response = self.client.get(f'/api/v0/courses/{course_id}/recent_activity', follow=True)
         self.assertEqual(response.status_code, 401)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_url_encoded_course_id(self, course_id):
         self.generate_data(course_id)
         url_encoded_course_id = six.moves.urllib.parse.quote_plus(course_id)
-        response = self.authenticated_get(u'/api/v0/courses/{}/recent_activity'.format(url_encoded_course_id))
+        response = self.authenticated_get(f'/api/v0/courses/{url_encoded_course_id}/recent_activity')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id))
 
@@ -250,23 +248,23 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def test_unknown_activity(self, course_id):
         self.generate_data(course_id)
         activity_type = 'missing_activity_type'
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?activity_type={1}'.format(
+        response = self.authenticated_get('/api/v0/courses/{}/recent_activity?activity_type={}'.format(
             course_id, activity_type))
         self.assertEqual(response.status_code, 404)
 
     def test_unknown_course_id(self):
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity'.format('foo'))
+        response = self.authenticated_get('/api/v0/courses/{}/recent_activity'.format('foo'))
         self.assertEqual(response.status_code, 404)
 
     def test_missing_course_id(self):
-        response = self.authenticated_get(u'/api/v0/courses/recent_activity')
+        response = self.authenticated_get('/api/v0/courses/recent_activity')
         self.assertEqual(response.status_code, 404)
 
     @ddt.data(*CourseSamples.course_ids)
     def test_label_parameter(self, course_id):
         self.generate_data(course_id)
         activity_type = 'played_video'
-        response = self.authenticated_get(u'/api/v0/courses/{0}/recent_activity?label={1}'.format(
+        response = self.authenticated_get('/api/v0/courses/{}/recent_activity?label={}'.format(
             course_id, activity_type))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, self.get_activity_record(course_id=course_id, activity_type=activity_type,
@@ -278,7 +276,7 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
     path = '/enrollment/birth_year'
     model = models.CourseEnrollmentByBirthYear
     order_by = ['birth_year']
-    csv_filename_slug = u'enrollment-age'
+    csv_filename_slug = 'enrollment-age'
 
     def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, birth_year=1956)
@@ -288,7 +286,7 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+            {'course_id': str(ce.course_id), 'count': ce.count,
              'date': ce.date.strftime(settings.DATE_FORMAT), 'birth_year': ce.birth_year,
              'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
         ]
@@ -307,7 +305,7 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
     path = '/enrollment/education/'
     model = models.CourseEnrollmentByEducation
     order_by = ['education_level']
-    csv_filename_slug = u'enrollment-education'
+    csv_filename_slug = 'enrollment-education'
 
     def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, education_level=self.el1)
@@ -316,13 +314,13 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
     @classmethod
     def setUpClass(cls):
-        super(CourseEnrollmentByEducationViewTests, cls).setUpClass()
+        super().setUpClass()
         cls.el1 = 'doctorate'
         cls.el2 = 'top_secret'
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+            {'course_id': str(ce.course_id), 'count': ce.count,
              'date': ce.date.strftime(settings.DATE_FORMAT), 'education_level': ce.education_level,
              'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
         ]
@@ -334,7 +332,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
     path = '/enrollment/gender/'
     model = models.CourseEnrollmentByGender
     order_by = ['gender']
-    csv_filename_slug = u'enrollment-gender'
+    csv_filename_slug = 'enrollment-gender'
 
     def generate_data(self, course_id):
         _genders = ['f', 'm', 'o', None]
@@ -354,7 +352,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
     def serialize_enrollment(self, enrollment):
         return {
             'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
-            'course_id': six.text_type(enrollment.course_id),
+            'course_id': str(enrollment.course_id),
             'date': enrollment.date.strftime(settings.DATE_FORMAT),
             enrollment.cleaned_gender: enrollment.count
         }
@@ -394,7 +392,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
 class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     model = models.CourseEnrollmentDaily
     path = '/enrollment'
-    csv_filename_slug = u'enrollment'
+    csv_filename_slug = 'enrollment'
 
     def generate_data(self, course_id):
         G(self.model, course_id=course_id, date=self.date, count=203)
@@ -402,7 +400,7 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
 
     def format_as_response(self, *args):
         return [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+            {'course_id': str(ce.course_id), 'count': ce.count,
              'date': ce.date.strftime(settings.DATE_FORMAT), 'created': ce.created.strftime(settings.DATETIME_FORMAT)}
             for ce in args
         ]
@@ -413,7 +411,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
                                     TestCaseWithAuthentication):
     model = models.CourseEnrollmentModeDaily
     path = '/enrollment/mode'
-    csv_filename_slug = u'enrollment_mode'
+    csv_filename_slug = 'enrollment_mode'
 
     def generate_data(self, course_id):
         for mode in enrollment_modes.ALL:
@@ -421,9 +419,9 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
 
     def serialize_enrollment(self, enrollment):
         return {
-            u'course_id': enrollment.course_id,
-            u'date': enrollment.date.strftime(settings.DATE_FORMAT),
-            u'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
+            'course_id': enrollment.course_id,
+            'date': enrollment.date.strftime(settings.DATE_FORMAT),
+            'created': enrollment.created.strftime(settings.DATETIME_FORMAT),
             enrollment.mode: enrollment.count
         }
 
@@ -441,8 +439,8 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         response[enrollment_modes.PROFESSIONAL] += response[enrollment_modes.PROFESSIONAL_NO_ID]
         del response[enrollment_modes.PROFESSIONAL_NO_ID]
 
-        response[u'count'] = total
-        response[u'cumulative_count'] = cumulative
+        response['count'] = total
+        response['cumulative_count'] = cumulative
 
         return [response]
 
@@ -463,8 +461,8 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
             expected[mode] = 0
 
         expected.update(self.serialize_enrollment(enrollment))
-        expected[u'count'] = 1
-        expected[u'cumulative_count'] = 100
+        expected['count'] = 1
+        expected['cumulative_count'] = 100
 
         self.assertViewReturnsExpectedData([expected], course_id)
 
@@ -472,7 +470,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/enrollment/location/'
     model = models.CourseEnrollmentByCountry
-    csv_filename_slug = u'enrollment-location'
+    csv_filename_slug = 'enrollment-location'
 
     def format_as_response(self, *args):
         unknown = {'course_id': None, 'count': 0, 'date': None,
@@ -490,7 +488,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
         response = [unknown]
         response += [
-            {'course_id': six.text_type(ce.course_id), 'count': ce.count,
+            {'course_id': str(ce.course_id), 'count': ce.count,
              'date': ce.date.strftime(settings.DATE_FORMAT),
              'country': {'alpha2': ce.country.alpha2, 'alpha3': ce.country.alpha3, 'name': ce.country.name},
              'created': ce.created.strftime(settings.DATETIME_FORMAT)} for ce in args
@@ -511,7 +509,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
     @classmethod
     def setUpClass(cls):
-        super(CourseEnrollmentByLocationViewTests, cls).setUpClass()
+        super().setUpClass()
         cls.country = get_country('US')
 
 
@@ -522,7 +520,7 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
     model = models.CourseActivityWeekly
     # activity_types = ['ACTIVE', 'ATTEMPTED_PROBLEM', 'PLAYED_VIDEO', 'POSTED_FORUM']
     activity_types = ['ACTIVE', 'ATTEMPTED_PROBLEM', 'PLAYED_VIDEO']
-    csv_filename_slug = u'engagement-activity'
+    csv_filename_slug = 'engagement-activity'
 
     def generate_data(self, course_id):
         for activity_type in self.activity_types:
@@ -535,7 +533,7 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
 
     @classmethod
     def setUpClass(cls):
-        super(CourseActivityWeeklyViewTests, cls).setUpClass()
+        super().setUpClass()
         cls.interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
         cls.interval_end = cls.interval_start + datetime.timedelta(weeks=1)
 
@@ -556,10 +554,10 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
                     activity_type = 'any'
 
                 item.update({
-                    u'course_id': activity.course_id,
-                    u'interval_start': activity.interval_start.strftime(settings.DATETIME_FORMAT),
-                    u'interval_end': activity.interval_end.strftime(settings.DATETIME_FORMAT),
-                    u'created': activity.created.strftime(settings.DATETIME_FORMAT),
+                    'course_id': activity.course_id,
+                    'interval_start': activity.interval_start.strftime(settings.DATETIME_FORMAT),
+                    'interval_end': activity.interval_end.strftime(settings.DATETIME_FORMAT),
+                    'created': activity.created.strftime(settings.DATETIME_FORMAT),
                     activity_type: activity.count
                 })
 
@@ -594,7 +592,7 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
         """
         Retrieve data for the specified course.
         """
-        url = '/api/v0/courses/{}/problems/'.format(course_id)
+        url = f'/api/v0/courses/{course_id}/problems/'
         return self.authenticated_get(url)
 
     @ddt.data(*CourseSamples.course_ids)
@@ -608,8 +606,8 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
 
         # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
         # natural order and ensure the view properly sorts the objects before grouping.
-        module_id = u'i4x://test/problem/1'
-        alt_module_id = u'i4x://test/problem/2'
+        module_id = 'i4x://test/problem/1'
+        alt_module_id = 'i4x://test/problem/2'
         created = timezone.now()
         alt_created = created + datetime.timedelta(seconds=2)
         date_time_format = '%Y-%m-%d %H:%M:%S%z'
@@ -626,15 +624,15 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
                 'module_id': module_id,
                 'total_submissions': 150,
                 'correct_submissions': 50,
-                'part_ids': [six.text_type(o1.part_id), six.text_type(o3.part_id)],
+                'part_ids': [str(o1.part_id), str(o3.part_id)],
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
             {
                 'module_id': alt_module_id,
                 'total_submissions': 100,
                 'correct_submissions': 100,
-                'part_ids': [six.text_type(o2.part_id)],
-                'created': six.text_type(created.strftime(settings.DATETIME_FORMAT))
+                'part_ids': [str(o2.part_id)],
+                'created': str(created.strftime(settings.DATETIME_FORMAT))
             }
         ]
 
@@ -657,7 +655,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
         """
         Retrieve data for the specified course.
         """
-        url = '/api/v0/courses/{}/problems_and_tags/'.format(course_id)
+        url = f'/api/v0/courses/{course_id}/problems_and_tags/'
         return self.authenticated_get(url)
 
     @ddt.data(*CourseSamples.course_ids)
@@ -671,8 +669,8 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
 
         # Create multiple objects here to test the grouping. Add a model with a different module_id to break up the
         # natural order and ensure the view properly sorts the objects before grouping.
-        module_id = u'i4x://test/problem/1'
-        alt_module_id = u'i4x://test/problem/2'
+        module_id = 'i4x://test/problem/1'
+        alt_module_id = 'i4x://test/problem/2'
 
         tags = {
             'difficulty': ['Easy', 'Medium', 'Hard'],
@@ -701,8 +699,8 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
                 'total_submissions': 11,
                 'correct_submissions': 4,
                 'tags': {
-                    u'difficulty': [u'Easy', u'Medium'],
-                    u'learning_outcome': [u'Learned a few things'],
+                    'difficulty': ['Easy', 'Medium'],
+                    'learning_outcome': ['Learned a few things'],
                 },
                 'created': alt_created.strftime(settings.DATETIME_FORMAT)
             },
@@ -711,7 +709,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
                 'total_submissions': 4,
                 'correct_submissions': 0,
                 'tags': {
-                    u'learning_outcome': [u'Learned everything'],
+                    'learning_outcome': ['Learned everything'],
                 },
                 'created': created.strftime(settings.DATETIME_FORMAT)
             }
@@ -719,7 +717,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
 
         response = self._get_data(course_id)
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, [dict(d) for d in response.data], expected)
+        self.assertCountEqual([dict(d) for d in response.data], expected)
 
     def test_get_404(self):
         """
@@ -736,7 +734,7 @@ class CourseVideosListViewTests(TestCaseWithAuthentication):
         """
         Retrieve videos for a specified course.
         """
-        url = '/api/v0/courses/{}/videos/'.format(course_id)
+        url = f'/api/v0/courses/{course_id}/videos/'
         return self.authenticated_get(url)
 
     @ddt.data(*CourseSamples.course_ids)
@@ -795,7 +793,7 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
         """
         Retrieve intervention report a specified course.
         """
-        url = '/api/v0/courses/{}/user_engagement/'.format(course_id)
+        url = f'/api/v0/courses/{course_id}/user_engagement/'
         return self.authenticated_get(url)
 
     @ddt.data(*CourseSamples.course_ids)

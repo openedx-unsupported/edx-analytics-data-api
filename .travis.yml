@@ -15,17 +15,15 @@ script:
   && make $TARGETS "
 matrix:
   include:
-  - python: 3.5
-    env: TESTNAME=quality-python-3.5 TARGETS="PYTHON_ENV=py35 quality"
-  - python: 3.5
-    env: TESTNAME=test-python-3.5 TARGETS="PYTHON_ENV=py35 test"
-    after_success:
-    - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
-    - codecov --disable pycov
   - python: 3.8
     env: TESTNAME=quality-python-3.8 TARGETS="PYTHON_ENV=py38 quality"
   - python: 3.8
     env: TESTNAME=test-python-3.8 TARGETS="PYTHON_ENV=py38 test"
+  - python: 3.8
+    env: TESTNAME=test-python-3.8-django-3.0 TARGETS="PYTHON_ENV=py38 DJANGO_VERSION=django30 test"
+    after_success:
+    - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
+    - codecov --disable pycov
 env:
   global:
   - DOCKER_USERNAME=edxbuilder

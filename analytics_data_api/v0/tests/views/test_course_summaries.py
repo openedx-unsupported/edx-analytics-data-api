@@ -1,10 +1,7 @@
-
-
 import datetime
 
 import ddt
 import pytz
-import six
 from django.conf import settings
 from django.utils import timezone
 from django_dynamic_fixture import G
@@ -28,7 +25,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
     test_post_method = True
 
     def setUp(self):
-        super(CourseSummariesViewTests, self).setUp()
+        super().setUp()
         self.now = timezone.now()
         self.maxDiff = None
 
@@ -60,11 +57,11 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         if modes is None:
             modes = enrollment_modes.ALL
 
-        super(CourseSummariesViewTests, self).generate_data(ids=ids, modes=modes, availability=availability, **kwargs)
+        super().generate_data(ids=ids, modes=modes, availability=availability, **kwargs)
 
     def expected_result(self, item_id, modes=None, availability='Current', programs=False, recent_count_change=None):  # pylint: disable=arguments-differ
         """Expected summary information for a course and modes to populate with data."""
-        summary = super(CourseSummariesViewTests, self).expected_result(item_id)
+        summary = super().expected_result(item_id)
 
         if modes is None:
             modes = enrollment_modes.ALL
@@ -124,7 +121,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         if modes is None:
             modes = enrollment_modes.ALL
 
-        return super(CourseSummariesViewTests, self).all_expected_results(
+        return super().all_expected_results(
             ids=ids, modes=modes,
             availability=availability,
             programs=programs,
@@ -158,7 +155,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         self.generate_data(modes=modes)
         response = self.validated_request(exclude=self.always_exclude)
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, response.data, self.all_expected_results(modes=modes))
+        self.assertCountEqual(response.data, self.all_expected_results(modes=modes))
 
     @ddt.data(
         ['malformed-course-id'],
@@ -178,13 +175,13 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         expected_summaries.extend(self.all_expected_results(ids=['foo/bar/baz'],
                                                             availability='Upcoming'))
 
-        six.assertCountEqual(self, response.data, expected_summaries)
+        self.assertCountEqual(response.data, expected_summaries)
 
     def test_programs(self):
         self.generate_data(programs=True)
         response = self.validated_request(exclude=self.always_exclude[:1], programs=['True'])
         self.assertEqual(response.status_code, 200)
-        six.assertCountEqual(self, response.data, self.all_expected_results(programs=True))
+        self.assertCountEqual(response.data, self.all_expected_results(programs=True))
 
     @ddt.data('passing_users', )
     def test_exclude(self, field):
@@ -202,7 +199,7 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         count_factor = 5
         expected_count_change = count_factor * len(enrollment_modes.ALL)
         expected = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count_change)
-        six.assertCountEqual(self, response.data, expected)
+        self.assertCountEqual(response.data, expected)
 
     def test_recent_bad_date(self):
         'Tests that sending a bad recent_date returns 400'
@@ -231,15 +228,15 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
         responseOnDate = self.validated_request(exclude=self.always_exclude, recent_date=recent.strftime('%Y-%m-%d'))
         self.assertEqual(responseOnDate.status_code, 200)
-        six.assertCountEqual(self, responseOnDate.data, expectedOnDate)
+        self.assertCountEqual(responseOnDate.data, expectedOnDate)
 
         after = (recent + datetime.timedelta(1)).strftime('%Y-%m-%d')
         responseAfterDate = self.validated_request(exclude=self.always_exclude, recent_date=after)
         self.assertEqual(responseAfterDate.status_code, 200)
-        six.assertCountEqual(self, responseAfterDate.data, expectedOnDate)
+        self.assertCountEqual(responseAfterDate.data, expectedOnDate)
 
         expectedBeforeDate = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count)
         before = (recent - datetime.timedelta(1)).strftime('%Y-%m-%d')
         responseBeforeDate = self.validated_request(exclude=self.always_exclude, recent_date=before)
         self.assertEqual(responseBeforeDate.status_code, 200)
-        six.assertCountEqual(self, responseBeforeDate.data, expectedBeforeDate)
+        self.assertCountEqual(responseBeforeDate.data, expectedBeforeDate)

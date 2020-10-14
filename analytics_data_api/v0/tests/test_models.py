@@ -1,5 +1,3 @@
-
-
 from django.test import TestCase
 from django_dynamic_fixture import G
 

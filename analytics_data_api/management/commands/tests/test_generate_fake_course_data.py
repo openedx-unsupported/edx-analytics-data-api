@@ -1,4 +1,3 @@
-
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -12,7 +11,7 @@ class GenerateFakeCourseDataTests(TestCase):
 
         call_command(
             'generate_fake_course_data',
-            "--num-weeks={weeks}".format(weeks=num_weeks),
+            f"--num-weeks={num_weeks}",
             "--no-videos",
             "--course-id", course_id
         )

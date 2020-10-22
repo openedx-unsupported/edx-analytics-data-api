@@ -4,7 +4,7 @@ PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 ELASTICSEARCH_VERSION = 1.5.2
 ELASTICSEARCH_PORT = 9223
-PYTHON_ENV=py35
+PYTHON_ENV=py38
 DJANGO_VERSION=django22
 .DEFAULT_GOAL := help
 

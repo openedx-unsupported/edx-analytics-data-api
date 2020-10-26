@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ['*']
 CONFIG_FILE=get_env_setting('ANALYTICS_API_CFG')
 
 with open(CONFIG_FILE) as f:
-  config_from_yaml = yaml.load(f)
+  config_from_yaml = yaml.load(f, Loader=yaml.FullLoader)
 
 REPORT_DOWNLOAD_BACKEND = config_from_yaml.pop('REPORT_DOWNLOAD_BACKEND', {})
 

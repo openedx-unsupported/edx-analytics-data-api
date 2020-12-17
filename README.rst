@@ -183,7 +183,7 @@ will make your contribution more likely to be accepted.
 .. _individual contributor’s agreement: http://code.edx.org/individual-contributor-agreement.pdf
 .. _CONTRIBUTING: https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst
 
-.. |build-status| image:: https://travis-ci.org/edx/edx-analytics-data-api.svg?branch=master
-   :target: https://travis-ci.org/edx/edx-analytics-data-api
+.. |build-status| image:: https://travis-ci.com/edx/edx-analytics-data-api.svg?branch=master
+   :target: https://travis-ci.com/edx/edx-analytics-data-api
 .. |coverage-status| image:: https://img.shields.io/codecov/c/github/edx/edx-analytics-data-api/master.svg
    :target: https://codecov.io/gh/edx/edx-analytics-data-api

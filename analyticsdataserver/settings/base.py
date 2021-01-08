@@ -333,6 +333,9 @@ REST_FRAMEWORK = {
 
         # For the browseable API
         'rest_framework.authentication.SessionAuthentication',
+
+        # For EdxRestApiClient
+        'edx_rest_framework_extensions.auth.jwt.authentication.JwtAuthentication',
     ),
 
     # TODO: Move to OpenAPI https://www.django-rest-framework.org/community/3.10-announcement/#continuing-to-use-coreapi

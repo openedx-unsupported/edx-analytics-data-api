@@ -362,11 +362,11 @@ class EnterpriseLearnerEngagementView(generics.ListAPIView):
     pagination_class = EdxPaginationSerializer
 
     def get_queryset(self):
-        enterprise_users = EnterpriseUser.objects.filter(
+        enterprise_users = list(EnterpriseUser.objects.filter(
             enterprise_id=self.kwargs.get('enterprise_customer')
         ).values_list(
             'user_username', flat=True
-        )
+        ))
         # TODO: __in statement should be replaced with sql join once we have foriegn
         # key relationship between ModuleEngagement and EnterpriseUser models
         return ModuleEngagement.objects.filter(username__in=enterprise_users).exclude(

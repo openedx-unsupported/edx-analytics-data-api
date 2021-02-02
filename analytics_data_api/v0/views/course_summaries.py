@@ -3,7 +3,6 @@ from functools import reduce as functools_reduce
 
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
-from newrelic.agent import function_trace
 
 from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models, serializers
@@ -84,7 +83,6 @@ class CourseSummariesView(APIListView):
                            'pacing_type', 'availability']  # fields to extract from summary model
     recent_date = None
 
-    @function_trace()
     def get(self, request, *args, **kwargs):
         query_params = self.request.query_params
         programs = split_query_argument(query_params.get('programs'))

@@ -68,6 +68,15 @@ DATABASES = {
         'PASSWORD': 'password',
         'PORT': '3306',
         'USER': 'reports001',
+    },
+    'enterprise': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'localhost',
+        'NAME': 'enterprise_reporting',
+        'OPTIONS': DEFAULT_MYSQL_OPTIONS,
+        'PASSWORD': 'password',
+        'PORT': '3306',
+        'USER': 'api001',
     }
 }
 ########## END DATABASE CONFIGURATION
@@ -354,6 +363,7 @@ REST_FRAMEWORK = {
 
 ANALYTICS_DATABASE = 'default'
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
+ENTERPRISE_REPORTING_DB = 'enterprise_reporting'
 
 LMS_BASE_URL = None
 

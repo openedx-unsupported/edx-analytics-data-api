@@ -363,7 +363,7 @@ REST_FRAMEWORK = {
 
 ANALYTICS_DATABASE = 'default'
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
-ENTERPRISE_REPORTING_DB = 'enterprise_reporting'
+ENTERPRISE_REPORTING_DB = 'enterprise'
 
 LMS_BASE_URL = None
 

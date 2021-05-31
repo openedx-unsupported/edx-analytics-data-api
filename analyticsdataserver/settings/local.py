@@ -65,7 +65,7 @@ CACHES = {
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'analytics'
-ENTERPRISE_REPORTING_DB = 'analytics'
+ENTERPRISE_REPORTING_DB_ALIAS = 'analytics'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

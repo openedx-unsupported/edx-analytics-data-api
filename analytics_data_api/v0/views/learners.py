@@ -10,12 +10,13 @@ from edx_django_utils.cache import TieredCache, get_cache_key
 from enterprise_data.models import EnterpriseUser
 from rest_framework import generics, status
 
+from analytics_data_api.v0.documents import RosterEntry, RosterUpdate
 from analytics_data_api.v0.exceptions import (
     LearnerEngagementTimelineNotFoundError,
     LearnerNotFoundError,
     ParameterValueError,
 )
-from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges, RosterEntry, RosterUpdate
+from analytics_data_api.v0.models import ModuleEngagement, ModuleEngagementMetricRanges
 from analytics_data_api.v0.serializers import (
     CourseLearnerMetadataSerializer,
     EdxPaginationSerializer,

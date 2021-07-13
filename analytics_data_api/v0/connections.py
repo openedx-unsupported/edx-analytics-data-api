@@ -28,7 +28,7 @@ class BotoHttpConnection(Connection):
         self.connection = ESConnection(**connection_params)
 
     # pylint: disable=unused-argument
-    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
+    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=(), headers=None):
         """
         Called when making requests elasticsearch.  Requests are signed and
         http status, headers, and response is returned.

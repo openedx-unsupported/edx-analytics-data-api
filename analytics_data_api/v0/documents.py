@@ -1,6 +1,6 @@
 
 from django.conf import settings
-from elasticsearch_dsl import Date, Document, Float, Integer, Keyword, Q, Short
+from elasticsearch_dsl import Date, Document, Float, Integer, Keyword, Q
 
 from analytics_data_api.constants import learner
 
@@ -34,7 +34,7 @@ class RosterEntry(Document):
     email = Keyword()
     language = Keyword()
     location = Keyword()
-    year_of_birth = Short()
+    year_of_birth = Integer()
     level_of_education = Keyword()
     gender = Keyword()
     mailing_address = Keyword()
@@ -44,17 +44,17 @@ class RosterEntry(Document):
     enrollment_mode = Keyword()
     cohort = Keyword()
     segments = Keyword()  # segments is an array/list of strings
-    problems_attempted = Short()
-    problems_completed = Short()
+    problems_attempted = Integer()
+    problems_completed = Integer()
     problem_attempts_per_completed = Float()
     # Useful for ordering problem_attempts_per_completed (because results can include null, which is
     # different from zero).  attempt_ratio_order is equal to the number of problem attempts if
     # problem_attempts_per_completed is > 1 and set to -problem_attempts if
     # problem_attempts_per_completed = 1.
-    attempt_ratio_order = Short()
-    discussion_contributions = Short()
+    attempt_ratio_order = Integer()
+    discussion_contributions = Integer()
     enrollment_date = Date()
-    videos_viewed = Short()
+    videos_viewed = Integer()
     last_updated = Date()
 
     class Index:

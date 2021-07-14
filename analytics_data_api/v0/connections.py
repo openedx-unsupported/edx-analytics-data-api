@@ -39,8 +39,12 @@ class BotoHttpConnection(Connection):
         """
         if not isinstance(body, str) and not isinstance(body, bytes):
             body = json.dumps(body).encode('UTF-8')
+        if not isinstance(headers, dict):
+            headers = {'Content-Type': 'application/json'}
+        else:
+            headers['Content-Type'] = 'application/json'
         start = time.time()
-        response = self.connection.make_request(method, url, params=params, data=body)
+        response = self.connection.make_request(method, url, headers=headers, params=params, data=body)
         duration = time.time() - start
         raw_data = response.read()
 

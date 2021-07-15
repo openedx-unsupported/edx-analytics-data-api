@@ -7,11 +7,7 @@
 # link to other information that will help people in the future to remove the
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
-
-# copy/paste all pins from upstream link. It gives us option to override any pin.
-# otherwise pip-tools gives conflicting errors.
--c common_constraints.txt
-
+ 
 # TODO: Many pinned dependencies should be unpinned and/or moved to this constraints file.
 
 # django-storages version 1.9 drops support for boto storage backend.

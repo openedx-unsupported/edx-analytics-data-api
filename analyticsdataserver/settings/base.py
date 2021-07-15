@@ -245,7 +245,8 @@ THIRD_PARTY_APPS = (
     'rest_framework.authtoken',
     'rest_framework_jwt',
     'django_countries',
-    'rest_framework_swagger',
+    'drf_yasg',
+    'edx_api_doc_tools',
     'storages',
     'enterprise_data',
     'rules.apps.AutodiscoverRulesConfig',
@@ -477,3 +478,7 @@ SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
 ########## ENTERPRISE LEARNER ENGAGEMENT REPORTING
 EXCLUDED_ENGAGEMENT_ENTITY_TYPES = [DISCUSSION]
 ENGAGEMENT_CACHE_TIMEOUT = 1 * 60 * 60  # 1 hour
+
+########## Django 3.2 upgrade settings
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_HASHING_ALGORITHM = "sha1"

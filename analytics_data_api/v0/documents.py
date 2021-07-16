@@ -153,8 +153,9 @@ class RosterEntry(Document):
         # debugging, to be removed
         logger.warning(res.__class__.__name__)
         items = res.hits
-        logger.warning(items[0])
-        logger.warning(dir(items[0]))
+        if items:
+            logger.warning(items[0])
+            logger.warning(dir(items[0]))
         return items
 
     @classmethod

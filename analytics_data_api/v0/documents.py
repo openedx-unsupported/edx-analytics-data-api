@@ -1,8 +1,11 @@
+import logging
 
 from django.conf import settings
 from elasticsearch_dsl import Date, Document, Float, Integer, Keyword, Q
 
 from analytics_data_api.constants import learner
+
+logger = logging.getLogger(__name__)
 
 
 class RosterUpdate(Document):
@@ -146,7 +149,14 @@ class RosterEntry(Document):
             }
             for sort_policy in sort_policies
         ])
-        return search_request.execute()
+        res = search_request.execute()
+        # debugging, to be removed
+        logger.warning(res.__class__.__name__)
+        items = res.hits
+        if items:
+            logger.warning(items[0])
+            logger.warning(dir(items[0]))
+        return items
 
     @classmethod
     def get_course_metadata(cls, course_id):

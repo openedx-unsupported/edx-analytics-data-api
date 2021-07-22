@@ -1,4 +1,5 @@
 import logging
+from fnmatch import fnmatch
 
 from django.conf import settings
 from elasticsearch_dsl import Date, Document, Float, Integer, Keyword, Q
@@ -22,7 +23,7 @@ class RosterUpdate(Document):
 
     @classmethod
     def get_last_updated(cls):
-        return cls.search().query('term', target_index=settings.ELASTICSEARCH_LEARNERS_INDEX).execute()
+        return cls.search().query('term', target_index=settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS).execute()
 
 
 class RosterEntry(Document):
@@ -61,8 +62,18 @@ class RosterEntry(Document):
     last_updated = Date()
 
     class Index:
-        name = settings.ELASTICSEARCH_LEARNERS_INDEX
+        name = settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS
+        aliases = {settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS: {}}
         settings = settings.ELASTICSEARCH_INDEX_SETTINGS
+
+    @classmethod
+    def _matches(cls, hit):
+        # override _matches to match indices in a pattern instead of just index name.
+        # The search target may be an index or an alias but the default implementation will strictly
+        # match the return on index causing queries to fail to map back to this python type.
+        #
+        # hit is the raw dict as returned by elasticsearch
+        return fnmatch(hit["_index"], settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS + '_*')
 
     @classmethod
     def get_course_user(cls, course_id, username):
@@ -152,6 +163,7 @@ class RosterEntry(Document):
         res = search_request.execute()
         # debugging, to be removed
         logger.warning(res.__class__.__name__)
+        logger.warning(search.doc_type)
         items = res.hits
         if items:
             logger.warning(items[0])

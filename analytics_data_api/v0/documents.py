@@ -160,15 +160,7 @@ class RosterEntry(Document):
             }
             for sort_policy in sort_policies
         ])
-        res = search_request.execute()
-        # debugging, to be removed
-        logger.warning(res.__class__.__name__)
-        logger.warning(search.doc_type)
-        items = res.hits
-        if items:
-            logger.warning(items[0])
-            logger.warning(dir(items[0]))
-        return items
+        return search_request.execute()
 
     @classmethod
     def get_course_metadata(cls, course_id):

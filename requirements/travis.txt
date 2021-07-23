@@ -4,10 +4,17 @@
 #
 #    make upgrade
 #
-certifi==2020.12.5        # via requests
-chardet==4.0.0            # via requests
-codecov==2.1.11           # via -r requirements/travis.in
-coverage==5.3.1           # via codecov
-idna==2.10                # via requests
-requests==2.25.1          # via codecov
-urllib3==1.26.2           # via requests
+certifi==2021.5.30
+    # via requests
+charset-normalizer==2.0.3
+    # via requests
+codecov==2.1.11
+    # via -r requirements/travis.in
+coverage==5.5
+    # via codecov
+idna==3.2
+    # via requests
+requests==2.26.0
+    # via codecov
+urllib3==1.26.6
+    # via requests

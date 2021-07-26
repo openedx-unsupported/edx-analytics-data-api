@@ -9,5 +9,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         es = Elasticsearch([settings.ELASTICSEARCH_LEARNERS_HOST])
         for index in [settings.ELASTICSEARCH_LEARNERS_INDEX, settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX]:
-            if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX):
+            if es.indices.exists(index):
                 es.indices.delete(index=index)

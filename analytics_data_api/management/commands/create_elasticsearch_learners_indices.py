@@ -6,6 +6,12 @@ from analytics_data_api.management.utils import elasticsearch_settings_defined
 from analytics_data_api.v0.documents import RosterEntry, RosterUpdate
 
 
+class TestRosterEntry(RosterEntry):
+    class Index:
+        name = settings.ELASTICSEARCH_LEARNERS_INDEX
+        aliases = {settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS: {}}
+
+
 class Command(BaseCommand):
     help = 'Creates Elasticsearch indices used by the Analytics Data API.'
 
@@ -20,7 +26,7 @@ class Command(BaseCommand):
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_INDEX):
             self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_INDEX}" index already exists.')
         else:
-            RosterEntry.init(using=es)
+            TestRosterEntry.init(using=es)
 
         if es.indices.exists(settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX):
             self.stderr.write(f'"{settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX}" index already exists.')

@@ -119,7 +119,7 @@ class LearnerAPITestMixin(CsvViewMixin):
             index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX,
             body={
                 'date': date,
-                'target_index': settings.ELASTICSEARCH_LEARNERS_INDEX,
+                'target_index': settings.ELASTICSEARCH_LEARNERS_INDEX_ALIAS,
             }
         )
         self._es.indices.refresh(index=settings.ELASTICSEARCH_LEARNERS_UPDATE_INDEX)

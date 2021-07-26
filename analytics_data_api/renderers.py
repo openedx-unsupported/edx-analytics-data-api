@@ -88,6 +88,7 @@ class DynamicFieldsCsvRenderer(CSVRenderer):
         """Override the default "get headers" behaviour, then render the data."""
         renderer_context = renderer_context or {}
         self.header = self.get_header(data, renderer_context)
+        self.labels = renderer_context.get('labels')
         return super().render(data, media_type, renderer_context, writer_opts)
 
 

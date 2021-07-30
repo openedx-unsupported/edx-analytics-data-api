@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.6
+boto3==1.18.10
     # via -r requirements/base.in
-botocore==1.21.6
+botocore==1.21.10
     # via
     #   boto3
     #   s3transfer
@@ -93,7 +93,7 @@ edx-api-doc-tools==1.4.3
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
-edx-django-release-util==1.0.0
+edx-django-release-util==1.1.0
     # via -r requirements/base.in
 edx-django-utils==4.2.0
     # via
@@ -152,7 +152,7 @@ markupsafe==2.0.1
     # via jinja2
 mysqlclient==2.0.3
     # via -r requirements/production.in
-newrelic==6.4.4.161
+newrelic==6.6.0.162
     # via
     #   -r requirements/production.in
     #   edx-django-utils

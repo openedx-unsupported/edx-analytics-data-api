@@ -3,7 +3,7 @@ COVERAGE_DIR = $(ROOT)/build/coverage
 PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
 PYTHON_ENV=py38
-DJANGO_VERSION=django32
+DJANGO_VERSION=django22
 .DEFAULT_GOAL := help
 
 help: ## display this help message

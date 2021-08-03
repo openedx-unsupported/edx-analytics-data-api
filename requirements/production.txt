@@ -4,8 +4,6 @@
 #
 #    make upgrade
 #
-asgiref==3.4.1
-    # via django
 boto==2.42.0
     # via -r requirements/base.in
 boto3==1.18.12
@@ -24,18 +22,17 @@ charset-normalizer==2.0.4
     # via requests
 coreapi==2.3.3
     # via
-    #   -r requirements/base.in
-    #   drf-yasg
+    #   django-rest-swagger
+    #   openapi-codec
 coreschema==0.0.4
-    # via
-    #   coreapi
-    #   drf-yasg
+    # via coreapi
 cryptography==3.4.7
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.6
+django==2.2.24
     # via
+    #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   -r requirements/base.in
     #   django-cors-headers
     #   django-crum
@@ -44,8 +41,6 @@ django==3.2.6
     #   django-storages
     #   djangorestframework
     #   drf-jwt
-    #   drf-yasg
-    #   edx-api-doc-tools
     #   edx-django-release-util
     #   edx-django-utils
     #   edx-drf-extensions
@@ -66,6 +61,8 @@ django-model-utils==4.1.1
     # via
     #   edx-enterprise-data
     #   edx-rbac
+django-rest-swagger==2.2.0
+    # via -r requirements/base.in
 django-storages==1.8
     # via
     #   -c requirements/constraints.txt
@@ -77,20 +74,17 @@ django-waffle==2.2.1
 djangorestframework==3.12.4
     # via
     #   -r requirements/base.in
+    #   django-rest-swagger
     #   djangorestframework-csv
     #   drf-jwt
-    #   drf-yasg
-    #   edx-api-doc-tools
     #   edx-drf-extensions
     #   rest-condition
 djangorestframework-csv==2.1.1
     # via -r requirements/base.in
-drf-jwt==1.19.1
-    # via edx-drf-extensions
-drf-yasg==1.20.0
-    # via edx-api-doc-tools
-edx-api-doc-tools==1.4.3
-    # via -r requirements/base.in
+drf-jwt==1.19.0
+    # via
+    #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
+    #   edx-drf-extensions
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
@@ -137,8 +131,6 @@ gunicorn==20.1.0
     # via -r requirements/production.in
 idna==3.2
     # via requests
-inflection==0.5.1
-    # via drf-yasg
 itypes==1.2.0
     # via coreapi
 jinja2==3.0.1
@@ -147,7 +139,7 @@ jmespath==0.10.0
     # via
     #   boto3
     #   botocore
-markdown==3.3.4
+markdown==2.6.6
     # via -r requirements/base.in
 markupsafe==2.0.1
     # via jinja2
@@ -157,12 +149,12 @@ newrelic==6.6.0.162
     # via
     #   -r requirements/production.in
     #   edx-django-utils
+openapi-codec==1.3.2
+    # via django-rest-swagger
 ordered-set==3.1.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-packaging==21.0
-    # via drf-yasg
 path.py==8.2.1
     # via -r requirements/production.in
 pbr==5.6.0
@@ -175,14 +167,13 @@ pycryptodomex==3.10.1
     # via pyjwkest
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.1.0
+pyjwt[crypto]==1.7.1
     # via
+    #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   drf-jwt
     #   edx-rest-api-client
 pymongo==3.12.0
     # via edx-opaque-keys
-pyparsing==2.4.7
-    # via packaging
 python-dateutil==2.8.2
     # via
     #   botocore
@@ -206,16 +197,14 @@ requests==2.26.0
     #   slumber
 rest-condition==1.0.3
     # via edx-drf-extensions
-ruamel.yaml==0.17.10
-    # via drf-yasg
-ruamel.yaml.clib==0.2.6
-    # via ruamel.yaml
 rules==3.0
     # via edx-enterprise-data
 s3transfer==0.5.0
     # via boto3
 semantic-version==2.8.5
     # via edx-drf-extensions
+simplejson==3.17.3
+    # via django-rest-swagger
 six==1.16.0
     # via
     #   djangorestframework-csv
@@ -240,9 +229,7 @@ tqdm==4.62.0
 unicodecsv==0.14.1
     # via djangorestframework-csv
 uritemplate==3.0.1
-    # via
-    #   coreapi
-    #   drf-yasg
+    # via coreapi
 urllib3==1.26.6
     # via
     #   -r requirements/base.in

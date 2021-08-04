@@ -101,7 +101,7 @@ edx-drf-extensions==6.4.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==2.2.18
+edx-enterprise-data==2.2.19
     # via -r requirements/base.in
 edx-opaque-keys==2.2.2
     # via

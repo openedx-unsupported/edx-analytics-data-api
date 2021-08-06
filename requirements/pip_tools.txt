@@ -12,7 +12,7 @@ pip-tools==6.2.0
     # via -r requirements/pip_tools.in
 six==1.16.0
     # via -r requirements/pip_tools.in
-tomli==1.2.0
+tomli==1.2.1
     # via pep517
 wheel==0.36.2
     # via pip-tools

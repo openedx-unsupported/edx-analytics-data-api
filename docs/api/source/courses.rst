@@ -2,10 +2,10 @@
 Course Information API
 #######################
 
-.. contents:: Section Contents 
+.. contents:: Section Contents
   :local:
   :depth: 1
-  
+
 .. _Get Weekly Course Activity:
 
 ***************************
@@ -16,12 +16,12 @@ Get Weekly Course Activity
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -45,12 +45,12 @@ Get Recent Course Activity
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     {
       "interval_start": "2014-12-08T00:00:00Z",
@@ -70,12 +70,12 @@ Get the Course Enrollment
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
     [
       {
         "course_id": "edX/DemoX/Demo_Course",
@@ -95,12 +95,12 @@ Get the Course Enrollment by Mode
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -125,12 +125,12 @@ Get the Course Enrollment by Birth Year
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -159,12 +159,12 @@ Get the Course Enrollment by Education Level
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -193,12 +193,12 @@ Get the Course Enrollment by Gender
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -224,12 +224,12 @@ See `ISO 3166 country codes`_ for more information.
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -266,12 +266,12 @@ Get the Course Video Data
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -295,7 +295,7 @@ Get the Course Video Data
         "users_at_start": 1044,
         "users_at_end": 0,
         "created": "2015-04-15T214158"
-      },     
+      },
     ]
 
 .. include:: links.rst

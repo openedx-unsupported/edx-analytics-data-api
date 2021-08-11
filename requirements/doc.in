@@ -2,4 +2,6 @@
 
 -r base.in                          # Core dependencies of edx-analytics-data-api
 
-Sphinx==1.2.1                       # Developer documentation builder
+Sphinx                              # Developer documentation builder
+path
+edx_sphinx_theme

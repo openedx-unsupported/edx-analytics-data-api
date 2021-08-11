@@ -146,4 +146,5 @@ travis_docker_push: travis_docker_tag travis_docker_auth ## push to docker hub
 	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT-newrelic"
 
 docs:
+	pip install -r requirements/tox.txt
 	tox -e docs

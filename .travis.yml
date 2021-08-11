@@ -24,6 +24,8 @@ matrix:
       after_success:
         - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
         - codecov --disable pycov
+    - python: '3.8'
+      env: TESTNAME=docs TARGETS="docs"
 env:
   global:
     - DOCKER_USERNAME=edxbuilder

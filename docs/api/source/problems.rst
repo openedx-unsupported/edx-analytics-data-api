@@ -2,26 +2,26 @@
 Problem Information API
 ########################
 
-.. contents:: Section Contents 
+.. contents:: Section Contents
   :local:
   :depth: 1
-  
+
 .. _Get the Grade Distribution for a Course:
 
 ***************************************
 Get the Grade Distribution for a Course
 ***************************************
 
-.. autoclass:: analytics_data_api.v0.views.problems.GradeDistributionView 
+.. autoclass:: analytics_data_api.v0.views.problems.GradeDistributionView
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {
@@ -52,12 +52,12 @@ Get the Answer Distribution for a Problem
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
        {
@@ -72,7 +72,7 @@ Get the Answer Distribution for a Problem
           "answer_value_text": "Russia",
           "answer_value_numeric": null,
           "problem_display_name": "Multiple Choice Problem",
-          "question_text": "Which of the following countries has the largest 
+          "question_text": "Which of the following countries has the largest
             population?",
           "variant": null,
           "created": "2014-12-05T225026"
@@ -89,7 +89,7 @@ Get the Answer Distribution for a Problem
           "answer_value_text": "Indonesia",
           "answer_value_numeric": null,
           "problem_display_name": "Multiple Choice Problem",
-          "question_text": "Which of the following countries has the largest 
+          "question_text": "Which of the following countries has the largest
             population?",
           "variant": null,
           "created": "2014-12-05T225026"
@@ -106,12 +106,12 @@ Get the View Count for a Subsection
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {

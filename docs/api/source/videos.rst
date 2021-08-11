@@ -4,7 +4,7 @@
 Video Data API
 ###############
 
-.. contents:: Section Contents 
+.. contents:: Section Contents
   :local:
   :depth: 1
 
@@ -14,16 +14,16 @@ Video Data API
 Get the Timeline for a Video
 ***************************************
 
-.. autoclass:: analytics_data_api.v0.views.videos.VideoTimelineView 
+.. autoclass:: analytics_data_api.v0.views.videos.VideoTimelineView
 
 **Example Response**
 
-.. code-block:: json
+.. code-block::
 
-    HTTP 200 OK  
-    Vary: Accept   
-    Content-Type: text/html; charset=utf-8   
-    Allow: GET, HEAD, OPTIONS 
+    HTTP 200 OK
+    Vary: Accept
+    Content-Type: text/html; charset=utf-8
+    Allow: GET, HEAD, OPTIONS
 
     [
       {

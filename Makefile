@@ -10,7 +10,7 @@ help: ## display this help message
 	@echo "Please use \`make <target>' where <target> is one of"
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: requirements develop clean diff.report view.diff.report quality static
+.PHONY: requirements develop clean diff.report view.diff.report quality static docs
 
 requirements:  ## install base requirements
 	pip3 install -q -r requirements/base.txt
@@ -144,3 +144,6 @@ travis_docker_push: travis_docker_tag travis_docker_auth ## push to docker hub
 	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT"
 	docker push 'openedx/analytics-data-api:latest-newrelic'
 	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT-newrelic"
+
+docs:
+	tox -e docs

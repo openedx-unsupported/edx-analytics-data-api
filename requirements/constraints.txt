@@ -17,6 +17,9 @@
 # django-storages version 1.9 drops support for boto storage backend.
 django-storages<1.9                 # BSD
 
+# elasticsearch library cannot be greater than 7.14.0. 7.14.0 library is not compatible with the 7.10 server in stage and prod
+elasticsearch < 7.14.0
+
 # elasticsearch-dsl depends on elasticsearch >=7.8.0,<8.0.0
 elasticsearch-dsl>=7.2.1,<8.0.0
 

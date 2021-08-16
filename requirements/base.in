@@ -2,20 +2,21 @@
 
 -c constraints.txt
 
+edx-api-doc-tools
 boto==2.42.0                        # MIT
 boto3
+coreapi
 Django                              # BSD License
 django-countries                    # MIT
 python-memcached                    # Python Software Foundation License v2
 djangorestframework                 # BSD
-django-rest-swagger		    # BSD
 djangorestframework-csv             # BSD
 django-storages                     # BSD
 elasticsearch-dsl                   # Apache 2.0
 ordered-set                         # MIT
 tqdm                                # MIT
 urllib3                             # MIT
-Markdown==2.6.6		            # BSD:markdown is used by swagger for rendering the api docs
+Markdown                            # BSD:markdown is used by swagger for rendering the api docs
 edx-ccx-keys
 edx-django-release-util
 edx-opaque-keys

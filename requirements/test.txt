@@ -12,9 +12,9 @@ attrs==21.2.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.21
+boto3==1.18.35
     # via -r requirements/base.in
-botocore==1.21.21
+botocore==1.21.35
     # via
     #   boto3
     #   s3transfer
@@ -40,13 +40,13 @@ coverage==5.5
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
 ddt==1.4.2
     # via -r requirements/test.in
-diff-cover==6.3.0
+diff-cover==6.3.5
     # via -r requirements/test.in
     # via
     #   -r requirements/base.in
@@ -65,7 +65,7 @@ diff-cover==6.3.0
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.7.0
+django-cors-headers==3.8.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -110,7 +110,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
     # via -r requirements/base.in
-edx-django-utils==4.2.0
+edx-django-utils==4.4.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -176,7 +176,7 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==6.8.0.163
+newrelic==6.8.1.164
     # via edx-django-utils
 ordered-set==3.1.1
     # via
@@ -204,7 +204,7 @@ pycryptodomex==3.10.1
     # via pyjwkest
 pydocstyle==6.1.1
     # via -r requirements/test.in
-pygments==2.9.0
+pygments==2.10.0
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -221,7 +221,7 @@ pymongo==3.12.0
     # via edx-opaque-keys
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.4
+pytest==6.2.5
     # via
     #   pytest-cov
     #   pytest-django
@@ -255,7 +255,7 @@ responses==0.13.4
     # via -r requirements/test.in
 rest-condition==1.0.3
     # via edx-drf-extensions
-ruamel.yaml==0.17.10
+ruamel.yaml==0.17.16
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -285,7 +285,7 @@ snowballstemmer==2.1.0
     # via pydocstyle
 sqlparse==0.4.1
     # via django
-stevedore==3.3.0
+stevedore==3.4.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
@@ -293,7 +293,7 @@ toml==0.10.2
     # via
     #   pytest
     #   pytest-cov
-tqdm==4.62.0
+tqdm==4.62.2
     # via -r requirements/base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv

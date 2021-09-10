@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.21
+boto3==1.18.39
     # via -r requirements/base.in
-botocore==1.21.21
+botocore==1.21.39
     # via
     #   boto3
     #   s3transfer
@@ -30,11 +30,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.6
+django==3.2.7
     # via
     #   -r requirements/base.in
     #   django-cors-headers
@@ -52,7 +52,7 @@ django==3.2.6
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.7.0
+django-cors-headers==3.8.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -95,7 +95,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
     # via -r requirements/base.in
-edx-django-utils==4.2.0
+edx-django-utils==4.4.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -154,7 +154,7 @@ markupsafe==2.0.1
     # via jinja2
 mysqlclient==2.0.3
     # via -r requirements/production.in
-newrelic==6.8.0.163
+newrelic==6.8.1.164
     # via
     #   -r requirements/production.in
     #   edx-django-utils
@@ -208,7 +208,7 @@ requests==2.26.0
     #   slumber
 rest-condition==1.0.3
     # via edx-drf-extensions
-ruamel.yaml==0.17.10
+ruamel.yaml==0.17.16
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -233,11 +233,11 @@ slumber==0.7.1
     # via edx-rest-api-client
 sqlparse==0.4.1
     # via django
-stevedore==3.3.0
+stevedore==3.4.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
-tqdm==4.62.0
+tqdm==4.62.2
     # via -r requirements/base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv

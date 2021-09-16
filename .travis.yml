@@ -2,34 +2,35 @@ language: python
 dist: xenial
 branches:
   only:
-    - master
+  - master
 services:
-  - docker
+- docker
 sudo: required
 before_install:
-  - docker-compose -f .travis/docker-compose-travis.yml up -d
+- docker-compose -f .travis/docker-compose-travis.yml up -d
 install:
-  - pip install -r requirements/travis.txt
+- pip install -r requirements/travis.txt
 script:
-  - docker exec -t -e TRAVIS=1 analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
-    && make $TARGETS "
+- docker exec -t -e TRAVIS=1 analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
+  && make $TARGETS "
 matrix:
   include:
-    - python: '3.8'
-      env: TESTNAME=quality-python-3.8 TARGETS="PYTHON_ENV=py38 quality"
-    - python: '3.8'
-      env: TESTNAME=test-python-3.8 TARGETS="PYTHON_ENV=py38 main.test"
-    - python: '3.8'
-      env: TESTNAME=test-python-3.8-django-3.0 TARGETS="PYTHON_ENV=py38 DJANGO_VERSION=django32 main.test"
-      after_success:
-        - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
-        - codecov --disable pycov
-    - python: '3.8'
-      env: TESTNAME=docs TARGETS="docs"
+  - python: '3.8'
+    env: TESTNAME=quality-python-3.8 TARGETS="PYTHON_ENV=py38 quality"
+  - python: '3.8'
+    env: TESTNAME=test-python-3.8 TARGETS="PYTHON_ENV=py38 main.test"
+  - python: '3.8'
+    env: TESTNAME=test-python-3.8-django-3.0 TARGETS="PYTHON_ENV=py38 DJANGO_VERSION=django32
+      main.test"
+    after_success:
+    - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
+    - codecov --disable pycov
+  - python: '3.8'
+    env: TESTNAME=docs TARGETS="docs"
 env:
   global:
-    - DOCKER_USERNAME=edxbuilder
-    - secure: ax2wADc8m84sUqM8QQ7px7zEGXPQWqAIr53ZIvbN9NP/Mco9oB1TmjRgo7dP4iRKMflB2F51owT3IyS8S7E8jTfemgDwrJaKb+iobulPHk0Gu4f0ywPBYcIAV77uLvSGL3DmkEzq5MFyK9vOldpAry/9n59h8lobkhA12Wup9w4=
+  - DOCKER_USERNAME=edxbuilder
+  - secure: YXlXo4K2VQZXA8divHuXy/g71wGA3rYlyuJgrF7YVkaxUg8mIk0whq1feSQbBbrpvObTJS7yz1wrIVTyfVCxDVecyPPSv1MXvpqzf8RhVxA3o++9iBSnaIdKCnVTsd3H/ENn0EgNFHsOPQRQ14rT205CU3p35s9wSuLVXojV++8=
 deploy:
   provider: script
   script: make travis_docker_push

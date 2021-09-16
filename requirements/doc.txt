@@ -6,14 +6,14 @@
 #
 alabaster==0.7.12
     # via sphinx
-babel==2.9.1
-    # via sphinx
 asgiref==3.4.1
     # via django
+babel==2.9.1
+    # via sphinx
 boto==2.42.0
-    # via -r requirements/base.in
+    # via -r base.in
 boto3==1.18.21
-    # via -r requirements/base.in
+    # via -r base.in
 botocore==1.21.21
     # via
     #   boto3
@@ -28,7 +28,7 @@ charset-normalizer==2.0.4
     # via requests
 coreapi==2.3.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   drf-yasg
 coreschema==0.0.4
     # via
@@ -40,7 +40,7 @@ cryptography==3.4.7
     #   pyjwt
 django==3.2.6
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   django-cors-headers
     #   django-crum
     #   django-fernet-fields
@@ -57,9 +57,9 @@ django==3.2.6
     #   edx-rbac
     #   rest-condition
 django-cors-headers==3.7.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-countries==7.2.1
-    # via -r requirements/base.in
+    # via -r base.in
 django-crum==0.7.9
     # via
     #   edx-django-utils
@@ -72,15 +72,15 @@ django-model-utils==4.1.1
     #   edx-rbac
 django-storages==1.8
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+    #   -c constraints.txt
+    #   -r base.in
 django-waffle==2.2.1
     # via
     #   edx-django-utils
     #   edx-drf-extensions
 djangorestframework==3.12.4
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   djangorestframework-csv
     #   drf-jwt
     #   drf-yasg
@@ -88,7 +88,7 @@ djangorestframework==3.12.4
     #   edx-drf-extensions
     #   rest-condition
 djangorestframework-csv==2.1.1
-    # via -r requirements/base.in
+    # via -r base.in
 docutils==0.17.1
     # via sphinx
 drf-jwt==1.19.1
@@ -96,27 +96,27 @@ drf-jwt==1.19.1
 drf-yasg==1.20.0
     # via edx-api-doc-tools
 edx-api-doc-tools==1.4.3
-    # via -r requirements/base.in
+    # via -r base.in
 edx-ccx-keys==1.2.1
-    # via -r requirements/base.in
+    # via -r base.in
 edx-django-release-util==1.1.0
-    # via -r requirements/base.in
+    # via -r base.in
 edx-django-utils==4.2.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
 edx-drf-extensions==7.0.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-enterprise-data
     #   edx-rbac
 edx-enterprise-data==3.1.0
-    # via -r requirements/base.in
+    # via -r base.in
 edx-opaque-keys==2.2.2
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-ccx-keys
     #   edx-drf-extensions
     #   edx-enterprise-data
@@ -124,18 +124,18 @@ edx-rbac==1.5.0
     # via edx-enterprise-data
 edx-rest-api-client==5.4.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-enterprise-data
 edx-sphinx-theme==3.0.0
-    # via -r requirements/doc.in
+    # via -r doc.in
 elasticsearch==7.13.4
     # via
-    #   -c requirements/constraints.txt
+    #   -c constraints.txt
     #   elasticsearch-dsl
 elasticsearch-dsl==7.4.0
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+    #   -c constraints.txt
+    #   -r base.in
 future==0.18.2
     # via pyjwkest
 idna==3.2
@@ -155,20 +155,21 @@ jmespath==0.10.0
     #   boto3
     #   botocore
 markdown==3.3.4
-    # via -r requirements/base.in
+    # via -r base.in
 markupsafe==2.0.1
     # via jinja2
 newrelic==6.8.0.163
     # via edx-django-utils
 ordered-set==3.1.1
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+    #   -c constraints.txt
+    #   -r base.in
 packaging==21.0
-    # via sphinx
+    # via
+    #   drf-yasg
+    #   sphinx
 path==16.2.0
-    # via -r requirements/doc.in
-    # via drf-yasg
+    # via -r doc.in
 pbr==5.6.0
     # via stevedore
 psutil==5.8.0
@@ -196,7 +197,7 @@ python-dateutil==2.8.2
     #   edx-drf-extensions
     #   elasticsearch-dsl
 python-memcached==1.59
-    # via -r requirements/base.in
+    # via -r base.in
 pytz==2021.1
     # via
     #   babel
@@ -242,7 +243,7 @@ snowballstemmer==2.1.0
     # via sphinx
 sphinx==4.1.2
     # via
-    #   -r requirements/doc.in
+    #   -r doc.in
     #   edx-sphinx-theme
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
@@ -256,14 +257,14 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
 stevedore==3.3.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
 tqdm==4.62.0
-    # via -r requirements/base.in
+    # via -r base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv
 uritemplate==3.0.1
@@ -272,7 +273,7 @@ uritemplate==3.0.1
     #   drf-yasg
 urllib3==1.26.6
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   botocore
     #   elasticsearch
     #   requests

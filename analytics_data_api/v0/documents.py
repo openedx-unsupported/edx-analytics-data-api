@@ -160,7 +160,12 @@ class RosterEntry(Document):
             }
             for sort_policy in sort_policies
         ])
-        return search_request.execute()
+
+        # calling count will generate an additional request to ES, but is necessary for returning the entire set of data
+        total = search_request.count()
+        # by default, ES will only return the first 10 documents, we want to get all of them
+        total_search_requests = search_request[0:total]
+        return total_search_requests.execute()
 
     @classmethod
     def get_course_metadata(cls, course_id):

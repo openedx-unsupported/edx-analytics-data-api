@@ -441,40 +441,34 @@ class LearnerListTests(LearnerAPITestMixin, VerifyCourseIdMixin, TestCaseWithAut
         self.assert_learners_returned(response, expected_users)
 
     def test_pagination(self):
-        num_users = 16
-        learner_list = [{'username': 'test' + str(num), 'course_id': self.course_id} for num in range(num_users)]
-        self.create_learners(learner_list)
+        usernames = ['a', 'b', 'c', 'd', 'e']
+        self.create_learners([{'username': username, 'course_id': self.course_id} for username in usernames])
 
-        response = self._get(self.course_id, page_size=5)
+        response = self._get(self.course_id, page_size=2)
         payload = json.loads(response.content.decode('utf-8'))
         self.assertDictContainsSubset(
             {
-                'count': num_users,
+                'count': len(usernames),
                 'previous': None,
-                'next': self.expected_page_url(self.course_id, page=2, page_size=5),
-                'num_pages': 4
+                'next': self.expected_page_url(self.course_id, page=2, page_size=2),
+                'num_pages': 3
             },
             payload
         )
-        self.assertEqual(response.status_code, 200)
-        returned_learners = json.loads(response.content.decode('utf-8'))['results']
-        self.assertEqual(len(returned_learners), 5)
+        self.assert_learners_returned(response, [{'username': 'a'}, {'username': 'b'}])
 
-        response = self._get(self.course_id, page_size=5, page=4)
+        response = self._get(self.course_id, page_size=2, page=3)
         payload = json.loads(response.content.decode('utf-8'))
         self.assertDictContainsSubset(
             {
-                'count': num_users,
-                'previous': self.expected_page_url(self.course_id, page=3, page_size=5),
+                'count': len(usernames),
+                'previous': self.expected_page_url(self.course_id, page=2, page_size=2),
                 'next': None,
-                'num_pages': 4
+                'num_pages': 3
             },
             payload
         )
-
-        self.assertEqual(response.status_code, 200)
-        returned_learners = json.loads(response.content.decode('utf-8'))['results']
-        self.assertEqual(len(returned_learners), 1)
+        self.assert_learners_returned(response, [{'username': 'e'}])
 
     # Error cases
     @ddt.data(

@@ -160,9 +160,7 @@ class RosterEntry(Document):
             }
             for sort_policy in sort_policies
         ])
-
-        # scan returns a generator, but we want to return a list.
-        return list(search_request.params(preserve_order=True).scan())
+        return search_request.execute()
 
     @classmethod
     def get_course_metadata(cls, course_id):

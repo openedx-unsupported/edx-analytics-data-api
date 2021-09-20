@@ -160,7 +160,14 @@ class RosterEntry(Document):
             }
             for sort_policy in sort_policies
         ])
-        return search_request.execute()
+
+        # by default, ES will only return the first 10 documents, we want to get as many as possible
+        count = search_request.count()
+        if count > 10000:
+            logger.info('Cannot return more than 10,000 learners for course_id=%s', course_id)
+            count = 10000
+        total_search_requests = search_request[0:count]
+        return total_search_requests.execute()
 
     @classmethod
     def get_course_metadata(cls, course_id):

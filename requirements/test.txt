@@ -12,9 +12,9 @@ attrs==21.2.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.21
+boto3==1.18.47
     # via -r requirements/base.in
-botocore==1.21.21
+botocore==1.21.47
     # via
     #   boto3
     #   s3transfer
@@ -26,7 +26,7 @@ cffi==1.14.6
     # via cryptography
 chardet==4.0.0
     # via diff-cover
-charset-normalizer==2.0.4
+charset-normalizer==2.0.6
     # via requests
 coreapi==2.3.3
     # via
@@ -40,13 +40,13 @@ coverage==5.5
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
 ddt==1.4.2
     # via -r requirements/test.in
-diff-cover==6.3.0
+diff-cover==6.4.0
     # via -r requirements/test.in
     # via
     #   -r requirements/base.in
@@ -65,7 +65,7 @@ diff-cover==6.3.0
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.7.0
+django-cors-headers==3.8.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -104,13 +104,13 @@ drf-jwt==1.19.1
     # via edx-drf-extensions
 drf-yasg==1.20.0
     # via edx-api-doc-tools
-edx-api-doc-tools==1.4.3
+edx-api-doc-tools==1.5.0
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
     # via -r requirements/base.in
-edx-django-utils==4.2.0
+edx-django-utils==4.4.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -121,7 +121,7 @@ edx-drf-extensions==7.0.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==3.1.0
+edx-enterprise-data==3.2.0
     # via -r requirements/base.in
 edx-opaque-keys==2.2.2
     # via
@@ -176,7 +176,7 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==6.8.0.163
+newrelic==7.0.0.166
     # via edx-django-utils
 ordered-set==3.1.1
     # via
@@ -188,7 +188,7 @@ packaging==21.0
     #   pytest
 pbr==5.6.0
     # via stevedore
-pluggy==0.13.1
+pluggy==1.0.0
     # via
     #   diff-cover
     #   pytest
@@ -204,7 +204,7 @@ pycryptodomex==3.10.1
     # via pyjwkest
 pydocstyle==6.1.1
     # via -r requirements/test.in
-pygments==2.9.0
+pygments==2.10.0
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -221,7 +221,7 @@ pymongo==3.12.0
     # via edx-opaque-keys
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.4
+pytest==6.2.5
     # via
     #   pytest-cov
     #   pytest-django
@@ -251,11 +251,11 @@ requests==2.26.0
     #   pyjwkest
     #   responses
     #   slumber
-responses==0.13.4
+responses==0.14.0
     # via -r requirements/test.in
 rest-condition==1.0.3
     # via edx-drf-extensions
-ruamel.yaml==0.17.10
+ruamel.yaml==0.17.16
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -283,9 +283,9 @@ slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.1.0
     # via pydocstyle
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
-stevedore==3.3.0
+stevedore==3.4.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
@@ -293,7 +293,7 @@ toml==0.10.2
     # via
     #   pytest
     #   pytest-cov
-tqdm==4.62.0
+tqdm==4.62.3
     # via -r requirements/base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -301,7 +301,7 @@ uritemplate==3.0.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -r requirements/base.in
     #   botocore

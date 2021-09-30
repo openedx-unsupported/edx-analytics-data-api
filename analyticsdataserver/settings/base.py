@@ -197,6 +197,7 @@ TEMPLATES = [
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-MIDDLEWARE
 MIDDLEWARE = [
     # Default Django middleware.
+    'edx_django_utils.monitoring.DeploymentMonitoringMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'crum.CurrentRequestUserMiddleware',

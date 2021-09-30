@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.21
+boto3==1.18.48
     # via -r requirements/base.in
-botocore==1.21.21
+botocore==1.21.48
     # via
     #   boto3
     #   s3transfer
@@ -20,7 +20,7 @@ certifi==2021.5.30
     #   requests
 cffi==1.14.6
     # via cryptography
-charset-normalizer==2.0.4
+charset-normalizer==2.0.6
     # via requests
 coreapi==2.3.3
     # via
@@ -30,11 +30,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.6
+django==3.2.7
     # via
     #   -r requirements/base.in
     #   django-cors-headers
@@ -52,7 +52,7 @@ django==3.2.6
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.7.0
+django-cors-headers==3.8.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -89,13 +89,13 @@ drf-jwt==1.19.1
     # via edx-drf-extensions
 drf-yasg==1.20.0
     # via edx-api-doc-tools
-edx-api-doc-tools==1.4.3
+edx-api-doc-tools==1.5.0
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
     # via -r requirements/base.in
-edx-django-utils==4.2.0
+edx-django-utils==4.4.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -106,7 +106,7 @@ edx-drf-extensions==7.0.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==3.1.0
+edx-enterprise-data==3.2.0
     # via -r requirements/base.in
 edx-opaque-keys==2.2.2
     # via
@@ -154,7 +154,7 @@ markupsafe==2.0.1
     # via jinja2
 mysqlclient==2.0.3
     # via -r requirements/production.in
-newrelic==6.8.0.163
+newrelic==7.0.0.166
     # via
     #   -r requirements/production.in
     #   edx-django-utils
@@ -172,7 +172,7 @@ psutil==5.8.0
     # via edx-django-utils
 pycparser==2.20
     # via cffi
-pycryptodomex==3.10.1
+pycryptodomex==3.10.4
     # via pyjwkest
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -208,7 +208,7 @@ requests==2.26.0
     #   slumber
 rest-condition==1.0.3
     # via edx-drf-extensions
-ruamel.yaml==0.17.10
+ruamel.yaml==0.17.16
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -231,13 +231,13 @@ six==1.16.0
     #   python-memcached
 slumber==0.7.1
     # via edx-rest-api-client
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via django
-stevedore==3.3.0
+stevedore==3.4.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
-tqdm==4.62.0
+tqdm==4.62.3
     # via -r requirements/base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -245,7 +245,7 @@ uritemplate==3.0.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.6
+urllib3==1.26.7
     # via
     #   -r requirements/base.in
     #   botocore

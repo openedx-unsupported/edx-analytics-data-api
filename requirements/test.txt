@@ -12,9 +12,9 @@ attrs==21.2.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.48
+boto3==1.18.52
     # via -r requirements/base.in
-botocore==1.21.48
+botocore==1.21.52
     # via
     #   boto3
     #   s3transfer
@@ -44,7 +44,7 @@ cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
-ddt==1.4.2
+ddt==1.4.3
     # via -r requirements/test.in
 diff-cover==6.4.1
     # via -r requirements/test.in
@@ -65,7 +65,7 @@ diff-cover==6.4.1
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.8.0
+django-cors-headers==3.9.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in

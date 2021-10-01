@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.48
+boto3==1.18.52
     # via -r requirements/base.in
-botocore==1.21.48
+botocore==1.21.52
     # via
     #   boto3
     #   s3transfer
@@ -52,7 +52,7 @@ django==3.2.7
     #   edx-enterprise-data
     #   edx-rbac
     #   rest-condition
-django-cors-headers==3.8.0
+django-cors-headers==3.9.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in

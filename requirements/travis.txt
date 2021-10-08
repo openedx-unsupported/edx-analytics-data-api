@@ -10,7 +10,7 @@ charset-normalizer==2.0.6
     # via requests
 codecov==2.1.12
     # via -r requirements/travis.in
-coverage==5.5
+coverage==6.0.1
     # via codecov
 idna==3.2
     # via requests

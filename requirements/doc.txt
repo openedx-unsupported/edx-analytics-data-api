@@ -12,9 +12,9 @@ babel==2.9.1
     # via sphinx
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.18.48
+boto3==1.18.57
     # via -r requirements/base.in
-botocore==1.21.48
+botocore==1.21.57
     # via
     #   boto3
     #   s3transfer
@@ -34,11 +34,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==3.4.8
+cryptography==35.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.7
+django==3.2.8
     # via
     #   -r requirements/base.in
     #   django-cors-headers
@@ -55,8 +55,7 @@ django==3.2.7
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-    #   rest-condition
-django-cors-headers==3.8.0
+django-cors-headers==3.10.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -86,7 +85,6 @@ djangorestframework==3.12.4
     #   drf-yasg
     #   edx-api-doc-tools
     #   edx-drf-extensions
-    #   rest-condition
 djangorestframework-csv==2.1.1
     # via -r requirements/base.in
 docutils==0.17.1
@@ -107,7 +105,7 @@ edx-django-utils==4.4.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==7.0.1
+edx-drf-extensions==8.0.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -146,7 +144,7 @@ inflection==0.5.1
     # via drf-yasg
 itypes==1.2.0
     # via coreapi
-jinja2==3.0.1
+jinja2==3.0.2
     # via
     #   coreschema
     #   sphinx
@@ -182,7 +180,7 @@ pygments==2.10.0
     # via sphinx
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.1.0
+pyjwt[crypto]==2.2.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -198,7 +196,7 @@ python-dateutil==2.8.2
     #   elasticsearch-dsl
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2021.1
+pytz==2021.3
     # via
     #   babel
     #   django
@@ -213,8 +211,6 @@ requests==2.26.0
     #   pyjwkest
     #   slumber
     #   sphinx
-rest-condition==1.0.3
-    # via edx-drf-extensions
 ruamel.yaml==0.17.16
     # via drf-yasg
 ruamel.yaml.clib==0.2.6

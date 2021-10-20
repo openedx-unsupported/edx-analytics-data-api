@@ -12,11 +12,9 @@ install:
 - pip install -r requirements/travis.txt
 script:
 - docker exec -t -e TRAVIS=1 analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
-  && export TOXENV=django32 && make $TARGETS "
+  && export TOXENV=django32 && make test.requirements tox.requirements $TARGETS "
 matrix:
   include:
-  - python: '3.8'
-    env: TESTNAME=install-requirements TARGETS="test.requirements"
   - python: '3.8'
     env: TESTNAME=quality-python-3.8 TARGETS="quality"
   - python: '3.8'

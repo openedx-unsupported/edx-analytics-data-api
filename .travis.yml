@@ -12,16 +12,15 @@ install:
 - pip install -r requirements/travis.txt
 script:
 - docker exec -t -e TRAVIS=1 analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
-  && make $TARGETS "
+  && export TOXENV=django32 && make $TARGETS "
 matrix:
   include:
   - python: '3.8'
-    env: TESTNAME=quality-python-3.8 TARGETS="PYTHON_ENV=py38 quality"
+    env: TESTNAME=install-requirements TARGETS="test.requirements"
   - python: '3.8'
-    env: TESTNAME=test-python-3.8 TARGETS="PYTHON_ENV=py38 main.test"
+    env: TESTNAME=quality-python-3.8 TARGETS="quality"
   - python: '3.8'
-    env: TESTNAME=test-python-3.8-django-3.0 TARGETS="PYTHON_ENV=py38 DJANGO_VERSION=django32
-      main.test"
+    env: TESTNAME=test-python-3.8 TARGETS="test"
     after_success:
     - docker exec analytics_api_testing /edx/app/analytics_api/analytics_api/.travis/run_coverage.sh
     - codecov --disable pycov

@@ -15,6 +15,7 @@ unless otherwise noted.
 
 Please see ``LICENSE.txt`` for details.
 
+ 
 Getting Started
 ---------------
 #. Create a virtual environment and activate it.

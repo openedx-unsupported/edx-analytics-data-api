@@ -15,9 +15,15 @@ unless otherwise noted.
 
 Please see ``LICENSE.txt`` for details.
 
- 
-Getting Started
----------------
+Getting Started With Devstack
+-----------------------------
+The best way to run this service is with edX Devstack: https://github.com/edx/devstack.
+
+See the [Devstack README](https://github.com/edx/devstack/blob/master/README.rst) for information on how to install and run the analytics data api.
+
+
+Getting Started Standalone
+--------------------------
 #. Create a virtual environment and activate it.
 
 #. Install the requirements:
@@ -75,6 +81,15 @@ Development with edx-enterprise-data
 If you need to make changes to ``edx-enterprise-data`` and have them reflected when you run the ``edx-analytics-data-api`` server,
 you can follow these steps. If you do not intend to make changes to ``edx-enterprise-data``, you can skip this section.
 
+Devstack Development
+~~~~~~~~~~~~~~~~~~~~
+#. Clone the `edx-enterprise-data <https://github.com/edx/edx-enterprise-data>`_ repo into the ``src`` folder alongside your devstack 
+workspace on the host system. 
+#. The modified ``edx-enterprise-data`` repository will now be available to devstack containers at ``/edx/src/edx-enterprise-data``.
+#. Inside the ``edx-data-analytics-api`` container run `pip install `-e /edx/src/edx-enterprise-data``
+
+Standalone Development
+~~~~~~~~~~~~~~~~~~~~~~
 #. Recommended: Install this repo into a subfolder of your working directory. Within that subfolder create an ``src`` folder.
 #. Clone the `edx-enterprise-data <https://github.com/edx/edx-enterprise-data>`_ repo into the ``src`` folder.
 #. ``cd`` into your ``edx-data-analytics-api`` folder and activate your virtualenv.

@@ -99,7 +99,7 @@ run_pylint:
 run_isort:
 	$(TOX)isort --recursive analytics_data_api/ analyticsdataserver/
 
-quality: tox.requirements run_pylint run_check_isort run_pycodestyle  ## run_pylint, run_check_isort, run_pycodestyle (Installs tox requirements.)
+quality: run_pylint run_check_isort run_pycodestyle  ## run_pylint, run_check_isort, run_pycodestyle (Installs tox requirements.)
 
 validate: test.requirements test quality  ## Runs make test and make quality. (Installs test requirements.)
 

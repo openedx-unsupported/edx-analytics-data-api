@@ -8,7 +8,7 @@ https://github.com/edx/edx-analytics-data-api-client.
 The enterprise client is hosted at https://github.com/edx/frontend-app-admin-portal.
 
 License
--------
+------- 
 
 The code in this repository is licensed under version 3 of the AGPL
 unless otherwise noted.

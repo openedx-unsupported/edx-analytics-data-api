@@ -4,7 +4,6 @@ import os
 
 from analyticsdataserver.settings.local import *
 
-
 ########## DATABASE CONFIGURATION
 DATABASES = {
     'default': {

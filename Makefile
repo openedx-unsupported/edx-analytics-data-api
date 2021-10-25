@@ -1,10 +1,13 @@
 ROOT = $(shell echo "$$PWD")
 COVERAGE_DIR = $(ROOT)/build/coverage
-PACKAGES = analyticsdataserver analytics_data_api
 DATABASES = default analytics
-PYTHON_ENV=py38
-DJANGO_VERSION=django32
 .DEFAULT_GOAL := help
+
+TOX=''
+
+ifdef TOXENV
+TOX := tox -- #to isolate each tox environment if TOXENV is defined
+endif
 
 help: ## display this help message
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -28,7 +31,7 @@ test.requirements: requirements  ## install base and test requirements
 	pip3 install -q -r requirements/test.txt
 
 tox.requirements:  ## install tox requirements
-	 pip3 install -q -r requirements/tox.txt
+	pip3 install -q -r requirements/tox.txt
 
 develop: test.requirements  ## install test and dev requirements
 	pip3 install -q -r requirements/dev.txt
@@ -58,16 +61,21 @@ upgrade:
 	mv requirements/test.tmp requirements/test.txt
 
 
-clean: tox.requirements  ## install tox requirements and run tox clean. Delete *.pyc files
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-clean
+clean:
+	$(TOX)coverage erase
 	find . -name '*.pyc' -delete
 
-main.test: tox.requirements clean
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-tests
+main.test: clean
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-coverage
+	$(TOX)pytest --cov-report html --cov-report xml
 
+test:
+
+ifeq ($(DJANGO_SETTINGS_MODULE),analyticsdataserver.settings.devstack)
+test: main.test
+else
 test: test.run_elasticsearch main.test test.stop_elasticsearch
+endif
 
 diff.report: test.requirements  ## Show the diff in quality and coverage
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
@@ -79,19 +87,19 @@ view.diff.report:  ## Show the diff in quality and coverage using xdg
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pycodestyle.html
 	xdg-open file:///$(COVERAGE_DIR)/diff_quality_pylint.html
 
-run_check_isort: tox.requirements  ## Run tox check_isort. (Installs tox requirements.)
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-check_isort
+run_check_isort:
+	$(TOX)isort --check-only --recursive --diff analytics_data_api/ analyticsdataserver/
 
-run_pycodestyle: tox.requirements  ## Run tox pycodestyle. (Installs tox requirements.)
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-pycodestyle
+run_pycodestyle:
+	$(TOX)pycodestyle --config=.pycodestyle analytics_data_api analyticsdataserver
 
-run_pylint: tox.requirements  ## Run tox pylint. (Installs tox requirements.)
-	tox -e $(PYTHON_ENV)-$(DJANGO_VERSION)-pylint
+run_pylint:
+	$(TOX)pylint -j 0 --rcfile=pylintrc analytics_data_api analyticsdataserver
 
-run_isort: tox.requirements  ## Run tox isort. (Installs tox requirements.)
-	tox -e  $(PYTHON_ENV)-$(DJANGO_VERSION)-isort
+run_isort:
+	$(TOX)isort --recursive analytics_data_api/ analyticsdataserver/
 
-quality: tox.requirements run_pylint run_check_isort run_pycodestyle  ## run_pylint, run_check_isort, run_pycodestyle (Installs tox requirements.)
+quality: run_pylint run_check_isort run_pycodestyle  ## run_pylint, run_check_isort, run_pycodestyle (Installs tox requirements.)
 
 validate: test.requirements test quality  ## Runs make test and make quality. (Installs test requirements.)
 
@@ -107,6 +115,9 @@ migrate-all:  ## Runs migrations on all databases
 loaddata: migrate  ## Runs migrations and generates fake data
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data
+
+create_indices:  ## Create ElasticSearch indices
+	python manage.py create_elasticsearch_learners_indices
 
 demo: clean requirements loaddata  ## Runs make clean, requirements, and loaddata, sets api key to edx
 	python manage.py set_api_key edx edx
@@ -134,6 +145,5 @@ travis_docker_push: travis_docker_tag travis_docker_auth ## push to docker hub
 	docker push 'openedx/analytics-data-api:latest-newrelic'
 	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT-newrelic"
 
-docs:
-	pip install -r requirements/tox.txt
+docs: tox.requirements
 	tox -e docs

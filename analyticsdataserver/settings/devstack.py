@@ -1,9 +1,10 @@
 """Devstack settings."""
 
+import os
+
 from analyticsdataserver.settings.local import *
 
-ALLOWED_HOSTS += ['edx.devstack.analyticsapi']
-
+########## DATABASE CONFIGURATION
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -23,5 +24,20 @@ DATABASES = {
     }
 }
 
-ELASTICSEARCH_LEARNERS_HOST = "edx.devstack.elasticsearch"
+DB_OVERRIDES = dict(
+    USER=os.environ.get('DB_USER', DATABASES['default']['USER']),
+    PASSWORD=os.environ.get('DB_PASSWORD', DATABASES['default']['PASSWORD']),
+    HOST=os.environ.get('DB_HOST', DATABASES['default']['HOST']),
+    PORT=os.environ.get('DB_PORT', DATABASES['default']['PORT']),
+)
+
+for override, value in DB_OVERRIDES.items():
+    DATABASES['default'][override] = value
+    DATABASES['analytics'][override] = value
+########## END DATABASE CONFIGURATION
+
+ELASTICSEARCH_LEARNERS_HOST = os.environ.get('ELASTICSEARCH_LEARNERS_HOST', 'edx.devstack.elasticsearch')
+
+ALLOWED_HOSTS += ['edx.devstack.analyticsapi']
+
 LMS_BASE_URL = "http://edx.devstack.lms:18000/"

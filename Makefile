@@ -119,11 +119,11 @@ loaddata: migrate  ## Runs migrations and generates fake data
 create_indices:  ## Create ElasticSearch indices
 	python manage.py create_elasticsearch_learners_indices
 
-demo: clean requirements loaddata  ## Runs make clean, requirements, and loaddata, sets api key to edx
+demo: requirements clean loaddata  ## Runs make clean, requirements, and loaddata, sets api key to edx
 	python manage.py set_api_key edx edx
 
 # Target used by edx-analytics-dashboard during its testing.
-travis: clean test.requirements migrate-all  ## Used by travis for testing
+travis: test.requirements clean migrate-all  ## Used by travis for testing
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"

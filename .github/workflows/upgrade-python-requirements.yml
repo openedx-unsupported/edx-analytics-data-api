@@ -2,8 +2,8 @@ name: Upgrade Requirements
 
 on:
   schedule:
-    # will start the job at 4:15 UTC every Wednesday
-    - cron: "15 4 * * 3"
+    # will start the job at 4:15 UTC on 13th and 28th of every month
+    - cron: "15 4 13,28 * *"
   workflow_dispatch:
     inputs:
       branch:
@@ -52,7 +52,7 @@ jobs:
           --target-branch="${{ env.target_branch }}" --base-branch-name="upgrade-python-requirements" \
           --commit-message="chore: Updating Python Requirements" --pr-title="Python Requirements Update" \
           --pr-body="Python requirements update.Please review the [changelogs](https://openedx.atlassian.net/wiki/spaces/TE/pages/1001521320/Python+Package+Changelogs) for the upgraded packages." \
-          --user-reviewers="" --team-reviewers="edx-data-engineering" --delete-old-pull-requests
+          --user-reviewers="" --team-reviewers="masters-devs-cosmonauts" --delete-old-pull-requests
 
       - name: Send failure notification
         if: ${{ failure() }}
@@ -63,6 +63,19 @@ jobs:
           username: ${{secrets.EDX_SMTP_USERNAME}}
           password: ${{secrets.EDX_SMTP_PASSWORD}}
           subject: Upgrade python requirements workflow failed in ${{github.repository}}
-          to: data-engineering@edx.org
+          to: masters-requirements-update@edx.opsgenie.net
           from: github-actions <github-actions@edx.org>
           body: Upgrade python requirements workflow in ${{github.repository}} failed! For details see "github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Send success notification
+        if: ${{ success() }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: email-smtp.us-east-1.amazonaws.com
+          server_port: 465
+          username: ${{secrets.EDX_SMTP_USERNAME}}
+          password: ${{secrets.EDX_SMTP_PASSWORD}}
+          subject: Upgrade python requirements workflow executed successfully in ${{github.repository}}
+          to: masters-requirements-update@edx.opsgenie.net
+          from: github-actions <github-actions@edx.org>
+          body: Upgrade python requirements workflow in ${{github.repository}} successfully created 'Python Requirements Update' PR. Please review it "github.com/${{ github.repository }}/pulls"

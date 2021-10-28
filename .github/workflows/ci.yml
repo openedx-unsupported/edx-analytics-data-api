@@ -18,7 +18,7 @@ jobs:
           - ubuntu-20.04
         python-version:
           - 3.8
-        targets: [ 'django32','quality','main.test','docs' ]
+        targets: [ 'quality','main.test','docs' ]
 
     steps:
     - uses: actions/checkout@v1

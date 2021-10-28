@@ -7,11 +7,11 @@ services:
 - docker
 sudo: required
 before_install:
-- docker-compose -f .travis/docker-compose-travis.yml up -d
+- docker-compose -f .travis/docker-compose-ci.yml up -d
 install:
-- pip install -r requirements/travis.txt
+- pip install -r requirements/ci.txt
 script:
-- docker exec -t -e TRAVIS=1 analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
+- docker exec -t analytics_api_testing bash -c " cd /edx/app/analytics_api/analytics_api/
   && export TOXENV=django32 && make test.requirements tox.requirements $TARGETS "
 matrix:
   include:

@@ -4,15 +4,15 @@
 #
 #    make upgrade
 #
-certifi==2021.5.30
+certifi==2021.10.8
     # via requests
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via requests
 codecov==2.1.12
-    # via -r requirements/travis.in
-coverage==5.5
+    # via -r requirements/ci.in
+coverage==6.0.2
     # via codecov
-idna==3.2
+idna==3.3
     # via requests
 requests==2.26.0
     # via codecov

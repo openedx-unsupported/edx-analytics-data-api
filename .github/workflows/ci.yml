@@ -1,0 +1,46 @@
+name: Python CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  run_tests:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+        python-version:
+          - 3.8
+        targets: [ 'quality','main.test','docs' ]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Start Container
+      run: docker-compose -f .github/docker-compose-ci.yml up -d
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements/pip.txt
+        pip install -r requirements/ci.txt
+
+    - name: Run Tests
+      run: docker exec -t analytics_api_testing bash -c "cd /edx/app/analytics_api/analytics_api/
+        && export TOXENV=django32 && make test.requirements tox.requirements ${{ matrix.targets }}"
+
+    - name: Run Coverage
+      if: matrix.python-version == '3.8' && matrix.targets=='main.test'
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true

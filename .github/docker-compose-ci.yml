@@ -10,10 +10,6 @@ services:
     command: tail -f /dev/null
     environment:
       ELASTICSEARCH_LEARNERS_HOST: "http://es:9223"
-      # Pull these from the host environment.
-      TRAVIS_BRANCH:
-      TRAVIS_PULL_REQUEST:
-      DATADOG_API_KEY:
     depends_on:
       - "es"
 

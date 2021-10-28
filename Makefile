@@ -38,6 +38,7 @@ develop: test.requirements  ## install test and dev requirements
 
 upgrade: 
 	pip3 install -q -r requirements/pip_tools.txt
+	pip-compile --upgrade --allow-unsafe -o requirements/pip.txt requirements/pip.in
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/doc.txt requirements/doc.in
@@ -45,7 +46,7 @@ upgrade:
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
 	pip-compile --upgrade -o requirements/tox.txt requirements/tox.in
-	pip-compile --upgrade -o requirements/travis.txt requirements/travis.in
+	pip-compile --upgrade -o requirements/ci.txt requirements/ci.in
 	scripts/post-pip-compile.sh \
         requirements/pip_tools.txt \
 	    requirements/base.txt \
@@ -54,7 +55,7 @@ upgrade:
 	    requirements/production.txt \
 	    requirements/test.txt \
 	    requirements/tox.txt \
-	    requirements/travis.txt
+	    requirements/ci.txt
 	## Let tox control the Django version for tests
 	grep -e "^django==" requirements/base.txt > requirements/django.txt
 	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
@@ -123,7 +124,7 @@ demo: requirements clean loaddata  ## Runs make clean, requirements, and loaddat
 	python manage.py set_api_key edx edx
 
 # Target used by edx-analytics-dashboard during its testing.
-travis: test.requirements clean migrate-all  ## Used by travis for testing
+github_ci: test.requirements clean migrate-all  ## Used by CI for testing
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
 	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
@@ -132,18 +133,18 @@ docker_build:
 	docker build . -f Dockerfile -t openedx/analytics-data-api
 	docker build . -f Dockerfile --target newrelic -t openedx/analytics-data-api:latest-newrelic
 
-travis_docker_tag: docker_build
-	docker tag openedx/analytics-data-api openedx/analytics-data-api:$$TRAVIS_COMMIT
-	docker tag openedx/analytics-data-api:latest-newrelic openedx/analytics-data-api:$$TRAVIS_COMMIT-newrelic
+docker_tag: docker_build
+	docker tag openedx/analytics-data-api openedx/analytics-data-api:${GITHUB_SHA}
+	docker tag openedx/analytics-data-api:latest-newrelic openedx/analytics-data-api:${GITHUB_SHA}-newrelic
 
-travis_docker_auth:
-	echo "$$DOCKER_PASSWORD" | docker login -u "$$DOCKER_USERNAME" --password-stdin
+docker_auth:
+	echo "$$DOCKERHUB_PASSWORD" | docker login -u "$$DOCKERHUB_USERNAME" --password-stdin
 
-travis_docker_push: travis_docker_tag travis_docker_auth ## push to docker hub
+docker_push: docker_tag docker_auth ## push to docker hub
 	docker push 'openedx/analytics-data-api:latest'
-	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT"
+	docker push "openedx/analytics-data-api:${GITHUB_SHA}"
 	docker push 'openedx/analytics-data-api:latest-newrelic'
-	docker push "openedx/analytics-data-api:$$TRAVIS_COMMIT-newrelic"
+	docker push "openedx/analytics-data-api:${GITHUB_SHA}-newrelic"
 
 docs: tox.requirements
 	tox -e docs

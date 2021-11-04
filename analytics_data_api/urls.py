@@ -5,6 +5,7 @@ app_name = 'analytics_data_api'
 
 urlpatterns = [
     url(r'^v0/', include('analytics_data_api.v0.urls')),
+    url(r'^v1/', include('analytics_data_api.v1.urls')),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

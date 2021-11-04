@@ -60,6 +60,15 @@ DATABASES = {
         'USER': 'api001',
         'ATOMIC_REQUESTS': False,
     },
+    'reports_v1': {
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'localhost',
+        'NAME': 'reports_v1',
+        'OPTIONS': DEFAULT_MYSQL_OPTIONS,
+        'PASSWORD': 'password',
+        'PORT': '3306',
+        'USER': 'reports001',
+    },
     'reports': {
         'ENGINE': 'django.db.backends.mysql',
         'HOST': 'localhost',
@@ -212,6 +221,7 @@ MIDDLEWARE = [
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'analyticsdataserver.router.RouterMiddleware',
     'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
@@ -370,7 +380,8 @@ REST_FRAMEWORK = {
 
 ########## ANALYTICS DATA API CONFIGURATION
 
-ANALYTICS_DATABASE = 'default'
+ANALYTICS_DATABASE = 'reports'
+ANALYTICS_DATABASE_V1 = 'reports_v1'
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
 ENTERPRISE_REPORTING_DB_ALIAS = 'enterprise'
 

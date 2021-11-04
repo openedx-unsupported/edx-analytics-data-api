@@ -40,6 +40,14 @@ DATABASES = {
         'HOST': '',
         'PORT': '',
     },
+    'analytics_v1': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
     'enterprise': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': normpath(join(DJANGO_ROOT, 'enterprise_reporting.db')),
@@ -66,6 +74,9 @@ CACHES = {
 
 ANALYTICS_DATABASE = 'analytics'
 ENTERPRISE_REPORTING_DB_ALIAS = 'analytics'
+# Requests to the /v1/ api will use this database.
+# To test a second database under the /v1/ routes change this to 'analytics_v1'
+ANALYTICS_DATABASE_V1 = 'analytics'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

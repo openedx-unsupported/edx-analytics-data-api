@@ -1,15 +1,17 @@
+import threading
+
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
 
-import threading
-
 request_cfg = threading.local()
 
+
 class RouterMiddleware(MiddlewareMixin):
-    def process_view(self, request, view_func, args, kwargs):
+    def process_view(self, request):
         if 'api/v1' in request.path:
             request_cfg.database = getattr(settings, 'ANALYTICS_DATABASE_V1', 'default_v1')
-    def process_response(self, request, response):
+
+    def process_response(self, request, response):  # pylint: disable=unused-argument
         if hasattr(request_cfg, 'database'):
             del request_cfg.database
         return response
@@ -24,8 +26,7 @@ class AnalyticsApiRouter:
         if app_label in ('v1', 'v0', 'enterprise_data'):
             if hasattr(request_cfg, 'database'):
                 return request_cfg.database
-            else:
-                return getattr(settings, 'ANALYTICS_DATABASE', 'default')
+            return getattr(settings, 'ANALYTICS_DATABASE', 'default')
 
         return None
 

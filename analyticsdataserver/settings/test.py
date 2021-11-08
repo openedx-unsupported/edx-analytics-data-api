@@ -16,6 +16,10 @@ DATABASES = {
     },
 }
 
+ANALYTICS_DATABASE = 'default'
+ENTERPRISE_REPORTING_DB_ALIAS = 'default'
+ANALYTICS_DATABASE_V1 = 'default'
+
 # Silence elasticsearch during tests
 LOGGING['loggers']['elasticsearch']['handlers'] = ['null']
 

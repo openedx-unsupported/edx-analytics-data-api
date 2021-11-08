@@ -40,6 +40,14 @@ DATABASES = {
         'HOST': '',
         'PORT': '',
     },
+    'analytics_v1': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
     'enterprise': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': normpath(join(DJANGO_ROOT, 'enterprise_reporting.db')),
@@ -66,6 +74,7 @@ CACHES = {
 
 ANALYTICS_DATABASE = 'analytics'
 ENTERPRISE_REPORTING_DB_ALIAS = 'analytics'
+ANALYTICS_DATABASE_V1 = 'analytics'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

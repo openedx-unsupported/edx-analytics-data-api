@@ -14,6 +14,14 @@ DATABASES = {
         'HOST': 'edx.devstack.mysql',
         'PORT': '3306',
     },
+    'analytics_v1': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'reports_v1',
+        'USER': 'api001',
+        'PASSWORD': 'password',
+        'HOST': 'edx.devstack.mysql',
+        'PORT': '3306',
+    },
     'analytics': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'reports',
@@ -34,6 +42,7 @@ DB_OVERRIDES = dict(
 for override, value in DB_OVERRIDES.items():
     DATABASES['default'][override] = value
     DATABASES['analytics'][override] = value
+    DATABASES['analytics_v1'][override] = value
 ########## END DATABASE CONFIGURATION
 
 ELASTICSEARCH_LEARNERS_HOST = os.environ.get('ELASTICSEARCH_LEARNERS_HOST', 'edx.devstack.elasticsearch')

@@ -7,7 +7,7 @@ request_cfg = threading.local()
 
 
 class RouterMiddleware(MiddlewareMixin):
-    def process_view(self, request):
+    def process_view(self, request, view_func, args, kwargs):  # pylint: disable=unused-argument
         if 'api/v1' in request.path:
             request_cfg.database = getattr(settings, 'ANALYTICS_DATABASE_V1', 'default_v1')
 

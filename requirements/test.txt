@@ -12,9 +12,9 @@ attrs==21.2.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.19.5
+boto3==1.20.5
     # via -r requirements/base.in
-botocore==1.22.5
+botocore==1.23.5
     # via
     #   boto3
     #   s3transfer
@@ -36,7 +36,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==6.0.2
+coverage[toml]==6.1.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -114,7 +114,7 @@ edx-django-utils==4.4.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.0.0
+edx-drf-extensions==8.0.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -127,7 +127,7 @@ edx-opaque-keys==2.2.2
     #   edx-ccx-keys
     #   edx-drf-extensions
     #   edx-enterprise-data
-edx-rbac==1.5.0
+edx-rbac==1.5.1
     # via edx-enterprise-data
 edx-rest-api-client==5.4.0
     # via
@@ -155,7 +155,7 @@ isort==4.3.21
     # via pylint
 itypes==1.2.0
     # via coreapi
-jinja2==3.0.2
+jinja2==3.0.3
     # via
     #   coreschema
     #   diff-cover
@@ -174,17 +174,17 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==7.2.2.169
+newrelic==7.2.4.171
     # via edx-django-utils
 ordered-set==3.1.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-packaging==21.0
+packaging==21.2
     # via
     #   drf-yasg
     #   pytest
-pbr==5.6.0
+pbr==5.7.0
     # via stevedore
 pluggy==1.0.0
     # via
@@ -192,11 +192,11 @@ pluggy==1.0.0
     #   pytest
 psutil==5.8.0
     # via edx-django-utils
-py==1.10.0
+py==1.11.0
     # via pytest
 pycodestyle==2.8.0
     # via -r requirements/test.in
-pycparser==2.20
+pycparser==2.21
     # via cffi
 pycryptodomex==3.11.0
     # via pyjwkest
@@ -217,7 +217,7 @@ pylint==2.4.4
     #   -r requirements/test.in
 pymongo==3.12.1
     # via edx-opaque-keys
-pyparsing==3.0.3
+pyparsing==2.4.7
     # via packaging
 pytest==6.2.5
     # via
@@ -251,7 +251,7 @@ requests==2.26.0
     #   slumber
 responses==0.15.0
     # via -r requirements/test.in
-ruamel.yaml==0.17.16
+ruamel.yaml==0.17.17
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml

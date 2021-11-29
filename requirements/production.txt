@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.19.5
+boto3==1.20.14
     # via -r requirements/base.in
-botocore==1.22.5
+botocore==1.23.14
     # via
     #   boto3
     #   s3transfer
@@ -20,7 +20,7 @@ certifi==2021.10.8
     #   requests
 cffi==1.15.0
     # via cryptography
-charset-normalizer==2.0.7
+charset-normalizer==2.0.8
     # via requests
 coreapi==2.3.3
     # via
@@ -30,11 +30,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==35.0.0
+cryptography==36.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.8
+django==3.2.9
     # via
     #   -r requirements/base.in
     #   django-cors-headers
@@ -99,7 +99,7 @@ edx-django-utils==4.4.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.0.0
+edx-drf-extensions==8.0.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -112,7 +112,7 @@ edx-opaque-keys==2.2.2
     #   edx-ccx-keys
     #   edx-drf-extensions
     #   edx-enterprise-data
-edx-rbac==1.5.0
+edx-rbac==1.5.1
     # via edx-enterprise-data
 edx-rest-api-client==5.4.0
     # via
@@ -136,23 +136,25 @@ gunicorn==20.1.0
     # via -r requirements/production.in
 idna==3.3
     # via requests
+importlib-metadata==4.8.2
+    # via markdown
 inflection==0.5.1
     # via drf-yasg
 itypes==1.2.0
     # via coreapi
-jinja2==3.0.2
+jinja2==3.0.3
     # via coreschema
 jmespath==0.10.0
     # via
     #   boto3
     #   botocore
-markdown==3.3.4
+markdown==3.3.6
     # via -r requirements/base.in
 markupsafe==2.0.1
     # via jinja2
-mysqlclient==2.0.3
+mysqlclient==2.1.0
     # via -r requirements/production.in
-newrelic==7.2.2.169
+newrelic==7.2.4.171
     # via
     #   -r requirements/production.in
     #   edx-django-utils
@@ -160,15 +162,15 @@ ordered-set==3.1.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-packaging==21.0
+packaging==21.3
     # via drf-yasg
 path.py==8.2.1
     # via -r requirements/production.in
-pbr==5.6.0
+pbr==5.8.0
     # via stevedore
 psutil==5.8.0
     # via edx-django-utils
-pycparser==2.20
+pycparser==2.21
     # via cffi
 pycryptodomex==3.11.0
     # via pyjwkest
@@ -181,7 +183,7 @@ pyjwt[crypto]==2.3.0
     #   edx-rest-api-client
 pymongo==3.12.1
     # via edx-opaque-keys
-pyparsing==3.0.3
+pyparsing==3.0.6
     # via packaging
 python-dateutil==2.8.2
     # via
@@ -204,7 +206,7 @@ requests==2.26.0
     #   edx-rest-api-client
     #   pyjwkest
     #   slumber
-ruamel.yaml==0.17.16
+ruamel.yaml==0.17.17
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -247,6 +249,8 @@ urllib3==1.26.7
     #   botocore
     #   elasticsearch
     #   requests
+zipp==3.6.0
+    # via importlib-metadata
 zope.event==4.5.0
     # via gevent
 zope.interface==5.4.0

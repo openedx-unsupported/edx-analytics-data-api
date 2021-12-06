@@ -1,5 +1,7 @@
 import abc
+from threading import local
 
+from django.conf import settings
 from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework import status
@@ -13,6 +15,25 @@ from analytics_data_api.v0.exceptions import (
     ParameterValueError,
     ReportFileNotFoundError,
 )
+
+thread_data = local()
+
+
+class RequestVersionMiddleware:
+    """
+    Add a database hint, analyticsapi_database, in the form of an attribute in thread-local storage.
+    This is used by the AnalyticsApiRouter to switch databases between the v0 and v1 views.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if 'api/v1' in request.path:
+            thread_data.analyticsapi_database = getattr(settings, 'ANALYTICS_DATABASE_V1', 'default')
+        else:
+            thread_data.analyticsapi_database = 'default'
+        response = self.get_response(request)
+        return response
 
 
 class BaseProcessErrorMiddleware(MiddlewareMixin, metaclass=abc.ABCMeta):

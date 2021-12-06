@@ -221,13 +221,14 @@ MIDDLEWARE = [
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
     'waffle.middleware.WaffleMiddleware',
-    'analytics_data_api.v0.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
-    'analytics_data_api.v0.middleware.LearnerNotFoundErrorMiddleware',
-    'analytics_data_api.v0.middleware.CourseNotSpecifiedErrorMiddleware',
-    'analytics_data_api.v0.middleware.CourseKeyMalformedErrorMiddleware',
-    'analytics_data_api.v0.middleware.ParameterValueErrorMiddleware',
-    'analytics_data_api.v0.middleware.ReportFileNotFoundErrorMiddleware',
-    'analytics_data_api.v0.middleware.CannotCreateDownloadLinkErrorMiddleware',
+    'analytics_data_api.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
+    'analytics_data_api.middleware.LearnerNotFoundErrorMiddleware',
+    'analytics_data_api.middleware.CourseNotSpecifiedErrorMiddleware',
+    'analytics_data_api.middleware.CourseKeyMalformedErrorMiddleware',
+    'analytics_data_api.middleware.ParameterValueErrorMiddleware',
+    'analytics_data_api.middleware.ReportFileNotFoundErrorMiddleware',
+    'analytics_data_api.middleware.CannotCreateDownloadLinkErrorMiddleware',
+    'analytics_data_api.middleware.RequestVersionMiddleware',
 ]
 ########## END MIDDLEWARE CONFIGURATION
 

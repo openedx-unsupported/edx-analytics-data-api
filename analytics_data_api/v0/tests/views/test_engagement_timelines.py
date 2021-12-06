@@ -17,7 +17,7 @@ from analytics_data_api.constants.engagement_events import (
 )
 from analytics_data_api.v0.tests.utils import create_engagement
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin
-from analyticsdataserver.tests import TestCaseWithAuthentication
+from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 @ddt.ddt

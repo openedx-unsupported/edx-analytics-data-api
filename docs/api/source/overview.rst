@@ -7,7 +7,7 @@ edX Data Analytics API Overview
 The edX Data Analytics API provides the tools for building applications to view
 and analyze student activity in your course.
 
-The edX Platform APIs use REST design principles and support the JSON 
+The edX Platform APIs use REST design principles and support the JSON
 data-interchange format.
 
 ****************************************
@@ -25,6 +25,20 @@ Open edX users can use the Data Analytics API with their own instances.
 
 EdX plans to make the Data Analytics API available to partners in the future,
 and invites feedback.
+
+**************************************
+edX Data Analytics API Version 1, Beta
+**************************************
+
+There is now a version 1 of the Data Analytics API. This version is largely the same
+as v0, but the data for v1 endpoints is sourced from a new database. The new database is populated by
+data outside of the current analytics pipeline. Open edX users can use version 1, but will need to populate the
+database being used by the v1 API.
+
+You can use version 1 of the API by updating your client URL version, for example:
+
+``/api/v1/courses/{course_id}/activity/``
+
 
 ***********************************
 edX Data Analytics API Capabilities

@@ -17,7 +17,7 @@ from analytics_data_api.constants import engagement_events
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
-from analyticsdataserver.tests import TestCaseWithAuthentication
+from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 class LearnerAPITestMixin(CsvViewMixin):

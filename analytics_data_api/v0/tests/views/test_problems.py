@@ -14,7 +14,7 @@ from analytics_data_api.v0.serializers import (
     ProblemFirstLastResponseAnswerDistributionSerializer,
     SequentialOpenDistributionSerializer,
 )
-from analyticsdataserver.tests import TestCaseWithAuthentication
+from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 class AnswerDistributionTests(TestCaseWithAuthentication):

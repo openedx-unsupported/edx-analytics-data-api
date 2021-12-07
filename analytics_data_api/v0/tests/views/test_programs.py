@@ -5,7 +5,7 @@ from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples
-from analyticsdataserver.tests import TestCaseWithAuthentication
+from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 @ddt.ddt

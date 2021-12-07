@@ -5,7 +5,7 @@ from django.utils import timezone
 from django_dynamic_fixture import G
 
 from analytics_data_api.v0 import models
-from analyticsdataserver.tests import TestCaseWithAuthentication
+from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 class VideoTimelineTests(TestCaseWithAuthentication):

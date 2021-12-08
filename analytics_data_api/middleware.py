@@ -29,9 +29,9 @@ class RequestVersionMiddleware:
 
     def __call__(self, request):
         if 'api/v1' in request.path:
-            thread_data.analyticsapi_database = getattr(settings, 'ANALYTICS_DATABASE_V1', 'default')
+            thread_data.analyticsapi_database = getattr(settings, 'ANALYTICS_DATABASE_V1')
         else:
-            thread_data.analyticsapi_database = 'default'
+            thread_data.analyticsapi_database = getattr(settings, 'ANALYTICS_DATABASE', 'default')
         response = self.get_response(request)
         return response
 

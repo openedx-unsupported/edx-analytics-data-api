@@ -11,7 +11,7 @@ class AnalyticsApiRouter:
     def _get_database(self, app_label):
         if app_label in ('v0', 'v1', 'enterprise_data'):
             if hasattr(thread_data, 'analyticsapi_database'):
-                return getattr(thread_data, 'analyticsapi_database', 'default')
+                return getattr(thread_data, 'analyticsapi_database')
             return getattr(settings, 'ANALYTICS_DATABASE', 'default')
         return None
 

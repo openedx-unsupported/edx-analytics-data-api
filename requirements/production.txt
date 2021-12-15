@@ -6,8 +6,6 @@
 #
 asgiref==3.4.1
     # via django
-backports.zoneinfo==0.2.1
-    # via django
 boto==2.42.0
     # via -r requirements/base.in
 boto3==1.20.24
@@ -32,12 +30,13 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==36.0.0
+cryptography==36.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
-django==4.0
+django==3.2.10
     # via
+    #   -c requirements/constraints.txt
     #   -r requirements/base.in
     #   django-cors-headers
     #   django-crum
@@ -75,7 +74,7 @@ django-waffle==2.2.1
     # via
     #   edx-django-utils
     #   edx-drf-extensions
-djangorestframework==3.13.0
+djangorestframework==3.13.1
     # via
     #   -r requirements/base.in
     #   djangorestframework-csv
@@ -195,7 +194,9 @@ python-dateutil==2.8.2
 python-memcached==1.59
     # via -r requirements/base.in
 pytz==2021.3
-    # via djangorestframework
+    # via
+    #   django
+    #   djangorestframework
 pyyaml==6.0
     # via
     #   -r requirements/production.in

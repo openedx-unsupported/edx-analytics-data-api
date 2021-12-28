@@ -4,17 +4,15 @@
 #
 #    make upgrade
 #
-backports.entry-points-selectable==1.1.1
-    # via virtualenv
 distlib==0.3.4
     # via virtualenv
-filelock==3.4.0
+filelock==3.4.2
     # via
     #   tox
     #   virtualenv
 packaging==21.3
     # via tox
-platformdirs==2.4.0
+platformdirs==2.4.1
     # via virtualenv
 pluggy==0.13.1
     # via tox
@@ -35,5 +33,5 @@ tox==3.14.6
     #   tox-battery
 tox-battery==0.6.1
     # via -r requirements/tox.in
-virtualenv==20.10.0
+virtualenv==20.11.0
     # via tox

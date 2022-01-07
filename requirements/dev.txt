@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.20.24
+boto3==1.20.26
     # via -r requirements/base.in
-botocore==1.23.24
+botocore==1.23.26
     # via
     #   boto3
     #   s3transfer
@@ -94,7 +94,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.1.0
     # via -r requirements/base.in
-edx-django-utils==4.4.0
+edx-django-utils==4.4.1
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -115,7 +115,7 @@ edx-opaque-keys==2.2.2
     #   edx-enterprise-data
 edx-rbac==1.5.1
     # via edx-enterprise-data
-edx-rest-api-client==5.4.0
+edx-rest-api-client==5.4.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -131,7 +131,7 @@ future==0.18.2
     # via pyjwkest
 idna==3.3
     # via requests
-importlib-metadata==4.8.2
+importlib-metadata==4.10.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -195,11 +195,11 @@ requests==2.26.0
     #   edx-rest-api-client
     #   pyjwkest
     #   slumber
-ruamel.yaml==0.17.17
+ruamel.yaml==0.17.19
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
-rules==3.0
+rules==3.1
     # via edx-enterprise-data
 s3transfer==0.5.0
     # via boto3

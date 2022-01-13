@@ -3,6 +3,7 @@ from datetime import date
 from django.test import TestCase
 from django_dynamic_fixture import G
 
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models as api_models
 from analytics_data_api.v0 import serializers as api_serializers
 
@@ -11,6 +12,7 @@ class TestSerializer(api_serializers.CourseEnrollmentDailySerializer, api_serial
     pass
 
 
+@set_databases
 class DynamicFieldsModelSerializerTests(TestCase):
     def test_fields(self):
         now = date.today()

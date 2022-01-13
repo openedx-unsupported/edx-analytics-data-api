@@ -2,9 +2,11 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 
 from analytics_data_api.constants.country import UNKNOWN_COUNTRY, get_country
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models
 
 
+@set_databases
 class CourseEnrollmentByCountryTests(TestCase):
     def test_country(self):
         country = get_country('US')

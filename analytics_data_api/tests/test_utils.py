@@ -119,3 +119,15 @@ class DateRangeTests(TestCase):
             datetime.datetime(2016, 1, 3),
             datetime.datetime(2016, 1, 4),
         ])
+
+
+def set_databases(cls):
+    """
+    This is to be used as a class decorator to set the databases
+    test class attribute to ensure that all databases are flushed.
+    Please see https://docs.djangoproject.com/en/3.2/topics/testing/tools/#multi-database-support.
+    """
+    def wrapper(cls):
+        setattr(cls, 'databases', '__all__')
+        return cls
+    return wrapper(cls)

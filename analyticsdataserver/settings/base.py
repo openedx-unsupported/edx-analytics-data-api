@@ -383,7 +383,7 @@ REST_FRAMEWORK = {
 ANALYTICS_DATABASE = 'reports'
 # Currently unused, V1 database will support migration to new backend data source
 ANALYTICS_DATABASE_V1 = 'reports_v1'
-DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsApiRouter']
+DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsdataserver.router.AnalyticsModelsRouter']
 ENTERPRISE_REPORTING_DB_ALIAS = 'enterprise'
 
 LMS_BASE_URL = None

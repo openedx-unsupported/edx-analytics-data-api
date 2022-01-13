@@ -7,12 +7,14 @@ from django.utils import timezone
 from django_dynamic_fixture import G
 
 from analytics_data_api.constants import enrollment_modes
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples, VerifyCourseIdMixin
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 @ddt.ddt
+@set_databases
 class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, APIListViewTestMixin):
     model = models.CourseMetaSummaryEnrollment
     model_id = 'course_id'

@@ -11,6 +11,7 @@ from analytics_data_api.constants.engagement_events import (
     VIDEO,
     VIEWED,
 )
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0.tests.utils import create_engagement, create_enterprise_user
 from analytics_data_api.v0.tests.views import CourseSamples
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
@@ -53,6 +54,7 @@ PAGINATED_SAMPLE_DATA = [
 
 
 @ddt.ddt
+@set_databases
 class EnterpriseLearnerEngagementViewTests(TestCaseWithAuthentication):
     @classmethod
     def setUpClass(cls):

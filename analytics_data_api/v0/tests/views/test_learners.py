@@ -14,6 +14,7 @@ from rest_framework import status
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from analytics_data_api.constants import engagement_events
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0.models import ModuleEngagementMetricRanges
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin, VerifyCsvResponseMixin
 from analytics_data_api.v0.views import CsvViewMixin, PaginatedHeadersMixin
@@ -644,11 +645,11 @@ class LearnerCsvListTests(LearnerAPITestMixin, VerifyCourseIdMixin,
 
 
 @ddt.ddt
+@set_databases
 class CourseLearnerMetadataTests(VerifyCourseIdMixin, LearnerAPITestMixin, TestCaseWithAuthentication,):
     """
     Tests for the course learner metadata endpoint.
     """
-
     def _get(self, course_id):
         """Helper to send a GET request to the API."""
         return self.authenticated_get(f'/api/v0/course_learner_metadata/{course_id}/')

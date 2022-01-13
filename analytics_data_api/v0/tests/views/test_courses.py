@@ -26,6 +26,7 @@ from analytics_data_api.constants.engagement_events import (
     VIDEO,
     VIEWED,
 )
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.utils import get_filename_safe_course_id
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.tests.utils import create_engagement
@@ -51,6 +52,7 @@ class DefaultFillTestMixin:
 
 # pylint: disable=no-member
 @ddt.ddt
+@set_databases
 class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
     model = None
     api_root_path = '/api/v0/'
@@ -156,6 +158,7 @@ class CourseViewTestCaseMixin(VerifyCsvResponseMixin):
 
 # pylint: disable=abstract-method
 @ddt.ddt
+@set_databases
 class CourseEnrollmentViewTestCaseMixin(CourseViewTestCaseMixin):
     date = None
 
@@ -175,6 +178,7 @@ class CourseEnrollmentViewTestCaseMixin(CourseViewTestCaseMixin):
 
 
 @ddt.ddt
+@set_databases
 class CourseActivityLastWeekTest(TestCaseWithAuthentication):
     def generate_data(self, course_id):
         interval_start = datetime.datetime(2014, 1, 1, tzinfo=pytz.utc)
@@ -272,6 +276,7 @@ class CourseActivityLastWeekTest(TestCaseWithAuthentication):
 
 
 @ddt.ddt
+@set_databases
 class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/enrollment/birth_year'
     model = models.CourseEnrollmentByBirthYear
@@ -301,6 +306,7 @@ class CourseEnrollmentByBirthYearViewTests(CourseEnrollmentViewTestCaseMixin, Te
         self.assertEqual(response.data, expected)
 
 
+@set_databases
 class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/enrollment/education/'
     model = models.CourseEnrollmentByEducation
@@ -327,6 +333,7 @@ class CourseEnrollmentByEducationViewTests(CourseEnrollmentViewTestCaseMixin, Te
 
 
 @ddt.ddt
+@set_databases
 class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
                                         TestCaseWithAuthentication):
     path = '/enrollment/gender/'
@@ -389,6 +396,7 @@ class CourseEnrollmentByGenderViewTests(CourseEnrollmentViewTestCaseMixin, Defau
         self.assertViewReturnsExpectedData([expected], course_id)
 
 
+@set_databases
 class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     model = models.CourseEnrollmentDaily
     path = '/enrollment'
@@ -407,6 +415,7 @@ class CourseEnrollmentViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithA
 
 
 @ddt.ddt
+@set_databases
 class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFillTestMixin,
                                     TestCaseWithAuthentication):
     model = models.CourseEnrollmentModeDaily
@@ -467,6 +476,7 @@ class CourseEnrollmentModeViewTests(CourseEnrollmentViewTestCaseMixin, DefaultFi
         self.assertViewReturnsExpectedData([expected], course_id)
 
 
+@set_databases
 class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/enrollment/location/'
     model = models.CourseEnrollmentByCountry
@@ -514,6 +524,7 @@ class CourseEnrollmentByLocationViewTests(CourseEnrollmentViewTestCaseMixin, Tes
 
 
 @ddt.ddt
+@set_databases
 class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthentication):
     path = '/activity/'
     default_order_by = 'interval_end'
@@ -587,6 +598,7 @@ class CourseActivityWeeklyViewTests(CourseViewTestCaseMixin, TestCaseWithAuthent
 
 
 @ddt.ddt
+@set_databases
 class CourseProblemsListViewTests(TestCaseWithAuthentication):
     def _get_data(self, course_id):
         """
@@ -650,6 +662,7 @@ class CourseProblemsListViewTests(TestCaseWithAuthentication):
 
 
 @ddt.ddt
+@set_databases
 class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
     def _get_data(self, course_id):
         """
@@ -729,6 +742,7 @@ class CourseProblemsAndTagsListViewTests(TestCaseWithAuthentication):
 
 
 @ddt.ddt
+@set_databases
 class CourseVideosListViewTests(TestCaseWithAuthentication):
     def _get_data(self, course_id):
         """
@@ -787,8 +801,8 @@ class CourseVideosListViewTests(TestCaseWithAuthentication):
 
 
 @ddt.ddt
+@set_databases
 class UserEngagementViewTests(TestCaseWithAuthentication):
-
     def _get_data(self, course_id):
         """
         Retrieve intervention report a specified course.
@@ -866,8 +880,8 @@ class UserEngagementViewTests(TestCaseWithAuthentication):
 
 
 @ddt.ddt
+@set_databases
 class CourseReportDownloadViewTests(TestCaseWithAuthentication):
-
     path = '/api/v0/courses/{course_id}/reports/{report_name}'
 
     @patch('django.core.files.storage.default_storage.exists', Mock(return_value=False))

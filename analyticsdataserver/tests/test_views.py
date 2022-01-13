@@ -5,9 +5,11 @@ from django.conf import settings
 from django.db.utils import ConnectionHandler
 from django.test.utils import override_settings
 
+from analytics_data_api.tests.test_utils import set_databases
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
+@set_databases
 class OperationalEndpointsTest(TestCaseWithAuthentication):
     def test_status(self):
         response = self.client.get('/status', follow=True)

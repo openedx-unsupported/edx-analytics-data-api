@@ -1,0 +1,274 @@
+[
+    {
+        "fields": {
+            "answer_value": "36.02736",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Earth Science Question",
+            "question_text": "Enter your answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "answer_value": "33.0",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Earth Science Question",
+            "question_text": "Enter your answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "answer_value": "27.51936482",
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Earth Science Question",
+            "question_text": "Enter your answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "answer_value": "28.65",
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "EarthSciences/GP202/Spring2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://EarthSciences/GP202/problem/d50bf059fa05468e94f61d52dd37f228",
+            "part_id": "i4x-EarthSciences-GP202-problem-d50bf059fa05468e94f61d52dd37f228_4_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Earth Science Question",
+            "question_text": "Enter your answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 4
+    },
+    {
+        "fields": {
+            "answer_value": "line 15: mean(glm.pred==Direction)",
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 190,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_0",
+            "variant": null,
+            "problem_display_name": null,
+            "question_text": null
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 5
+    },
+    {
+        "fields": {
+            "answer_value": "line 22: Direction.2005=Smarket$Direction[!train]",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_2",
+            "variant": null,
+            "problem_display_name": null,
+            "question_text": null
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 6
+    },
+    {
+        "fields": {
+            "answer_value": "line 30: table(glm.pred,Direction.2005)",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 2,
+            "course_id": "HumanitiesScience/StatLearning/Winter2014",
+            "created": "2014-06-24T17:13:12",
+            "module_id": "i4x://HumanitiesScience/StatLearning/problem/3c53e173c9af464aa3afb8fac82c3702",
+            "part_id": "i4x-HumanitiesScience-StatLearning-problem-3c53e173c9af464aa3afb8fac82c3702_2_1",
+            "value_id": "choice_3",
+            "variant": null,
+            "problem_display_name": null,
+            "question_text": null
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 7
+    },
+    {
+        "fields": {
+            "answer_value": "5.02",
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 190,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_2_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Enter an answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 8
+    },
+    {
+        "fields": {
+            "answer_value": "62",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 26,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_2_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Enter an answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 9
+    },
+    {
+        "fields": {
+            "answer_value": "10.2",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 200,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:12",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_2_1",
+            "value_id": null,
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Enter an answer:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 10
+    },
+    {
+        "fields": {
+            "answer_value": null,
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 10,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_3_1",
+            "value_id": null,
+            "variant": 2,
+            "problem_display_name": "Example problem",
+            "question_text": "Randomized answer"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 11
+    },
+    {
+        "fields": {
+            "answer_value": null,
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 426,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_3_1",
+            "value_id": null,
+            "variant": 100,
+            "problem_display_name": "Example problem",
+            "question_text": "Randomized answer"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 12
+    },
+
+    {
+        "fields": {
+            "answer_value": "North America",
+            "correct": true,
+            "first_response_count": 0,
+            "last_response_count": 190,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_4_1",
+            "value_id": "choice_0",
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Select from the choices below:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 13
+    },
+    {
+        "fields": {
+            "answer_value": "Africa",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 26,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:11",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_4_1",
+            "value_id": "choice_0",
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Select from the choices below:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 14
+    },
+    {
+        "fields": {
+            "answer_value": "Asia",
+            "correct": false,
+            "first_response_count": 0,
+            "last_response_count": 200,
+            "course_id": "edX/DemoX/Demo_Course",
+            "created": "2014-06-24T17:13:12",
+            "module_id": "i4x://edX/DemoX.1/problem/05d289c5ad3d47d48a77622c4a81ec36",
+            "part_id": "i4x-edX-DemoX_1-problem-05c289c5ad3d47d48a77622c4a81ec33_4_1",
+            "value_id": "choice_0",
+            "variant": null,
+            "problem_display_name": "Example problem",
+            "question_text": "Select from the choices below:"
+        },
+        "model": "v0.problemfirstlastresponseanswerdistribution",
+        "pk": 15
+    }
+
+]

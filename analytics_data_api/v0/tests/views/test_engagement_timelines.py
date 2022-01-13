@@ -15,12 +15,14 @@ from analytics_data_api.constants.engagement_events import (
     VIDEO,
     VIEWED,
 )
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0.tests.utils import create_engagement
 from analytics_data_api.v0.tests.views import CourseSamples, VerifyCourseIdMixin
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 @ddt.ddt
+@set_databases
 class EngagementTimelineTests(VerifyCourseIdMixin, TestCaseWithAuthentication):
     DEFAULT_USERNAME = 'ed_xavier'
     path_template = '/api/v0/engagement_timelines/{}/?course_id={}'

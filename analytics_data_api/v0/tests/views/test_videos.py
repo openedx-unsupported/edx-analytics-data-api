@@ -4,12 +4,13 @@ from django.conf import settings
 from django.utils import timezone
 from django_dynamic_fixture import G
 
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
+@set_databases
 class VideoTimelineTests(TestCaseWithAuthentication):
-
     def _get_data(self, video_id=None):
         return self.authenticated_get(f'/api/v0/videos/{video_id}/timeline')
 

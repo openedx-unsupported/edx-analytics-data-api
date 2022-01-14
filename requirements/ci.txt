@@ -6,7 +6,7 @@
 #
 certifi==2021.10.8
     # via requests
-charset-normalizer==2.0.9
+charset-normalizer==2.0.10
     # via requests
 codecov==2.1.12
     # via -r requirements/ci.in
@@ -14,7 +14,7 @@ coverage==6.2
     # via codecov
 idna==3.3
     # via requests
-requests==2.26.0
+requests==2.27.1
     # via codecov
-urllib3==1.26.7
+urllib3==1.26.8
     # via requests

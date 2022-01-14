@@ -8,9 +8,9 @@ asgiref==3.4.1
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.20.26
+boto3==1.20.35
     # via -r requirements/base.in
-botocore==1.23.26
+botocore==1.23.35
     # via
     #   boto3
     #   s3transfer
@@ -20,7 +20,7 @@ certifi==2021.10.8
     #   requests
 cffi==1.15.0
     # via cryptography
-charset-normalizer==2.0.9
+charset-normalizer==2.0.10
     # via requests
 coreapi==2.3.3
     # via
@@ -34,7 +34,7 @@ cryptography==36.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.10
+django==3.2.11
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -52,7 +52,7 @@ django==3.2.10
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==3.10.1
+django-cors-headers==3.11.0
     # via -r requirements/base.in
 django-countries==7.2.1
     # via -r requirements/base.in
@@ -70,7 +70,7 @@ django-storages==1.8
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-django-waffle==2.2.1
+django-waffle==2.3.0
     # via
     #   edx-django-utils
     #   edx-drf-extensions
@@ -84,7 +84,7 @@ djangorestframework==3.13.1
     #   edx-drf-extensions
 djangorestframework-csv==2.1.1
     # via -r requirements/base.in
-drf-jwt==1.19.1
+drf-jwt==1.19.2
     # via edx-drf-extensions
 drf-yasg==1.20.0
     # via edx-api-doc-tools
@@ -92,7 +92,7 @@ edx-api-doc-tools==1.5.0
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
-edx-django-release-util==1.1.0
+edx-django-release-util==1.1.1
     # via -r requirements/base.in
 edx-django-utils==4.4.1
     # via
@@ -157,7 +157,7 @@ packaging==21.3
     # via drf-yasg
 pbr==5.8.0
     # via stevedore
-psutil==5.8.0
+psutil==5.9.0
     # via edx-django-utils
 pycparser==2.21
     # via cffi
@@ -187,7 +187,7 @@ pytz==2021.3
     #   djangorestframework
 pyyaml==6.0
     # via edx-django-release-util
-requests==2.26.0
+requests==2.27.1
     # via
     #   coreapi
     #   edx-drf-extensions
@@ -195,7 +195,7 @@ requests==2.26.0
     #   edx-rest-api-client
     #   pyjwkest
     #   slumber
-ruamel.yaml==0.17.19
+ruamel.yaml==0.17.20
     # via drf-yasg
 ruamel.yaml.clib==0.2.6
     # via ruamel.yaml
@@ -232,11 +232,11 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -r requirements/base.in
     #   botocore
     #   elasticsearch
     #   requests
-zipp==3.6.0
+zipp==3.7.0
     # via importlib-metadata

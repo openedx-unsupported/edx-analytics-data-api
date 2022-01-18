@@ -14,11 +14,27 @@ DATABASES = {
         "HOST": "",
         "PORT": "",
     },
+    'analytics': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'analytics_v1': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': normpath(join(DJANGO_ROOT, 'analytics_v1.db')),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
 }
 
-ANALYTICS_DATABASE = 'default'
+ANALYTICS_DATABASE = 'analytics'
+ANALYTICS_DATABASE_V1 = 'analytics_v1'
 ENTERPRISE_REPORTING_DB_ALIAS = 'default'
-ANALYTICS_DATABASE_V1 = 'default'
 
 # Silence elasticsearch during tests
 LOGGING['loggers']['elasticsearch']['handlers'] = ['null']

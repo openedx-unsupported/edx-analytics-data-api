@@ -1,9 +1,11 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models
 
 
+@set_databases
 class GenerateFakeCourseDataTests(TestCase):
     def testNormalRun(self):
         num_weeks = 2
@@ -13,7 +15,8 @@ class GenerateFakeCourseDataTests(TestCase):
             'generate_fake_course_data',
             f"--num-weeks={num_weeks}",
             "--no-videos",
-            "--course-id", course_id
+            "--course-id", course_id,
+            "--database", 'analytics',
         )
 
         for model in [models.CourseEnrollmentDaily,

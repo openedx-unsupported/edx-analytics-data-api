@@ -22,7 +22,7 @@ thread_data = local()
 class RequestVersionMiddleware:
     """
     Add a database hint, analyticsapi_database, in the form of an attribute in thread-local storage.
-    This is used by the AnalyticsApiRouter to switch databases between the v0 and v1 views.
+    This is used by the AnalyticsAPIRouter to switch databases between the v0 and v1 views.
     """
     def __init__(self, get_response):
         self.get_response = get_response

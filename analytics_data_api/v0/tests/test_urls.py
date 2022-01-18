@@ -1,7 +1,10 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from analytics_data_api.tests.test_utils import set_databases
 
+
+@set_databases
 class UrlRedirectTests(TestCase):
     api_root_path = '/api/v0/'
 

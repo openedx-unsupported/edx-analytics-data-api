@@ -64,8 +64,15 @@ class Command(BaseCommand):
             default=True,
             help='Disables pulling video ids from the LMS server to generate fake video data and instead uses fake ids.'
         )
+        parser.add_argument(
+            '--database',
+            action='store',
+            dest='database',
+            default='default',
+            help='Database in which to generate fake date',
+        )
 
-    def generate_daily_data(self, course_id, start_date, end_date):
+    def generate_daily_data(self, course_id, start_date, end_date, database):
         # Use the preset ratios below to generate data in the specified demographics
 
         gender_ratios = {
@@ -116,7 +123,7 @@ class Command(BaseCommand):
                       models.CourseEnrollmentByCountry,
                       models.CourseMetaSummaryEnrollment,
                       models.CourseProgramMetadata]:
-            model.objects.all().delete()
+            model.objects.using(database).all().delete()
 
         logger.info("Deleted all daily course enrollment data.")
         logger.info("Generating new daily course enrollment data...")
@@ -129,33 +136,33 @@ class Command(BaseCommand):
         progress = tqdm(total=(end_date - date).days + 2)
         while date <= end_date:
             daily_total = get_count(daily_total)
-            models.CourseEnrollmentDaily.objects.create(course_id=course_id, date=date, count=daily_total)
+            models.CourseEnrollmentDaily.objects.using(database).create(course_id=course_id, date=date, count=daily_total)
 
             for mode, ratio in enrollment_mode_ratios.items():
                 count = int(ratio * daily_total)
                 cumulative_count = max(cumulative_count + 10, count)
-                models.CourseEnrollmentModeDaily.objects.create(course_id=course_id, date=date, count=count,
-                                                                cumulative_count=cumulative_count, mode=mode)
+                models.CourseEnrollmentModeDaily.objects.using(database).create(course_id=course_id, date=date, count=count,
+                                                                                cumulative_count=cumulative_count, mode=mode)
 
             for gender, ratio in gender_ratios.items():
                 count = int(ratio * daily_total)
-                models.CourseEnrollmentByGender.objects.create(course_id=course_id, date=date, count=count,
-                                                               gender=gender)
+                models.CourseEnrollmentByGender.objects.using(database).create(course_id=course_id, date=date, count=count,
+                                                                               gender=gender)
 
             for education_level, ratio in education_level_ratios.items():
                 count = int(ratio * daily_total)
-                models.CourseEnrollmentByEducation.objects.create(course_id=course_id, date=date, count=count,
-                                                                  education_level=education_level)
+                models.CourseEnrollmentByEducation.objects.using(database).create(course_id=course_id, date=date, count=count,
+                                                                                  education_level=education_level)
 
             for country_code, ratio in country_ratios.items():
                 count = int(ratio * daily_total)
-                models.CourseEnrollmentByCountry.objects.create(course_id=course_id, date=date, count=count,
-                                                                country_code=country_code)
+                models.CourseEnrollmentByCountry.objects.using(database).create(course_id=course_id, date=date, count=count,
+                                                                                country_code=country_code)
 
             for birth_year, ratio in birth_years.items():
                 count = int(ratio * daily_total)
-                models.CourseEnrollmentByBirthYear.objects.create(course_id=course_id, date=date, count=count,
-                                                                  birth_year=birth_year)
+                models.CourseEnrollmentByBirthYear.objects.using(database).create(course_id=course_id, date=date, count=count,
+                                                                                  birth_year=birth_year)
 
             progress.update(1)
             date = date + datetime.timedelta(days=1)
@@ -164,7 +171,7 @@ class Command(BaseCommand):
             count = int(ratio * daily_total)
             pass_rate = min(random.normalvariate(.45 + (.1 * index), .15), 1.0)
             cumulative_count = count + random.randint(0, 100)
-            models.CourseMetaSummaryEnrollment.objects.create(
+            models.CourseMetaSummaryEnrollment.objects.using(database).create(
                 course_id=course_id, catalog_course_title='Demo Course', catalog_course='Demo_Course',
                 start_time=timezone.now() - datetime.timedelta(weeks=6),
                 end_time=timezone.now() + datetime.timedelta(weeks=10),
@@ -172,21 +179,21 @@ class Command(BaseCommand):
                 cumulative_count=cumulative_count, count_change_7_days=random.randint(-50, 50),
                 passing_users=int(cumulative_count * pass_rate))
 
-        models.CourseProgramMetadata.objects.create(course_id=course_id, program_id='Demo_Program',
-                                                    program_type='Demo', program_title='Demo Program')
+        models.CourseProgramMetadata.objects.using(database).create(course_id=course_id, program_id='Demo_Program',
+                                                                    program_type='Demo', program_title='Demo Program')
 
         progress.update(1)
         progress.close()
         logger.info("Done!")
 
-    def generate_weekly_data(self, course_id, start_date, end_date):
+    def generate_weekly_data(self, course_id, start_date, end_date, database):
         activity_types = ['PLAYED_VIDEO', 'ATTEMPTED_PROBLEM', 'POSTED_FORUM']
 
         # Ensure we start on a Sunday 00:00
         days_ahead = -start_date.weekday()
         start = start_date + datetime.timedelta(days_ahead)
 
-        models.CourseActivityWeekly.objects.all().delete()
+        models.CourseActivityWeekly.objects.using(database).all().delete()
         logger.info("Deleted all weekly course activity.")
 
         logger.info("Generating new weekly course activity data...")
@@ -200,12 +207,13 @@ class Command(BaseCommand):
             counts = constrained_sum_sample_pos(len(activity_types), active_students)
 
             for activity_type, count in zip(activity_types, counts):
-                models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type=activity_type,
-                                                           count=count, interval_start=start, interval_end=end)
+                models.CourseActivityWeekly.objects.using(database).create(
+                    course_id=course_id, activity_type=activity_type,
+                    count=count, interval_start=start, interval_end=end)
 
-            models.CourseActivityWeekly.objects.create(course_id=course_id, activity_type='ACTIVE',
-                                                       count=active_students,
-                                                       interval_start=start, interval_end=end)
+            models.CourseActivityWeekly.objects.using(database).create(course_id=course_id, activity_type='ACTIVE',
+                                                                       count=active_students,
+                                                                       interval_start=start, interval_end=end)
 
             progress.update(1)
             start = end
@@ -213,23 +221,23 @@ class Command(BaseCommand):
         progress.close()
         logger.info("Done!")
 
-    def generate_video_timeline_data(self, video_id):
+    def generate_video_timeline_data(self, video_id, database):
         for segment in range(100):
             active_students = random.randint(100, 4000)
             counts = constrained_sum_sample_pos(2, active_students)
-            models.VideoTimeline.objects.create(pipeline_video_id=video_id, segment=segment,
-                                                num_users=counts[0], num_views=counts[1])
+            models.VideoTimeline.objects.using(database).create(pipeline_video_id=video_id, segment=segment,
+                                                                num_users=counts[0], num_views=counts[1])
 
-    def generate_video_data(self, course_id, video_id, module_id):
+    def generate_video_data(self, course_id, video_id, module_id, database):
         users_at_start = 1234
-        models.Video.objects.create(course_id=course_id, pipeline_video_id=video_id,
-                                    encoded_module_id=module_id, duration=500, segment_length=5,
-                                    users_at_start=users_at_start,
-                                    users_at_end=random.randint(100, users_at_start))
+        models.Video.objects.using(database).create(course_id=course_id, pipeline_video_id=video_id,
+                                                    encoded_module_id=module_id, duration=500, segment_length=5,
+                                                    users_at_start=users_at_start,
+                                                    users_at_end=random.randint(100, users_at_start))
 
-    def generate_learner_engagement_data(self, course_id, username, start_date, end_date, max_value=100):
+    def generate_learner_engagement_data(self, course_id, username, start_date, end_date, database, max_value=100):
         logger.info("Deleting learner engagement module data...")
-        models.ModuleEngagement.objects.all().delete()
+        models.ModuleEngagement.objects.using(database).all().delete()
 
         logger.info("Generating learner engagement module data...")
         current = start_date
@@ -244,31 +252,31 @@ class Command(BaseCommand):
                         entity_type = metric.split('_', 1)[0]
                         event = metric.split('_', 1)[1]
                         entity_id = f'an-id-{entity_type}-{event}'
-                        models.ModuleEngagement.objects.create(
+                        models.ModuleEngagement.objects.using(database).create(
                             course_id=course_id, username=username, date=current,
                             entity_type=entity_type, entity_id=entity_id, event=event, count=count)
             progress.update(1)
         progress.close()
         logger.info("Done!")
 
-    def generate_learner_engagement_range_data(self, course_id, start_date, end_date, max_value=100):
+    def generate_learner_engagement_range_data(self, course_id, start_date, end_date, database, max_value=100):
         logger.info("Deleting engagement range data...")
-        models.ModuleEngagementMetricRanges.objects.all().delete()
+        models.ModuleEngagementMetricRanges.objects.using(database).all().delete()
 
         logger.info("Generating engagement range data...")
         for event in engagement_events.EVENTS:
             low_ceil = random.random() * max_value * 0.5
-            models.ModuleEngagementMetricRanges.objects.create(
+            models.ModuleEngagementMetricRanges.objects.using(database).create(
                 course_id=course_id, start_date=start_date, end_date=end_date, metric=event,
                 range_type='low', low_value=0, high_value=low_ceil)
             high_floor = random.random() * max_value * 0.5 + low_ceil
-            models.ModuleEngagementMetricRanges.objects.create(
+            models.ModuleEngagementMetricRanges.objects.using(database).create(
                 course_id=course_id, start_date=start_date, end_date=end_date, metric=event,
                 range_type='high', low_value=high_floor, high_value=max_value)
 
-    def generate_tags_distribution_data(self, course_id):
+    def generate_tags_distribution_data(self, course_id, database):
         logger.info("Deleting existed tags distribution data...")
-        models.ProblemsAndTags.objects.all().delete()
+        models.ProblemsAndTags.objects.using(database).all().delete()
 
         module_id_tpl = 'i4x://test/problem/%d'
         difficulty_tag = ['Easy', 'Medium', 'Hard']
@@ -282,13 +290,13 @@ class Command(BaseCommand):
             total_submissions = random.randint(0, 100)
             correct_submissions = random.randint(0, total_submissions)
 
-            models.ProblemsAndTags.objects.create(
+            models.ProblemsAndTags.objects.using(database).create(
                 course_id=course_id, module_id=module_id,
                 tag_name='learning_outcome', tag_value=random.choice(learning_outcome_tag),
                 total_submissions=total_submissions, correct_submissions=correct_submissions
             )
             if random.randint(0, chance_difficulty) != chance_difficulty:
-                models.ProblemsAndTags.objects.create(
+                models.ProblemsAndTags.objects.using(database).create(
                     course_id=course_id, module_id=module_id,
                     tag_name='difficulty', tag_value=random.choice(difficulty_tag),
                     total_submissions=total_submissions, correct_submissions=correct_submissions
@@ -306,17 +314,17 @@ class Command(BaseCommand):
         blocks_api = CourseBlocksApiClient(api_base_url, settings.COURSE_BLOCK_API_AUTH_TOKEN, timeout=5)
         return blocks_api.all_videos(course_id)
 
-    def generate_all_video_data(self, course_id, videos):
+    def generate_all_video_data(self, course_id, videos, database):
         logger.info("Deleting course video data...")
-        models.Video.objects.all().delete()
+        models.Video.objects.using(database).all().delete()
 
         logger.info("Deleting video timeline data...")
-        models.VideoTimeline.objects.all().delete()
+        models.VideoTimeline.objects.using(database).all().delete()
 
         logger.info("Generating new course videos and video timeline data...")
         for video in tqdm(videos):
-            self.generate_video_data(course_id, video['video_id'], video['video_module_id'])
-            self.generate_video_timeline_data(video['video_id'])
+            self.generate_video_data(course_id, video['video_id'], video['video_module_id'], database)
+            self.generate_video_timeline_data(video['video_id'], database)
 
         logger.info("Done!")
 
@@ -332,6 +340,7 @@ class Command(BaseCommand):
         course_id = options['course_id']
         username = options['username']
         videos = options['videos']
+        database = options['database']
         if videos:
             video_ids = self.fetch_videos_from_course_blocks(course_id)
             if not video_ids:
@@ -348,10 +357,10 @@ class Command(BaseCommand):
         else:
             end_date = timezone.now().replace(microsecond=0)
 
-        logger.info("Generating data for %s...", course_id)
-        self.generate_weekly_data(course_id, start_date, end_date)
-        self.generate_daily_data(course_id, start_date, end_date)
-        self.generate_all_video_data(course_id, video_ids)
-        self.generate_learner_engagement_data(course_id, username, start_date, end_date)
-        self.generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date())
-        self.generate_tags_distribution_data(course_id)
+        logger.info("Generating data for %s in database %s", course_id, database)
+        self.generate_weekly_data(course_id, start_date, end_date, database)
+        self.generate_daily_data(course_id, start_date, end_date, database)
+        self.generate_all_video_data(course_id, video_ids, database)
+        self.generate_learner_engagement_data(course_id, username, start_date, end_date, database)
+        self.generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date(), database)
+        self.generate_tags_distribution_data(course_id, database)

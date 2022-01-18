@@ -3,12 +3,14 @@ import datetime
 import ddt
 from django_dynamic_fixture import G
 
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.tests.views import APIListViewTestMixin, CourseSamples
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
 @ddt.ddt
+@set_databases
 class ProgramsViewTests(TestCaseWithAuthentication, APIListViewTestMixin):
     model = models.CourseProgramMetadata
     model_id = 'program_id'

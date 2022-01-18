@@ -1,6 +1,6 @@
 ROOT = $(shell echo "$$PWD")
 COVERAGE_DIR = $(ROOT)/build/coverage
-DATABASES = default analytics
+DATABASES = default analytics analytics_v1
 .DEFAULT_GOAL := help
 
 TOX=''
@@ -113,9 +113,11 @@ migrate:  ## Runs django migrations with syncdb and default database
 migrate-all:  ## Runs migrations on all databases
 	$(foreach db_name,$(DATABASES),./manage.py migrate --noinput --run-syncdb --database=$(db_name);)
 
-loaddata: migrate  ## Runs migrations and generates fake data
+loaddata: migrate-all  ## Runs migrations and generates fake data
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_course_data
+	python manage.py loaddata problem_response_answer_distribution_analytics_v1 --database=analytics_v1
+	python manage.py generate_fake_course_data --database=analytics
+	python manage.py generate_fake_course_data --database=analytics_v1
 
 create_indices:  ## Create ElasticSearch indices
 	python manage.py create_elasticsearch_learners_indices

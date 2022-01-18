@@ -8,6 +8,7 @@ import json
 
 from django_dynamic_fixture import G
 
+from analytics_data_api.tests.test_utils import set_databases
 from analytics_data_api.v0 import models
 from analytics_data_api.v0.serializers import (
     GradeDistributionSerializer,
@@ -17,6 +18,7 @@ from analytics_data_api.v0.serializers import (
 from analyticsdataserver.tests.utils import TestCaseWithAuthentication
 
 
+@set_databases
 class AnswerDistributionTests(TestCaseWithAuthentication):
     path = '/answer_distribution/'
     maxDiff = None
@@ -138,6 +140,7 @@ class AnswerDistributionTests(TestCaseWithAuthentication):
         self.assertEqual(response.status_code, 404)
 
 
+@set_databases
 class GradeDistributionTests(TestCaseWithAuthentication):
     path = '/grade_distribution/'
     maxDiff = None
@@ -167,6 +170,7 @@ class GradeDistributionTests(TestCaseWithAuthentication):
         self.assertEqual(response.status_code, 404)
 
 
+@set_databases
 class SequentialOpenDistributionTests(TestCaseWithAuthentication):
     path = '/sequential_open_distribution/'
     maxDiff = None

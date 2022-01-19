@@ -61,7 +61,7 @@ class CourseEnrollmentModeDaily(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_mode_daily'
-        ordering = ('date', 'course_id', 'mode')
+        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'mode')]
 
 
@@ -100,7 +100,7 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_birth_year_daily'
-        ordering = ('date', 'course_id', 'birth_year')
+        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'birth_year')]
 
 
@@ -109,7 +109,7 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_education_level_daily'
-        ordering = ('date', 'course_id', 'education_level')
+        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'education_level')]
 
 
@@ -131,7 +131,7 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender_daily'
-        ordering = ('date', 'course_id', 'gender')
+        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'gender')]
 
 
@@ -196,7 +196,7 @@ class CourseEnrollmentByCountry(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_location_current'
-        ordering = ('date', 'course_id', 'country_code')
+        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'country_code')]
 
 

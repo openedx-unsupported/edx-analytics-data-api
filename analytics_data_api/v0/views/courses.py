@@ -158,6 +158,7 @@ class CourseActivityWeeklyView(BaseCourseView):
         """
         formatted_data = []
 
+        data = sorted(data, key=lambda x: (x.course_id, x.interval_start, x.interval_end))
         for key, group in groupby(data, lambda x: (x.course_id, x.interval_start, x.interval_end)):
             # Iterate over groups and create a single item with all activity types
             item = {
@@ -401,7 +402,9 @@ class CourseEnrollmentByGenderView(BaseCourseEnrollmentView):
         queryset = super().get_queryset()
         formatted_data = []
 
-        for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
+        items = queryset.all()
+        items = sorted(items, key=lambda x: (x.course_id, x.date))
+        for key, group in groupby(items, lambda x: (x.course_id, x.date)):
             # Iterate over groups and create a single item with gender data
             item = {
                 'course_id': key[0],
@@ -507,7 +510,9 @@ class CourseEnrollmentModeView(BaseCourseEnrollmentView):
         queryset = super().get_queryset()
         formatted_data = []
 
-        for key, group in groupby(queryset, lambda x: (x.course_id, x.date)):
+        items = queryset.all()
+        items = sorted(items, key=lambda x: (x.course_id, x.date))
+        for key, group in groupby(items, lambda x: (x.course_id, x.date)):
             item = {
                 'course_id': key[0],
                 'date': key[1],

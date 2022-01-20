@@ -24,7 +24,6 @@ class CourseActivityWeekly(BaseCourseModel):
     class Meta(BaseCourseModel.Meta):
         db_table = 'course_activity'
         index_together = [['course_id', 'activity_type']]
-        ordering = ('interval_end', 'interval_start', 'course_id')
         get_latest_by = 'interval_end'
 
     interval_start = models.DateTimeField()
@@ -51,7 +50,6 @@ class BaseCourseEnrollment(BaseCourseModel):
 class CourseEnrollmentDaily(BaseCourseEnrollment):
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_daily'
-        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date',)]
 
 
@@ -61,7 +59,6 @@ class CourseEnrollmentModeDaily(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_mode_daily'
-        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'mode')]
 
 
@@ -100,7 +97,6 @@ class CourseEnrollmentByBirthYear(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_birth_year_daily'
-        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'birth_year')]
 
 
@@ -109,7 +105,6 @@ class CourseEnrollmentByEducation(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_education_level_daily'
-        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'education_level')]
 
 
@@ -131,7 +126,6 @@ class CourseEnrollmentByGender(BaseCourseEnrollment):
 
     class Meta(BaseCourseEnrollment.Meta):
         db_table = 'course_enrollment_gender_daily'
-        ordering = ('date', 'course_id')
         unique_together = [('course_id', 'date', 'gender')]
 
 

@@ -71,36 +71,60 @@ class HealthView(APIView):
 
    """
     permission_classes = (permissions.AllowAny,)
+    STATUS_OK = 'OK'
+    STATUS_UNAVAILABLE = 'UNAVAILABLE'
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        OK = 'OK'
-        UNAVAILABLE = 'UNAVAILABLE'
-
-        overall_status = UNAVAILABLE
-        db_conn_status = UNAVAILABLE
-
+    def _get_connection_status(self, connection_name):
+        """
+        With the passed in database name, try to make connection to the database.
+        If database is able to connect successfully, return 'OK' status.
+        Otherwise, return 'UNAVAILABLE' status
+        """
+        db_status = self.STATUS_UNAVAILABLE
         try:
-            connection_name = getattr(settings, 'ANALYTICS_DATABASE', 'default')
             cursor = connections[connection_name].cursor()
             try:
                 cursor.execute("SELECT 1")
                 cursor.fetchone()
-
-                overall_status = OK
-                db_conn_status = OK
+                db_status = self.STATUS_OK
             finally:
                 cursor.close()
         except Exception:  # pylint: disable=broad-except
             pass
+        return db_status
+
+    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        overall_status = self.STATUS_UNAVAILABLE
+        analytics_db_status = self.STATUS_UNAVAILABLE
+
+        # First try the default database.
+        # The default database hosts user and auth info. Without it, no API would function
+        default_db_status = self._get_connection_status('default')
+
+        analytics_db_v1_name = getattr(settings, 'ANALYTICS_DATABASE_V1')
+        analytics_db_name = getattr(settings, 'ANALYTICS_DATABASE')
+        if analytics_db_v1_name:
+            # If the v1 db is defined, we check the status of both v0 and v1 analytics db status
+            analytics_v0_db_status = self._get_connection_status(analytics_db_name)
+            analyitcs_v1_db_status = self._get_connection_status(analytics_db_v1_name)
+            if analytics_v0_db_status == analyitcs_v1_db_status == self.STATUS_OK:
+                analytics_db_status = self.STATUS_OK
+        else:
+            # Otherwise, only check the defined 'ANALYTICS_DATABASE' status
+            analytics_db_status = self._get_connection_status(analytics_db_name)
+
+        if default_db_status == analytics_db_status == self.STATUS_OK:
+            overall_status = self.STATUS_OK
 
         response = {
             "overall_status": overall_status,
             "detailed_status": {
-                'database_connection': db_conn_status
+                'default_db_status': default_db_status,
+                'analytics_db_status': analytics_db_status,
             }
         }
 
-        if overall_status == UNAVAILABLE:
+        if overall_status == self.STATUS_UNAVAILABLE:
             logger.error("Health check failed: %s", response)
 
-        return Response(response, status=200 if overall_status == OK else 503)
+        return Response(response, status=200 if overall_status == self.STATUS_OK else 503)

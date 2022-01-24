@@ -26,14 +26,21 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
     def test_health(self):
         self.assert_database_health('OK')
 
-    def assert_database_health(self, status, status_code=200):
+    def assert_database_health(
+        self,
+        overall_status,
+        default_db_status='OK',
+        analytics_db_status='OK',
+        status_code=200
+    ):
         response = self.client.get('/health', follow=True)
         self.assertEqual(
             response.data,
             {
-                'overall_status': status,
+                'overall_status': overall_status,
                 'detailed_status': {
-                    'database_connection': status
+                    'default_db_status': default_db_status,
+                    'analytics_db_status': analytics_db_status,
                 }
             }
         )
@@ -45,23 +52,22 @@ class OperationalEndpointsTest(TestCaseWithAuthentication):
         with mock.patch('analyticsdataserver.views.connections', ConnectionHandler(databases)):
             yield
 
+    def test_default_bad_health(self):
+        databases = dict(settings.DATABASES)
+        databases['default'] = {}
+        with self.override_database_connections(databases):
+            self.assert_database_health('UNAVAILABLE', default_db_status='UNAVAILABLE', status_code=503)
+
     @override_settings(ANALYTICS_DATABASE='reporting')
-    def test_read_setting(self):
+    def test_db_bad_health(self):
         databases = dict(settings.DATABASES)
         databases['reporting'] = {}
-
         with self.override_database_connections(databases):
-            self.assert_database_health('UNAVAILABLE', status_code=503)
+            self.assert_database_health('UNAVAILABLE', analytics_db_status='UNAVAILABLE', status_code=503)
 
-    # Workaround to remove a setting from django settings. It has to be used in override_settings and then deleted.
-    @override_settings(ANALYTICS_DATABASE='reporting')
-    def test_default_setting(self):
-        del settings.ANALYTICS_DATABASE
-
+    @override_settings(ANALYTICS_DATABASE_V1='reporting_v1')
+    def test_v1_db_bad_health(self):
         databases = dict(settings.DATABASES)
-        databases['reporting'] = {}
-
+        databases['reporting_v1'] = {}
         with self.override_database_connections(databases):
-            # This would normally return UNAVAILABLE, however we have deleted the settings so it will use the default
-            # connection which should be OK.
-            self.assert_database_health('OK')
+            self.assert_database_health('UNAVAILABLE', analytics_db_status='UNAVAILABLE', status_code=503)

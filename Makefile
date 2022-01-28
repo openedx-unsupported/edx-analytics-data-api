@@ -129,7 +129,7 @@ demo: requirements clean loaddata  ## Runs make clean, requirements, and loaddat
 github_ci: test.requirements clean migrate-all  ## Used by CI for testing
 	python manage.py set_api_key edx edx
 	python manage.py loaddata problem_response_answer_distribution --database=analytics
-	python manage.py generate_fake_course_data --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
+	python manage.py generate_fake_course_data --database=analytics --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
 
 docker_build:
 	docker build . -f Dockerfile -t openedx/analytics-data-api

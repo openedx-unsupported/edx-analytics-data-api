@@ -8,6 +8,11 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+try:
+    import newrelic.agent
+except ImportError:  # pragma: no cover
+    newrelic = None  # pylint: disable=invalid-name
+
 logger = logging.getLogger(__name__)
 
 
@@ -94,6 +99,9 @@ class HealthView(APIView):
         return db_status
 
     def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+        if newrelic:  # pragma: no cover
+            newrelic.agent.ignore_transaction()
+
         overall_status = self.STATUS_UNAVAILABLE
         analytics_db_status = self.STATUS_UNAVAILABLE
 

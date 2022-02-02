@@ -6,6 +6,7 @@ coverage
 ddt
 diff-cover
 django-dynamic-fixture
+freezegun
 pycodestyle
 pydocstyle
 pylint

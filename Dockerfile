@@ -1,4 +1,4 @@
-FROM ubuntu:xenial as app
+FROM ubuntu:focal as app
 
 RUN apt update && \
   apt-get install -y software-properties-common && \

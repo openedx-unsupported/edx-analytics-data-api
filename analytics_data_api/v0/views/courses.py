@@ -158,8 +158,8 @@ class CourseActivityWeeklyView(BaseCourseView):
         """
         formatted_data = []
 
-        data = sorted(data, key=lambda x: (x.course_id, x.interval_start, x.interval_end))
-        for key, group in groupby(data, lambda x: (x.course_id, x.interval_start, x.interval_end)):
+        data = sorted(data, key=lambda x: (x.course_id_key(), x.interval_start, x.interval_end))
+        for key, group in groupby(data, lambda x: (x.course_id_key(), x.interval_start, x.interval_end)):
             # Iterate over groups and create a single item with all activity types
             item = {
                 'course_id': key[0],

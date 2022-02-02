@@ -14,6 +14,13 @@ class BaseCourseModel(models.Model):
     course_id = models.CharField(db_index=True, max_length=255)
     created = models.DateTimeField(auto_now_add=True)
 
+    def course_id_key(self):
+        """
+        Version of the course_id suitable for grouping when the database
+        contains multiple casings of the course ID
+        """
+        return str.casefold(self.course_id)
+
     class Meta:
         abstract = True
 

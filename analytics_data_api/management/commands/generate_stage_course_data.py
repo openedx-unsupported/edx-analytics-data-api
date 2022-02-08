@@ -73,4 +73,4 @@ class Command(BaseCommand):
             generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date(), database)
             generate_tags_distribution_data(course_id, database)
 
-        generate_program_data(PROGRAM_COURSE_IDS, program_title, database)
+        generate_program_data(PROGRAM_COURSE_IDS, program_title, '01n3fb1531o8470b832209243z7y421a', database)

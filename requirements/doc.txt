@@ -38,7 +38,7 @@ cryptography==3.4.8
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.11
+django==3.2.14
     # via
     #   -r requirements/base.in
     #   django-cors-headers

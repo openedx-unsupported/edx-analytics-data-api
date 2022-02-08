@@ -333,11 +333,9 @@ def fake_video_ids_fallback():
     ]
 
 
-def generate_program_data(course_ids, program_title, database):
+def generate_program_data(course_ids, program_title, program_id, database):
     logger.info("Deleting existing course program data...")
     models.CourseProgramMetadata.objects.using(database).all().delete()
-
-    program_id = '01n3fb1531o8470b832209243z7y421a'
     program_type = 'Professional Certificate'
 
     for course_id in course_ids:

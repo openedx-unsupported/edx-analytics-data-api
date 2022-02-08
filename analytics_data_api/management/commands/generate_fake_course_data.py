@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         generate_weekly_data(course_id, start_date, end_date, database)
         generate_daily_data(course_id, start_date, end_date, database)
-        generate_program_data([course_id], 'Demo Program', database)
+        generate_program_data([course_id], 'Demo Program', 'Demo_Program', database)
         generate_all_video_data(course_id, video_ids, database)
         generate_learner_engagement_data(course_id, username, start_date, end_date, database)
         generate_learner_engagement_range_data(course_id, start_date.date(), end_date.date(), database)

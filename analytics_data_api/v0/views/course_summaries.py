@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import reduce as functools_reduce
+from itertools import groupby
 
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
@@ -163,6 +164,37 @@ class CourseSummariesView(APIListView):
 
         return field_dict
 
+    # override parent group by ID in order to do recent date stuff efficiently
+    def group_by_id(self, queryset):
+        """Return results aggregated by a distinct ID."""
+        aggregate_field_dict = []
+
+        fetch_recents = self.recent_date and 'recent_count_change' not in self.exclude
+        if fetch_recents:
+            recent_counts = models.CourseEnrollmentDaily.objects.filter(
+                date=self.recent_date
+            )
+            # add in the same course_id filter used by the main query
+            if self.ids:
+                recent_counts = recent_counts.filter(self.get_query())
+            recents = dict()
+            for c in recent_counts:
+                recents[c.course_id] = c.count
+
+        for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
+            field_dict = self.base_field_dict(item_id)
+
+            for model in model_group:
+                field_dict = self.update_field_dict_from_model(model, base_field_dict=field_dict)
+
+            if fetch_recents:
+                field_dict = self.add_recent_count_change(field_dict, recents)
+
+            field_dict = self.postprocess_field_dict(field_dict)
+            aggregate_field_dict.append(field_dict)
+
+        return aggregate_field_dict
+
     def postprocess_field_dict(self, field_dict):
         # Merge professional with non verified professional
         modes = field_dict['enrollment_modes']
@@ -179,29 +211,25 @@ class CourseSummariesView(APIListView):
             # don't do expensive looping for programs if we are just going to throw it away
             field_dict = self.add_programs(field_dict)
 
-        if self.recent_date and 'recent_count_change' not in self.exclude:
-            field_dict = self.add_recent_count_change(field_dict)
-
         for field in self.exclude:
             for mode in field_dict['enrollment_modes']:
                 _ = field_dict['enrollment_modes'][mode].pop(field, None)
 
         return field_dict
 
-    def add_recent_count_change(self, field_dict):
+    def add_recent_count_change(self, field_dict, recents):
         # Pick the most recent daily count on-or-before the desired date
         # If there are no daily counts before the desired date, assume 0
-        recents = models.CourseEnrollmentDaily.objects.filter(
-            course_id=field_dict['course_id'],
-            date__lte=self.recent_date
-        ).order_by('-date')[0:1]
-        if recents:
-            recent_count = recents[0].count
+        course_id = field_dict['course_id']
+        if course_id in recents:
+            recent_count = recents[course_id]
         else:
             recent_count = 0
         field_dict['recent_count_change'] = field_dict['count'] - recent_count
         return field_dict
 
+    # TODO this needs the same transformation as add_recent_count_change from one query per item to one query
+    # TODO but may never be used for multiple courses currently
     def add_programs(self, field_dict):
         """Query for programs attached to a course and include them (just the IDs) in the course summary dict"""
         field_dict['programs'] = []

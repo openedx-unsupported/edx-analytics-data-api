@@ -227,10 +227,6 @@ class APIListView(generics.ListAPIView):
         field_dict.update({field: getattr(model, field) for field in field_list})
         return field_dict
 
-    def postprocess_field_dict(self, field_dict):
-        """Applies some business logic to final result without access to any data from the original model."""
-        return field_dict
-
     def group_by_id(self, queryset):
         """Return results aggregated by a distinct ID."""
         aggregate_field_dict = []
@@ -240,7 +236,6 @@ class APIListView(generics.ListAPIView):
             for model in model_group:
                 field_dict = self.update_field_dict_from_model(model, base_field_dict=field_dict)
 
-            field_dict = self.postprocess_field_dict(field_dict)
             aggregate_field_dict.append(field_dict)
 
         return aggregate_field_dict

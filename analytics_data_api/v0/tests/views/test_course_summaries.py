@@ -225,17 +225,20 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
         expected_recent = recent_factor * len(enrollment_modes.ALL)
         recent_delta = expected_count - expected_recent
         self.generate_data(programs=True, recent_date=recent)
+
         expectedOnDate = self.all_expected_results(modes=enrollment_modes.ALL,
                                                    recent_count_change=recent_delta)
-
         responseOnDate = self.validated_request(exclude=self.always_exclude, recent_date=recent.strftime('%Y-%m-%d'))
         self.assertEqual(responseOnDate.status_code, 200)
         self.assertCountEqual(responseOnDate.data, expectedOnDate)
 
-        after = (recent + datetime.timedelta(1)).strftime('%Y-%m-%d')
-        responseAfterDate = self.validated_request(exclude=self.always_exclude, recent_date=after)
-        self.assertEqual(responseAfterDate.status_code, 200)
-        self.assertCountEqual(responseAfterDate.data, expectedOnDate)
+        expectedLimitedIDs = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=recent_delta,
+                                                       ids=CourseSamples.course_ids[0:2])
+        responseLimitedIDs = self.validated_request(exclude=self.always_exclude,
+                                                    recent_date=recent.strftime('%Y-%m-%d'),
+                                                    ids=CourseSamples.course_ids[0:2])
+        self.assertEqual(responseLimitedIDs.status_code, 200)
+        self.assertCountEqual(responseLimitedIDs.data, expectedLimitedIDs)
 
         expectedBeforeDate = self.all_expected_results(modes=enrollment_modes.ALL, recent_count_change=expected_count)
         before = (recent - datetime.timedelta(1)).strftime('%Y-%m-%d')

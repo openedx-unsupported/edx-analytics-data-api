@@ -31,7 +31,6 @@ for path, view, name in COURSE_URLS:
 urlpatterns = course_urlpatterns + [
     url(r'^problems/', include('analytics_data_api.v0.urls.problems')),
     url(r'^videos/', include('analytics_data_api.v0.urls.videos')),
-    url('^', include('analytics_data_api.v0.urls.learners')),
     url('^', include('analytics_data_api.v0.urls.course_summaries')),
     url('^', include('analytics_data_api.v0.urls.programs')),
 

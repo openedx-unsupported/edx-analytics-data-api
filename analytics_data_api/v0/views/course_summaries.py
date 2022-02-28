@@ -181,6 +181,20 @@ class CourseSummariesView(APIListView):
             for c in recent_counts:
                 recents[c.course_id] = c.count
 
+        fetch_programs = self.exclude == [] or (self.exclude and 'programs' not in self.exclude)
+        if fetch_programs:
+            # Use retrieve all course_program metadata query related to the courses
+            course_program_metadata_queryset = self.programs_model.objects.all()
+            if self.ids:
+                course_program_metadata_queryset = course_program_metadata_queryset.filter(
+                    course_id__in=self.ids
+                )
+            programs_metadata = dict()
+            for program_item in course_program_metadata_queryset:
+                programs_metadata.setdefault(program_item.course_id, []).append(
+                    self.programs_serializer_class(program_item.__dict__).data['program_id']
+                )
+
         for item_id, model_group in groupby(queryset, lambda x: (getattr(x, self.model_id_field))):
             field_dict = self.base_field_dict(item_id)
 
@@ -189,6 +203,9 @@ class CourseSummariesView(APIListView):
 
             if fetch_recents:
                 field_dict = self.add_recent_count_change(field_dict, recents)
+
+            if fetch_programs:
+                field_dict['programs'] = programs_metadata[item_id]
 
             field_dict = self.postprocess_field_dict(field_dict)
             aggregate_field_dict.append(field_dict)
@@ -207,10 +224,6 @@ class CourseSummariesView(APIListView):
         if field_dict['availability'] == 'Starting Soon':
             field_dict['availability'] = 'Upcoming'
 
-        if self.exclude == [] or (self.exclude and 'programs' not in self.exclude):
-            # don't do expensive looping for programs if we are just going to throw it away
-            field_dict = self.add_programs(field_dict)
-
         for field in self.exclude:
             for mode in field_dict['enrollment_modes']:
                 _ = field_dict['enrollment_modes'][mode].pop(field, None)
@@ -226,17 +239,6 @@ class CourseSummariesView(APIListView):
         else:
             recent_count = 0
         field_dict['recent_count_change'] = field_dict['count'] - recent_count
-        return field_dict
-
-    # TODO this needs the same transformation as add_recent_count_change from one query per item to one query
-    # TODO but may never be used for multiple courses currently
-    def add_programs(self, field_dict):
-        """Query for programs attached to a course and include them (just the IDs) in the course summary dict"""
-        field_dict['programs'] = []
-        queryset = self.programs_model.objects.filter(course_id=field_dict['course_id'])
-        for program in queryset:
-            program = self.programs_serializer_class(program.__dict__)
-            field_dict['programs'].append(program.data['program_id'])
         return field_dict
 
     def get_query(self):

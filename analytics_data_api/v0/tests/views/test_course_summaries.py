@@ -179,11 +179,21 @@ class CourseSummariesViewTests(VerifyCourseIdMixin, TestCaseWithAuthentication, 
 
         self.assertCountEqual(response.data, expected_summaries)
 
-    def test_programs(self):
+    @ddt.data(
+        None,
+        CourseSamples.course_ids[0:1]
+    )
+    def test_programs(self, filter_ids):
         self.generate_data(programs=True)
-        response = self.validated_request(exclude=self.always_exclude[:1], programs=['True'])
-        self.assertEqual(response.status_code, 200)
-        self.assertCountEqual(response.data, self.all_expected_results(programs=True))
+        with self.assertNumQueries(4, using=settings.ANALYTICS_DATABASE):
+            # The db query runs 4 times here because we do both a get and a post call to the server
+            response = self.validated_request(
+                ids=filter_ids,
+                exclude=self.always_exclude[:1],
+                programs=['True']
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertCountEqual(response.data, self.all_expected_results(ids=filter_ids, programs=True))
 
     @ddt.data('passing_users', )
     def test_exclude(self, field):

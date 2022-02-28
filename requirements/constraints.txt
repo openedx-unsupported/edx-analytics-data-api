@@ -7,7 +7,7 @@
 # link to other information that will help people in the future to remove the
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
- 
+
 # TODO: Many pinned dependencies should be unpinned and/or moved to this constraints file.
 django<4.0
 
@@ -31,3 +31,5 @@ tox==3.14.6
 pylint==2.4.4
 pylint-django==2.0.11
 
+# django-countries 7.3 is incompatible with python 3.8
+django-countries<7.3

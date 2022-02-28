@@ -12,9 +12,9 @@ attrs==21.4.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.20.54
+boto3==1.21.8
     # via -r requirements/base.in
-botocore==1.23.54
+botocore==1.24.8
     # via
     #   boto3
     #   s3transfer
@@ -36,7 +36,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==6.3.1
+coverage[toml]==6.3.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -67,7 +67,7 @@ diff-cover==6.4.4
     #   edx-rbac
 django-cors-headers==3.11.0
     # via -r requirements/base.in
-django-countries==7.2.1
+django-countries==7.3
     # via -r requirements/base.in
 django-crum==0.7.9
     # via
@@ -103,11 +103,11 @@ drf-jwt==1.19.2
     # via edx-drf-extensions
 drf-yasg==1.20.0
     # via edx-api-doc-tools
-edx-api-doc-tools==1.5.1
+edx-api-doc-tools==1.6.0
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
-edx-django-release-util==1.1.1
+edx-django-release-util==1.2.0
     # via -r requirements/base.in
 edx-django-utils==4.5.0
     # via
@@ -120,7 +120,7 @@ edx-drf-extensions==8.0.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==3.3.0
+edx-enterprise-data==4.0.0
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -148,7 +148,7 @@ future==0.18.2
     # via pyjwkest
 idna==3.3
     # via requests
-importlib-metadata==4.11.0
+importlib-metadata==4.11.2
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -170,11 +170,11 @@ lazy-object-proxy==1.4.3
     # via astroid
 markdown==3.3.6
     # via -r requirements/base.in
-markupsafe==2.0.1
+markupsafe==2.1.0
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==7.4.0.172
+newrelic==7.6.0.173
     # via edx-django-utils
 ordered-set==3.1.1
     # via
@@ -259,7 +259,7 @@ ruamel-yaml-clib==0.2.6
     # via ruamel-yaml
 rules==3.1
     # via edx-enterprise-data
-s3transfer==0.5.1
+s3transfer==0.5.2
     # via boto3
 semantic-version==2.9.0
     # via edx-drf-extensions
@@ -290,7 +290,7 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-tqdm==4.62.3
+tqdm==4.63.0
     # via -r requirements/base.in
 unicodecsv==0.14.1
     # via djangorestframework-csv

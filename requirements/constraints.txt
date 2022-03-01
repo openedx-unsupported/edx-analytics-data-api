@@ -30,6 +30,3 @@ tox==3.14.6
 # Use same version of edx-lint
 pylint==2.4.4
 pylint-django==2.0.11
-
-# django-countries 7.3 is incompatible with python 3.8
-django-countries<7.3

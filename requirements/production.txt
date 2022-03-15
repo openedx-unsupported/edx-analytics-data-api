@@ -8,9 +8,9 @@ asgiref==3.5.0
     # via django
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.21.9
+boto3==1.21.19
     # via -r requirements/base.in
-botocore==1.24.9
+botocore==1.24.19
     # via
     #   boto3
     #   s3transfer
@@ -54,7 +54,7 @@ django==3.2.12
     #   edx-rbac
 django-cors-headers==3.11.0
     # via -r requirements/base.in
-django-countries==7.3.1
+django-countries==7.3.2
     # via -r requirements/base.in
 django-crum==0.7.9
     # via
@@ -105,7 +105,7 @@ edx-drf-extensions==8.0.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.0.0
+edx-enterprise-data==4.2.0
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -127,6 +127,10 @@ elasticsearch-dsl==7.4.0
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
+factory-boy==3.2.1
+    # via edx-enterprise-data
+faker==13.3.2
+    # via factory-boy
 future==0.18.2
     # via pyjwkest
 gevent==21.12.0
@@ -137,7 +141,7 @@ gunicorn==20.1.0
     # via -r requirements/production.in
 idna==3.3
     # via requests
-importlib-metadata==4.11.2
+importlib-metadata==4.11.3
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -151,7 +155,7 @@ jmespath==0.10.0
     #   botocore
 markdown==3.3.6
     # via -r requirements/base.in
-markupsafe==2.1.0
+markupsafe==2.1.1
     # via jinja2
 mysqlclient==2.1.0
     # via -r requirements/production.in
@@ -191,6 +195,7 @@ python-dateutil==2.8.2
     #   botocore
     #   edx-drf-extensions
     #   elasticsearch-dsl
+    #   faker
 python-memcached==1.59
     # via -r requirements/base.in
 pytz==2021.3
@@ -213,7 +218,7 @@ ruamel-yaml==0.17.21
     # via drf-yasg
 ruamel-yaml-clib==0.2.6
     # via ruamel-yaml
-rules==3.1
+rules==3.2.1
     # via edx-enterprise-data
 s3transfer==0.5.2
     # via boto3

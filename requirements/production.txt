@@ -105,7 +105,7 @@ edx-drf-extensions==8.0.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.2.1
+edx-enterprise-data==4.2.3
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -253,7 +253,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.8
+urllib3==1.26.9
     # via
     #   -r requirements/base.in
     #   botocore

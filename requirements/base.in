@@ -13,6 +13,7 @@ djangorestframework                 # BSD
 djangorestframework-csv             # BSD
 django-storages                     # BSD
 elasticsearch-dsl                   # Apache 2.0
+html5lib			    # MIT
 ordered-set                         # MIT
 tqdm                                # MIT
 urllib3                             # MIT

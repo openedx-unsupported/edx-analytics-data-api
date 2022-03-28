@@ -1,5 +1,8 @@
+import json
+import re
 from collections import OrderedDict
 
+import html5lib
 from django.conf import settings
 from rest_framework import pagination, serializers
 from rest_framework.response import Response
@@ -95,6 +98,107 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
             'variant',
             'created'
         )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['answer_value'] = self._clean_answer_string(data['answer_value'])
+        data['value_id'] = self._clean_answer_string(data['value_id'])
+        return data
+
+    def _clean_answer_string(self, answer_value):
+        """
+        Convert value to a canonical string representation.
+        If value is a list, then returns list values
+        surrounded by square brackets and delimited by pipes
+        (e.g. "[choice_1|choice_3|choice_4]").
+        If value is a string, just returns as-is.
+        If the value contains html the answer_string is parsed as XML,
+        and the text value of the answer_value is returned.
+        """
+
+        def normalize(value):
+            """Pull out HTML tags and deslugify certain escape sequences."""
+            text = self._get_text_from_html(value)
+            return self._parse_slugged_slashes(text)
+
+        # attempt to evaluate string as a list, else keep it a string
+        try:
+            answer_eval = json.loads(answer_value.encode('unicode_escape'))
+            if isinstance(answer_eval, list):
+                answer_value = answer_eval
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        # produce a string, or 'list' of strings as output
+        # lists containing non-string values such as dictionaries will have
+        # those elements represented as JSON strings
+        if isinstance(answer_value, str):
+            return normalize(answer_value)
+        if isinstance(answer_value, list):
+            normalized = []
+            for value in answer_value:
+                if isinstance(value, str):
+                    normalized.append(normalize(value))
+                else:
+                    normalized.append(json.dumps(value))
+            return u'[{list_val}]'.format(list_val=u'|'.join(normalized))
+
+        return str(answer_value)
+
+    def _get_text_from_html(self, markup):
+        """
+        Convert html markup to plain text.
+        Includes stripping excess whitespace, and assuring whitespace
+        exists between elements (e.g. table elements).
+        """
+        try:
+            root = html5lib.parse(markup)
+            text_list = []
+            for val in self._get_text_from_element(root):
+                text_list.extend(val.strip().split(' '))
+            text = u' '.join(text_list)
+        except Exception:  # pylint: disable=broad-except
+            text = markup.strip()
+
+        return text
+
+    def _get_text_from_element(self, node):
+        """Traverse ElementTree node recursively to return text values."""
+        tag = node.tag
+        if not isinstance(tag, str) and tag is not None:
+            return
+        if node.text:
+            yield node.text
+        for child in node:
+            for text in self._get_text_from_element(child):
+                yield text
+            if child.tail:
+                yield child.tail
+
+    def _parse_slugged_slashes(self, text):
+        """
+        Data coming out of snowflake sometimes looks like "**FOURBACKSLASHQUOTE** something" because of
+        slugging from
+        https://github.com/edx/warehouse-transforms/blob/master/projects/automated/raw_to_source/models/downstream_sources/tracking_log_events/tracking_events.sql
+        we need to remove the slugs so that it is consumable/readable in insights.
+        """
+        # order matters if a we have a key that is a substring of another key
+        # this is not the case right now but let's use in ordered dict anyway
+        replacements = OrderedDict({
+            '**FOURBACKSLASHQUOTE**': '\\\\\\\\"',
+            '**THREEBACKSLASHQUOTE**': '\\\\\\"',
+            '**TWOBACKSLASHQUOTE**': '\\\\"',
+            '**ONEBACKSLASHQUOTE**': '\\"',
+            '**TWOBACKSLASH**': '\\\\',
+            '**BACKSLASHSPACE**': '\\ ',
+        })
+
+        # escape the '*' characters and build one big regex OR pattern
+        escaped_replace = map(re.escape, replacements)
+        pattern = re.compile("|".join(escaped_replace))
+
+        # for each match in the pattern replace with the value from the replacement dictionary
+        return pattern.sub(lambda match: replacements[match.group(0)], text)
 
 
 class ConsolidatedAnswerDistributionSerializer(ProblemResponseAnswerDistributionSerializer):

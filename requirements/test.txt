@@ -12,9 +12,9 @@ attrs==21.4.0
     # via pytest
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.21.20
+boto3==1.21.27
     # via -r requirements/base.in
-botocore==1.24.20
+botocore==1.24.27
     # via
     #   boto3
     #   s3transfer
@@ -46,7 +46,7 @@ cryptography==36.0.2
     #   pyjwt
 ddt==1.4.4
     # via -r requirements/test.in
-diff-cover==6.4.4
+diff-cover==6.4.5
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -109,7 +109,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.2.0
     # via -r requirements/base.in
-edx-django-utils==4.5.0
+edx-django-utils==4.6.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -144,9 +144,9 @@ elasticsearch-dsl==7.4.0
     #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.3.2
+faker==13.3.3
     # via factory-boy
-freezegun==1.2.0
+freezegun==1.2.1
     # via -r requirements/test.in
 future==0.18.2
     # via pyjwkest
@@ -162,11 +162,11 @@ isort==4.3.21
     # via pylint
 itypes==1.2.0
     # via coreapi
-jinja2==3.0.3
+jinja2==3.1.1
     # via
     #   coreschema
     #   diff-cover
-jmespath==0.10.0
+jmespath==1.0.0
     # via
     #   boto3
     #   botocore
@@ -223,7 +223,7 @@ pymongo==3.12.3
     # via edx-opaque-keys
 pyparsing==3.0.7
     # via packaging
-pytest==7.1.0
+pytest==7.1.1
     # via
     #   pytest-cov
     #   pytest-django
@@ -240,7 +240,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2021.3
+pytz==2022.1
     # via
     #   -r requirements/test.in
     #   django
@@ -256,13 +256,13 @@ requests==2.27.1
     #   pyjwkest
     #   responses
     #   slumber
-responses==0.19.0
+responses==0.20.0
     # via -r requirements/test.in
 ruamel-yaml==0.17.21
     # via drf-yasg
 ruamel-yaml-clib==0.2.6
     # via ruamel-yaml
-rules==3.2.1
+rules==3.3
     # via edx-enterprise-data
 s3transfer==0.5.2
     # via boto3
@@ -295,7 +295,7 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-tqdm==4.63.0
+tqdm==4.63.1
     # via -r requirements/base.in
 typing-extensions==4.1.1
     # via django-countries

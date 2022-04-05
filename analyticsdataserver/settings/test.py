@@ -32,7 +32,7 @@ DATABASES = {
 }
 
 ANALYTICS_DATABASE = 'analytics'
-ANALYTICS_DATABASE_V1 = None
+ANALYTICS_DATABASE_V1 = 'analytics_v1'
 ENTERPRISE_REPORTING_DB_ALIAS = 'default'
 
 # Silence elasticsearch during tests

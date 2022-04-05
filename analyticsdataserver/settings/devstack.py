@@ -46,7 +46,7 @@ for override, value in DB_OVERRIDES.items():
     DATABASES['analytics'][override] = value
     DATABASES['analytics_v1'][override] = value
 
-DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsDevelopmentRouter', 'analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsdataserver.router.AnalyticsModelsRouter']
+DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsdataserver.router.AnalyticsModelsRouter']
 
 ########## END DATABASE CONFIGURATION
 

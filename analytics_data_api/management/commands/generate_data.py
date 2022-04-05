@@ -298,14 +298,12 @@ def generate_tags_distribution_data(course_id, database):
 
 def fetch_videos_from_course_blocks(course_id):
     logger.info("Fetching video ids from Course Blocks API...")
-    try:
-        api_base_url = settings.LMS_BASE_URL + 'api/courses/v1/'
-    except AttributeError:
-        logger.warning("LMS_BASE_URL is not configured! Cannot get video ids.")
-        return None
-    logger.info("Assuming the Course Blocks API is hosted at: %s", api_base_url)
 
-    blocks_api = CourseBlocksApiClient(api_base_url, settings.COURSE_BLOCK_API_AUTH_TOKEN, timeout=5)
+    blocks_api = CourseBlocksApiClient(
+        settings.BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL,
+        settings.BACKEND_SERVICE_EDX_OAUTH2_KEY,
+        settings.BACKEND_SERVICE_EDX_OAUTH2_SECRET,
+    )
     return blocks_api.all_videos(course_id)
 
 

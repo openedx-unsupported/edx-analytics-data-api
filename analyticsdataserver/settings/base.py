@@ -381,7 +381,7 @@ REST_FRAMEWORK = {
 ########## ANALYTICS DATA API CONFIGURATION
 
 ANALYTICS_DATABASE = 'reports'
-# Currently unused, V1 database will support migration to new backend data source
+# V1 database supports migration to new backend data source
 ANALYTICS_DATABASE_V1 = None
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsdataserver.router.AnalyticsModelsRouter']
 ENTERPRISE_REPORTING_DB_ALIAS = 'enterprise'

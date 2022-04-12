@@ -1,17 +1,18 @@
 import logging
+from urllib.parse import urljoin
 
-from edx_rest_api_client.client import EdxRestApiClient
-from edx_rest_api_client.exceptions import HttpClientError
+from django.conf import settings
+from edx_rest_api_client.client import OAuthAPIClient
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import UsageKey
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 
 from analyticsdataserver.utils import temp_log_level
 
 logger = logging.getLogger(__name__)
 
 
-class CourseBlocksApiClient(EdxRestApiClient):
+class CourseBlocksApiClient(OAuthAPIClient):
     """
     This class is a sub-class of the edX Rest API Client
     (https://github.com/edx/edx-rest-api-client).
@@ -22,15 +23,28 @@ class CourseBlocksApiClient(EdxRestApiClient):
     Currently, this client is only used for a local-only developer script (generate_fake_course_data).
     """
 
-    def __init__(self, url, access_token, timeout):
-        super().__init__(url, oauth_access_token=access_token, timeout=timeout)
-
     def all_videos(self, course_id):
         try:
             logger.debug('Retrieving course video blocks for course_id: %s', course_id)
-            response = self.blocks.get(course_id=course_id, all_blocks=True, depth='all', block_types_filter='video')
+
+            try:
+                api_base_url = urljoin(settings.LMS_BASE_URL + '/', 'api/courses/v1/')
+            except AttributeError:
+                logger.warning("LMS_BASE_URL is not configured! Cannot get video ids.")
+                return None
+            logger.info("Assuming the Course Blocks API is hosted at: %s", api_base_url)
+
+            blocks_kwargs = {
+                'course_id': course_id,
+                'all_blocks': True,
+                'depth': 'all',
+                'block_types_filter': 'video'
+            }
+            response = self.get(urljoin(api_base_url, 'blocks/'), params=blocks_kwargs)
+            response.raise_for_status()
+            data = response.json()
             logger.info("Successfully authenticated with the Course Blocks API.")
-        except HttpClientError as e:
+        except HTTPError as e:
             if e.response.status_code == 401:
                 logger.warning("Course Blocks API failed to return video ids (%s). "
                                "See README for instructions on how to authenticate the API with your local LMS.",
@@ -50,7 +64,7 @@ class CourseBlocksApiClient(EdxRestApiClient):
         # (The UsageKey utility still works despite the import errors, so I think the errors are not important).
         with temp_log_level('stevedore', log_level=logging.CRITICAL):
             videos = []
-            for video in response['blocks'].values():
+            for video in data['blocks'].values():
                 try:
                     encoded_id = UsageKey.from_string(video['id']).html_id()
                 except InvalidKeyError:

@@ -41,7 +41,7 @@ class ProblemResponseAnswerDistributionSerializerTests(TestCase):
         ('justastring', 'justastring'),
         ('25.94', '25.94'),
         ('[0, 100, 7, "x", "Duōshǎo"]', '[0|100|7|x|Duōshǎo]'),
-        ('"a","b" <choicehint>Correct.</choicehint>', '"a","b" Correct.'),
+        ('"a","b" <choicehint>Correct.</choicehint> o', '"a","b" Correct. o'),
         ('[{"3":"t1"},{"2":"t2"}]', '[{"3": "t1"}|{"2": "t2"}]'),
         ('[[1,0,0],[0,1,0],[0,0,1],[0,0,0]]', '[[1, 0, 0]|[0, 1, 0]|[0, 0, 1]|[0, 0, 0]]'),
         ('["<text>(S \\to D \\to G)</text>"]', '[(S \\to D \\to G)]'),

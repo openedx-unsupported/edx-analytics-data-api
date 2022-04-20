@@ -121,7 +121,8 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
             text = self._get_text_from_html(value)
             return self._parse_slugged_slashes(text)
 
-        # attempt to evaluate string as a list, else keep it a string
+        # attempt to evaluate string as a list (this will get special
+        # formatting), else keep it a string
         try:
             answer_eval = json.loads(answer_value.encode('unicode_escape'))
             if isinstance(answer_eval, list):
@@ -183,7 +184,7 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
         we need to remove the slugs so that it is consumable/readable in insights.
         """
         # order matters if a we have a key that is a substring of another key
-        # this is not the case right now but let's use in ordered dict anyway
+        # this is not the case right now but use an ordered dict so results are deterministic
         replacements = OrderedDict({
             '**FOURBACKSLASHQUOTE**': '\\\\\\\\"',
             '**THREEBACKSLASHQUOTE**': '\\\\\\"',

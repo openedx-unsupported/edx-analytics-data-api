@@ -8,13 +8,13 @@ alabaster==0.7.12
     # via sphinx
 asgiref==3.5.0
     # via django
-babel==2.9.1
+babel==2.10.1
     # via sphinx
 boto==2.42.0
     # via -r requirements/base.in
-boto3==1.21.40
+boto3==1.21.44
     # via -r requirements/base.in
-botocore==1.24.40
+botocore==1.24.44
     # via
     #   boto3
     #   s3transfer
@@ -137,10 +137,12 @@ elasticsearch-dsl==7.4.0
     #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.3.4
+faker==13.3.5
     # via factory-boy
 future==0.18.2
     # via pyjwkest
+html5lib==1.1
+    # via -r requirements/base.in
 idna==3.3
     # via requests
 imagesize==1.3.0
@@ -241,6 +243,7 @@ six==1.16.0
     #   edx-rbac
     #   edx-sphinx-theme
     #   elasticsearch-dsl
+    #   html5lib
     #   pyjwkest
     #   python-dateutil
     #   python-memcached
@@ -272,7 +275,7 @@ stevedore==3.5.0
     #   edx-opaque-keys
 tqdm==4.64.0
     # via -r requirements/base.in
-typing-extensions==4.1.1
+typing-extensions==4.2.0
     # via django-countries
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -286,5 +289,7 @@ urllib3==1.26.9
     #   botocore
     #   elasticsearch
     #   requests
+webencodings==0.5.1
+    # via html5lib
 zipp==3.8.0
     # via importlib-metadata

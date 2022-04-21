@@ -159,7 +159,7 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
                 text_list.extend(val.strip().split(' '))
             text = u' '.join(text_list)
         except Exception:  # pylint: disable=broad-except
-            text = markup.strip()
+            text = ''
 
         return text
 

@@ -373,7 +373,16 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
         'analytics_data_api.renderers.PaginatedCsvRenderer',
-    )
+    ),
+
+    'DEFAULT_THROTTLE_CLASSES': (
+        'analytics_data_api.throttles.ServiceUserThrottle',
+    ),
+
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '60/minute',
+        'service_user': '800/minute',
+    },
 }
 ########## END REST FRAMEWORK CONFIGURATION
 
@@ -390,6 +399,13 @@ LMS_BASE_URL = None
 
 # base url to generate link to user api
 LMS_USER_ACCOUNT_BASE_URL = None
+
+# Defines the usernames of service users who should be throttled
+# at a higher rate than normal users.
+ANALYTICS_API_SERVICE_USERNAMES = [
+    'enterprise_worker',
+    'ecommerce_worker',
+]
 
 # settings for report downloads
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

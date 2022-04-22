@@ -59,3 +59,6 @@ FTP_STORAGE_LOCATION = 'ftp://localhost:80/path'
 # Default settings for report download endpoint
 COURSE_REPORT_FILE_LOCATION_TEMPLATE = '/{course_id}_{report_name}.csv'
 COURSE_REPORT_DOWNLOAD_EXPIRY_TIME = 120
+
+# Disable throttling during most testing, as it just adds queries
+REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = ()

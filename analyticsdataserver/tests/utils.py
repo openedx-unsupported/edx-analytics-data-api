@@ -6,8 +6,8 @@ from rest_framework.authtoken.models import Token
 class TestCaseWithAuthentication(TestCase):
     def setUp(self):
         super().setUp()
-        test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
-        self.token = Token.objects.create(user=test_user)
+        self.test_user = User.objects.create_user('tester', 'test@example.com', 'testpassword')
+        self.token = Token.objects.create(user=self.test_user)
 
     def authenticated_get(self, path, data=None, follow=True, **extra):
         data = data or {}

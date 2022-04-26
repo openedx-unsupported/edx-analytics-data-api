@@ -40,7 +40,7 @@ coverage[toml]==6.3.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==36.0.2
+cryptography==37.0.0
     # via
     #   django-fernet-fields
     #   pyjwt

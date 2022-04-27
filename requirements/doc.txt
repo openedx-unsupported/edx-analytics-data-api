@@ -10,11 +10,11 @@ asgiref==3.5.0
     # via django
 babel==2.10.1
     # via sphinx
-boto==2.42.0
+boto==2.49.0
     # via -r requirements/base.in
-boto3==1.21.44
+boto3==1.22.0
     # via -r requirements/base.in
-botocore==1.24.44
+botocore==1.25.0
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==36.0.2
+cryptography==37.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -137,7 +137,7 @@ elasticsearch-dsl==7.4.0
     #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.3.5
+faker==13.4.0
     # via factory-boy
 future==0.18.2
     # via pyjwkest
@@ -169,10 +169,8 @@ markupsafe==2.1.1
     # via jinja2
 newrelic==7.10.0.175
     # via edx-django-utils
-ordered-set==3.1.1
-    # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+ordered-set==4.1.0
+    # via -r requirements/base.in
 packaging==21.3
     # via
     #   drf-yasg
@@ -187,7 +185,7 @@ pycparser==2.21
     # via cffi
 pycryptodomex==3.14.1
     # via pyjwkest
-pygments==2.11.2
+pygments==2.12.0
     # via sphinx
 pyjwkest==1.4.2
     # via edx-drf-extensions

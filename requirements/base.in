@@ -3,7 +3,7 @@
 -c constraints.txt
 
 edx-api-doc-tools
-boto==2.42.0                        # MIT
+boto                                # MIT
 boto3
 coreapi
 Django                              # BSD License

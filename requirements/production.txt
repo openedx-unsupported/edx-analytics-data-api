@@ -8,9 +8,9 @@ asgiref==3.5.0
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.22.0
+boto3==1.22.2
     # via -r requirements/base.in
-botocore==1.25.0
+botocore==1.25.2
     # via
     #   boto3
     #   s3transfer
@@ -30,7 +30,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==37.0.0
+cryptography==37.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -129,7 +129,7 @@ elasticsearch-dsl==7.4.0
     #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.4.0
+faker==13.6.0
     # via factory-boy
 future==0.18.2
     # via pyjwkest

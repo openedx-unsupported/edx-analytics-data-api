@@ -12,9 +12,9 @@ attrs==21.4.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.22.0
+boto3==1.22.2
     # via -r requirements/base.in
-botocore==1.25.0
+botocore==1.25.2
     # via
     #   boto3
     #   s3transfer
@@ -40,7 +40,7 @@ coverage[toml]==6.3.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==37.0.0
+cryptography==37.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -144,7 +144,7 @@ elasticsearch-dsl==7.4.0
     #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.4.0
+faker==13.6.0
     # via factory-boy
 freezegun==1.2.1
     # via -r requirements/test.in

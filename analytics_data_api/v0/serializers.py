@@ -192,7 +192,7 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
             '**ONEBACKSLASHQUOTE**': '\\"',
             '**TWOBACKSLASH**': '\\\\',
             '**BACKSLASHSPACE**': '\\ ',
-            '**BACKSLASHQUOTECOMMA**': '\\",',
+            '**BACKSLASHQUOTE**': '\\"',
         })
 
         # escape the '*' characters and build one big regex OR pattern

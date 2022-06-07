@@ -19,11 +19,21 @@ Getting Started With Devstack
 -----------------------------
 The best way to run this service is with edX Devstack: https://github.com/edx/devstack.
 
-See the [Devstack README](https://github.com/edx/devstack/blob/master/README.rst) for information on how to install and run the analytics data api.
+See the [Devstack README](https://github.com/edx/devstack/blob/master/README.rst) for information on how to install and run devstack.
+
+With devstack running and this repo checked-out locally, you'll want to do the following from your devstack directory:
+
+   ::
+
+      $ make dev.pull.analyticsapi
+      $ make dev.up.analyticsapi
+      $ make dev.provision.analyticsapi     # this will provision the DB user, run migrations, etc.
+      $ docker-compose restart analyticsapi # maybe necessary to reset the DB connection
+      $ make analyticsapi-logs              # make sure the app is running without errors
 
 
-Getting Started Standalone
---------------------------
+Getting Started Standalone (deprecated, prefer running in devstack)
+-------------------------------------------------------------------
 #. Create a virtual environment and activate it.
 
 #. Install the requirements:

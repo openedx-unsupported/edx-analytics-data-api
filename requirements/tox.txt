@@ -6,7 +6,7 @@
 #
 distlib==0.3.4
     # via virtualenv
-filelock==3.6.0
+filelock==3.7.1
     # via
     #   tox
     #   virtualenv
@@ -18,7 +18,7 @@ pluggy==1.0.0
     # via tox
 py==1.11.0
     # via tox
-pyparsing==3.0.8
+pyparsing==3.0.9
     # via packaging
 six==1.16.0
     # via
@@ -32,5 +32,5 @@ tox==3.25.0
     #   tox-battery
 tox-battery==0.6.1
     # via -r requirements/tox.in
-virtualenv==20.14.1
+virtualenv==20.15.0
     # via tox

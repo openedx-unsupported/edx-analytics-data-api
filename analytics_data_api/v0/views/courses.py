@@ -4,7 +4,7 @@ from itertools import groupby
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connections
+from django.db import connections, router
 from django.db.models import Max
 from django.http import Http404
 from django.utils.timezone import make_aware, utc
@@ -17,7 +17,7 @@ from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.utils import dictfetchall, get_course_report_download_details
 from analytics_data_api.v0 import models, serializers
 from analytics_data_api.v0.exceptions import ReportFileNotFoundError
-from analytics_data_api.v0.models import ModuleEngagement
+from analytics_data_api.v0.models import ModuleEngagement, ProblemResponseAnswerDistribution
 from analytics_data_api.v0.views.utils import raise_404_if_none
 
 
@@ -665,7 +665,9 @@ WHERE course_id = %s
 GROUP BY module_id;
         """
 
-        connection = connections[settings.ANALYTICS_DATABASE]
+        database = router.db_for_read(ProblemResponseAnswerDistribution)
+
+        connection = connections[database]
         with connection.cursor() as cursor:
             if connection.vendor == 'mysql':
                 # The default value of group_concat_max_len, 1024, is too low for some course data. Increase this value

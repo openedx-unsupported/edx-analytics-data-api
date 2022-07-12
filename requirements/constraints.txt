@@ -23,3 +23,6 @@ elasticsearch-dsl>=7.2.1,<8.0.0
 # Use same version of edx-lint
 pylint==2.4.4
 pylint-django==2.0.11
+
+# pinning for CR-4990 until report failures resolved
+edx-enterprise-data==4.3.2

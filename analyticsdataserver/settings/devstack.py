@@ -50,8 +50,6 @@ DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsd
 
 ########## END DATABASE CONFIGURATION
 
-ELASTICSEARCH_LEARNERS_HOST = os.environ.get('ELASTICSEARCH_LEARNERS_HOST', 'edx.devstack.elasticsearch')
-
 ALLOWED_HOSTS += ['edx.devstack.analyticsapi']
 
 LMS_BASE_URL = "http://edx.devstack.lms:18000/"

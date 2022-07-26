@@ -3,7 +3,6 @@ import json
 from collections import OrderedDict
 
 import six
-from django_dynamic_fixture import G
 from rest_framework import status
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
@@ -27,15 +26,6 @@ class CourseSamples:
 
 class VerifyCourseIdMixin:
 
-    def verify_no_course_id(self, response):
-        """ Assert that a course ID must be provided. """
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected = {
-            "error_code": "course_not_specified",
-            "developer_message": "Course id/key not specified."
-        }
-        self.assertDictEqual(json.loads(response.content.decode('utf-8')), expected)
-
     def verify_bad_course_id(self, response, course_id='malformed-course-id'):
         """ Assert that a course ID must be valid. """
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -48,47 +38,23 @@ class VerifyCourseIdMixin:
 
 class VerifyCsvResponseMixin:
 
-    def assertCsvResponseIsValid(self, response, expected_filename, expected_data=None, expected_headers=None):
-
+    def assertCsvResponseIsValid(self, response, expected_filename, expected_data):
         # Validate the basic response status, content type, and filename
         self.assertEqual(response.status_code, 200)
-        if expected_data:
-            self.assertEqual(response['Content-Type'].split(';')[0], 'text/csv')
+        self.assertEqual(response['Content-Type'].split(';')[0], 'text/csv')
         self.assertEqual(response['Content-Disposition'], f'attachment; filename={expected_filename}')
 
-        # Validate other response headers
-        if expected_headers:
-            for header_name, header_content in expected_headers.items():
-                self.assertEqual(response.get(header_name), header_content)
+        data = list(map(flatten, expected_data))
 
-        # Validate the content data
-        if expected_data:
-            data = list(map(flatten, expected_data))
+        # The CSV renderer sorts the headers alphabetically
+        fieldnames = sorted(data[0].keys())
 
-            # The CSV renderer sorts the headers alphabetically
-            fieldnames = sorted(data[0].keys())
-
-            # Generate the expected CSV output
-            expected = six.StringIO()
-            writer = csv.DictWriter(expected, fieldnames)
-            writer.writeheader()
-            writer.writerows(data)
-            self.assertEqual(response.content.decode('utf-8'), expected.getvalue())
-        else:
-            self.assertEqual(response.content.decode('utf-8'), '')
-
-    def assertResponseFields(self, response, fields):
-        content_type = response.get('Content-Type', '').split(';')[0]
-        self.assertEqual(content_type, 'text/csv')
-
-        data = six.StringIO(response.content.decode('utf-8'))
-        reader = csv.reader(data)
-        rows = []
-        for row in reader:
-            rows.append(row)
-        # Just check the header row
-        self.assertGreater(len(rows), 1)
-        self.assertEqual(rows[0], fields)
+        # Generate the expected CSV output
+        expected = six.StringIO()
+        writer = csv.DictWriter(expected, fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
+        self.assertEqual(response.content.decode('utf-8'), expected.getvalue())
 
 
 class APIListViewTestMixin:

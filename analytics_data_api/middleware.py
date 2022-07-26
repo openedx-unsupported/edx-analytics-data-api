@@ -10,9 +10,6 @@ from analytics_data_api.v0.exceptions import (
     CannotCreateReportDownloadLinkError,
     CourseKeyMalformedError,
     CourseNotSpecifiedError,
-    LearnerEngagementTimelineNotFoundError,
-    LearnerNotFoundError,
-    ParameterValueError,
     ReportFileNotFoundError,
 )
 
@@ -62,42 +59,6 @@ class BaseProcessErrorMiddleware(MiddlewareMixin, metaclass=abc.ABCMeta):
         return None
 
 
-class LearnerNotFoundErrorMiddleware(BaseProcessErrorMiddleware):
-    """
-    Raise 404 if learner not found.
-    """
-
-    @property
-    def error(self):
-        return LearnerNotFoundError
-
-    @property
-    def error_code(self):
-        return 'no_learner_for_course'
-
-    @property
-    def status_code(self):
-        return status.HTTP_404_NOT_FOUND
-
-
-class LearnerEngagementTimelineNotFoundErrorMiddleware(BaseProcessErrorMiddleware):
-    """
-    Raise 404 if learner engagement timeline not found.
-    """
-
-    @property
-    def error(self):
-        return LearnerEngagementTimelineNotFoundError
-
-    @property
-    def error_code(self):
-        return 'no_learner_engagement_timeline'
-
-    @property
-    def status_code(self):
-        return status.HTTP_404_NOT_FOUND
-
-
 class CourseNotSpecifiedErrorMiddleware(BaseProcessErrorMiddleware):
     """
     Raise 400 course not specified.
@@ -128,24 +89,6 @@ class CourseKeyMalformedErrorMiddleware(BaseProcessErrorMiddleware):
     @property
     def error_code(self):
         return 'course_key_malformed'
-
-    @property
-    def status_code(self):
-        return status.HTTP_400_BAD_REQUEST
-
-
-class ParameterValueErrorMiddleware(BaseProcessErrorMiddleware):
-    """
-    Raise 400 if illegal parameter values are provided.
-    """
-
-    @property
-    def error(self):
-        return ParameterValueError
-
-    @property
-    def error_code(self):
-        return 'illegal_parameter_values'
 
     @property
     def status_code(self):

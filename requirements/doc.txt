@@ -12,16 +12,14 @@ babel==2.10.3
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.24.29
+boto3==1.24.38
     # via -r requirements/base.in
-botocore==1.27.29
+botocore==1.27.38
     # via
     #   boto3
     #   s3transfer
 certifi==2022.6.15
-    # via
-    #   elasticsearch
-    #   requests
+    # via requests
 cffi==1.15.1
     # via
     #   cryptography
@@ -81,7 +79,7 @@ django-storages==1.8
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-django-waffle==2.5.0
+django-waffle==2.6.0
     # via
     #   edx-django-utils
     #   edx-drf-extensions
@@ -95,11 +93,11 @@ djangorestframework==3.13.1
     #   edx-drf-extensions
 djangorestframework-csv==2.1.1
     # via -r requirements/base.in
-docutils==0.18.1
+docutils==0.19
     # via sphinx
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.20.3
+drf-yasg==1.21.3
     # via edx-api-doc-tools
 edx-api-doc-tools==1.6.0
     # via -r requirements/base.in
@@ -134,17 +132,9 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 edx-sphinx-theme==3.0.0
     # via -r requirements/doc.in
-elasticsearch==7.13.4
-    # via
-    #   -c requirements/constraints.txt
-    #   elasticsearch-dsl
-elasticsearch-dsl==7.4.0
-    # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==13.15.0
+faker==13.15.1
     # via factory-boy
 future==0.18.2
     # via pyjwkest
@@ -170,11 +160,11 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-markdown==3.3.7
+markdown==3.4.1
     # via -r requirements/base.in
 markupsafe==2.1.1
     # via jinja2
-newrelic==7.14.0.177
+newrelic==7.16.0.178
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -211,7 +201,6 @@ python-dateutil==2.8.2
     # via
     #   botocore
     #   edx-drf-extensions
-    #   elasticsearch-dsl
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
@@ -250,7 +239,6 @@ six==1.16.0
     #   edx-drf-extensions
     #   edx-rbac
     #   edx-sphinx-theme
-    #   elasticsearch-dsl
     #   html5lib
     #   pyjwkest
     #   python-dateutil
@@ -259,7 +247,7 @@ slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.0.2
+sphinx==5.1.1
     # via
     #   -r requirements/doc.in
     #   edx-sphinx-theme
@@ -291,11 +279,10 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.10
+urllib3==1.26.11
     # via
     #   -r requirements/base.in
     #   botocore
-    #   elasticsearch
     #   requests
 webencodings==0.5.1
     # via html5lib

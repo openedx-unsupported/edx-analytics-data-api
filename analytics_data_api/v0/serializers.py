@@ -6,9 +6,8 @@ import html5lib
 from django.conf import settings
 from rest_framework import pagination, serializers
 from rest_framework.response import Response
-from six.moves.urllib.parse import urljoin  # pylint: disable=import-error,ungrouped-imports
 
-from analytics_data_api.constants import engagement_events, enrollment_modes
+from analytics_data_api.constants import enrollment_modes
 from analytics_data_api.v0 import models
 
 # Below are the enrollment modes supported by this API.
@@ -439,65 +438,6 @@ class VideoTimelineSerializer(ModelSerializerWithCreatedField):
         )
 
 
-# pylint: disable=abstract-method
-class LastUpdatedSerializer(serializers.Serializer):
-    last_updated = serializers.DateTimeField(source='date', format=settings.DATE_FORMAT)
-
-
-# pylint: disable=abstract-method
-class LearnerSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    username = serializers.CharField()
-    enrollment_mode = serializers.CharField()
-    name = serializers.CharField()
-    account_url = serializers.SerializerMethodField()
-    email = serializers.CharField()
-    language = serializers.CharField()
-    location = serializers.CharField()
-    year_of_birth = serializers.IntegerField()
-    level_of_education = serializers.CharField()
-    gender = serializers.CharField()
-    mailing_address = serializers.CharField()
-    city = serializers.CharField()
-    country = serializers.CharField()
-    goals = serializers.CharField()
-    segments = serializers.SerializerMethodField()
-    engagements = serializers.SerializerMethodField()
-    enrollment_date = serializers.DateTimeField(format=settings.DATE_FORMAT)
-    cohort = serializers.CharField(default=None, allow_null=True)
-
-    def get_segments(self, obj):
-        if getattr(obj, 'segments'):
-            # json parsing will fail unless in unicode
-            return [str(segment) for segment in obj.segments]
-        return []
-
-    def get_account_url(self, obj):
-        if settings.LMS_USER_ACCOUNT_BASE_URL:
-            return urljoin(settings.LMS_USER_ACCOUNT_BASE_URL, obj.username)
-        return None
-
-    def default_if_none(self, value, default=0):
-        return value if value is not None else default
-
-    def get_engagements(self, obj):
-        """
-        Add the engagement totals.
-        """
-        engagements = {}
-
-        # fill in these fields will 0 if values not returned/found
-        default_if_none_fields = ['discussion_contributions', 'problems_attempted',
-                                  'problems_completed', 'videos_viewed']
-        for field in default_if_none_fields:
-            engagements[field] = self.default_if_none(getattr(obj, field, None), 0)
-
-        # preserve null values for problem attempts per completed
-        engagements['problem_attempts_per_completed'] = getattr(obj, 'problem_attempts_per_completed', None)
-
-        return engagements
-
-
 class EdxPaginationSerializer(pagination.PageNumberPagination):
     """
     Adds values to the response according to edX REST API Conventions.
@@ -517,27 +457,6 @@ class EdxPaginationSerializer(pagination.PageNumberPagination):
             ('previous', self.get_previous_link()),
             ('results', data)
         ]))
-
-
-# pylint: disable=abstract-method
-class EngagementDaySerializer(serializers.Serializer):
-    date = serializers.DateField(format=settings.DATE_FORMAT)
-    problems_attempted = serializers.SerializerMethodField()
-    problems_completed = serializers.SerializerMethodField()
-    discussion_contributions = serializers.SerializerMethodField()
-    videos_viewed = serializers.SerializerMethodField()
-
-    def get_problems_attempted(self, obj):
-        return obj.get('problems_attempted', 0)
-
-    def get_problems_completed(self, obj):
-        return obj.get('problems_completed', 0)
-
-    def get_discussion_contributions(self, obj):
-        return obj.get('discussion_contributions', 0)
-
-    def get_videos_viewed(self, obj):
-        return obj.get('videos_viewed', 0)
 
 
 class EnterpriseLearnerEngagementSerializer(serializers.ModelSerializer):
@@ -594,39 +513,6 @@ class UserEngagementSerializer(serializers.Serializer):
     forum_posts_overall = serializers.IntegerField()
     forum_posts_last_week = serializers.IntegerField()
     date_last_active = serializers.DateTimeField(format=settings.DATE_FORMAT)
-
-
-# pylint: disable=abstract-method
-class CourseLearnerMetadataSerializer(serializers.Serializer):
-    enrollment_modes = serializers.ReadOnlyField(source='es_data.enrollment_modes')
-    segments = serializers.ReadOnlyField(source='es_data.segments')
-    cohorts = serializers.ReadOnlyField(source='es_data.cohorts')
-    engagement_ranges = serializers.SerializerMethodField()
-
-    def get_engagement_ranges(self, obj):
-        query_set = obj['engagement_ranges']
-        engagement_ranges = {
-            'date_range': DateRangeSerializer(query_set[0] if len(query_set) > 0 else None).data
-        }
-
-        for metric in engagement_events.EVENTS:
-            # construct the range type to class rank pairs
-            ranges_ranks = [('normal', 'average')]
-            if metric == 'problem_attempts_per_completed':
-                ranges_ranks.extend([('low', 'top'), ('high', 'bottom')])
-            else:
-                ranges_ranks.extend([('high', 'top'), ('low', 'bottom')])
-
-            # put together data to be serialized
-            serializer_kwargs = {}
-            for range_type, class_rank_type in ranges_ranks:
-                range_queryset = query_set.filter(metric=metric, range_type=range_type)
-                serializer_kwargs[class_rank_type] = range_queryset[0] if len(range_queryset) > 0 else None
-            engagement_ranges.update({
-                metric: EnagementRangeMetricSerializer(serializer_kwargs).data
-            })
-
-        return engagement_ranges
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):

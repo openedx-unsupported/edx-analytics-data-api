@@ -21,12 +21,6 @@ requirements:  ## install base requirements
 production-requirements:  ## install production requirements
 	pip3 install -r requirements.txt
 
-test.run_elasticsearch:
-	docker-compose up -d
-
-test.stop_elasticsearch:
-	docker-compose stop
-
 test.requirements: requirements  ## install base and test requirements
 	pip3 install -q -r requirements/test.txt
 
@@ -36,7 +30,7 @@ tox.requirements:  ## install tox requirements
 develop: test.requirements  ## install test and dev requirements
 	pip3 install -q -r requirements/dev.txt
 
-upgrade: 
+upgrade:
 	pip3 install -q -r requirements/pip_tools.txt
 	pip-compile --upgrade --allow-unsafe -o requirements/pip.txt requirements/pip.in
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
@@ -72,13 +66,7 @@ main.test: clean
 	export COVERAGE_DIR=$(COVERAGE_DIR) && \
 	$(TOX)pytest --cov-report html --cov-report xml
 
-test:
-
-ifeq ($(DJANGO_SETTINGS_MODULE),analyticsdataserver.settings.devstack)
 test: main.test
-else
-test: test.run_elasticsearch main.test test.stop_elasticsearch
-endif
 
 diff.report: test.requirements  ## Show the diff in quality and coverage
 	diff-cover $(COVERAGE_DIR)/coverage.xml --html-report $(COVERAGE_DIR)/diff_cover.html
@@ -120,9 +108,6 @@ loaddata: migrate-all  ## Runs migrations and generates fake data
 	python manage.py loaddata problem_response_answer_distribution_analytics_v1 --database=analytics_v1
 	python manage.py generate_fake_course_data --database=analytics
 	python manage.py generate_fake_course_data --database=analytics_v1
-
-create_indices:  ## Create ElasticSearch indices
-	python manage.py create_elasticsearch_learners_indices
 
 demo: requirements clean loaddata  ## Runs make clean, requirements, and loaddata, sets api key to edx
 	python manage.py set_api_key edx edx

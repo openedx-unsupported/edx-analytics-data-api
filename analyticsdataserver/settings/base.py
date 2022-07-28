@@ -90,29 +90,6 @@ DATABASES = {
 }
 ########## END DATABASE CONFIGURATION
 
-########## ELASTICSEARCH CONFIGURATION
-ELASTICSEARCH_LEARNERS_HOST = environ.get('ELASTICSEARCH_LEARNERS_HOST', None)
-ELASTICSEARCH_LEARNERS_INDEX = environ.get('ELASTICSEARCH_LEARNERS_INDEX', None)
-ELASTICSEARCH_LEARNERS_INDEX_ALIAS = environ.get('ELASTICSEARCH_LEARNERS_INDEX_ALIAS', None)
-ELASTICSEARCH_LEARNERS_UPDATE_INDEX = environ.get('ELASTICSEARCH_LEARNERS_UPDATE_INDEX', None)
-
-# access credentials for signing requests to AWS.
-# For more information see http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html
-ELASTICSEARCH_AWS_ACCESS_KEY_ID = None
-ELASTICSEARCH_AWS_SECRET_ACCESS_KEY = None
-# override the default elasticsearch connection class and useful for signing certificates
-# e.g. 'analytics_data_api.v0.connections.BotoHttpConnection'
-ELASTICSEARCH_CONNECTION_CLASS = None
-# only needed with BotoHttpConnection, e.g. 'us-east-1'
-ELASTICSEARCH_CONNECTION_DEFAULT_REGION = None
-
-DEFAULT_ELASTICSEARCH_INDEX_SETTINGS = {
-    'number_of_shards': 1,
-    'number_of_replicas': 0
-}
-ELASTICSEARCH_INDEX_SETTINGS = environ.get('ELASTICSEARCH_INDEX_SETTINGS', DEFAULT_ELASTICSEARCH_INDEX_SETTINGS)
-########## END ELASTICSEARCH CONFIGURATION
-
 ########## GENERAL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
 TIME_ZONE = 'UTC'
@@ -222,11 +199,8 @@ MIDDLEWARE = [
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
     'waffle.middleware.WaffleMiddleware',
-    'analytics_data_api.middleware.LearnerEngagementTimelineNotFoundErrorMiddleware',
-    'analytics_data_api.middleware.LearnerNotFoundErrorMiddleware',
     'analytics_data_api.middleware.CourseNotSpecifiedErrorMiddleware',
     'analytics_data_api.middleware.CourseKeyMalformedErrorMiddleware',
-    'analytics_data_api.middleware.ParameterValueErrorMiddleware',
     'analytics_data_api.middleware.ReportFileNotFoundErrorMiddleware',
     'analytics_data_api.middleware.CannotCreateDownloadLinkErrorMiddleware',
     'analytics_data_api.middleware.RequestVersionMiddleware',
@@ -323,21 +297,6 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
-        },
-        # See https://elasticutils.readthedocs.io/en/latest/debugging.html
-        # INFO-level logs tell us when nodes fail and are resurrected.
-        'elasticsearch': {
-            'handlers': ['console'],
-            'level': 'WARNING'
-        },
-        # elasticsearch.trace logs are fired for every single request
-        # with an INFO or DEBUG level.  They're noisy and not terribly
-        # userful for debugging, so we'll just propagate them to the
-        # 'elasticsearch' log bucket which only accepts 'WARNING'
-        # level logs.
-        'elasticsearch.trace': {
-            'handlers': ['null'],
-            'propagate': False
         },
     },
 }

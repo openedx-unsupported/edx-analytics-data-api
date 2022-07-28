@@ -114,10 +114,4 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
 )
 CORS_ALLOW_CREDENTIALS = True
 
-# Default elasticsearch port when running locally
-ELASTICSEARCH_LEARNERS_HOST = environ.get("ELASTICSEARCH_LEARNERS_HOST", 'http://localhost:9223/')
-ELASTICSEARCH_LEARNERS_INDEX = 'roster_entry_001'
-ELASTICSEARCH_LEARNERS_INDEX_ALIAS = 'roster_entry'
-ELASTICSEARCH_LEARNERS_UPDATE_INDEX = 'index_update'
-
 ########## END ANALYTICS DATA API CONFIGURATION

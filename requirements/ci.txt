@@ -10,7 +10,7 @@ charset-normalizer==2.1.0
     # via requests
 codecov==2.1.12
     # via -r requirements/ci.in
-coverage==6.4.2
+coverage==6.4.3
     # via codecov
 idna==3.3
     # via requests

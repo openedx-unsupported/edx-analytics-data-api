@@ -69,4 +69,4 @@ Consequences
 References
 ----------
 
-- `Insights Replumbing <https://openedx.atlassian.net/wiki/spaces/PT/pages/3139764337/Insights+Replumbing>`_
+- `Insights Replumbing <https://2u-internal.atlassian.net/wiki/spaces/PT/pages/15440575/Insights+Replumbing>`_

@@ -23,7 +23,7 @@ You must get the `Data Analytics API repository`_ from GitHub.
 
 From the terminal, enter:
 
-``git clone https://github.com/edx/edx-analytics-data-api``
+``git clone https://github.com/openedx/edx-analytics-data-api``
 
 You may choose to get the repository in a virtual environment.
 

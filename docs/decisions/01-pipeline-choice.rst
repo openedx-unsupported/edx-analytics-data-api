@@ -63,7 +63,7 @@ Consequences
 
 - We will be maintaining two databases and two APIs until the old API is retired (if at all).
 - We will rely on the client (in our case,
-  `edx-analytics-dashboard <https://github.com/edx/edx-analytics-dashboard>`_) in order to
+  `edx-analytics-dashboard <https://github.com/openedx/edx-analytics-dashboard>`_) in order to
   determine which API to use.
 
 References

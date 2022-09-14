@@ -179,7 +179,7 @@ class ProblemResponseAnswerDistributionSerializer(ModelSerializerWithCreatedFiel
         """
         Data coming out of snowflake sometimes looks like "**FOURBACKSLASHQUOTE** something" because of
         slugging from
-        https://github.com/openedx/warehouse-transforms/blob/master/projects/automated/raw_to_source/models/downstream_sources/tracking_log_events/tracking_events.sql
+        https://github.com/edx/warehouse-transforms/blob/master/projects/automated/raw_to_source/models/downstream_sources/tracking_log_events/tracking_events.sql
         we need to remove the slugs so that it is consumable/readable in insights.
         """
         # order matters if a we have a key that is a substring of another key

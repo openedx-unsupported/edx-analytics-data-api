@@ -12,13 +12,13 @@ attrs==22.1.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.24.70
+boto3==1.24.80
     # via -r requirements/base.in
-botocore==1.27.70
+botocore==1.27.80
     # via
     #   boto3
     #   s3transfer
-certifi==2022.6.15.1
+certifi==2022.9.24
     # via requests
 cffi==1.15.1
     # via
@@ -48,7 +48,7 @@ cryptography==38.0.1
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==6.5.1
+diff-cover==7.0.1
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -94,7 +94,7 @@ django-waffle==3.0.0
     # via
     #   edx-django-utils
     #   edx-drf-extensions
-djangorestframework==3.13.1
+djangorestframework==3.14.0
     # via
     #   -r requirements/base.in
     #   djangorestframework-csv
@@ -114,7 +114,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.2.0
     # via -r requirements/base.in
-edx-django-utils==5.0.1
+edx-django-utils==5.1.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -141,7 +141,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==14.2.0
+faker==14.2.1
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -149,7 +149,7 @@ future==0.18.2
     # via pyjwkest
 html5lib==1.1
     # via -r requirements/base.in
-idna==3.3
+idna==3.4
     # via requests
 importlib-metadata==4.12.0
     # via markdown
@@ -177,7 +177,7 @@ markupsafe==2.1.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.0.0.179
+newrelic==8.1.0.180
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -207,7 +207,7 @@ pygments==2.13.0
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.4.0
+pyjwt[crypto]==2.5.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -284,7 +284,7 @@ slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.2.0
     # via pydocstyle
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via django
 stevedore==4.0.0
     # via
@@ -296,6 +296,8 @@ tomli==2.0.1
     #   pytest
 tqdm==4.64.1
     # via -r requirements/base.in
+types-cryptography==3.3.23
+    # via pyjwt
 typing-extensions==4.3.0
     # via django-countries
 unicodecsv==0.14.1

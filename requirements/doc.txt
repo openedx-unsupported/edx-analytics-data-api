@@ -12,13 +12,13 @@ babel==2.10.3
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.24.70
+boto3==1.24.80
     # via -r requirements/base.in
-botocore==1.27.70
+botocore==1.27.80
     # via
     #   boto3
     #   s3transfer
-certifi==2022.6.15.1
+certifi==2022.9.24
     # via requests
 cffi==1.15.1
     # via
@@ -83,7 +83,7 @@ django-waffle==3.0.0
     # via
     #   edx-django-utils
     #   edx-drf-extensions
-djangorestframework==3.13.1
+djangorestframework==3.14.0
     # via
     #   -r requirements/base.in
     #   djangorestframework-csv
@@ -105,7 +105,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.2.0
     # via -r requirements/base.in
-edx-django-utils==5.0.1
+edx-django-utils==5.1.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -134,13 +134,13 @@ edx-sphinx-theme==3.0.0
     # via -r requirements/doc.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==14.2.0
+faker==14.2.1
     # via factory-boy
 future==0.18.2
     # via pyjwkest
 html5lib==1.1
     # via -r requirements/base.in
-idna==3.3
+idna==3.4
     # via requests
 imagesize==1.4.1
     # via sphinx
@@ -164,7 +164,7 @@ markdown==3.4.1
     # via -r requirements/base.in
 markupsafe==2.1.1
     # via jinja2
-newrelic==8.0.0.179
+newrelic==8.1.0.180
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -186,7 +186,7 @@ pygments==2.13.0
     # via sphinx
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.4.0
+pyjwt[crypto]==2.5.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -263,7 +263,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via django
 stevedore==4.0.0
     # via
@@ -271,6 +271,8 @@ stevedore==4.0.0
     #   edx-opaque-keys
 tqdm==4.64.1
     # via -r requirements/base.in
+types-cryptography==3.3.23
+    # via pyjwt
 typing-extensions==4.3.0
     # via django-countries
 unicodecsv==0.14.1

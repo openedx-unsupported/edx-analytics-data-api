@@ -38,7 +38,7 @@ cryptography==36.0.2
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.15
+django==3.2.16
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in

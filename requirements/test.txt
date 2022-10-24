@@ -12,9 +12,9 @@ attrs==22.1.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.24.89
+boto3==1.24.96
     # via -r requirements/base.in
-botocore==1.27.89
+botocore==1.27.96
     # via
     #   boto3
     #   s3transfer
@@ -141,7 +141,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.0.0
+faker==15.1.1
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -177,7 +177,7 @@ markupsafe==2.1.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.2.0.181
+newrelic==8.2.1
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -185,13 +185,13 @@ packaging==21.3
     # via
     #   drf-yasg
     #   pytest
-pbr==5.10.0
+pbr==5.11.0
     # via stevedore
 pluggy==1.0.0
     # via
     #   diff-cover
     #   pytest
-psutil==5.9.2
+psutil==5.9.3
     # via edx-django-utils
 py==1.11.0
     # via pytest
@@ -207,7 +207,7 @@ pygments==2.13.0
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.5.0
+pyjwt[crypto]==2.6.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -238,7 +238,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.4
+pytz==2022.5
     # via
     #   -r requirements/test.in
     #   django
@@ -255,11 +255,11 @@ requests==2.28.1
     #   pyjwkest
     #   responses
     #   slumber
-responses==0.21.0
+responses==0.22.0
     # via -r requirements/test.in
 ruamel-yaml==0.17.21
     # via drf-yasg
-ruamel-yaml-clib==0.2.6
+ruamel-yaml-clib==0.2.7
     # via ruamel-yaml
 rules==3.3
     # via edx-enterprise-data
@@ -286,18 +286,20 @@ snowballstemmer==2.2.0
     # via pydocstyle
 sqlparse==0.4.3
     # via django
-stevedore==4.0.0
+stevedore==4.1.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
+toml==0.10.2
+    # via responses
 tomli==2.0.1
     # via
     #   coverage
     #   pytest
 tqdm==4.64.1
     # via -r requirements/base.in
-types-cryptography==3.3.23
-    # via pyjwt
+types-toml==0.10.8
+    # via responses
 typing-extensions==4.4.0
     # via django-countries
 unicodecsv==0.14.1
@@ -316,5 +318,5 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.9.0
+zipp==3.10.0
     # via importlib-metadata

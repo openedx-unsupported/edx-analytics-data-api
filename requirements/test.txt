@@ -12,9 +12,9 @@ attrs==22.1.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.24.96
+boto3==1.25.1
     # via -r requirements/base.in
-botocore==1.27.96
+botocore==1.28.1
     # via
     #   boto3
     #   s3transfer
@@ -125,7 +125,7 @@ edx-drf-extensions==8.3.1
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.6.3
+edx-enterprise-data==4.6.4
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -139,6 +139,8 @@ edx-rest-api-client==5.5.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
+exceptiongroup==1.0.0rc9
+    # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
 faker==15.1.1
@@ -177,7 +179,7 @@ markupsafe==2.1.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.2.1
+newrelic==8.3.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -193,8 +195,6 @@ pluggy==1.0.0
     #   pytest
 psutil==5.9.3
     # via edx-django-utils
-py==1.11.0
-    # via pytest
 pycodestyle==2.9.1
     # via -r requirements/test.in
 pycparser==2.21
@@ -222,7 +222,7 @@ pynacl==1.5.0
     # via edx-django-utils
 pyparsing==3.0.9
     # via packaging
-pytest==7.1.3
+pytest==7.2.0
     # via
     #   pytest-cov
     #   pytest-django

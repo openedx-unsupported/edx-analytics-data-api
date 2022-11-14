@@ -8,9 +8,9 @@ asgiref==3.5.2
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.25.1
+boto3==1.26.6
     # via -r requirements/base.in
-botocore==1.28.1
+botocore==1.29.6
     # via
     #   boto3
     #   s3transfer
@@ -32,7 +32,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==38.0.1
+cryptography==38.0.3
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -126,13 +126,13 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.1.1
+faker==15.3.1
     # via factory-boy
 future==0.18.2
     # via pyjwkest
-gevent==22.10.1
+gevent==22.10.2
     # via -r requirements/production.in
-greenlet==1.1.3.post0
+greenlet==2.0.1
     # via gevent
 gunicorn==20.1.0
     # via -r requirements/production.in
@@ -158,7 +158,7 @@ markupsafe==2.1.1
     # via jinja2
 mysqlclient==2.1.1
     # via -r requirements/production.in
-newrelic==8.3.0
+newrelic==8.4.0
     # via
     #   -r requirements/production.in
     #   edx-django-utils
@@ -170,7 +170,7 @@ path-py==8.2.1
     # via -r requirements/production.in
 pbr==5.11.0
     # via stevedore
-psutil==5.9.3
+psutil==5.9.4
     # via edx-django-utils
 pycparser==2.21
     # via cffi
@@ -183,7 +183,7 @@ pyjwt[crypto]==2.6.0
     #   drf-jwt
     #   edx-drf-extensions
     #   edx-rest-api-client
-pymongo==3.12.3
+pymongo==3.13.0
     # via edx-opaque-keys
 pynacl==1.5.0
     # via edx-django-utils
@@ -196,7 +196,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.5
+pytz==2022.6
     # via
     #   django
     #   djangorestframework
@@ -238,7 +238,7 @@ slumber==0.7.1
     # via edx-rest-api-client
 sqlparse==0.4.3
     # via django
-stevedore==4.1.0
+stevedore==4.1.1
     # via
     #   edx-django-utils
     #   edx-opaque-keys
@@ -263,7 +263,7 @@ zipp==3.10.0
     # via importlib-metadata
 zope-event==4.5.0
     # via gevent
-zope-interface==5.5.0
+zope-interface==5.5.1
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:

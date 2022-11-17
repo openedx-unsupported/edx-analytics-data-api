@@ -63,3 +63,6 @@ elasticsearch-*
 
 # Visual Studio Code
 .vscode
+
+#Pyenv
+.python-version

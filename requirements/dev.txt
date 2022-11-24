@@ -8,9 +8,9 @@ asgiref==3.5.2
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.6
+boto3==1.26.16
     # via -r requirements/base.in
-botocore==1.29.6
+botocore==1.29.16
     # via
     #   boto3
     #   s3transfer
@@ -67,7 +67,7 @@ django-fernet-fields==0.6
     # via edx-enterprise-data
 django-filter==22.1
     # via edx-enterprise-data
-django-model-utils==4.2.0
+django-model-utils==4.3.1
     # via
     #   edx-enterprise-data
     #   edx-rbac
@@ -126,7 +126,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.3.1
+faker==15.3.3
     # via factory-boy
 future==0.18.2
     # via pyjwkest
@@ -134,7 +134,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==5.0.0
+importlib-metadata==5.1.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -238,7 +238,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.12
+urllib3==1.26.13
     # via
     #   -r requirements/base.in
     #   botocore

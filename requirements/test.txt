@@ -12,9 +12,9 @@ attrs==22.1.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.6
+boto3==1.26.16
     # via -r requirements/base.in
-botocore==1.29.6
+botocore==1.29.16
     # via
     #   boto3
     #   s3transfer
@@ -48,7 +48,7 @@ cryptography==38.0.3
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.0.1
+diff-cover==7.0.2
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -82,7 +82,7 @@ django-fernet-fields==0.6
     # via edx-enterprise-data
 django-filter==22.1
     # via edx-enterprise-data
-django-model-utils==4.2.0
+django-model-utils==4.3.1
     # via
     #   edx-enterprise-data
     #   edx-rbac
@@ -139,11 +139,11 @@ edx-rest-api-client==5.5.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
-exceptiongroup==1.0.1
+exceptiongroup==1.0.4
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.3.1
+faker==15.3.3
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -153,7 +153,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==5.0.0
+importlib-metadata==5.1.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -195,7 +195,7 @@ pluggy==1.0.0
     #   pytest
 psutil==5.9.4
     # via edx-django-utils
-pycodestyle==2.9.1
+pycodestyle==2.10.0
     # via -r requirements/test.in
 pycparser==2.21
     # via cffi
@@ -298,7 +298,7 @@ tomli==2.0.1
     #   pytest
 tqdm==4.64.1
     # via -r requirements/base.in
-types-toml==0.10.8
+types-toml==0.10.8.1
     # via responses
 typing-extensions==4.4.0
     # via django-countries
@@ -308,7 +308,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.12
+urllib3==1.26.13
     # via
     #   -r requirements/base.in
     #   botocore

@@ -6,8 +6,6 @@ on:
       - master
     tags:
       - open-release/*
-  # temporary trigger for testing
-  pull_request:
 jobs:
   push:
     runs-on: ubuntu-latest

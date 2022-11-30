@@ -6,6 +6,8 @@ on:
       - master
     tags:
       - open-release/*
+  # temporary trigger for testing
+  pull_request:
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -38,6 +40,9 @@ jobs:
           repository: edxops/analytics-api-dev
           tags: ${{ steps.get-tag-name.outputs.result }},${{ github.sha }}
 
+      # This part is commented out for now as edxops/insights is the older image built using Ansible.
+      # For smooth transition we want to keep that image intact too. Apart from this, the current priority is to get
+      # the devstack off of Ansible based Images.
       # - name: Build and push prod Docker image
       #   uses: docker/build-push-action@v1
       #   with:

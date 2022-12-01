@@ -3,7 +3,7 @@ version: "2"
 services:
 
   analytics_api:
-    image: edxops/analytics_api:latest
+    image: edxops/analytics-api-dev:latest
     container_name: analytics_api_testing
     volumes:
       - ..:/edx/app/analytics_api/analytics_api

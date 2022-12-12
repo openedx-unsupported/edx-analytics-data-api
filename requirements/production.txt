@@ -57,7 +57,7 @@ django==3.2.16
     #   edx-rbac
 django-cors-headers==3.13.0
     # via -r requirements/base.in
-django-countries==7.4.2
+django-countries==7.5
     # via -r requirements/base.in
 django-crum==0.7.9
     # via

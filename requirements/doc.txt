@@ -6,15 +6,15 @@
 #
 alabaster==0.7.12
     # via sphinx
-asgiref==3.5.2
+asgiref==3.6.0
     # via django
 babel==2.11.0
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.27
+boto3==1.26.37
     # via -r requirements/base.in
-botocore==1.29.27
+botocore==1.29.37
     # via
     #   boto3
     #   s3transfer
@@ -111,7 +111,7 @@ edx-django-utils==5.2.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.3.1
+edx-drf-extensions==8.4.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -144,7 +144,7 @@ idna==3.4
     # via requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==5.1.0
+importlib-metadata==5.2.0
     # via
     #   markdown
     #   sphinx
@@ -202,7 +202,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.6
+pytz==2022.7
     # via
     #   babel
     #   django

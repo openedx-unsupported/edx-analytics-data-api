@@ -4,17 +4,17 @@
 #
 #    make upgrade
 #
-asgiref==3.5.2
+asgiref==3.6.0
     # via django
 astroid==2.3.3
     # via pylint
-attrs==22.1.0
+attrs==22.2.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.27
+boto3==1.26.46
     # via -r requirements/base.in
-botocore==1.29.27
+botocore==1.29.46
     # via
     #   boto3
     #   s3transfer
@@ -38,11 +38,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==6.5.0
+coverage[toml]==7.0.4
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==38.0.4
+cryptography==39.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -120,7 +120,7 @@ edx-django-utils==5.2.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.3.1
+edx-drf-extensions==8.4.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -139,11 +139,11 @@ edx-rest-api-client==5.5.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
-exceptiongroup==1.0.4
+exceptiongroup==1.1.0
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.3.4
+faker==16.1.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -153,11 +153,11 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==5.1.0
+importlib-metadata==6.0.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
-iniconfig==1.1.1
+iniconfig==2.0.0
     # via pytest
 isort==4.3.21
     # via pylint
@@ -183,7 +183,7 @@ newrelic==8.5.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
-packaging==22.0
+packaging==23.0
     # via
     #   drf-yasg
     #   pytest
@@ -201,9 +201,9 @@ pycparser==2.21
     # via cffi
 pycryptodomex==3.16.0
     # via pyjwkest
-pydocstyle==6.1.1
+pydocstyle==6.2.3
     # via -r requirements/test.in
-pygments==2.13.0
+pygments==2.14.0
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -236,7 +236,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.6
+pytz==2022.7
     # via
     #   -r requirements/test.in
     #   django

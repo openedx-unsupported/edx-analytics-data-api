@@ -6,15 +6,15 @@
 #
 alabaster==0.7.12
     # via sphinx
-asgiref==3.5.2
+asgiref==3.6.0
     # via django
 babel==2.11.0
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.27
+boto3==1.26.46
     # via -r requirements/base.in
-botocore==1.29.27
+botocore==1.29.46
     # via
     #   boto3
     #   s3transfer
@@ -36,7 +36,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==38.0.4
+cryptography==39.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -111,7 +111,7 @@ edx-django-utils==5.2.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.3.1
+edx-drf-extensions==8.4.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -134,7 +134,7 @@ edx-sphinx-theme==3.0.0
     # via -r requirements/doc.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==15.3.4
+faker==16.1.0
     # via factory-boy
 future==0.18.2
     # via pyjwkest
@@ -144,7 +144,7 @@ idna==3.4
     # via requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==5.1.0
+importlib-metadata==6.0.0
     # via
     #   markdown
     #   sphinx
@@ -168,7 +168,7 @@ newrelic==8.5.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
-packaging==22.0
+packaging==23.0
     # via
     #   drf-yasg
     #   sphinx
@@ -182,7 +182,7 @@ pycparser==2.21
     # via cffi
 pycryptodomex==3.16.0
     # via pyjwkest
-pygments==2.13.0
+pygments==2.14.0
     # via sphinx
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -202,7 +202,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.6
+pytz==2022.7
     # via
     #   babel
     #   django
@@ -245,11 +245,11 @@ slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.3.0
+sphinx==6.1.2
     # via
     #   -r requirements/doc.in
     #   edx-sphinx-theme
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==1.0.3
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx

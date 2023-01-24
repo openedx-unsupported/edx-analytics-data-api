@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-alabaster==0.7.12
+alabaster==0.7.13
     # via sphinx
 asgiref==3.6.0
     # via django
@@ -12,9 +12,9 @@ babel==2.11.0
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.46
+boto3==1.26.55
     # via -r requirements/base.in
-botocore==1.29.46
+botocore==1.29.55
     # via
     #   boto3
     #   s3transfer
@@ -24,7 +24,7 @@ cffi==1.15.1
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==2.1.1
+charset-normalizer==3.0.1
     # via requests
 click==8.1.3
     # via edx-django-utils
@@ -111,7 +111,7 @@ edx-django-utils==5.2.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.4.0
+edx-drf-extensions==8.4.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -130,13 +130,13 @@ edx-rest-api-client==5.5.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
-edx-sphinx-theme==3.0.0
+edx-sphinx-theme==3.1.0
     # via -r requirements/doc.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==16.1.0
+faker==16.6.0
     # via factory-boy
-future==0.18.2
+future==0.18.3
     # via pyjwkest
 html5lib==1.1
     # via -r requirements/base.in
@@ -162,7 +162,7 @@ jmespath==1.0.1
     #   botocore
 markdown==3.4.1
     # via -r requirements/base.in
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via jinja2
 newrelic==8.5.0
     # via edx-django-utils
@@ -174,7 +174,7 @@ packaging==23.0
     #   sphinx
 path==16.6.0
     # via -r requirements/doc.in
-pbr==5.11.0
+pbr==5.11.1
     # via stevedore
 psutil==5.9.4
     # via edx-django-utils
@@ -202,7 +202,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.7
+pytz==2022.7.1
     # via
     #   babel
     #   django
@@ -210,7 +210,7 @@ pytz==2022.7
     #   drf-yasg
 pyyaml==6.0
     # via edx-django-release-util
-requests==2.28.1
+requests==2.28.2
     # via
     #   coreapi
     #   edx-drf-extensions
@@ -245,11 +245,11 @@ slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==6.1.2
+sphinx==5.3.0
     # via
     #   -r requirements/doc.in
     #   edx-sphinx-theme
-sphinxcontrib-applehelp==1.0.3
+sphinxcontrib-applehelp==1.0.4
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
@@ -277,7 +277,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.13
+urllib3==1.26.14
     # via
     #   -r requirements/base.in
     #   botocore

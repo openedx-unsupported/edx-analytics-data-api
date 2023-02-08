@@ -11,9 +11,9 @@ astroid==2.3.3
 attrs==22.2.0
     # via pytest
 boto==2.49.0
-    # via -r requirements/base.in
+    # via -r base.in
 boto3==1.26.55
-    # via -r requirements/base.in
+    # via -r base.in
 botocore==1.29.55
     # via
     #   boto3
@@ -32,7 +32,7 @@ click==8.1.3
     # via edx-django-utils
 coreapi==2.3.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   drf-yasg
 coreschema==0.0.4
     # via
@@ -40,19 +40,20 @@ coreschema==0.0.4
     #   drf-yasg
 coverage[toml]==7.0.5
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   pytest-cov
-cryptography==39.0.0
+cryptography==39.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
 ddt==1.6.0
-    # via -r requirements/test.in
+    # via -r test.in
 diff-cover==7.3.2
-    # via -r requirements/test.in
+    # via -r test.in
+django==3.2.17
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+    #   -c constraints.txt
+    #   -r base.in
     #   django-cors-headers
     #   django-crum
     #   django-fernet-fields
@@ -69,15 +70,15 @@ diff-cover==7.3.2
     #   edx-enterprise-data
     #   edx-rbac
 django-cors-headers==3.13.0
-    # via -r requirements/base.in
+    # via -r base.in
 django-countries==7.5
-    # via -r requirements/base.in
+    # via -r base.in
 django-crum==0.7.9
     # via
     #   edx-django-utils
     #   edx-rbac
 django-dynamic-fixture==3.1.2
-    # via -r requirements/test.in
+    # via -r test.in
 django-fernet-fields==0.6
     # via edx-enterprise-data
 django-filter==22.1
@@ -88,48 +89,48 @@ django-model-utils==4.3.1
     #   edx-rbac
 django-storages==1.8
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/base.in
+    #   -c constraints.txt
+    #   -r base.in
 django-waffle==3.0.0
     # via
     #   edx-django-utils
     #   edx-drf-extensions
 djangorestframework==3.14.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   djangorestframework-csv
     #   drf-jwt
     #   drf-yasg
     #   edx-api-doc-tools
     #   edx-drf-extensions
 djangorestframework-csv==2.1.1
-    # via -r requirements/base.in
+    # via -r base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
 drf-yasg==1.21.4
     # via edx-api-doc-tools
 edx-api-doc-tools==1.6.0
-    # via -r requirements/base.in
+    # via -r base.in
 edx-ccx-keys==1.2.1
-    # via -r requirements/base.in
+    # via -r base.in
 edx-django-release-util==1.2.0
-    # via -r requirements/base.in
+    # via -r base.in
 edx-django-utils==5.2.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
 edx-drf-extensions==8.4.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-enterprise-data
     #   edx-rbac
 edx-enterprise-data==4.6.4
-    # via -r requirements/base.in
+    # via -r base.in
 edx-opaque-keys==2.3.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-ccx-keys
     #   edx-drf-extensions
     #   edx-enterprise-data
@@ -137,24 +138,20 @@ edx-rbac==1.7.0
     # via edx-enterprise-data
 edx-rest-api-client==5.5.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   edx-enterprise-data
-exceptiongroup==1.1.0
-    # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
 faker==16.6.0
     # via factory-boy
 freezegun==1.2.2
-    # via -r requirements/test.in
+    # via -r test.in
 future==0.18.3
     # via pyjwkest
 html5lib==1.1
-    # via -r requirements/base.in
+    # via -r base.in
 idna==3.4
     # via requests
-importlib-metadata==6.0.0
-    # via markdown
 inflection==0.5.1
     # via drf-yasg
 iniconfig==2.0.0
@@ -174,7 +171,7 @@ jmespath==1.0.1
 lazy-object-proxy==1.4.3
     # via astroid
 markdown==3.4.1
-    # via -r requirements/base.in
+    # via -r base.in
 markupsafe==2.1.2
     # via jinja2
 mccabe==0.6.1
@@ -182,7 +179,7 @@ mccabe==0.6.1
 newrelic==8.5.0
     # via edx-django-utils
 ordered-set==4.1.0
-    # via -r requirements/base.in
+    # via -r base.in
 packaging==23.0
     # via
     #   drf-yasg
@@ -196,13 +193,13 @@ pluggy==1.0.0
 psutil==5.9.4
     # via edx-django-utils
 pycodestyle==2.10.0
-    # via -r requirements/test.in
+    # via -r test.in
 pycparser==2.21
     # via cffi
 pycryptodomex==3.16.0
     # via pyjwkest
 pydocstyle==6.3.0
-    # via -r requirements/test.in
+    # via -r test.in
 pygments==2.14.0
     # via diff-cover
 pyjwkest==1.4.2
@@ -214,8 +211,8 @@ pyjwt[crypto]==2.6.0
     #   edx-rest-api-client
 pylint==2.4.4
     # via
-    #   -c requirements/constraints.txt
-    #   -r requirements/test.in
+    #   -c constraints.txt
+    #   -r test.in
 pymongo==3.13.0
     # via edx-opaque-keys
 pynacl==1.5.0
@@ -225,9 +222,9 @@ pytest==7.2.1
     #   pytest-cov
     #   pytest-django
 pytest-cov==4.0.0
-    # via -r requirements/test.in
+    # via -r test.in
 pytest-django==4.5.2
-    # via -r requirements/test.in
+    # via -r test.in
 python-dateutil==2.8.2
     # via
     #   botocore
@@ -235,10 +232,10 @@ python-dateutil==2.8.2
     #   faker
     #   freezegun
 python-memcached==1.59
-    # via -r requirements/base.in
+    # via -r base.in
 pytz==2022.7.1
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   django
     #   djangorestframework
     #   drf-yasg
@@ -254,11 +251,9 @@ requests==2.28.2
     #   responses
     #   slumber
 responses==0.22.0
-    # via -r requirements/test.in
+    # via -r test.in
 ruamel-yaml==0.17.21
     # via drf-yasg
-ruamel-yaml-clib==0.2.7
-    # via ruamel-yaml
 rules==3.3
     # via edx-enterprise-data
 s3transfer==0.6.0
@@ -290,12 +285,8 @@ stevedore==4.1.1
     #   edx-opaque-keys
 toml==0.10.2
     # via responses
-tomli==2.0.1
-    # via
-    #   coverage
-    #   pytest
 tqdm==4.64.1
-    # via -r requirements/base.in
+    # via -r base.in
 types-toml==0.10.8.1
     # via responses
 typing-extensions==4.4.0
@@ -308,7 +299,7 @@ uritemplate==4.1.1
     #   drf-yasg
 urllib3==1.26.14
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   botocore
     #   requests
     #   responses
@@ -316,5 +307,3 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.11.0
-    # via importlib-metadata

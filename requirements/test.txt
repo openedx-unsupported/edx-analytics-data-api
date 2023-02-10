@@ -5,16 +5,18 @@
 #    make upgrade
 #
 asgiref==3.6.0
-    # via django
+    # via
+    #   django
+    #   django-countries
 astroid==2.3.3
     # via pylint
 attrs==22.2.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.55
+boto3==1.26.68
     # via -r requirements/base.in
-botocore==1.29.55
+botocore==1.29.68
     # via
     #   boto3
     #   s3transfer
@@ -38,17 +40,17 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==7.0.5
+coverage[toml]==7.1.0
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==39.0.0
+cryptography==39.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.3.2
+diff-cover==7.4.0
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -70,7 +72,7 @@ diff-cover==7.3.2
     #   edx-rbac
 django-cors-headers==3.13.0
     # via -r requirements/base.in
-django-countries==7.5
+django-countries==7.5.1
     # via -r requirements/base.in
 django-crum==0.7.9
     # via
@@ -106,7 +108,7 @@ djangorestframework-csv==2.1.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.21.4
+drf-yasg==1.21.5
     # via edx-api-doc-tools
 edx-api-doc-tools==1.6.0
     # via -r requirements/base.in
@@ -143,7 +145,7 @@ exceptiongroup==1.1.0
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==16.6.0
+faker==16.8.1
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -179,7 +181,7 @@ markupsafe==2.1.2
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.5.0
+newrelic==8.6.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -199,7 +201,7 @@ pycodestyle==2.10.0
     # via -r requirements/test.in
 pycparser==2.21
     # via cffi
-pycryptodomex==3.16.0
+pycryptodomex==3.17
     # via pyjwkest
 pydocstyle==6.3.0
     # via -r requirements/test.in
@@ -296,7 +298,7 @@ tomli==2.0.1
     #   pytest
 tqdm==4.64.1
     # via -r requirements/base.in
-types-toml==0.10.8.1
+types-toml==0.10.8.3
     # via responses
 typing-extensions==4.4.0
     # via django-countries
@@ -316,5 +318,5 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.11.0
+zipp==3.13.0
     # via importlib-metadata

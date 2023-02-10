@@ -5,12 +5,14 @@
 #    make upgrade
 #
 asgiref==3.6.0
-    # via django
+    # via
+    #   django
+    #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.55
+boto3==1.26.68
     # via -r requirements/base.in
-botocore==1.29.55
+botocore==1.29.68
     # via
     #   boto3
     #   s3transfer
@@ -32,11 +34,11 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==39.0.0
+cryptography==39.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.16
+django==3.2.17
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -57,7 +59,7 @@ django==3.2.16
     #   edx-rbac
 django-cors-headers==3.13.0
     # via -r requirements/base.in
-django-countries==7.5
+django-countries==7.5.1
     # via -r requirements/base.in
 django-crum==0.7.9
     # via
@@ -91,7 +93,7 @@ djangorestframework-csv==2.1.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.21.4
+drf-yasg==1.21.5
     # via edx-api-doc-tools
 edx-api-doc-tools==1.6.0
     # via -r requirements/base.in
@@ -126,7 +128,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==16.6.0
+faker==16.8.1
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -150,7 +152,7 @@ markdown==3.4.1
     # via -r requirements/base.in
 markupsafe==2.1.2
     # via jinja2
-newrelic==8.5.0
+newrelic==8.6.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -162,7 +164,7 @@ psutil==5.9.4
     # via edx-django-utils
 pycparser==2.21
     # via cffi
-pycryptodomex==3.16.0
+pycryptodomex==3.17
     # via pyjwkest
 pyjwkest==1.4.2
     # via edx-drf-extensions
@@ -243,5 +245,5 @@ urllib3==1.26.14
     #   requests
 webencodings==0.5.1
     # via html5lib
-zipp==3.11.0
+zipp==3.13.0
     # via importlib-metadata

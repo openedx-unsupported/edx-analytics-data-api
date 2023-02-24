@@ -14,9 +14,9 @@ babel==2.11.0
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.68
+boto3==1.26.78
     # via -r requirements/base.in
-botocore==1.29.68
+botocore==1.29.78
     # via
     #   boto3
     #   s3transfer
@@ -42,7 +42,7 @@ cryptography==39.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.17
+django==3.2.18
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -136,7 +136,7 @@ edx-sphinx-theme==3.1.0
     # via -r requirements/doc.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==16.8.1
+faker==17.0.0
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -166,7 +166,7 @@ markdown==3.4.1
     # via -r requirements/base.in
 markupsafe==2.1.2
     # via jinja2
-newrelic==8.6.0
+newrelic==8.7.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -265,13 +265,13 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sqlparse==0.4.3
     # via django
-stevedore==4.1.1
+stevedore==5.0.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
 tqdm==4.64.1
     # via -r requirements/base.in
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via django-countries
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -286,5 +286,5 @@ urllib3==1.26.14
     #   requests
 webencodings==0.5.1
     # via html5lib
-zipp==3.13.0
+zipp==3.14.0
     # via importlib-metadata

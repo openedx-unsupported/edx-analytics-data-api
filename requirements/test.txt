@@ -14,9 +14,9 @@ attrs==22.2.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.68
+boto3==1.26.78
     # via -r requirements/base.in
-botocore==1.29.68
+botocore==1.29.78
     # via
     #   boto3
     #   s3transfer
@@ -40,7 +40,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==7.1.0
+coverage[toml]==7.2.0
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -50,7 +50,7 @@ cryptography==39.0.1
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.4.0
+diff-cover==7.5.0
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -145,7 +145,7 @@ exceptiongroup==1.1.0
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==16.8.1
+faker==17.0.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -181,7 +181,7 @@ markupsafe==2.1.2
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.6.0
+newrelic==8.7.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -286,7 +286,7 @@ snowballstemmer==2.2.0
     # via pydocstyle
 sqlparse==0.4.3
     # via django
-stevedore==4.1.1
+stevedore==5.0.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
@@ -298,9 +298,9 @@ tomli==2.0.1
     #   pytest
 tqdm==4.64.1
     # via -r requirements/base.in
-types-toml==0.10.8.3
+types-toml==0.10.8.5
     # via responses
-typing-extensions==4.4.0
+typing-extensions==4.5.0
     # via django-countries
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -318,5 +318,5 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.13.0
+zipp==3.14.0
     # via importlib-metadata

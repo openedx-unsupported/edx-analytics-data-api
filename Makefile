@@ -120,22 +120,5 @@ github_ci: test.requirements clean migrate-all  ## Used by CI for testing
 	python manage.py generate_fake_course_data --database=analytics --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
 	python manage.py generate_fake_course_data --database=analytics_v1 --num-weeks=2 --no-videos --course-id "edX/DemoX/Demo_Course"
 
-docker_build:
-	docker build . -f Dockerfile -t openedx/analytics-data-api
-	docker build . -f Dockerfile --target newrelic -t openedx/analytics-data-api:latest-newrelic
-
-docker_tag: docker_build
-	docker tag openedx/analytics-data-api openedx/analytics-data-api:${GITHUB_SHA}
-	docker tag openedx/analytics-data-api:latest-newrelic openedx/analytics-data-api:${GITHUB_SHA}-newrelic
-
-docker_auth:
-	echo "$$DOCKERHUB_PASSWORD" | docker login -u "$$DOCKERHUB_USERNAME" --password-stdin
-
-docker_push: docker_tag docker_auth ## push to docker hub
-	docker push 'openedx/analytics-data-api:latest'
-	docker push "openedx/analytics-data-api:${GITHUB_SHA}"
-	docker push 'openedx/analytics-data-api:latest-newrelic'
-	docker push "openedx/analytics-data-api:${GITHUB_SHA}-newrelic"
-
 docs: tox.requirements
 	tox -e docs

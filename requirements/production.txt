@@ -10,9 +10,9 @@ asgiref==3.6.0
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.88
+boto3==1.26.98
     # via -r requirements/base.in
-botocore==1.29.88
+botocore==1.29.98
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==39.0.2
+cryptography==40.0.0
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -101,7 +101,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.2.0
     # via -r requirements/base.in
-edx-django-utils==5.2.0
+edx-django-utils==5.3.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -128,7 +128,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==17.6.0
+faker==18.3.1
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -142,7 +142,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==6.0.0
+importlib-metadata==6.1.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -154,13 +154,13 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-markdown==3.4.1
+markdown==3.4.3
     # via -r requirements/base.in
 markupsafe==2.1.2
     # via jinja2
 mysqlclient==2.1.1
     # via -r requirements/production.in
-newrelic==8.7.0
+newrelic==8.7.1
     # via
     #   -r requirements/production.in
     #   edx-django-utils
@@ -252,7 +252,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.14
+urllib3==1.26.15
     # via
     #   -r requirements/base.in
     #   botocore
@@ -263,7 +263,7 @@ zipp==3.15.0
     # via importlib-metadata
 zope-event==4.6
     # via gevent
-zope-interface==5.5.2
+zope-interface==6.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:

@@ -4,4 +4,4 @@
 
 Sphinx                              # Developer documentation builder
 path
-edx_sphinx_theme
+sphinx-book-theme

@@ -14,9 +14,9 @@ attrs==22.2.0
     # via pytest
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.98
+boto3==1.26.105
     # via -r requirements/base.in
-botocore==1.29.98
+botocore==1.29.105
     # via
     #   boto3
     #   s3transfer
@@ -44,7 +44,7 @@ coverage[toml]==7.2.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
-cryptography==40.0.0
+cryptography==40.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -82,7 +82,7 @@ django-dynamic-fixture==3.1.2
     # via -r requirements/test.in
 django-fernet-fields==0.6
     # via edx-enterprise-data
-django-filter==22.1
+django-filter==23.1
     # via edx-enterprise-data
 django-model-utils==4.3.1
     # via
@@ -145,7 +145,7 @@ exceptiongroup==1.1.1
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.3.1
+faker==18.3.2
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -181,7 +181,7 @@ markupsafe==2.1.2
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==8.7.1
+newrelic==8.8.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -238,7 +238,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.7.1
+pytz==2023.3
     # via
     #   -r requirements/test.in
     #   django
@@ -298,7 +298,7 @@ tomli==2.0.1
     #   pytest
 tqdm==4.65.0
     # via -r requirements/base.in
-types-pyyaml==6.0.12.8
+types-pyyaml==6.0.12.9
     # via responses
 typing-extensions==4.5.0
     # via django-countries

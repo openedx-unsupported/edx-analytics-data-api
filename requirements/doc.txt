@@ -14,9 +14,9 @@ babel==2.12.1
     # via sphinx
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.98
+boto3==1.26.105
     # via -r requirements/base.in
-botocore==1.29.98
+botocore==1.29.105
     # via
     #   boto3
     #   s3transfer
@@ -38,7 +38,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==40.0.0
+cryptography==40.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -71,7 +71,7 @@ django-crum==0.7.9
     #   edx-rbac
 django-fernet-fields==0.6
     # via edx-enterprise-data
-django-filter==22.1
+django-filter==23.1
     # via edx-enterprise-data
 django-model-utils==4.3.1
     # via
@@ -136,7 +136,7 @@ edx-sphinx-theme==3.1.0
     # via -r requirements/doc.in
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.3.1
+faker==18.3.2
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -166,7 +166,7 @@ markdown==3.4.3
     # via -r requirements/base.in
 markupsafe==2.1.2
     # via jinja2
-newrelic==8.7.1
+newrelic==8.8.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -204,7 +204,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.7.1
+pytz==2023.3
     # via
     #   babel
     #   django

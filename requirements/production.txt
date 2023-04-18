@@ -10,9 +10,9 @@ asgiref==3.6.0
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.98
+boto3==1.26.115
     # via -r requirements/base.in
-botocore==1.29.98
+botocore==1.29.115
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-cryptography==40.0.0
+cryptography==40.0.2
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -67,7 +67,7 @@ django-crum==0.7.9
     #   edx-rbac
 django-fernet-fields==0.6
     # via edx-enterprise-data
-django-filter==22.1
+django-filter==23.1
     # via edx-enterprise-data
 django-model-utils==4.3.1
     # via
@@ -101,13 +101,13 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.2.0
     # via -r requirements/base.in
-edx-django-utils==5.3.0
+edx-django-utils==5.4.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.4.1
+edx-drf-extensions==8.6.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -128,7 +128,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.3.1
+faker==18.4.0
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -142,7 +142,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==6.1.0
+importlib-metadata==6.5.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -160,19 +160,19 @@ markupsafe==2.1.2
     # via jinja2
 mysqlclient==2.1.1
     # via -r requirements/production.in
-newrelic==8.7.1
+newrelic==8.8.0
     # via
     #   -r requirements/production.in
     #   edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
-packaging==23.0
+packaging==23.1
     # via drf-yasg
 path-py==8.2.1
     # via -r requirements/production.in
 pbr==5.11.1
     # via stevedore
-psutil==5.9.4
+psutil==5.9.5
     # via edx-django-utils
 pycparser==2.21
     # via cffi
@@ -196,7 +196,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2022.7.1
+pytz==2023.3
     # via
     #   django
     #   djangorestframework
@@ -236,7 +236,7 @@ six==1.16.0
     #   python-memcached
 slumber==0.7.1
     # via edx-rest-api-client
-sqlparse==0.4.3
+sqlparse==0.4.4
     # via django
 stevedore==5.0.0
     # via

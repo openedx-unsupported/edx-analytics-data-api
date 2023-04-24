@@ -213,7 +213,7 @@ also contains guidelines for how to maintain high code quality, which
 will make your contribution more likely to be accepted.
 
 .. _individual contributor’s agreement: http://code.edx.org/individual-contributor-agreement.pdf
-.. _CONTRIBUTING: https://github.com/openedx/edx-platform/blob/master/CONTRIBUTING.rst
+.. _CONTRIBUTING: https://github.com/openedx/.github/blob/master/CONTRIBUTING.md
 
 .. |build-status| image:: https://travis-ci.com/edx/edx-analytics-data-api.svg?branch=master
    :target: https://travis-ci.com/edx/edx-analytics-data-api

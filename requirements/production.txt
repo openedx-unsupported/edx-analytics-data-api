@@ -10,9 +10,9 @@ asgiref==3.6.0
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.115
+boto3==1.26.119
     # via -r requirements/base.in
-botocore==1.29.115
+botocore==1.29.119
     # via
     #   boto3
     #   s3transfer
@@ -107,7 +107,7 @@ edx-django-utils==5.4.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.6.0
+edx-drf-extensions==8.7.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -128,7 +128,7 @@ edx-rest-api-client==5.5.0
     #   edx-enterprise-data
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.4.0
+faker==18.5.1
     # via factory-boy
 future==0.18.3
     # via pyjwkest
@@ -142,7 +142,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==6.5.0
+importlib-metadata==6.6.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg

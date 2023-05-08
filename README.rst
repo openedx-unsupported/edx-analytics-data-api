@@ -19,7 +19,7 @@ Getting Started With Devstack
 -----------------------------
 The best way to run this service is with edX Devstack: https://github.com/openedx/devstack.
 
-See the [Devstack README](https://github.com/openedx/devstack/blob/master/README.rst) for information on how to install and run devstack.
+See the `Devstack Readme <https://github.com/openedx/devstack/blob/master/README.rst>`_ for information on how to install and run devstack.
 
 With devstack running and this repo checked-out locally, you'll want to do the following from your devstack directory:
 

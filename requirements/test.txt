@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.130
+boto3==1.26.134
     # via -r requirements/base.in
-botocore==1.29.130
+botocore==1.29.134
     # via
     #   boto3
     #   s3transfer
@@ -68,7 +68,7 @@ diff-cover==7.5.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==3.14.0
+django-cors-headers==4.0.0
     # via -r requirements/base.in
 django-countries==7.5.1
     # via -r requirements/base.in
@@ -135,7 +135,7 @@ edx-opaque-keys==2.3.0
     #   edx-enterprise-data
 edx-rbac==1.7.0
     # via edx-enterprise-data
-edx-rest-api-client==5.5.0
+edx-rest-api-client==5.5.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -207,7 +207,7 @@ pygments==2.15.1
     # via diff-cover
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.6.0
+pyjwt[crypto]==2.7.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -257,7 +257,7 @@ requests==2.30.0
     #   slumber
 responses==0.23.1
     # via -r requirements/test.in
-ruamel-yaml==0.17.24
+ruamel-yaml==0.17.26
     # via drf-yasg
 ruamel-yaml-clib==0.2.7
     # via ruamel-yaml
@@ -286,7 +286,7 @@ snowballstemmer==2.2.0
     # via pydocstyle
 sqlparse==0.4.4
     # via django
-stevedore==5.0.0
+stevedore==5.1.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys

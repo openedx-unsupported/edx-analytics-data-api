@@ -20,9 +20,9 @@ beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.130
+boto3==1.26.134
     # via -r requirements/base.in
-botocore==1.29.130
+botocore==1.29.134
     # via
     #   boto3
     #   s3transfer
@@ -67,7 +67,7 @@ django==3.2.19
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==3.14.0
+django-cors-headers==4.0.0
     # via -r requirements/base.in
 django-countries==7.5.1
     # via -r requirements/base.in
@@ -136,7 +136,7 @@ edx-opaque-keys==2.3.0
     #   edx-enterprise-data
 edx-rbac==1.7.0
     # via edx-enterprise-data
-edx-rest-api-client==5.5.0
+edx-rest-api-client==5.5.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -200,7 +200,7 @@ pygments==2.15.1
     #   sphinx
 pyjwkest==1.4.2
     # via edx-drf-extensions
-pyjwt[crypto]==2.6.0
+pyjwt[crypto]==2.7.0
     # via
     #   drf-jwt
     #   edx-drf-extensions
@@ -233,7 +233,7 @@ requests==2.30.0
     #   pyjwkest
     #   slumber
     #   sphinx
-ruamel-yaml==0.17.24
+ruamel-yaml==0.17.26
     # via drf-yasg
 ruamel-yaml-clib==0.2.7
     # via ruamel-yaml
@@ -281,7 +281,7 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sqlparse==0.4.4
     # via django
-stevedore==5.0.0
+stevedore==5.1.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys

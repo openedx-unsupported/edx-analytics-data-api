@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.134
+boto3==1.26.138
     # via -r requirements/base.in
-botocore==1.29.134
+botocore==1.29.138
     # via
     #   boto3
     #   s3transfer
@@ -120,7 +120,7 @@ edx-django-utils==5.4.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.7.0
+edx-drf-extensions==8.8.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -135,7 +135,7 @@ edx-opaque-keys==2.3.0
     #   edx-enterprise-data
 edx-rbac==1.7.0
     # via edx-enterprise-data
-edx-rest-api-client==5.5.1
+edx-rest-api-client==5.5.2
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -143,12 +143,10 @@ exceptiongroup==1.1.1
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.7.0
+faker==18.9.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
-future==0.18.3
-    # via pyjwkest
 html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
@@ -199,14 +197,10 @@ pycodestyle==2.10.0
     # via -r requirements/test.in
 pycparser==2.21
     # via cffi
-pycryptodomex==3.17
-    # via pyjwkest
 pydocstyle==6.3.0
     # via -r requirements/test.in
 pygments==2.15.1
     # via diff-cover
-pyjwkest==1.4.2
-    # via edx-drf-extensions
 pyjwt[crypto]==2.7.0
     # via
     #   drf-jwt
@@ -246,13 +240,12 @@ pyyaml==6.0
     # via
     #   edx-django-release-util
     #   responses
-requests==2.30.0
+requests==2.31.0
     # via
     #   coreapi
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-    #   pyjwkest
     #   responses
     #   slumber
 responses==0.23.1
@@ -277,7 +270,6 @@ six==1.16.0
     #   edx-drf-extensions
     #   edx-rbac
     #   html5lib
-    #   pyjwkest
     #   python-dateutil
     #   python-memcached
 slumber==0.7.1
@@ -296,9 +288,9 @@ tomli==2.0.1
     #   pytest
 tqdm==4.65.0
     # via -r requirements/base.in
-types-pyyaml==6.0.12.9
+types-pyyaml==6.0.12.10
     # via responses
-typing-extensions==4.5.0
+typing-extensions==4.6.0
     # via django-countries
 unicodecsv==0.14.1
     # via djangorestframework-csv
@@ -306,7 +298,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.15
+urllib3==1.26.16
     # via
     #   -r requirements/base.in
     #   botocore

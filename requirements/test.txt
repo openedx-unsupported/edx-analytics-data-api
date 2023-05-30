@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-asgiref==3.6.0
+asgiref==3.7.2
     # via
     #   django
     #   django-countries
@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.138
+boto3==1.26.142
     # via -r requirements/base.in
-botocore==1.29.138
+botocore==1.29.142
     # via
     #   boto3
     #   s3transfer
@@ -38,7 +38,7 @@ coreschema==0.0.4
     # via
     #   coreapi
     #   drf-yasg
-coverage[toml]==7.2.5
+coverage[toml]==7.2.7
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -218,7 +218,7 @@ pytest==7.3.1
     # via
     #   pytest-cov
     #   pytest-django
-pytest-cov==4.0.0
+pytest-cov==4.1.0
     # via -r requirements/test.in
 pytest-django==4.5.2
     # via -r requirements/test.in
@@ -250,7 +250,7 @@ requests==2.31.0
     #   slumber
 responses==0.23.1
     # via -r requirements/test.in
-ruamel-yaml==0.17.26
+ruamel-yaml==0.17.30
     # via drf-yasg
 ruamel-yaml-clib==0.2.7
     # via ruamel-yaml
@@ -290,8 +290,10 @@ tqdm==4.65.0
     # via -r requirements/base.in
 types-pyyaml==6.0.12.10
     # via responses
-typing-extensions==4.6.0
-    # via django-countries
+typing-extensions==4.6.2
+    # via
+    #   asgiref
+    #   django-countries
 unicodecsv==0.14.1
     # via djangorestframework-csv
 uritemplate==4.1.1

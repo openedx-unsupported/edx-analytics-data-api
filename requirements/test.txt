@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.150
+boto3==1.26.153
     # via -r requirements/base.in
-botocore==1.29.150
+botocore==1.29.153
     # via
     #   boto3
     #   s3transfer
@@ -48,7 +48,7 @@ cryptography==41.0.1
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.5.0
+diff-cover==7.6.0
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -68,7 +68,7 @@ diff-cover==7.5.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==4.0.0
+django-cors-headers==4.1.0
     # via -r requirements/base.in
 django-countries==7.5.1
     # via -r requirements/base.in
@@ -125,7 +125,7 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.6.6
+edx-enterprise-data==4.6.7
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -214,7 +214,7 @@ pymongo==3.13.0
     # via edx-opaque-keys
 pynacl==1.5.0
     # via edx-django-utils
-pytest==7.3.1
+pytest==7.3.2
     # via
     #   pytest-cov
     #   pytest-django

@@ -20,9 +20,9 @@ beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.150
+boto3==1.26.153
     # via -r requirements/base.in
-botocore==1.29.150
+botocore==1.29.153
     # via
     #   boto3
     #   s3transfer
@@ -67,7 +67,7 @@ django==3.2.19
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==4.0.0
+django-cors-headers==4.1.0
     # via -r requirements/base.in
 django-countries==7.5.1
     # via -r requirements/base.in
@@ -126,7 +126,7 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.6.6
+edx-enterprise-data==4.6.7
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via

@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.153
+boto3==1.26.156
     # via -r requirements/base.in
-botocore==1.29.153
+botocore==1.29.156
     # via
     #   boto3
     #   s3transfer
@@ -31,13 +31,9 @@ charset-normalizer==3.1.0
 click==8.1.3
     # via edx-django-utils
 coreapi==2.3.3
-    # via
-    #   -r requirements/base.in
-    #   drf-yasg
+    # via -r requirements/base.in
 coreschema==0.0.4
-    # via
-    #   coreapi
-    #   drf-yasg
+    # via coreapi
 coverage[toml]==7.2.7
     # via
     #   -r requirements/test.in
@@ -106,7 +102,7 @@ djangorestframework-csv==2.1.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.21.5
+drf-yasg==1.21.6
     # via edx-api-doc-tools
 edx-api-doc-tools==1.6.0
     # via -r requirements/base.in
@@ -125,7 +121,7 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.6.9
+edx-enterprise-data==4.6.10
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -151,7 +147,7 @@ html5lib==1.1
     # via -r requirements/base.in
 idna==3.4
     # via requests
-importlib-metadata==6.6.0
+importlib-metadata==6.7.0
     # via markdown
 inflection==0.5.1
     # via drf-yasg
@@ -238,6 +234,7 @@ pytz==2023.3
     #   drf-yasg
 pyyaml==6.0
     # via
+    #   drf-yasg
     #   edx-django-release-util
     #   responses
 requests==2.31.0
@@ -250,10 +247,6 @@ requests==2.31.0
     #   slumber
 responses==0.23.1
     # via -r requirements/test.in
-ruamel-yaml==0.17.31
-    # via drf-yasg
-ruamel-yaml-clib==0.2.7
-    # via ruamel-yaml
 rules==3.3
     # via edx-enterprise-data
 s3transfer==0.6.1

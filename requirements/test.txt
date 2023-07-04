@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.26.161
+boto3==1.27.0
     # via -r requirements/base.in
-botocore==1.29.161
+botocore==1.30.0
     # via
     #   boto3
     #   s3transfer
@@ -135,11 +135,11 @@ edx-rest-api-client==5.5.2
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
-exceptiongroup==1.1.1
+exceptiongroup==1.1.2
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.11.1
+faker==18.11.2
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -283,7 +283,7 @@ tqdm==4.65.0
     # via -r requirements/base.in
 types-pyyaml==6.0.12.10
     # via responses
-typing-extensions==4.6.3
+typing-extensions==4.7.1
     # via
     #   asgiref
     #   django-countries

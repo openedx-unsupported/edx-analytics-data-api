@@ -1,8 +1,11 @@
 FROM ubuntu:focal as base
 
 # System requirements.
+
+# pkg-config; mysqlclient>=2.2.0 requires pkg-config (https://github.com/PyMySQL/mysqlclient/issues/620)
+
 RUN apt update && \
-  apt-get install -qy \ 
+  DEBIAN_FRONTEND=noninteractive apt-get install -qy \ 
   curl \
   vim \
   language-pack-en \
@@ -11,6 +14,7 @@ RUN apt update && \
   python3-virtualenv \
   python3.8-distutils \
   libmysqlclient-dev \
+  pkg-config \
   libssl-dev && \
   rm -rf /var/lib/apt/lists/*
 

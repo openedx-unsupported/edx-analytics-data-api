@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.2
+boto3==1.28.3
     # via -r requirements/base.in
-botocore==1.31.2
+botocore==1.31.3
     # via
     #   boto3
     #   s3transfer
@@ -28,7 +28,7 @@ chardet==5.1.0
     # via diff-cover
 charset-normalizer==3.2.0
     # via requests
-click==8.1.4
+click==8.1.5
     # via edx-django-utils
 coreapi==2.3.3
     # via -r requirements/base.in
@@ -44,7 +44,7 @@ cryptography==41.0.2
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.6.0
+diff-cover==7.7.0
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -121,7 +121,7 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.8.0
+edx-enterprise-data==4.8.1
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -139,7 +139,7 @@ exceptiongroup==1.1.2
     # via pytest
 factory-boy==3.2.1
     # via edx-enterprise-data
-faker==18.13.0
+faker==19.1.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -287,6 +287,7 @@ typing-extensions==4.7.1
     # via
     #   asgiref
     #   django-countries
+    #   faker
 unicodecsv==0.14.1
     # via djangorestframework-csv
 uritemplate==4.1.1
@@ -303,5 +304,5 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.16.0
+zipp==3.16.2
     # via importlib-metadata

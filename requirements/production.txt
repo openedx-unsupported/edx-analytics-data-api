@@ -10,9 +10,9 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.3
+boto3==1.28.4
     # via -r requirements/base.in
-botocore==1.31.3
+botocore==1.31.4
     # via
     #   boto3
     #   s3transfer
@@ -130,7 +130,7 @@ gevent==23.7.0
     # via -r requirements/production.in
 greenlet==2.0.2
     # via gevent
-gunicorn==20.1.0
+gunicorn==21.1.0
     # via -r requirements/production.in
 html5lib==1.1
     # via -r requirements/base.in
@@ -161,7 +161,9 @@ newrelic==8.8.1
 ordered-set==4.1.0
     # via -r requirements/base.in
 packaging==23.1
-    # via drf-yasg
+    # via
+    #   drf-yasg
+    #   gunicorn
 path-py==8.2.1
     # via -r requirements/production.in
 pbr==5.11.1
@@ -191,7 +193,7 @@ pytz==2023.3
     #   django
     #   djangorestframework
     #   drf-yasg
-pyyaml==6.0
+pyyaml==6.0.1
     # via
     #   -r requirements/production.in
     #   drf-yasg

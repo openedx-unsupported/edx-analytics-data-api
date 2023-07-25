@@ -10,13 +10,13 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.4
+boto3==1.28.10
     # via -r requirements/base.in
-botocore==1.31.4
+botocore==1.31.10
     # via
     #   boto3
     #   s3transfer
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 cffi==1.15.1
     # via
@@ -24,7 +24,7 @@ cffi==1.15.1
     #   pynacl
 charset-normalizer==3.2.0
     # via requests
-click==8.1.5
+click==8.1.6
     # via edx-django-utils
 coreapi==2.3.3
     # via -r requirements/base.in
@@ -89,15 +89,15 @@ djangorestframework-csv==2.1.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
-drf-yasg==1.21.6
+drf-yasg==1.21.7
     # via edx-api-doc-tools
-edx-api-doc-tools==1.6.0
+edx-api-doc-tools==1.7.0
     # via -r requirements/base.in
 edx-ccx-keys==1.2.1
     # via -r requirements/base.in
-edx-django-release-util==1.2.0
+edx-django-release-util==1.3.0
     # via -r requirements/base.in
-edx-django-utils==5.5.0
+edx-django-utils==5.6.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -108,7 +108,7 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.8.1
+edx-enterprise-data==4.9.0
     # via -r requirements/base.in
 edx-opaque-keys==2.3.0
     # via
@@ -122,15 +122,15 @@ edx-rest-api-client==5.5.2
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
-factory-boy==3.2.1
+factory-boy==3.3.0
     # via edx-enterprise-data
-faker==19.1.0
+faker==19.2.0
     # via factory-boy
 gevent==23.7.0
     # via -r requirements/production.in
 greenlet==2.0.2
     # via gevent
-gunicorn==21.1.0
+gunicorn==21.2.0
     # via -r requirements/production.in
 html5lib==1.1
     # via -r requirements/base.in
@@ -148,7 +148,7 @@ jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-markdown==3.4.3
+markdown==3.4.4
     # via -r requirements/base.in
 markupsafe==2.1.3
     # via jinja2
@@ -172,7 +172,7 @@ psutil==5.9.5
     # via edx-django-utils
 pycparser==2.21
     # via cffi
-pyjwt[crypto]==2.7.0
+pyjwt[crypto]==2.8.0
     # via
     #   drf-jwt
     #   edx-drf-extensions

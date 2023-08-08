@@ -10,9 +10,9 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.16
+boto3==1.28.21
     # via -r requirements/base.in
-botocore==1.31.16
+botocore==1.31.21
     # via
     #   boto3
     #   s3transfer
@@ -30,7 +30,7 @@ coreapi==2.3.3
     # via -r requirements/base.in
 coreschema==0.0.4
     # via coreapi
-cryptography==41.0.2
+cryptography==41.0.3
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -98,7 +98,7 @@ edx-ccx-keys==1.2.1
     # via -r requirements/base.in
 edx-django-release-util==1.3.0
     # via -r requirements/base.in
-edx-django-utils==5.6.0
+edx-django-utils==5.7.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -109,9 +109,9 @@ edx-drf-extensions==8.8.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.9.0
+edx-enterprise-data==4.10.0
     # via -r requirements/base.in
-edx-opaque-keys==2.3.0
+edx-opaque-keys==2.4.0
     # via
     #   -r requirements/base.in
     #   edx-ccx-keys
@@ -125,7 +125,7 @@ edx-rest-api-client==5.6.0
     #   edx-enterprise-data
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==19.2.0
+faker==19.3.0
     # via factory-boy
 gevent==23.7.0
     # via -r requirements/production.in
@@ -230,7 +230,7 @@ stevedore==5.1.0
     # via
     #   edx-django-utils
     #   edx-opaque-keys
-tqdm==4.65.0
+tqdm==4.65.1
     # via -r requirements/base.in
 typing-extensions==4.7.1
     # via

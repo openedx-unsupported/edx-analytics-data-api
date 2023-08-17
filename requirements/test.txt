@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.27
+boto3==1.28.29
     # via -r requirements/base.in
-botocore==1.31.27
+botocore==1.31.29
     # via
     #   boto3
     #   s3transfer
@@ -28,7 +28,7 @@ chardet==5.2.0
     # via diff-cover
 charset-normalizer==3.2.0
     # via requests
-click==8.1.6
+click==8.1.7
     # via edx-django-utils
 coreapi==2.3.3
     # via -r requirements/base.in
@@ -122,7 +122,7 @@ edx-drf-extensions==8.9.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==4.11.0
+edx-enterprise-data==4.11.1
     # via -r requirements/base.in
 edx-opaque-keys==2.4.0
     # via

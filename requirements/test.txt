@@ -122,7 +122,7 @@ edx-drf-extensions==8.9.2
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==5.1.0
+edx-enterprise-data==5.2.0
     # via -r requirements/base.in
 edx-opaque-keys==2.5.0
     # via

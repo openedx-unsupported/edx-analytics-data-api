@@ -10,9 +10,9 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.36
+boto3==1.28.40
     # via -r requirements/base.in
-botocore==1.31.36
+botocore==1.31.40
     # via
     #   boto3
     #   s3transfer
@@ -34,7 +34,7 @@ cryptography==41.0.3
     # via
     #   django-fernet-fields
     #   pyjwt
-django==3.2.20
+django==3.2.21
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
@@ -104,12 +104,12 @@ edx-django-utils==5.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.9.1
+edx-drf-extensions==8.9.2
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==5.0.0
+edx-enterprise-data==5.1.0
     # via -r requirements/base.in
 edx-opaque-keys==2.5.0
     # via
@@ -127,7 +127,7 @@ factory-boy==3.3.0
     # via edx-enterprise-data
 faker==19.3.1
     # via factory-boy
-gevent==23.7.0
+gevent==23.9.0.post1
     # via -r requirements/production.in
 greenlet==2.0.2
     # via gevent
@@ -189,7 +189,7 @@ python-dateutil==2.8.2
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
-pytz==2023.3
+pytz==2023.3.post1
     # via
     #   django
     #   djangorestframework

@@ -1,5 +1,4 @@
-from django.conf.urls import include, url
-from django.urls import reverse_lazy
+from django.urls import include, re_path, reverse_lazy
 from django.views.generic import RedirectView
 
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN
@@ -26,16 +25,16 @@ course_urlpatterns = []
 
 for path, view, name in COURSE_URLS:
     regex = fr'^courses/{COURSE_ID_PATTERN}/{path}/$'
-    course_urlpatterns.append(url(regex, view.as_view(), name=name))
+    course_urlpatterns.append(re_path(regex, view.as_view(), name=name))
 
 urlpatterns = course_urlpatterns + [
-    url(r'^problems/', include('analytics_data_api.v0.urls.problems')),
-    url(r'^videos/', include('analytics_data_api.v0.urls.videos')),
-    url('^', include('analytics_data_api.v0.urls.course_summaries')),
-    url('^', include('analytics_data_api.v0.urls.programs')),
+    re_path(r'^problems/', include('analytics_data_api.v0.urls.problems')),
+    re_path(r'^videos/', include('analytics_data_api.v0.urls.videos')),
+    re_path('^', include('analytics_data_api.v0.urls.course_summaries')),
+    re_path('^', include('analytics_data_api.v0.urls.programs')),
 
     # pylint: disable=no-value-for-parameter
-    url(r'^authenticated/$', RedirectView.as_view(url=reverse_lazy('authenticated')), name='authenticated'),
-    url(r'^health/$', RedirectView.as_view(url=reverse_lazy('health')), name='health'),
-    url(r'^status/$', RedirectView.as_view(url=reverse_lazy('status')), name='status'),
+    re_path(r'^authenticated/$', RedirectView.as_view(url=reverse_lazy('authenticated')), name='authenticated'),
+    re_path(r'^health/$', RedirectView.as_view(url=reverse_lazy('health')), name='health'),
+    re_path(r'^status/$', RedirectView.as_view(url=reverse_lazy('status')), name='status'),
 ]

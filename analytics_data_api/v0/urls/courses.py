@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN
 from analytics_data_api.v0.views import courses as views
@@ -25,4 +25,4 @@ urlpatterns = []
 
 for path, view, name in COURSE_URLS:
     regex = fr'^{COURSE_ID_PATTERN}/{path}/$'
-    urlpatterns.append(url(regex, view.as_view(), name=name))
+    urlpatterns.append(re_path(regex, view.as_view(), name=name))

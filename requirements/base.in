@@ -9,6 +9,7 @@ coreapi
 Django                              # BSD License
 django-countries                    # MIT
 python-memcached                    # Python Software Foundation License v2
+pymemcache
 djangorestframework                 # BSD
 djangorestframework-csv             # BSD
 django-storages                     # BSD

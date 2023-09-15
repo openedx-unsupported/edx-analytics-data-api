@@ -10,9 +10,9 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.45
+boto3==1.28.48
     # via -r requirements/base.in
-botocore==1.31.45
+botocore==1.31.48
     # via
     #   boto3
     #   s3transfer
@@ -104,12 +104,12 @@ edx-django-utils==5.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.9.2
+edx-drf-extensions==8.9.3
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==5.3.1
+edx-enterprise-data==5.4.0
     # via -r requirements/base.in
 edx-opaque-keys==2.5.0
     # via
@@ -173,7 +173,6 @@ pynacl==1.5.0
 python-dateutil==2.8.2
     # via
     #   botocore
-    #   edx-drf-extensions
     #   faker
 python-memcached==1.59
     # via -r requirements/base.in
@@ -204,7 +203,6 @@ six==1.16.0
     #   djangorestframework-csv
     #   edx-ccx-keys
     #   edx-django-release-util
-    #   edx-drf-extensions
     #   edx-rbac
     #   html5lib
     #   python-dateutil

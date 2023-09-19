@@ -12,9 +12,9 @@ astroid==2.3.3
     # via pylint
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.48
+boto3==1.28.50
     # via -r requirements/base.in
-botocore==1.31.48
+botocore==1.31.50
     # via
     #   boto3
     #   s3transfer
@@ -73,11 +73,11 @@ django-crum==0.7.9
     # via
     #   edx-django-utils
     #   edx-rbac
-django-dynamic-fixture==4.0.0
+django-dynamic-fixture==4.0.1
     # via -r requirements/test.in
 django-fernet-fields==0.6
     # via edx-enterprise-data
-django-filter==23.2
+django-filter==23.3
     # via edx-enterprise-data
 django-model-utils==4.3.1
     # via
@@ -117,7 +117,7 @@ edx-django-utils==5.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.9.3
+edx-drf-extensions==8.10.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -283,7 +283,7 @@ tqdm==4.66.1
     # via -r requirements/base.in
 types-pyyaml==6.0.12.11
     # via responses
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   asgiref
     #   django-countries
@@ -305,5 +305,5 @@ webencodings==0.5.1
     # via html5lib
 wrapt==1.11.2
     # via astroid
-zipp==3.16.2
+zipp==3.17.0
     # via importlib-metadata

@@ -10,9 +10,9 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.48
+boto3==1.28.50
     # via -r requirements/base.in
-botocore==1.31.48
+botocore==1.31.50
     # via
     #   boto3
     #   s3transfer
@@ -64,7 +64,7 @@ django-crum==0.7.9
     #   edx-rbac
 django-fernet-fields==0.6
     # via edx-enterprise-data
-django-filter==23.2
+django-filter==23.3
     # via edx-enterprise-data
 django-model-utils==4.3.1
     # via
@@ -104,7 +104,7 @@ edx-django-utils==5.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.9.3
+edx-drf-extensions==8.10.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -232,7 +232,7 @@ stevedore==5.1.0
     #   edx-opaque-keys
 tqdm==4.66.1
     # via -r requirements/base.in
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   asgiref
     #   django-countries
@@ -251,7 +251,7 @@ urllib3==1.26.16
     #   requests
 webencodings==0.5.1
     # via html5lib
-zipp==3.16.2
+zipp==3.17.0
     # via importlib-metadata
 zope-event==5.0
     # via gevent

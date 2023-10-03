@@ -471,3 +471,8 @@ ENGAGEMENT_CACHE_TIMEOUT = 1 * 60 * 60  # 1 hour
 ########## Django 3.2 upgrade settings
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 DEFAULT_HASHING_ALGORITHM = "sha1"
+
+
+######### Django 4.2 CSRF_TRUSTED_ORIGINS settings
+CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS_WITH_SCHEME = []

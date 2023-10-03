@@ -10,19 +10,19 @@ asgiref==3.7.2
     #   django-countries
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.54
+boto3==1.28.58
     # via -r requirements/base.in
-botocore==1.31.54
+botocore==1.31.58
     # via
     #   boto3
     #   s3transfer
 certifi==2023.7.22
     # via requests
-cffi==1.15.1
+cffi==1.16.0
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.2.0
+charset-normalizer==3.3.0
     # via requests
 click==8.1.7
     # via edx-django-utils
@@ -151,7 +151,7 @@ newrelic==9.1.0
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
-packaging==23.1
+packaging==23.2
     # via drf-yasg
 pbr==5.11.1
     # via stevedore
@@ -194,7 +194,7 @@ requests==2.31.0
     #   slumber
 rules==3.3
     # via edx-enterprise-data
-s3transfer==0.6.2
+s3transfer==0.7.0
     # via boto3
 semantic-version==2.10.0
     # via edx-drf-extensions
@@ -229,7 +229,7 @@ uritemplate==4.1.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.26.16
+urllib3==1.26.17
     # via
     #   -r requirements/base.in
     #   botocore

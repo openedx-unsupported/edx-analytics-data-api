@@ -5,6 +5,12 @@
 # Required: the version of this file's schema.
 version: 2
 
+# Provide default os type for build 
+build:
+   os: "ubuntu-20.04"
+   tools:
+      python: "3.8"
+
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
    configuration: docs/api/source/conf.py

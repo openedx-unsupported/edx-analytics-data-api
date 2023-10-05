@@ -1,9 +1,8 @@
 import os
 import sys
+
 import django
-
 from path import Path
-
 
 # Add any paths that contain templates here, relative to this directory.
 # templates_path.append('source/_templates')

@@ -135,7 +135,7 @@ class BaseProblemResponseAnswerDistribution(BaseCourseModel):
 
     module_id = models.CharField(db_index=True, max_length=255)
     part_id = models.CharField(db_index=True, max_length=255)
-    correct = models.NullBooleanField()
+    correct = models.BooleanField(default=None, null=True)
     value_id = models.CharField(db_index=True, max_length=255, null=True)
     answer_value = models.TextField(null=True, db_column='answer_value_text')
     variant = models.IntegerField(null=True)

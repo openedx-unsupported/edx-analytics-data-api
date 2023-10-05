@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import connections, router
 from django.db.models import Max
 from django.http import Http404
-from django.utils.timezone import make_aware, utc
+from django.utils.timezone import make_aware
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics
 from rest_framework.response import Response
@@ -32,7 +32,7 @@ class BaseCourseView(generics.ListAPIView):
         self.course_id = self.kwargs.get('course_id')
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-        timezone = utc
+        timezone = datetime.timezone.utc
 
         self.start_date = self.parse_date(start_date, timezone)
         self.end_date = self.parse_date(end_date, timezone)

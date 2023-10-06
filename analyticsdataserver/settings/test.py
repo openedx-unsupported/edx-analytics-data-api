@@ -41,7 +41,6 @@ LMS_USER_ACCOUNT_BASE_URL = 'http://lms-host'
 
 # Default the django-storage settings so we can test easily
 STORAGES = {
-    **STORAGES,
     "default": {
         "BACKEND": 'storages.backends.s3boto3.S3Boto3Storage',
     },

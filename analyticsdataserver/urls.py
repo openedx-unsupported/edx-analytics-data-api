@@ -1,6 +1,5 @@
 from django.contrib import admin
-from django.urls import path
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from edx_api_doc_tools import make_api_info, make_docs_ui_view
 from rest_framework.authtoken.views import obtain_auth_token

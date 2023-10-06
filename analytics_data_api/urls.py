@@ -1,5 +1,4 @@
-from django.urls import path
-from django.urls import include
+from django.urls import include, path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = 'analytics_data_api'

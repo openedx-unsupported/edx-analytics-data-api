@@ -1,7 +1,6 @@
 import re
 
-from django.urls import path
-from django.urls import re_path
+from django.urls import path, re_path
 
 from analytics_data_api.v0.views import problems as views
 

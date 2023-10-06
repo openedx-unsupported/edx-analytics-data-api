@@ -1,5 +1,4 @@
-from django.urls import path
-from django.urls import include, re_path, reverse_lazy
+from django.urls import include, path, re_path, reverse_lazy
 from django.views.generic import RedirectView
 
 from analytics_data_api.v0.urls import COURSE_ID_PATTERN

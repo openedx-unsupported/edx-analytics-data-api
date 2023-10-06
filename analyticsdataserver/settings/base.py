@@ -110,6 +110,10 @@ USE_L10N = False
 USE_TZ = True
 ########## END GENERAL CONFIGURATION
 
+# Django 4.0+ uses zoneinfo if this is not set. We can remove this and
+# migrate to zoneinfo after Django 4.2 upgrade. See more on following url
+# https://docs.djangoproject.com/en/4.2/releases/4.0/#zoneinfo-default-timezone-implementation
+USE_DEPRECATED_PYTZ = True
 
 ########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root

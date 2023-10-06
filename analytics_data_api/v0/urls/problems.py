@@ -1,5 +1,6 @@
 import re
 
+from django.urls import path
 from django.urls import re_path
 
 from analytics_data_api.v0.views import problems as views
@@ -12,7 +13,7 @@ PROBLEM_URLS = [
 ]
 
 urlpatterns = [
-    re_path(r'^(?P<module_id>.+)/sequential_open_distribution/$',
+    path('<path:module_id>/sequential_open_distribution/',
             views.SequentialOpenDistributionView.as_view(),
             name='sequential_open_distribution'),
 ]

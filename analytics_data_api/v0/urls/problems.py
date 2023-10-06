@@ -14,8 +14,8 @@ PROBLEM_URLS = [
 
 urlpatterns = [
     path('<path:module_id>/sequential_open_distribution/',
-            views.SequentialOpenDistributionView.as_view(),
-            name='sequential_open_distribution'),
+         views.SequentialOpenDistributionView.as_view(),
+         name='sequential_open_distribution'),
 ]
 
 for path, view, name in PROBLEM_URLS:

@@ -110,6 +110,10 @@ USE_L10N = False
 USE_TZ = True
 ########## END GENERAL CONFIGURATION
 
+# Django 4.0+ uses zoneinfo if this is not set. We can remove this and
+# migrate to zoneinfo after Django 4.2 upgrade. See more on following url
+# https://docs.djangoproject.com/en/4.2/releases/4.0/#zoneinfo-default-timezone-implementation
+USE_DEPRECATED_PYTZ = True
 
 ########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
@@ -427,6 +431,7 @@ SYSTEM_TO_FEATURE_ROLE_MAPPING = {
 ########## EDX ENTERPRISE DATA CONFIGURATION
 API_AUTH_TOKEN = 'put-your-api-token-here'
 CSRF_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS_WITH_SCHEME = []  # just for Django 4.2 upgrade
 
 EXTRA_APPS = []
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

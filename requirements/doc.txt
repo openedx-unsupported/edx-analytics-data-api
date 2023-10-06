@@ -82,7 +82,7 @@ django-model-utils==4.3.1
     # via
     #   edx-enterprise-data
     #   edx-rbac
-django-storages==1.8
+django-storages==1.10.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in

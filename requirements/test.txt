@@ -14,9 +14,9 @@ backports-zoneinfo==0.2.1
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.62
+boto3==1.28.64
     # via -r requirements/base.in
-botocore==1.31.62
+botocore==1.31.64
     # via
     #   boto3
     #   s3transfer
@@ -46,7 +46,7 @@ cryptography==41.0.4
     #   pyjwt
 ddt==1.6.0
     # via -r requirements/test.in
-diff-cover==7.7.0
+diff-cover==8.0.0
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -67,7 +67,7 @@ diff-cover==7.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rbac
-django-cors-headers==4.2.0
+django-cors-headers==4.3.0
     # via -r requirements/base.in
 django-countries==7.5.1
     # via -r requirements/base.in
@@ -119,7 +119,7 @@ edx-django-utils==5.7.0
     #   edx-drf-extensions
     #   edx-enterprise-data
     #   edx-rest-api-client
-edx-drf-extensions==8.10.0
+edx-drf-extensions==8.12.0
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -134,7 +134,7 @@ edx-opaque-keys==2.5.1
     #   edx-enterprise-data
 edx-rbac==1.8.0
     # via edx-enterprise-data
-edx-rest-api-client==5.6.0
+edx-rest-api-client==5.6.1
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
@@ -142,7 +142,7 @@ exceptiongroup==1.1.3
     # via pytest
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==19.8.0
+faker==19.10.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -190,9 +190,9 @@ pluggy==1.3.0
     # via
     #   diff-cover
     #   pytest
-psutil==5.9.5
+psutil==5.9.6
     # via edx-django-utils
-pycodestyle==2.11.0
+pycodestyle==2.11.1
     # via -r requirements/test.in
 pycparser==2.21
     # via cffi

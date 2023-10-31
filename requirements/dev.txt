@@ -12,9 +12,9 @@ backports-zoneinfo==0.2.1
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.67
+boto3==1.28.73
     # via -r requirements/base.in
-botocore==1.31.67
+botocore==1.31.73
     # via
     #   boto3
     #   s3transfer
@@ -24,7 +24,7 @@ cffi==1.16.0
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.3.0
+charset-normalizer==3.3.1
     # via requests
 click==8.1.7
     # via edx-django-utils
@@ -32,7 +32,7 @@ coreapi==2.3.3
     # via -r requirements/base.in
 coreschema==0.0.4
     # via coreapi
-cryptography==41.0.4
+cryptography==41.0.5
     # via
     #   django-fernet-fields-v2
     #   pyjwt
@@ -88,7 +88,7 @@ djangorestframework==3.14.0
     #   drf-yasg
     #   edx-api-doc-tools
     #   edx-drf-extensions
-djangorestframework-csv==2.1.1
+djangorestframework-csv==3.0.1
     # via -r requirements/base.in
 drf-jwt==1.19.2
     # via edx-drf-extensions
@@ -127,7 +127,7 @@ edx-rest-api-client==5.6.1
     #   edx-enterprise-data
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==19.11.0
+faker==19.12.0
     # via factory-boy
 html5lib==1.1
     # via -r requirements/base.in
@@ -203,7 +203,6 @@ semantic-version==2.10.0
     # via edx-drf-extensions
 six==1.16.0
     # via
-    #   djangorestframework-csv
     #   edx-ccx-keys
     #   edx-django-release-util
     #   edx-rbac
@@ -226,8 +225,6 @@ typing-extensions==4.8.0
     #   django-countries
     #   edx-opaque-keys
     #   faker
-unicodecsv==0.14.1
-    # via djangorestframework-csv
 uritemplate==4.1.1
     # via
     #   coreapi

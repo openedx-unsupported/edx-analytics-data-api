@@ -14,9 +14,9 @@ backports-zoneinfo==0.2.1
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.28.79
+boto3==1.28.85
     # via -r requirements/base.in
-botocore==1.31.79
+botocore==1.31.85
     # via
     #   boto3
     #   s3transfer
@@ -44,9 +44,9 @@ cryptography==41.0.5
     # via
     #   django-fernet-fields-v2
     #   pyjwt
-ddt==1.6.0
+ddt==1.7.0
     # via -r requirements/test.in
-diff-cover==8.0.0
+diff-cover==8.0.1
     # via -r requirements/test.in
     # via
     #   -c requirements/constraints.txt
@@ -142,7 +142,7 @@ exceptiongroup==1.1.3
     # via pytest
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==19.13.0
+faker==20.0.0
     # via factory-boy
 freezegun==1.2.2
     # via -r requirements/test.in
@@ -176,7 +176,7 @@ markupsafe==2.1.3
     # via jinja2
 mccabe==0.6.1
     # via pylint
-newrelic==9.1.1
+newrelic==9.1.2
     # via edx-django-utils
 ordered-set==4.1.0
     # via -r requirements/base.in
@@ -184,7 +184,7 @@ packaging==23.2
     # via
     #   drf-yasg
     #   pytest
-pbr==5.11.1
+pbr==6.0.0
     # via stevedore
 pluggy==1.3.0
     # via
@@ -221,7 +221,7 @@ pytest==7.4.3
     #   pytest-django
 pytest-cov==4.1.0
     # via -r requirements/test.in
-pytest-django==4.6.0
+pytest-django==4.7.0
     # via -r requirements/test.in
 python-dateutil==2.8.2
     # via

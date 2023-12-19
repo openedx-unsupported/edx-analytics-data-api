@@ -13,9 +13,9 @@ backports-zoneinfo==0.2.1
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.33.12
+boto3==1.34.3
     # via -r requirements/base.in
-botocore==1.33.12
+botocore==1.34.3
     # via
     #   boto3
     #   s3transfer
@@ -128,7 +128,7 @@ edx-rest-api-client==5.6.1
     #   edx-enterprise-data
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==20.1.0
+faker==21.0.0
     # via factory-boy
 gevent==23.9.1
     # via -r requirements/production.in
@@ -156,7 +156,7 @@ markdown==3.5.1
     # via -r requirements/base.in
 markupsafe==2.1.3
     # via jinja2
-mysqlclient==2.2.0
+mysqlclient==2.2.1
     # via -r requirements/production.in
 newrelic==9.3.0
     # via
@@ -172,7 +172,7 @@ path-py==8.2.1
     # via -r requirements/production.in
 pbr==6.0.0
     # via stevedore
-psutil==5.9.6
+psutil==5.9.7
     # via edx-django-utils
 pycparser==2.21
     # via cffi
@@ -211,7 +211,7 @@ requests==2.31.0
     #   slumber
 rules==3.3
     # via edx-enterprise-data
-s3transfer==0.8.2
+s3transfer==0.9.0
     # via boto3
 semantic-version==2.10.0
     # via edx-drf-extensions

@@ -23,9 +23,9 @@ beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.33.12
+boto3==1.34.7
     # via -r requirements/base.in
-botocore==1.33.12
+botocore==1.34.7
     # via
     #   boto3
     #   s3transfer
@@ -142,7 +142,7 @@ edx-rest-api-client==5.6.1
     #   edx-enterprise-data
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==20.1.0
+faker==21.0.0
     # via factory-boy
 html5lib==1.1
     # via -r requirements/base.in
@@ -150,7 +150,7 @@ idna==3.6
     # via requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==7.0.0
+importlib-metadata==7.0.1
     # via
     #   markdown
     #   sphinx
@@ -183,7 +183,7 @@ path==16.9.0
     # via -r requirements/doc.in
 pbr==6.0.0
     # via stevedore
-psutil==5.9.6
+psutil==5.9.7
     # via edx-django-utils
 pycparser==2.21
     # via cffi
@@ -209,7 +209,7 @@ python-dateutil==2.8.2
     # via
     #   botocore
     #   faker
-python-memcached==1.59
+python-memcached==1.60
     # via -r requirements/base.in
 pytz==2023.3.post1
     # via
@@ -230,7 +230,7 @@ requests==2.31.0
     #   sphinx
 rules==3.3
     # via edx-enterprise-data
-s3transfer==0.8.2
+s3transfer==0.10.0
     # via boto3
 semantic-version==2.10.0
     # via edx-drf-extensions
@@ -241,7 +241,6 @@ six==1.16.0
     #   edx-rbac
     #   html5lib
     #   python-dateutil
-    #   python-memcached
 slumber==0.7.1
     # via edx-rest-api-client
 snowballstemmer==2.2.0

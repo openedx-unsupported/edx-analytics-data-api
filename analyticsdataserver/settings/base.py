@@ -358,6 +358,7 @@ ANALYTICS_DATABASE = 'reports'
 ANALYTICS_DATABASE_V1 = None
 DATABASE_ROUTERS = ['analyticsdataserver.router.AnalyticsAPIRouter', 'analyticsdataserver.router.AnalyticsModelsRouter']
 ENTERPRISE_REPORTING_DB_ALIAS = 'enterprise'
+ENROLLMENTS_PAGE_SIZE = 10000
 
 LMS_BASE_URL = None
 

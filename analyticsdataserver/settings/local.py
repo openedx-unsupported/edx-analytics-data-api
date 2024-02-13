@@ -75,6 +75,7 @@ CACHES = {
 ANALYTICS_DATABASE = 'analytics'
 ENTERPRISE_REPORTING_DB_ALIAS = 'analytics'
 ANALYTICS_DATABASE_V1 = 'analytics'
+ENROLLMENTS_PAGE_SIZE = 10000
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 

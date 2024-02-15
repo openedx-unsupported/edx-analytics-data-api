@@ -15,9 +15,9 @@ backports-zoneinfo==0.2.1
     # via django
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.34.40
+boto3==1.34.42
     # via -r requirements/base.in
-botocore==1.34.40
+botocore==1.34.42
     # via
     #   boto3
     #   s3transfer
@@ -127,7 +127,7 @@ edx-drf-extensions==10.2.0
     #   -r requirements/base.in
     #   edx-enterprise-data
     #   edx-rbac
-edx-enterprise-data==6.0.0
+edx-enterprise-data==6.1.0
     # via -r requirements/base.in
 edx-opaque-keys==2.5.1
     # via
@@ -145,7 +145,7 @@ exceptiongroup==1.2.0
     # via pytest
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==23.1.0
+faker==23.2.0
     # via factory-boy
 freezegun==1.4.0
     # via -r requirements/test.in
@@ -251,7 +251,7 @@ requests==2.31.0
     #   edx-rest-api-client
     #   responses
     #   slumber
-responses==0.24.1
+responses==0.25.0
     # via -r requirements/test.in
 rules==3.3
     # via edx-enterprise-data

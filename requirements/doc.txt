@@ -23,9 +23,9 @@ beautifulsoup4==4.12.3
     # via pydata-sphinx-theme
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.34.42
+boto3==1.34.45
     # via -r requirements/base.in
-botocore==1.34.42
+botocore==1.34.45
     # via
     #   boto3
     #   s3transfer
@@ -43,7 +43,7 @@ coreapi==2.3.3
     # via -r requirements/base.in
 coreschema==0.0.4
     # via coreapi
-cryptography==42.0.2
+cryptography==42.0.3
     # via
     #   django-fernet-fields-v2
     #   pyjwt
@@ -144,7 +144,7 @@ edx-rest-api-client==5.6.1
     #   edx-enterprise-data
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==23.2.0
+faker==23.2.1
     # via factory-boy
 html5lib==1.1
     # via -r requirements/base.in

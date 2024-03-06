@@ -1,5 +1,19 @@
-edX Analytics API Server |build-status| |coverage-status|
-=========================================================
+edX Analytics API Server
+========================
+
+DEPRECATION NOTICE
+------------------
+
+The Insights product and associated repositories are in the process of being
+deprecated and removed from service. Details on the deprecation status and
+process can be found in the relevant `Github issue <https://github.com/openedx/public-engineering/issues/221>_`.
+
+This repository is slated may be archived and moved to the openedx-unsupported
+Github organization at any time.
+
+The following sections are for historical purposes only.
+
+------------------
 
 This repository includes the Django server for the API as well as the
 API package itself. The client is hosted at
@@ -93,8 +107,8 @@ you can follow these steps. If you do not intend to make changes to ``edx-enterp
 
 Devstack Development
 ~~~~~~~~~~~~~~~~~~~~
-#. Clone the `edx-enterprise-data <https://github.com/openedx/edx-enterprise-data>`_ repo into the ``src`` folder alongside your devstack 
-workspace on the host system. 
+#. Clone the `edx-enterprise-data <https://github.com/openedx/edx-enterprise-data>`_ repo into the ``src`` folder alongside your devstack
+workspace on the host system.
 #. The modified ``edx-enterprise-data`` repository will now be available to devstack containers at ``/edx/src/edx-enterprise-data``.
 #. Inside the ``edx-data-analytics-api`` container run `pip install `-e /edx/src/edx-enterprise-data``
 
@@ -202,20 +216,3 @@ Running Tests
 
 Run ``make validate`` install the requirements, run the tests, and run
 lint.
-
-How to Contribute
------------------
-
-Contributions are very welcome, but for legal reasons, you must submit a
-signed `individual contributor’s agreement`_ before we can accept your
-contribution. See our `CONTRIBUTING`_ file for more information – it
-also contains guidelines for how to maintain high code quality, which
-will make your contribution more likely to be accepted.
-
-.. _individual contributor’s agreement: http://code.edx.org/individual-contributor-agreement.pdf
-.. _CONTRIBUTING: https://github.com/openedx/.github/blob/master/CONTRIBUTING.md
-
-.. |build-status| image:: https://travis-ci.com/edx/edx-analytics-data-api.svg?branch=master
-   :target: https://travis-ci.com/edx/edx-analytics-data-api
-.. |coverage-status| image:: https://img.shields.io/codecov/c/github/edx/edx-analytics-data-api/master.svg
-   :target: https://codecov.io/gh/edx/edx-analytics-data-api

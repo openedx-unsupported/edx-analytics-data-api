@@ -14,10 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - ubuntu-20.04
-        python-version:
-          - 3.8
+        os: ['ubuntu-20.04']
+        python-version: ['3.8', '3.11']
         targets: [ 'quality','main.test','docs' ]
 
     steps:
@@ -27,13 +25,21 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Start Container
-      run: docker-compose -f .github/docker-compose-ci.yml up -d
-
     - name: Install dependencies
       run: |
         pip install -r requirements/pip.txt
         pip install -r requirements/ci.txt
+  
+    - name: Start Container
+      run: docker-compose -f .github/docker-compose-ci.yml up -d
+
+    - name: Install Python 3.11
+      if: matrix.python-version == '3.11'
+      run: docker exec -t analytics_api_testing bash -c "apt-get install -y python3.11"
+
+    - name: Create symbolic link for Python 3.11
+      if: matrix.python-version == '3.11'
+      run: docker exec -t analytics_api_testing bash -c "ln -sf /usr/bin/python3.11 /usr/local/bin/python3"
 
     - name: Run Tests
       run: docker exec -t analytics_api_testing bash -c "cd /edx/app/analytics_api/analytics_api/

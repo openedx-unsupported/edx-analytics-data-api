@@ -17,9 +17,9 @@ backports-zoneinfo==0.2.1
     #   djangorestframework
 boto==2.49.0
     # via -r requirements/base.in
-boto3==1.34.89
+boto3==1.34.94
     # via -r requirements/base.in
-botocore==1.34.89
+botocore==1.34.94
     # via
     #   boto3
     #   s3transfer
@@ -39,7 +39,7 @@ coreapi==2.3.3
     # via -r requirements/base.in
 coreschema==0.0.4
     # via coreapi
-coverage[toml]==7.4.4
+coverage[toml]==7.5.0
     # via
     #   -r requirements/test.in
     #   pytest-cov
@@ -108,6 +108,8 @@ djangorestframework-csv==3.0.2
     # via
     #   -r requirements/base.in
     #   edx-enterprise-data
+dnspython==2.6.1
+    # via pymongo
 drf-jwt==1.19.2
     # via edx-drf-extensions
 drf-yasg==1.21.7
@@ -118,7 +120,7 @@ edx-ccx-keys==1.3.0
     # via -r requirements/base.in
 edx-django-release-util==1.4.0
     # via -r requirements/base.in
-edx-django-utils==5.12.0
+edx-django-utils==5.13.0
     # via
     #   -r requirements/base.in
     #   edx-drf-extensions
@@ -131,7 +133,7 @@ edx-drf-extensions==10.3.0
     #   edx-rbac
 edx-enterprise-data==6.2.0
     # via -r requirements/base.in
-edx-opaque-keys==2.8.0
+edx-opaque-keys==2.9.0
     # via
     #   -r requirements/base.in
     #   edx-ccx-keys
@@ -147,9 +149,9 @@ exceptiongroup==1.2.1
     # via pytest
 factory-boy==3.3.0
     # via edx-enterprise-data
-faker==24.11.0
+faker==25.0.0
     # via factory-boy
-freezegun==1.4.0
+freezegun==1.5.0
     # via -r requirements/test.in
 html5lib==1.1
     # via -r requirements/base.in
@@ -216,11 +218,11 @@ pylint==2.4.4
     #   -r requirements/test.in
 pymemcache==4.0.0
     # via -r requirements/base.in
-pymongo==3.13.0
+pymongo==4.4.0
     # via edx-opaque-keys
 pynacl==1.5.0
     # via edx-django-utils
-pytest==8.1.1
+pytest==8.2.0
     # via
     #   pytest-cov
     #   pytest-django
@@ -289,7 +291,6 @@ typing-extensions==4.11.0
     #   asgiref
     #   django-countries
     #   edx-opaque-keys
-    #   faker
 uritemplate==4.1.1
     # via
     #   coreapi

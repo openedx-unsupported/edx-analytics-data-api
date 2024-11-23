@@ -13,7 +13,7 @@ help: ## display this help message
 	@echo "Please use \`make <target>' where <target> is one of"
 	@perl -nle'print $& if m{^[\.a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m  %-25s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: requirements develop clean diff.report view.diff.report quality static docs
+.PHONY: requirements develop clean diff.report view.diff.report quality static docs check_keywords
 
 requirements:  ## install base requirements
 	pip3 install -q -r requirements/base.txt
@@ -122,3 +122,6 @@ github_ci: test.requirements clean migrate-all  ## Used by CI for testing
 
 docs: tox.requirements
 	tox -e docs
+
+check_keywords: ## Scan the Django models in all installed apps in this project for restricted field names
+	python manage.py check_reserved_keywords --override_file db_keyword_overrides.yml
